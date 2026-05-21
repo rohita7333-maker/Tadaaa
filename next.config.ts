@@ -9,9 +9,17 @@ const isDev = process.env.NODE_ENV !== "production";
 // 'unsafe-inline' on style-src stays for now; tightening to nonces would
 // require route-level middleware reworking every styled element. Tracked in
 // HANDOFF as P2 polish.
+// PostHog + Sentry hosts are allowed in both dev and prod so analytics +
+// session replay actually work behind the CSP. PostHog uses regional
+// `*.i.posthog.com` ingest hosts plus `*-assets.i.posthog.com` for the JS
+// snippet; Sentry uses `*.ingest.sentry.io` for envelopes plus generic
+// `*.sentry.io` for the SDK loader/replay worker scripts.
+const analyticsHosts =
+  "https://*.i.posthog.com https://*-assets.i.posthog.com https://*.ingest.sentry.io https://*.sentry.io";
+
 const scriptSrc = isDev
-  ? "'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com"
-  : "'self' 'unsafe-inline' https://js.stripe.com";
+  ? `'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com ${analyticsHosts}`
+  : `'self' 'unsafe-inline' https://js.stripe.com ${analyticsHosts}`;
 
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
@@ -32,15 +40,16 @@ const securityHeaders = [
       "default-src 'self'",
       `script-src ${scriptSrc}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://*.supabase.co https://picsum.photos",
+      "img-src 'self' data: blob: https://*.supabase.co https://picsum.photos https://*.i.posthog.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co https://api.stripe.com",
+      `connect-src 'self' https://*.supabase.co https://api.stripe.com ${analyticsHosts}`,
       "media-src 'self' blob: https://*.supabase.co",
       "frame-src https://js.stripe.com https://hooks.stripe.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "object-src 'none'",
       "base-uri 'self'",
+      "worker-src 'self' blob:",
       "upgrade-insecure-requests",
     ].join("; "),
   },

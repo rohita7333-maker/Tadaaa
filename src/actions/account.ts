@@ -151,7 +151,9 @@ export async function deleteAccount() {
     return { error: "Failed to delete account. Please contact support." };
   }
 
-  // user row is gone — RLS `self-insert` policy still allows `user_id IS NULL`.
+  // User row is gone — logAudit detects userId === null and routes via the
+  // service-role admin client (sql/account_audit.sql self-insert policy
+  // requires auth.uid() = user_id, so user-context inserts would fail RLS).
   // Stash the deleted id in meta so the audit row remains traceable.
   const deletedUserId = user.id;
   const meta = await getRequestMeta();

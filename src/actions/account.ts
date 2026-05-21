@@ -3,8 +3,10 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { STORAGE_BUCKET } from "@/lib/constants";
 import { rateLimit } from "@/lib/rate-limit";
+import { logAudit, getRequestMeta } from "@/lib/audit";
 
 export async function getProfile() {
   const supabase = await createClient();
@@ -148,6 +150,20 @@ export async function deleteAccount() {
     console.error("deleteAccount error:", error);
     return { error: "Failed to delete account. Please contact support." };
   }
+
+  // user row is gone — RLS `self-insert` policy still allows `user_id IS NULL`.
+  // Stash the deleted id in meta so the audit row remains traceable.
+  const deletedUserId = user.id;
+  const meta = await getRequestMeta();
+  after(async () => {
+    await logAudit({
+      userId: null,
+      action: "account.delete",
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      meta: { deleted_user_id: deletedUserId },
+    });
+  });
 
   redirect("/");
 }

@@ -3,13 +3,21 @@
 import { createClient } from "@/lib/supabase/server";
 import { signInSchema, signUpSchema, magicLinkSchema } from "@/lib/schemas";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { APP_URL } from "@/lib/constants";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { headers } from "next/headers";
+import { logAudit, getRequestMeta } from "@/lib/audit";
 
 async function ipKey(prefix: string): Promise<string> {
   const h = await headers();
   return `${prefix}:${getIp(h)}`;
+}
+
+/** Extract the bit after @ for low-signal logging (never the full email). */
+function emailDomain(email: string): string | null {
+  const at = email.lastIndexOf("@");
+  return at >= 0 ? email.slice(at + 1).toLowerCase() : null;
 }
 
 export async function signUp(formData: FormData) {
@@ -29,7 +37,7 @@ export async function signUp(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: result.data.email,
     password: result.data.password,
     options: {
@@ -39,6 +47,19 @@ export async function signUp(formData: FormData) {
   });
 
   if (error) return { error: error.message };
+
+  const userId = data.user?.id ?? null;
+  const domain = emailDomain(result.data.email);
+  const meta = await getRequestMeta();
+  after(async () => {
+    await logAudit({
+      userId,
+      action: "signup",
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      meta: { email_domain: domain },
+    });
+  });
 
   // Welcome email is sent ONCE from the auth callback after confirmation
   // (see app/auth/callback/route.ts). Avoid a duplicate at signup time.
@@ -62,12 +83,26 @@ export async function signIn(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: result.data.email,
     password: result.data.password,
   });
 
   if (error) return { error: error.message };
+
+  const userId = data.user?.id ?? null;
+  const domain = emailDomain(result.data.email);
+  const meta = await getRequestMeta();
+  after(async () => {
+    await logAudit({
+      userId,
+      action: "signin.password",
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      meta: { email_domain: domain },
+    });
+  });
+
   redirect("/dashboard");
 }
 
@@ -104,6 +139,20 @@ export async function signInWithMagicLink(formData: FormData) {
     }
     return { error: error.message };
   }
+
+  // Magic-link is pre-auth — no user id yet. Log domain + IP only.
+  const domain = emailDomain(email);
+  const meta = await getRequestMeta();
+  after(async () => {
+    await logAudit({
+      userId: null,
+      action: "signin.magic_link",
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      meta: { email_domain: domain },
+    });
+  });
+
   return { success: "Check your email for a sign-in link!" };
 }
 
@@ -133,7 +182,19 @@ export async function signInWithGoogle() {
 
 export async function signOut() {
   const supabase = await createClient();
+  // Capture the user BEFORE signing out — the cookie is invalidated after.
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id ?? null;
+  const meta = await getRequestMeta();
   await supabase.auth.signOut();
+  after(async () => {
+    await logAudit({
+      userId,
+      action: "signout",
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+    });
+  });
   redirect("/");
 }
 
@@ -151,6 +212,20 @@ export async function sendPasswordReset(formData: FormData) {
   });
 
   if (error) return { error: error.message };
+
+  // Pre-auth — no user id available, log domain + IP only.
+  const domain = emailDomain(email);
+  const meta = await getRequestMeta();
+  after(async () => {
+    await logAudit({
+      userId: null,
+      action: "password.reset_request",
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      meta: { email_domain: domain },
+    });
+  });
+
   return { success: "Check your email for a password reset link." };
 }
 
@@ -190,6 +265,17 @@ export async function updatePassword(formData: FormData) {
 
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: error.message };
+
+  const meta = await getRequestMeta();
+  after(async () => {
+    await logAudit({
+      userId: user.id,
+      action: "password.update",
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      meta: { recovery: isRecovery },
+    });
+  });
 
   return { success: "Password updated" };
 }

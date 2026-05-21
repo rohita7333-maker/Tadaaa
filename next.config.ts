@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 import path from "path";
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -71,4 +72,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Wrap with Sentry to enable source-map upload + auto-instrumentation when
+// SENTRY_ORG / SENTRY_PROJECT / SENTRY_AUTH_TOKEN are configured. With those
+// env vars unset, this is effectively a passthrough.
+export default withSentryConfig(nextConfig, {
+  silent: !process.env.CI,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+});

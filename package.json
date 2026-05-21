@@ -16,6 +16,7 @@
     "@remotion/cli": "^4.0.462",
     "@remotion/core": "^1.0.0-y.46",
     "@remotion/renderer": "^4.0.462",
+    "@sentry/nextjs": "^10.53.1",
     "@stripe/stripe-js": "^9.4.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",

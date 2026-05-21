@@ -22,6 +22,22 @@
  */
 type Scan = { safe: boolean; reason?: string };
 
+// Sightengine weapon model returns either a flat number (legacy) or an object
+// { classes: { firearm, knife, ... }, prob? } in current versions. Take the
+// max signal we can find so detection works across API versions.
+function weaponScore(w: unknown): number {
+  if (typeof w === "number") return w;
+  if (!w || typeof w !== "object") return 0;
+  const obj = w as Record<string, unknown>;
+  if (typeof obj.prob === "number") return obj.prob;
+  const classes = obj.classes;
+  if (classes && typeof classes === "object") {
+    return Math.max(0, ...Object.values(classes as Record<string, unknown>)
+      .map(v => (typeof v === "number" ? v : 0)));
+  }
+  return 0;
+}
+
 export async function scanImage(url: string): Promise<Scan> {
   const user = process.env.SIGHTENGINE_API_USER;
   const secret = process.env.SIGHTENGINE_API_SECRET;
@@ -44,7 +60,7 @@ export async function scanImage(url: string): Promise<Scan> {
       data.nudity?.erotica ?? 0,
       data.nudity?.raw ?? 0
     );
-    const weapon = data.weapon ?? 0;
+    const weapon = weaponScore(data.weapon);
     const gore = data.gore?.prob ?? 0;
     const offensive = data.offensive?.prob ?? 0;
 

@@ -12,6 +12,7 @@ describe("scanImage", () => {
   afterEach(() => {
     process.env.SIGHTENGINE_API_USER = originalUser;
     process.env.SIGHTENGINE_API_SECRET = originalSecret;
+    vi.unstubAllGlobals();
   });
 
   it("returns safe when no API key", async () => {
@@ -31,6 +32,19 @@ describe("scanImage", () => {
     const result = await scanImage("https://example.com/x.jpg");
     expect(result.safe).toBe(false);
     expect(result.reason).toContain("nudity");
+  });
+
+  it("rejects when weapon classes contain high firearm score", async () => {
+    process.env.SIGHTENGINE_API_USER = "user";
+    process.env.SIGHTENGINE_API_SECRET = "secret";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(
+      new Response(JSON.stringify({
+        weapon: { classes: { firearm: 0.9, knife: 0.1 } },
+      }), { status: 200 })
+    ));
+    const result = await scanImage("https://example.com/x.jpg");
+    expect(result.safe).toBe(false);
+    expect(result.reason).toContain("weapon");
   });
 
   it("fails OPEN when Sightengine API returns non-200", async () => {

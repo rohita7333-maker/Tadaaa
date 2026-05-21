@@ -181,7 +181,7 @@ export default function InviteCard({ invite }: InviteCardProps) {
               className="overflow-hidden"
             >
               <div className="pt-4 border-t border-[#D4CBC3]/40 mt-4">
-                <ShareButtons slug={invite.slug} title={invite.title} />
+                <ShareButtons slug={invite.slug} title={invite.title} inviteId={invite.id} />
               </div>
             </motion.div>
           )}

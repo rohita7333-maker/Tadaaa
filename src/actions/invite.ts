@@ -9,6 +9,7 @@ import { trackServer } from "@/lib/analytics";
 
 const MAX_PHOTOS = 8;
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 export async function createInvite(formData: FormData) {
   const supabase = await createClient();
@@ -113,12 +114,15 @@ export async function createInvite(formData: FormData) {
   }
 
   // Track invite creation. No-ops when POSTHOG_API_KEY is unset. Keep props
-  // PII-free — user.id only, no email or name.
-  await trackServer(user.id, "invite_created", {
-    theme,
-    revealType,
-    occasionType,
-    inviteId: invite.id,
+  // PII-free — user.id only, no email or name. Defer the PostHog HTTP flush
+  // off the critical path so it doesn't block the redirect (50-300ms saved).
+  after(async () => {
+    await trackServer(user.id, "invite_created", {
+      theme,
+      revealType,
+      occasionType,
+      inviteId: invite.id,
+    });
   });
 
   // Upload photos with caption + rotation

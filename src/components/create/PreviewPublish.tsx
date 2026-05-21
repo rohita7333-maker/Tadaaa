@@ -71,7 +71,7 @@ export default function PreviewPublish({
         </div>
 
         <div className="max-w-sm mx-auto mb-4">
-          <ShareButtons slug={publishedSlug!} title={title} />
+          <ShareButtons slug={publishedSlug!} title={title} inviteId={publishedInviteId ?? undefined} />
         </div>
 
         {publishedInviteId && (

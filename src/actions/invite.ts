@@ -5,6 +5,7 @@ import { createInviteSchema, inviteQuestionsSchema } from "@/lib/schemas";
 import { generateInviteSlug } from "@/lib/utils";
 import { STORAGE_BUCKET, FREE_INVITE_MONTHLY_LIMIT } from "@/lib/constants";
 import { getThemeById } from "@/lib/themes";
+import { trackServer } from "@/lib/analytics";
 
 const MAX_PHOTOS = 8;
 import { revalidatePath } from "next/cache";
@@ -110,6 +111,15 @@ export async function createInvite(formData: FormData) {
   if (insertError || !invite) {
     return { error: "Failed to create invite. Please try again." };
   }
+
+  // Track invite creation. No-ops when POSTHOG_API_KEY is unset. Keep props
+  // PII-free — user.id only, no email or name.
+  await trackServer(user.id, "invite_created", {
+    theme,
+    revealType,
+    occasionType,
+    inviteId: invite.id,
+  });
 
   // Upload photos with caption + rotation
   const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif"];

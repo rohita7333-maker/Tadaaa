@@ -11,9 +11,25 @@ import { APP_URL } from "@/lib/constants";
 interface ShareButtonsProps {
   slug: string;
   title: string;
+  inviteId?: string;
 }
 
-export default function ShareButtons({ slug, title }: ShareButtonsProps) {
+// Posthog is loaded lazily via the snippet in layout.tsx after cookie consent.
+// We probe the global rather than importing posthog-js directly so that the
+// capture truly no-ops when the user hasn't accepted cookies (or no key set).
+type PosthogGlobal = { capture?: (event: string, props?: Record<string, unknown>) => void };
+function capture(event: string, props?: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  const ph = (window as unknown as { posthog?: PosthogGlobal }).posthog;
+  if (!ph || typeof ph.capture !== "function") return;
+  try {
+    ph.capture(event, props);
+  } catch {
+    // never break the share UX over an analytics failure
+  }
+}
+
+export default function ShareButtons({ slug, title, inviteId }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
@@ -24,10 +40,15 @@ export default function ShareButtons({ slug, title }: ShareButtonsProps) {
     ? `https://api.whatsapp.com/send?text=${waText}`
     : `https://web.whatsapp.com/send?text=${waText}`;
 
+  function trackShare(channel: string) {
+    capture("invite_shared", { channel, inviteId, slug });
+  }
+
   async function handleCopy() {
     await navigator.clipboard.writeText(url);
     setCopied(true);
     toast.success("Link copied!");
+    trackShare("copy");
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -35,6 +56,7 @@ export default function ShareButtons({ slug, title }: ShareButtonsProps) {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({ title, url });
+        trackShare("native");
         return;
       } catch {
         // user cancelled — fall through to copy
@@ -51,6 +73,7 @@ export default function ShareButtons({ slug, title }: ShareButtonsProps) {
           href={waHref}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackShare("whatsapp")}
           className="flex items-center justify-center gap-2 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95"
           style={{ background: "#25D366" }}
         >

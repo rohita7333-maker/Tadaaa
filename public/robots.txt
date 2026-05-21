@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /create
+Disallow: /auth
+
+# Surprise pages are private, don't index
+Disallow: /surprise/

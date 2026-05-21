@@ -1,0 +1,166 @@
+import { NextRequest, NextResponse } from "next/server";
+import { stripe } from "@/lib/stripe";
+import { createAdminClient } from "@/lib/supabase/server";
+import Stripe from "stripe";
+
+export async function POST(request: NextRequest) {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("[stripe] STRIPE_WEBHOOK_SECRET not configured");
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+  }
+
+  const body = await request.text();
+  const signature = request.headers.get("stripe-signature");
+
+  if (!signature) {
+    return NextResponse.json({ error: "No signature" }, { status: 400 });
+  }
+
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
+  const supabase = createAdminClient();
+
+  // Idempotency — every Stripe event has a unique id. claim_stripe_event
+  // inserts ON CONFLICT DO NOTHING and returns true only if this is the first
+  // delivery. Stripe retries on non-2xx; we still 200 here on dup so it stops.
+  const { data: claimed } = await supabase.rpc("claim_stripe_event", {
+    p_event_id: event.id,
+    p_event_type: event.type,
+  });
+  if (claimed === false) {
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+
+  // One-time payment (Plus per-invite)
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const userId = session.metadata?.user_id;
+    const themeId = session.metadata?.theme_id;
+    const subscriptionType = session.metadata?.subscription_type;
+    const customerId =
+      typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+
+    if (userId && session.payment_status === "paid") {
+      // Verify the user_id in metadata matches the bound stripe customer id.
+      // First payment for a user binds the customer; subsequent payments must match.
+      if (customerId) {
+        const { data: ok } = await supabase.rpc("verify_stripe_customer", {
+          p_user_id: userId,
+          p_customer_id: customerId,
+        });
+        if (ok !== true) {
+          console.error(`[stripe] customer/user mismatch on session ${session.id}`);
+          return NextResponse.json({ error: "Customer/user mismatch" }, { status: 400 });
+        }
+      }
+
+      if (subscriptionType === "plus" && themeId) {
+        // Mark the invite matched by stripe_session_id if we already pre-stamped it,
+        // OR the most recent unpaid invite with this theme. Idempotency above
+        // prevents replay re-querying.
+        const { data: existing } = await supabase
+          .from("invites")
+          .select("id")
+          .eq("stripe_session_id", session.id)
+          .limit(1)
+          .maybeSingle();
+
+        let inviteId = existing?.id as string | undefined;
+
+        if (!inviteId) {
+          const { data: invite } = await supabase
+            .from("invites")
+            .select("id")
+            .eq("creator_id", userId)
+            .eq("theme", themeId)
+            .eq("is_paid", false)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          inviteId = invite?.id;
+        }
+
+        if (inviteId) {
+          await supabase
+            .from("invites")
+            .update({ is_paid: true, stripe_session_id: session.id })
+            .eq("id", inviteId);
+        }
+      }
+    }
+  }
+
+  // Subscription created or renewed
+  if (
+    event.type === "customer.subscription.created" ||
+    event.type === "customer.subscription.updated"
+  ) {
+    const subscription = event.data.object as Stripe.Subscription;
+    const userId = subscription.metadata?.user_id;
+    const customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer?.id ?? null;
+
+    if (userId && customerId) {
+      const { data: ok } = await supabase.rpc("verify_stripe_customer", {
+        p_user_id: userId,
+        p_customer_id: customerId,
+      });
+      if (ok !== true) {
+        console.error(`[stripe] customer/user mismatch on sub ${subscription.id}`);
+        return NextResponse.json({ error: "Customer/user mismatch" }, { status: 400 });
+      }
+
+      const isActive = subscription.status === "active" || subscription.status === "trialing";
+      const periodEnd = (subscription as unknown as { current_period_end?: number })
+        .current_period_end;
+      const expiresAt =
+        isActive && typeof periodEnd === "number"
+          ? new Date(periodEnd * 1000).toISOString()
+          : null;
+
+      await supabase.from("profiles").upsert({
+        id: userId,
+        subscription_tier: isActive ? "unlimited" : "free",
+        subscription_expires_at: expiresAt,
+      });
+    }
+  }
+
+  // Subscription cancelled / expired
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription;
+    const userId = subscription.metadata?.user_id;
+    const customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer?.id ?? null;
+
+    if (userId && customerId) {
+      const { data: ok } = await supabase.rpc("verify_stripe_customer", {
+        p_user_id: userId,
+        p_customer_id: customerId,
+      });
+      if (ok !== true) {
+        console.error(`[stripe] customer/user mismatch on sub.deleted ${subscription.id}`);
+        return NextResponse.json({ error: "Customer/user mismatch" }, { status: 400 });
+      }
+
+      await supabase.from("profiles").upsert({
+        id: userId,
+        subscription_tier: "free",
+        subscription_expires_at: null,
+      });
+    }
+  }
+
+  return NextResponse.json({ received: true });
+}

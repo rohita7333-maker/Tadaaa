@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans, Caveat } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsent } from "@/components/CookieConsent";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -52,6 +53,7 @@ export default function RootLayout({
     <html lang="en" className={`${playfair.variable} ${dmSans.variable} ${caveat.variable}`}>
       <body className="antialiased">
         {children}
+        <CookieConsent />
         <Toaster richColors position="top-center" />
       </body>
       {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (

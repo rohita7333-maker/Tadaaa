@@ -64,7 +64,16 @@ export async function GET() {
 
   const [profile, invites, photos, questions, answers, rsvps, audit] =
     await Promise.all([
-      supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+      // Explicit allowlist — mirrors columns surfaced in the user UI (settings,
+      // dashboard, getProfile). Excludes billing-system identifiers like
+      // `stripe_customer_id` that the app never shows users elsewhere.
+      supabase
+        .from("profiles")
+        .select(
+          "id, full_name, avatar_url, notify_on_view, notify_on_answer, notify_occasions, subscription_tier, subscription_expires_at, welcomed_at, created_at",
+        )
+        .eq("id", user.id)
+        .maybeSingle(),
       supabase.from("invites").select("*").eq("creator_id", user.id),
       inviteIds.length
         ? supabase.from("invite_photos").select("*").in("invite_id", inviteIds)

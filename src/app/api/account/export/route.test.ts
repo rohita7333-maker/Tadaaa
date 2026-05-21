@@ -17,9 +17,6 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: null } }) },
   }),
-  createAdminClient: () => ({
-    from: () => ({ insert: async () => ({ error: null }) }),
-  }),
 }));
 
 // Rate limit module unused on the 401 path but mock it defensively so it

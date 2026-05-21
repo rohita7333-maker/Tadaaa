@@ -4,7 +4,7 @@ import { getProfile, updateNotifications } from "@/actions/account";
 import DeleteAccountButton from "./DeleteAccountButton";
 import AvatarUpload from "./AvatarUpload";
 import Link from "next/link";
-import { ArrowLeft, User, Bell, ShieldAlert, Crown, Lock } from "lucide-react";
+import { ArrowLeft, User, Bell, ShieldAlert, Crown, Lock, Download } from "lucide-react";
 import ChangePasswordForm from "./ChangePasswordForm";
 
 export const metadata = { title: "Settings — TaDaaaa" };
@@ -139,6 +139,25 @@ export default async function SettingsPage() {
             <h2 className="font-heading text-lg text-[#2D2926]">Security</h2>
           </div>
           <ChangePasswordForm />
+        </section>
+
+        {/* Your Data */}
+        <section className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30 mb-5">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="w-8 h-8 rounded-xl bg-[#FFF0E8] flex items-center justify-center">
+              <Download className="w-4 h-4 text-[#C4686D]" />
+            </div>
+            <h2 className="font-heading text-lg text-[#2D2926]">Your Data</h2>
+          </div>
+          <p className="text-sm text-[#6B5E57] mb-4 leading-relaxed">
+            Download a JSON copy of everything we store about you.
+          </p>
+          <Link
+            href="/settings/data"
+            className="inline-flex items-center gap-1.5 text-sm text-[#C4686D] hover:underline font-semibold"
+          >
+            Export my data →
+          </Link>
         </section>
 
         {/* Danger zone */}

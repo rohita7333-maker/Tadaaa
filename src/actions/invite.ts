@@ -6,6 +6,8 @@ import { generateInviteSlug } from "@/lib/utils";
 import { STORAGE_BUCKET, FREE_INVITE_MONTHLY_LIMIT } from "@/lib/constants";
 import { getThemeById } from "@/lib/themes";
 import { trackServer } from "@/lib/analytics";
+import { scanImage } from "@/lib/moderation";
+import { logAudit } from "@/lib/audit";
 
 const MAX_PHOTOS = 8;
 import { revalidatePath } from "next/cache";
@@ -137,6 +139,11 @@ export async function createInvite(formData: FormData) {
     sort_order: number;
   }[] = [];
 
+  // Track uploaded storage paths separately so we can roll back the entire
+  // submission if any single photo trips moderation. A partial 4-of-5 upload
+  // would confuse the recipient and silently drop user content.
+  const uploadedPaths: string[] = [];
+
   for (let i = 0; i < photoCount; i++) {
     const file = formData.get(`photo_${i}`) as File;
     if (!file) continue;
@@ -153,6 +160,53 @@ export async function createInvite(formData: FormData) {
     if (uploadError) {
       console.error(`Failed to upload photo ${i}:`, uploadError);
       continue;
+    }
+    uploadedPaths.push(path);
+
+    // Sightengine needs to fetch the image. The invite-photos bucket is
+    // private, so generate a short-lived signed URL just for the scan. 5
+    // minutes is enough cushion for API queueing without leaving a usable
+    // link around. If the URL can't be signed, fail OPEN — same posture as
+    // a Sightengine outage.
+    const { data: signed } = await adminClient.storage
+      .from(STORAGE_BUCKET)
+      .createSignedUrl(path, 60 * 5);
+    const scanUrl = signed?.signedUrl;
+
+    if (scanUrl) {
+      const { safe, reason } = await scanImage(scanUrl);
+      if (!safe) {
+        // Roll back ALL photos uploaded in this submission, plus the parent
+        // invite row. Partial invites are worse than no invite. Also drop
+        // any invite_photos rows that might have been written (none yet at
+        // this point — DB insert is post-loop — but defensive in case the
+        // loop layout changes).
+        await adminClient.storage.from(STORAGE_BUCKET).remove(uploadedPaths);
+        await supabase.from("invites").delete().eq("id", invite.id);
+
+        // Audit-log the rejection off the critical path. Do NOT log the photo
+        // URL or storage path — both are PII-adjacent and the file is being
+        // deleted anyway. `i` records how many photos uploaded before the
+        // reject so admins can spot abuse patterns (e.g. always the 5th
+        // photo).
+        const rejectedReason = reason ?? "unknown";
+        const rejectedIndex = i;
+        after(async () => {
+          await logAudit({
+            userId: user.id,
+            action: "photo.rejected",
+            meta: {
+              reason: rejectedReason,
+              count_uploaded_before_reject: rejectedIndex,
+            },
+          });
+        });
+
+        return {
+          error:
+            "One of your photos was flagged by our content filter. Please try a different photo.",
+        };
+      }
     }
 
     const caption = (formData.get(`photo_caption_${i}`) as string) || "";

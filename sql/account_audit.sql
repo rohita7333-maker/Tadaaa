@@ -1,7 +1,11 @@
 -- Account-level audit log: durable trail of auth + account-mutation events.
--- Backed by RLS so a user can read only their own rows. Inserts are written from
--- server actions using the user-context client; a self-insert policy + a
--- system-insert allowance (NULL user_id) covers the cases we need.
+-- Backed by RLS so a user can read only their own rows. Authenticated users
+-- may only insert rows where user_id matches their own auth.uid().
+--
+-- Pre-auth events (magic-link, signup, password-reset) MUST be written via
+-- the service-role admin client (see src/lib/audit.ts), not the user-context
+-- client. Authenticated users cannot insert rows for arbitrary user_ids,
+-- which would otherwise be a spam vector (NULL user_id + arbitrary action/meta).
 --
 -- Run this in the Supabase SQL editor before deploying the audit code; missing
 -- table simply causes audit inserts to fail silently (logged), so user flows
@@ -28,10 +32,12 @@ CREATE POLICY "self-read" ON account_audit
   FOR SELECT
   USING (auth.uid() = user_id);
 
--- A user can write their own audit rows. user_id IS NULL is allowed so that
--- pre-auth events (failed sign-in, magic-link request for a bad email) can
--- still be recorded by the same user-context client without a service role.
+-- A user can write their own audit rows. Pre-auth (user_id IS NULL) events are
+-- NOT writable through this policy — they must go through the service-role
+-- admin client, which bypasses RLS. Allowing NULL here would let any
+-- authenticated user spam the table with arbitrary action/meta payloads.
 DROP POLICY IF EXISTS "self-insert" ON account_audit;
 CREATE POLICY "self-insert" ON account_audit
   FOR INSERT
-  WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);

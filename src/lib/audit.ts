@@ -1,12 +1,21 @@
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 /**
  * Durable audit log for auth + account-mutation events.
  *
- * Inserts go through the user-context Supabase client (cookie-bound). The
- * matching `self-insert` RLS policy on `account_audit` allows either
- * `auth.uid() = user_id` or `user_id IS NULL` (for pre-auth events).
+ * Routing:
+ *   - `userId` is set       → user-context client (cookie-bound). The
+ *     `self-insert` RLS policy on `account_audit` requires
+ *     `auth.uid() = user_id`, so the row is rejected unless the caller is
+ *     actually that user.
+ *   - `userId` is null      → service-role admin client. Pre-auth events
+ *     (magic-link, signup, failed sign-in, password-reset) have no session;
+ *     RLS would block them otherwise. The service role bypasses RLS.
+ *
+ * This split prevents the spam vector where an authenticated user could insert
+ * NULL-userId rows with arbitrary action/meta payloads through the user
+ * client.
  *
  * REQUIRED MIGRATION: `sql/account_audit.sql` must be applied in Supabase
  * before any audit insert will succeed. Failures here are swallowed and
@@ -25,7 +34,8 @@ export async function logAudit(params: {
   meta?: Record<string, unknown>;
 }) {
   try {
-    const supabase = await createClient();
+    const supabase =
+      params.userId === null ? createAdminClient() : await createClient();
     const { error } = await supabase.from("account_audit").insert({
       user_id: params.userId,
       action: params.action,

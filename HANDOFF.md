@@ -1,14 +1,14 @@
 # TaDaaaa — Session Handoff (2026-05-22)
 
-## Status: SHIP-READY (Phase A + B1 on feat/sophistication)
+## Status: SHIP-READY (Phase A + B1 + B2 on feat/sophistication)
 
-All P0 + P1 + P2 closed. Phase A (Sentry, PostHog, audit log, GDPR export, Sightengine moderation, cookie consent) + Phase B1 (AI invite drafter) shipped on `feat/sophistication` — 11 commits ahead of `main`.
+All P0 + P1 + P2 closed. Phase A (Sentry, PostHog, audit log, GDPR export, Sightengine moderation, cookie consent) + Phase B1 (AI invite drafter) + Phase B2 (collaborative memory invites — multi-contributor photos/notes) shipped on `feat/sophistication` — 14 commits ahead of `main`.
 
-**Tests:** 43/43 pass · **tsc:** 0 errors · **lint:** 0 errors
+**Tests:** 47/47 pass · **tsc:** 0 errors · **lint:** 0 errors
 
 **Next action for user:**
 1. Add `ANTHROPIC_API_KEY` to Vercel env vars (TODO — not yet done)
-2. Run remaining SQL migrations (see below — `ai_drafts.sql` ✓ already run)
+2. Run remaining SQL migrations (see below — `ai_drafts.sql` ✓ already run, `invite_contributions.sql` NEW B2)
 3. Merge `feat/sophistication` → `main` + push → Vercel auto-deploys
 
 ---
@@ -125,6 +125,7 @@ sql/invite_rsvps.sql               # NEW — RSVP table + rsvp_count()
 sql/profiles_welcomed_at.sql       # NEW — profiles.welcomed_at flag
 sql/account_audit.sql              # NEW (Phase A) — audit log table + RLS
 sql/ai_drafts.sql                  # NEW (Phase B1) — AI draft log + RLS  ✓ ALREADY RUN
+sql/invite_contributions.sql       # NEW (Phase B2) — contributions table + RLS + invites.accept_contributions
 ```
 
 All idempotent (`CREATE OR REPLACE` / `IF NOT EXISTS`).
@@ -264,3 +265,4 @@ Highlights:
 - 2026-05-21: Server restart, hydration fixes, port-sync, BUILD_PROCESS.md + idea-to-app agent; Google OAuth verified live
 - 2026-05-21 sophistication: Phase A — Sentry, PostHog, audit log, GDPR export, Sightengine moderation, cookie consent (10 commits)
 - 2026-05-22: Phase B1 — AI invite drafter; sql/ai_drafts.sql run in Supabase
+- 2026-05-22: Phase B2 — collaborative memory invites (contribute table + RLS, /contribute/[slug] page, ContributeForm, anon upload via service role, surprise reveal renders contributions as polaroids + notes, audit on dedup, React.cache on hot path)

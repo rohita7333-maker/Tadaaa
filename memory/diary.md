@@ -456,3 +456,36 @@ HANDOFF.md is the ship-readiness doc. BUILD_PROCESS.md is the cross-project play
 - Phase B2 (collaborative invites) or B3 (reveal video default) next
 
 ---
+
+## 2026-05-22 (session 2 — Phase B2 collaborative invites)
+
+**What happened:** Phase B2 (collaborative memory invites) shipped on `feat/sophistication`. Subagent-driven flow: implementer → spec review → code quality review → 3-fix follow-up.
+
+**What was built:**
+- `sql/invite_contributions.sql` — contributions table (id/invite_id/contributor_name/email/message/photo_url/approved/visitor_hash) + `accept_contributions` flag on invites + RLS (public-read-approved, no client INSERT)
+- `src/app/api/invite/[slug]/contribute/route.ts` — POST: 10/hr/IP rate limit, Zod validation, Sightengine scan on photoUrl, visitor_hash=`sha256(ip:invite.id)`, 23505 dedup returns 200 not 500, audit `contribution.received` AND `contribution.dedup` via `after()`
+- `src/app/api/invite/[slug]/contribute/upload/route.ts` — service-role anon upload, MIME allowlist (jpeg/png/webp, no SVG), 1.25× size cap, 20/hr rate limit, gated on `accept_contributions + is_active + status`, returns 1hr signed URL
+- `src/app/contribute/[slug]/page.tsx` — public form page; notFound on inactive/non-accepting
+- `src/components/contribute/ContributeForm.tsx` — name/email/message/photo fields, reuses `browser-image-compression`
+- Wizard toggle in `RevealSettings.tsx` (Switch) → threaded through create/page.tsx → invite.ts persists
+- `ShareButtons.tsx` — conditional `/contribute/[slug]` secondary share link when `acceptContributions=true`
+- Surprise page integration — `getInviteBySlug` now returns contributions; photo contribs merge into `PolaroidScroll`, message-only notes render as letter cards via new `notes` prop
+- `getInviteBySlug` wrapped in React.cache() — dedupes generateMetadata + page body double-query
+
+**Tests:** 47/47 (was 43; added 404, 403, 200 ok, 200 dedup paths)
+
+**Fixes from review:**
+- Audit log dedup hits (`contribution.dedup` action with same meta-shape as received)
+- React.cache() on getInviteBySlug to halve DB load on hot path
+- Drop UA from visitor_hash (false dedups across in-app browser drift)
+
+**Commits:** `905e688 feat(contributions): collaborative memory invites (Task B2)` + `5df1817 fix(b2): audit dedup hits, React.cache getInviteBySlug, drop UA from visitor hash`
+
+**Build status:** tsc 0, lint 0, tests 47/47, build clean.
+
+**Pending:**
+- Run `sql/invite_contributions.sql` in Supabase before deploy
+- Phase B3 next (reveal video default) OR low-priority cleanup pass OR merge → main
+- Follow-ups documented: orphan-file cleanup cron, explicit getInviteBySlug return type, per-invite rate limit tuning
+
+---

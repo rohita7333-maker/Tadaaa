@@ -434,3 +434,25 @@ User finished Supabase Google OAuth config + Google Cloud OAuth client. Verified
 HANDOFF.md is the ship-readiness doc. BUILD_PROCESS.md is the cross-project playbook. idea-to-app agent v2 enforces Phase 7 OAuth checklist + smoke test. Future builds run the agent.
 
 ---
+
+## 2026-05-22
+
+**What happened:** Phase B1 (AI invite drafter) shipped on `feat/sophistication`. `sql/ai_drafts.sql` run in Supabase.
+
+**What was built:**
+- `src/lib/ai/draft.ts` — `draftInvite()` calls claude-sonnet-4-6 with prompt caching on system msg; `parseDraftOutput()` validates with Zod
+- `src/lib/ai/prompts.ts` — system prompt + user message builder
+- `src/lib/ai/draft.test.ts` — 5 tests (invalid JSON, schema pass, unsafe refusal, missing fields, title overflow)
+- `src/app/api/ai/draft-invite/route.ts` — POST route: auth + 10/hr rate limit (reuses `consume_rate_limit` RPC) + audit log via `after()`
+- `src/components/create/AIDraftButton.tsx` — UI: recipient, occasion, tone, optional details; inline expand/collapse
+- `sql/ai_drafts.sql` — log table with self-read RLS (RAN in Supabase ✓)
+- Wired into `create/page.tsx` step 1 — `applyDraft` fills title/message/theme/questions + auto-advances to step 2
+
+**Build status:** Clean — 43/43 tests (up from 38), tsc 0 errors, lint 0 errors.
+
+**Pending:**
+- `ANTHROPIC_API_KEY` → add to Vercel env vars before prod deploy (TODO)
+- Merge `feat/sophistication` → `main` + push when ready to deploy
+- Phase B2 (collaborative invites) or B3 (reveal video default) next
+
+---

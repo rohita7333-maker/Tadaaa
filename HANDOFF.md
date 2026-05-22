@@ -1,10 +1,15 @@
-# TaDaaaa — Session Handoff (2026-05-21)
+# TaDaaaa — Session Handoff (2026-05-22)
 
-## Status: SHIP-READY
+## Status: SHIP-READY (Phase A + B1 on feat/sophistication)
 
-All P0 + P1 + P2 closed. Hydration bugs fixed. Google OAuth verified end-to-end with the user's live Supabase + Google Cloud setup. Dev server clean (`tsc` 0, tests 29/29, lint 0 errors, 0 console errors in browser).
+All P0 + P1 + P2 closed. Phase A (Sentry, PostHog, audit log, GDPR export, Sightengine moderation, cookie consent) + Phase B1 (AI invite drafter) shipped on `feat/sophistication` — 11 commits ahead of `main`.
 
-**Next action for user:** run the 6 SQL migrations in Supabase + deploy to Vercel.
+**Tests:** 43/43 pass · **tsc:** 0 errors · **lint:** 0 errors
+
+**Next action for user:**
+1. Add `ANTHROPIC_API_KEY` to Vercel env vars (TODO — not yet done)
+2. Run remaining SQL migrations (see below — `ai_drafts.sql` ✓ already run)
+3. Merge `feat/sophistication` → `main` + push → Vercel auto-deploys
 
 ---
 
@@ -13,11 +18,12 @@ All P0 + P1 + P2 closed. Hydration bugs fixed. Google OAuth verified end-to-end 
 | Layer | State | Notes |
 |---|---|---|
 | TypeScript | exit 0 | `npx tsc --noEmit` |
-| Tests | 29/29 pass | `npm test` (vitest) — schemas, utils, unsubscribe HMAC |
-| Lint | 0 errors | 10 warnings (intentional: per-line set-state-in-effect disables, no-img-element on avatar, no-unused-vars for future) |
+| Tests | 43/43 pass | `npm test` (vitest) — schemas, utils, unsubscribe HMAC, AI draft parsing |
+| Lint | 0 errors | 10 warnings (intentional) |
 | Browser QA | 0 console errors | Playwright probed `/`, `/auth/signin`, `/auth/signup`, `/auth/verify-email`, `/pricing`, `/settings` |
-| Google OAuth | Verified live | Provider enabled in Supabase; client ID + secret configured in Google Cloud; redirect chain tested via Playwright |
+| Google OAuth | Verified live | Provider enabled in Supabase; client ID + secret configured in Google Cloud |
 | Dev server | http://localhost:3000 | Restart cleanly via `npm run dev` from `surprise-invite/` |
+| Branch | feat/sophistication | 11 commits ahead of main — merge when ready to deploy |
 
 ---
 
@@ -117,6 +123,8 @@ sql/rate_limits.sql                # NEW — rate-limit table + consume_rate_lim
 sql/stripe_customers.sql           # NEW — profiles.stripe_customer_id + verify_stripe_customer()
 sql/invite_rsvps.sql               # NEW — RSVP table + rsvp_count()
 sql/profiles_welcomed_at.sql       # NEW — profiles.welcomed_at flag
+sql/account_audit.sql              # NEW (Phase A) — audit log table + RLS
+sql/ai_drafts.sql                  # NEW (Phase B1) — AI draft log + RLS  ✓ ALREADY RUN
 ```
 
 All idempotent (`CREATE OR REPLACE` / `IF NOT EXISTS`).
@@ -144,6 +152,22 @@ RESEND_FROM_EMAIL=
 
 # Cron + Unsubscribe HMAC (same secret powers both)
 CRON_SECRET=
+
+# Phase A — Sentry, PostHog, Sightengine (fail-open when unset)
+SENTRY_DSN=
+NEXT_PUBLIC_SENTRY_DSN=
+SENTRY_AUTH_TOKEN=
+SENTRY_ORG=
+SENTRY_PROJECT=
+POSTHOG_API_KEY=
+NEXT_PUBLIC_POSTHOG_KEY=
+POSTHOG_HOST=https://app.posthog.com
+NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+SIGHTENGINE_API_USER=
+SIGHTENGINE_API_SECRET=
+
+# Phase B1 — AI invite drafter (TODO: add to Vercel before deploy)
+ANTHROPIC_API_KEY=
 ```
 
 ## Supabase Dashboard — required config
@@ -218,9 +242,17 @@ Highlights:
 ## Genuinely Open (low priority)
 
 - Full CSP nonce migration
-- Sentry / error-reporting
 - Prettier config
 - Optional auto-`releaseSounds()` on reveal unmount
+- `posthog.identify(user.id)` on client (currently anon-only)
+- `auditAfter()` DRY wrapper in auth.ts (7 boilerplate blocks)
+- Happy-path test for `/api/account/export`
+
+## Next Phases (sophistication plan)
+
+- **B2** Collaborative memory invites — multi-contributor photos/questions
+- **B3** Reveal video as default share asset (Remotion already wired)
+- **C–F** Templates marketplace, pricing restructure, Web Push, i18n, edge runtime, Inngest
 
 ## Prior Sessions
 
@@ -229,5 +261,6 @@ Highlights:
 - 2026-05-20 mid: 10 high-impact P1
 - 2026-05-20 late: 15 remaining P1 + Hallmark onboarding + tests
 - 2026-05-20 final: P2 polish + lint baseline cleared
-- 2026-05-21: Server restart, hydration bug fixes, port-sync, BUILD_PROCESS.md + idea-to-app agent
-- 2026-05-21 (this): Google OAuth verified live, HANDOFF rewritten, agent updated with verified dashboard steps
+- 2026-05-21: Server restart, hydration fixes, port-sync, BUILD_PROCESS.md + idea-to-app agent; Google OAuth verified live
+- 2026-05-21 sophistication: Phase A — Sentry, PostHog, audit log, GDPR export, Sightengine moderation, cookie consent (10 commits)
+- 2026-05-22: Phase B1 — AI invite drafter; sql/ai_drafts.sql run in Supabase

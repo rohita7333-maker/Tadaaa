@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check, Share2, QrCode } from "lucide-react";
+import { Copy, Check, Share2, QrCode, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { APP_URL } from "@/lib/constants";
@@ -12,6 +12,13 @@ interface ShareButtonsProps {
   slug: string;
   title: string;
   inviteId?: string;
+  /**
+   * When true, renders a secondary "Contribute link" row pointing at
+   * /contribute/<slug>. Owner-facing flow: the family-facing link is
+   * separate from the recipient surprise link, so the recipient never
+   * accidentally lands on the contribute form.
+   */
+  acceptContributions?: boolean;
 }
 
 // Posthog is loaded lazily via the snippet in layout.tsx after cookie consent.
@@ -29,11 +36,18 @@ function capture(event: string, props?: Record<string, unknown>) {
   }
 }
 
-export default function ShareButtons({ slug, title, inviteId }: ShareButtonsProps) {
+export default function ShareButtons({
+  slug,
+  title,
+  inviteId,
+  acceptContributions = false,
+}: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
+  const [contributeCopied, setContributeCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
   const url = `${APP_URL}/surprise/${slug}`;
+  const contributeUrl = `${APP_URL}/contribute/${slug}`;
   const waText = encodeURIComponent(`💌 ${title} — Someone made something special for you! Open this: ${url}`);
   const isMobile = typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent);
   const waHref = isMobile
@@ -147,6 +161,47 @@ export default function ShareButtons({ slug, title, inviteId }: ShareButtonsProp
       <p className="text-center text-xs text-[#6B5E57] opacity-70">
         Share via WhatsApp for best results 💚
       </p>
+
+      {acceptContributions && (
+        <div className="mt-4 pt-4 border-t border-[#D4CBC3]/40">
+          <div className="flex items-center gap-2 mb-2">
+            <Users className="w-4 h-4 text-[#C4686D]" />
+            <p className="text-sm font-medium text-[#2D2926]">
+              Contribute link
+            </p>
+          </div>
+          <p className="text-xs text-[#6B5E57] mb-2">
+            Send to family who want to add memories
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={contributeUrl}
+              readOnly
+              onFocus={(e) => e.currentTarget.select()}
+              className="flex-1 h-10 rounded-full border border-[#D4CBC3] px-3 text-xs text-[#2D2926] bg-[#FFF8F0] focus:outline-none focus:border-[#C4686D]"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={async () => {
+                await navigator.clipboard.writeText(contributeUrl);
+                setContributeCopied(true);
+                toast.success("Contribute link copied!");
+                trackShare("contribute_copy");
+                setTimeout(() => setContributeCopied(false), 2000);
+              }}
+              className="h-10 px-3 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF0EE] text-xs transition-all duration-200"
+            >
+              {contributeCopied ? (
+                <Check className="w-3.5 h-3.5 text-[#6B8F71]" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

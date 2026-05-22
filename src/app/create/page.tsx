@@ -115,6 +115,7 @@ export default function CreatePage() {
   const [countdownDate, setCountdownDate] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [hasExpiry, setHasExpiry] = useState(false);
+  const [acceptContributions, setAcceptContributions] = useState(false);
   const [titleError, setTitleError] = useState("");
   const [messageError, setMessageError] = useState("");
 
@@ -187,6 +188,7 @@ export default function CreatePage() {
     if (hasExpiry && expiresAt) {
       formData.append("expiresAt", new Date(expiresAt).toISOString());
     }
+    formData.append("acceptContributions", acceptContributions ? "true" : "false");
     photos.forEach((p, i) => {
       formData.append(`photo_${i}`, p.file, p.file.name);
       formData.append(`photo_caption_${i}`, p.caption);
@@ -296,10 +298,12 @@ export default function CreatePage() {
                     countdownDate={countdownDate}
                     expiresAt={expiresAt}
                     hasExpiry={hasExpiry}
+                    acceptContributions={acceptContributions}
                     onRevealTypeChange={setRevealType}
                     onCountdownDateChange={setCountdownDate}
                     onExpiresAtChange={setExpiresAt}
                     onHasExpiryChange={setHasExpiry}
+                    onAcceptContributionsChange={setAcceptContributions}
                   />
                 </div>
               )}
@@ -324,6 +328,7 @@ export default function CreatePage() {
                   revealType={revealType}
                   photos={photos}
                   tier={userTier}
+                  acceptContributions={acceptContributions}
                   onPublish={handlePublish}
                 />
               )}

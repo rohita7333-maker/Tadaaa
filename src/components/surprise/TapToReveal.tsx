@@ -20,6 +20,13 @@ interface TapToRevealProps {
   inviteId?: string;
   enableDodge?: boolean;
   videoUrl?: string | null;
+  /**
+   * Message-only contributions from collaborative invites (Task B2).
+   * Rendered after the polaroid stack as signed letters. Photo-bearing
+   * contributions are merged into `photos` by the server and surface
+   * inside the carousel itself.
+   */
+  contributorNotes?: { contributor_name: string; message: string }[];
 }
 
 type Stage = "landing" | "video" | "photos" | "questions" | "celebrate" | "message" | "cta";
@@ -70,7 +77,7 @@ function FloatingParticles({
   );
 }
 
-export default function TapToReveal({ theme, photos, title, message, questions = [], inviteId = "", enableDodge = true, videoUrl }: TapToRevealProps) {
+export default function TapToReveal({ theme, photos, title, message, questions = [], inviteId = "", enableDodge = true, videoUrl, contributorNotes = [] }: TapToRevealProps) {
   const [stage, setStage] = useState<Stage>("landing");
 
   const revealEmoji =
@@ -190,6 +197,7 @@ export default function TapToReveal({ theme, photos, title, message, questions =
               photos={photos}
               theme={theme}
               title={title}
+              notes={contributorNotes}
               onComplete={() => setStage(questions.length > 0 ? "questions" : "message")}
             />
           </motion.div>

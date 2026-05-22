@@ -27,6 +27,7 @@ interface InviteCardProps {
     expires_at: string | null;
     created_at: string;
     reveal_type: "tap" | "countdown";
+    accept_contributions?: boolean;
   };
 }
 
@@ -181,7 +182,12 @@ export default function InviteCard({ invite }: InviteCardProps) {
               className="overflow-hidden"
             >
               <div className="pt-4 border-t border-[#D4CBC3]/40 mt-4">
-                <ShareButtons slug={invite.slug} title={invite.title} inviteId={invite.id} />
+                <ShareButtons
+                  slug={invite.slug}
+                  title={invite.title}
+                  inviteId={invite.id}
+                  acceptContributions={invite.accept_contributions ?? false}
+                />
               </div>
             </motion.div>
           )}

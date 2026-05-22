@@ -16,6 +16,7 @@ interface PreviewPublishProps {
   revealType: "tap" | "countdown";
   photos: PhotoFile[];
   tier?: string;
+  acceptContributions?: boolean;
   onPublish: () => Promise<{ slug: string; inviteId: string } | null>;
 }
 
@@ -26,6 +27,7 @@ export default function PreviewPublish({
   revealType,
   photos,
   tier = "free",
+  acceptContributions = false,
   onPublish,
 }: PreviewPublishProps) {
   const [publishing, setPublishing] = useState(false);
@@ -71,7 +73,12 @@ export default function PreviewPublish({
         </div>
 
         <div className="max-w-sm mx-auto mb-4">
-          <ShareButtons slug={publishedSlug!} title={title} inviteId={publishedInviteId ?? undefined} />
+          <ShareButtons
+            slug={publishedSlug!}
+            title={title}
+            inviteId={publishedInviteId ?? undefined}
+            acceptContributions={acceptContributions}
+          />
         </div>
 
         {publishedInviteId && (

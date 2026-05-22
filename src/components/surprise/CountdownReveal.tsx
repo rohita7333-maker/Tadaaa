@@ -20,6 +20,8 @@ interface CountdownRevealProps {
   inviteId?: string;
   enableDodge?: boolean;
   videoUrl?: string | null;
+  /** Message-only contributions (Task B2) — rendered after polaroid stack. */
+  contributorNotes?: { contributor_name: string; message: string }[];
 }
 
 interface TimeLeft {
@@ -51,6 +53,7 @@ export default function CountdownReveal({
   inviteId = "",
   enableDodge = true,
   videoUrl,
+  contributorNotes = [],
 }: CountdownRevealProps) {
   // Memoize the parsed Date so the effect dep is stable across ticks.
   // Without this, `target` is a new object every render → effect re-runs every
@@ -95,6 +98,7 @@ export default function CountdownReveal({
         photos={photos}
         theme={theme}
         title={title}
+        notes={contributorNotes}
         onComplete={() => setStage(questions.length > 0 ? "questions" : "message")}
       />
     );

@@ -167,6 +167,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                 expires_at: invite.expires_at,
                 created_at: invite.created_at,
                 reveal_type: invite.reveal_type,
+                accept_contributions: invite.accept_contributions ?? false,
               }}
             />
           ))}

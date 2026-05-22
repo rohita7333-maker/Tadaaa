@@ -94,7 +94,33 @@ export default async function SurprisePage({ params }: Props) {
   }
 
   const theme = getThemeById(invite.theme) ?? getThemeById("warm-embrace")!;
-  const photos = (invite.photos || []) as { url: string; caption?: string; rotation_deg?: number }[];
+  const ownerPhotos = (invite.photos || []) as { url: string; caption?: string; rotation_deg?: number }[];
+  const contributions = ((invite as { contributions?: { contributor_name: string; message: string | null; photo_url: string | null }[] }).contributions) ?? [];
+
+  // Merge contributions into the polaroid carousel. Photo contributions
+  // become real polaroids (caption shows contributor's name + their note
+  // if they wrote one). Message-only contributions get a "letter" polaroid
+  // — no image, just the note signed by the contributor — so they aren't
+  // silently dropped.
+  const contributionPhotos = contributions
+    .filter((c) => !!c.photo_url)
+    .map((c) => ({
+      url: c.photo_url as string,
+      caption: c.message
+        ? `${c.message} — ${c.contributor_name}`
+        : `from ${c.contributor_name}`,
+    }));
+  const photos = [...ownerPhotos, ...contributionPhotos];
+
+  // Contributor letters (no photo, just a note) are surfaced as a roster
+  // beneath the polaroids — passed to the reveal so it can render them
+  // alongside the photo stack without overhauling the carousel logic.
+  const contributorNotes = contributions
+    .filter((c) => !c.photo_url && c.message)
+    .map((c) => ({
+      contributor_name: c.contributor_name,
+      message: c.message as string,
+    }));
   const questions = (invite.questions as { id: string; question_text: string; yes_label: string; no_label: string; require_answer: boolean }[]) || [];
   const enableDodge = (invite as { enable_dodge_no?: boolean }).enable_dodge_no ?? true;
   const videoUrl = (invite as { videoUrl?: string | null }).videoUrl ?? null;
@@ -122,6 +148,7 @@ export default async function SurprisePage({ params }: Props) {
           inviteId={invite.id}
           enableDodge={enableDodge}
           videoUrl={videoUrl}
+          contributorNotes={contributorNotes}
         />
       ) : (
         <TapToReveal
@@ -133,6 +160,7 @@ export default async function SurprisePage({ params }: Props) {
           inviteId={invite.id}
           enableDodge={enableDodge}
           videoUrl={videoUrl}
+          contributorNotes={contributorNotes}
         />
       )}
     </div>

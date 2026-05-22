@@ -11,10 +11,22 @@ interface Photo {
   rotation_deg?: number;
 }
 
+interface Note {
+  contributor_name: string;
+  message: string;
+}
+
 interface PolaroidScrollProps {
   photos: Photo[];
   theme: Theme;
   title: string;
+  /**
+   * Message-only contributions from collaborative invites (Task B2).
+   * Photo contributions are merged into `photos` upstream; these are the
+   * letters-without-an-image cards rendered after the polaroid stack so
+   * they aren't lost.
+   */
+  notes?: Note[];
   onComplete: () => void;
 }
 
@@ -25,6 +37,7 @@ export default function PolaroidScroll({
   photos,
   theme,
   title,
+  notes = [],
   onComplete,
 }: PolaroidScrollProps) {
   const [visibleCount, setVisibleCount] = useState(0);
@@ -32,10 +45,12 @@ export default function PolaroidScroll({
   const photoRefs = useRef<(HTMLDivElement | null)[]>([]);
   const ctaRef = useRef<HTMLDivElement | null>(null);
 
-  // Fire immediately if no photos
+  // Fire immediately if there's nothing to show — no photos AND no notes.
+  // When only notes are present we still render so contributors aren't
+  // silently dropped on photo-less invites.
   useEffect(() => {
-    if (photos.length === 0) onComplete();
-  }, [photos.length, onComplete]);
+    if (photos.length === 0 && notes.length === 0) onComplete();
+  }, [photos.length, notes.length, onComplete]);
 
   useEffect(() => {
     if (photos.length === 0) return;
@@ -71,7 +86,7 @@ export default function PolaroidScroll({
     return () => observers.forEach((o) => o.disconnect());
   }, [photos]);
 
-  if (photos.length === 0) return null;
+  if (photos.length === 0 && notes.length === 0) return null;
 
   const textColor = theme.colors.text;
   const accentColor = theme.colors.accent;
@@ -197,6 +212,47 @@ export default function PolaroidScroll({
             </div>
           );
         })}
+
+        {/* Contributor letters — message-only contributions from family
+            (Task B2). Rendered as folded-paper cards beneath the polaroids
+            so they're part of the same scroll moment. */}
+        {notes.length > 0 && (
+          <div className="pt-4 space-y-4">
+            <p
+              className="text-center text-sm opacity-70"
+              style={{
+                color: mutedColor,
+                fontFamily: "var(--font-caveat, cursive)",
+                fontSize: "1.1rem",
+              }}
+            >
+              Notes from people who love you
+            </p>
+            {notes.map((note, idx) => (
+              <motion.div
+                key={`note-${idx}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.05 * idx }}
+                className="bg-white rounded-2xl p-5 shadow-[0_6px_18px_rgba(45,41,38,0.10)] border border-[#D4CBC3]/40"
+              >
+                <p
+                  className="text-[#2D2926] leading-relaxed"
+                  style={{
+                    fontFamily: "var(--font-caveat, cursive)",
+                    fontSize: "1.15rem",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {note.message}
+                </p>
+                <p className="mt-3 text-right text-xs text-[#6B5E57]">
+                  — {note.contributor_name}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* CTA sentinel */}
         <div ref={ctaRef} className="pt-4 pb-16 text-center">

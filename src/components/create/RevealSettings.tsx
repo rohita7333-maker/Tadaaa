@@ -10,10 +10,12 @@ interface RevealSettingsProps {
   countdownDate: string;
   expiresAt: string;
   hasExpiry: boolean;
+  acceptContributions: boolean;
   onRevealTypeChange: (v: "tap" | "countdown") => void;
   onCountdownDateChange: (v: string) => void;
   onExpiresAtChange: (v: string) => void;
   onHasExpiryChange: (v: boolean) => void;
+  onAcceptContributionsChange: (v: boolean) => void;
 }
 
 export default function RevealSettings({
@@ -21,10 +23,12 @@ export default function RevealSettings({
   countdownDate,
   expiresAt,
   hasExpiry,
+  acceptContributions,
   onRevealTypeChange,
   onCountdownDateChange,
   onExpiresAtChange,
   onHasExpiryChange,
+  onAcceptContributionsChange,
 }: RevealSettingsProps) {
   const minDate = new Date();
   minDate.setMinutes(minDate.getMinutes() + 5);
@@ -131,6 +135,25 @@ export default function RevealSettings({
           />
         </div>
       )}
+
+      {/* Contributions toggle — collaborative memory invites (Task B2). When
+          on, the dashboard exposes a /contribute/<slug> link and family
+          members can drop a photo + note before the reveal. */}
+      <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FFF8F0] border border-[#D4CBC3]/40">
+        <div className="pr-3">
+          <p className="text-[#2D2926] font-medium text-sm">
+            Let family contribute photos/messages
+          </p>
+          <p className="text-[#6B5E57] text-xs mt-0.5">
+            Get a second link to send to people who want to add memories
+          </p>
+        </div>
+        <Switch
+          checked={acceptContributions}
+          onCheckedChange={onAcceptContributionsChange}
+          className="data-[state=checked]:bg-[#C4686D]"
+        />
+      </div>
     </div>
   );
 }

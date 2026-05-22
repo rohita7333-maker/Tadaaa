@@ -94,6 +94,12 @@ export async function createInvite(formData: FormData) {
   }
   if (!slug) return { error: "Failed to generate unique slug. Please try again." };
 
+  // Accept contributions toggle — opt-in collaborative memory invites
+  // (Task B2). Defaults to false so existing creates keep their
+  // private-reveal behaviour.
+  const acceptContributions =
+    formData.get("acceptContributions") === "true";
+
   // Insert invite
   const { data: invite, error: insertError } = await supabase
     .from("invites")
@@ -107,6 +113,7 @@ export async function createInvite(formData: FormData) {
       countdown_date: countdownDate || null,
       expires_at: expiresAt || null,
       occasion_type: occasionType,
+      accept_contributions: acceptContributions,
     })
     .select("id")
     .single();
@@ -380,5 +387,27 @@ export async function getInviteBySlug(slug: string) {
     videoUrl = videoData?.signedUrl || null;
   }
 
-  return { ...invite, photos: signedPhotos, questions, videoUrl };
+  // Fetch approved contributions (Task B2 — collaborative memory invites).
+  // Skipped silently when the invite isn't opted in; surprise page treats
+  // an empty array as "no contributions yet" and renders normally.
+  let contributions: {
+    contributor_name: string;
+    message: string | null;
+    photo_url: string | null;
+  }[] = [];
+  if ((invite as { accept_contributions?: boolean }).accept_contributions) {
+    const { data: rows } = await adminClient
+      .from("invite_contributions")
+      .select("contributor_name, message, photo_url, created_at")
+      .eq("invite_id", invite.id)
+      .eq("approved", true)
+      .order("created_at", { ascending: true });
+    contributions = (rows ?? []).map((r) => ({
+      contributor_name: r.contributor_name,
+      message: r.message,
+      photo_url: r.photo_url,
+    }));
+  }
+
+  return { ...invite, photos: signedPhotos, questions, videoUrl, contributions };
 }

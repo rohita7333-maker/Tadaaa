@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { createInviteSchema, inviteQuestionsSchema } from "@/lib/schemas";
 import { generateInviteSlug } from "@/lib/utils";
@@ -317,7 +318,19 @@ export async function deleteInvite(inviteId: string) {
   return { success: true };
 }
 
+// Per-request memo: the surprise page calls getInviteBySlug twice (once in
+// generateMetadata, once in the page body) and each call now includes a
+// contributions SELECT on top of the photos/questions/video queries. React's
+// cache() collapses both calls into a single execution per request — no TTL,
+// no cross-user key collisions — so we halve the DB load on the hot path
+// without any client-visible behaviour change.
+const _getInviteBySlugCached = cache(_getInviteBySlugImpl);
+
 export async function getInviteBySlug(slug: string) {
+  return _getInviteBySlugCached(slug);
+}
+
+async function _getInviteBySlugImpl(slug: string) {
   const adminClient = createAdminClient();
 
   const { data: invite, error } = await adminClient

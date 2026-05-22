@@ -126,4 +126,25 @@ describe("POST /api/invite/[slug]/contribute", () => {
     const json = await res.json();
     expect(json.ok).toBe(true);
   });
+
+  it("returns dedup ok when UNIQUE violation fires (same visitor retries)", async () => {
+    // Same accepting invite as the happy path, but the mocked insert now
+    // returns a Postgres 23505 (unique_violation). The route should swallow
+    // the error and respond { ok: true, dedup: true } so the UI doesn't
+    // surface a scary failure on accidental double-submits.
+    state.invite = {
+      id: "00000000-0000-0000-0000-000000000003",
+      accept_contributions: true,
+      is_active: true,
+      status: "active",
+    };
+    state.insertError = { code: "23505", message: "duplicate key value" };
+    const res = await POST(
+      makeRequest({ name: "Alex", message: "Happy birthday!" }) as never,
+      { params: Promise.resolve({ slug: "dup" }) }
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json).toEqual({ ok: true, dedup: true });
+  });
 });

@@ -12,8 +12,8 @@ import { logAudit } from "@/lib/audit";
  *
  * Anonymous: no session required. The owner opts in by setting
  * `invites.accept_contributions = true` in the create wizard. Each visitor
- * (hashed from IP + UA + invite_id) can contribute at most once per invite —
- * the duplicate INSERT collides on the UNIQUE constraint and we return a
+ * (hashed from IP + invite_id) can contribute at most once per invite — the
+ * duplicate INSERT collides on the UNIQUE constraint and we return a
  * graceful `{ ok: true, dedup: true }` so a double-tap on the submit button
  * never surfaces a scary error.
  *
@@ -86,11 +86,14 @@ export async function POST(
     }
   }
 
-  // Visitor hash deduplicates submissions from same IP/UA on same invite.
-  // Salted with invite.id so the same person on the same network can still
-  // contribute to other invites independently.
+  // Visitor hash deduplicates submissions from the same IP on the same
+  // invite. Salted with invite.id so the same person on the same network can
+  // still contribute to other invites independently. We deliberately do NOT
+  // include the user-agent: in-app browsers (iOS Mail, Gmail, WhatsApp) emit
+  // different UAs than Safari/Chrome on the same device, which would silently
+  // bypass dedup and surface as duplicate polaroids in the reveal.
   const visitorHash = createHash("sha256")
-    .update(`${ip}:${req.headers.get("user-agent") ?? ""}:${invite.id}`)
+    .update(`${ip}:${invite.id}`)
     .digest("hex");
 
   const { error } = await supabase.from("invite_contributions").insert({
@@ -104,7 +107,25 @@ export async function POST(
 
   if (error?.code === "23505") {
     // UNIQUE collision — same visitor already contributed. Treat as success
-    // so the UI doesn't error on accidental double-submits.
+    // so the UI doesn't error on accidental double-submits. Audit the dedup
+    // hit (off the critical path) so admins can spot a spammer retrying the
+    // same submission — without this they're invisible.
+    const dedupInviteId = invite.id;
+    const dedupHasPhoto = !!parsed.photoUrl;
+    const dedupHasMessage = !!parsed.message;
+    after(async () => {
+      await logAudit({
+        userId: null,
+        action: "contribution.dedup",
+        ip,
+        userAgent: req.headers.get("user-agent"),
+        meta: {
+          invite_id: dedupInviteId,
+          has_photo: dedupHasPhoto,
+          has_message: dedupHasMessage,
+        },
+      });
+    });
     return NextResponse.json({ ok: true, dedup: true });
   }
   if (error) {

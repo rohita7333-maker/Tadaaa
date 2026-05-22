@@ -13,7 +13,9 @@ import MessageEditor from "@/components/create/MessageEditor";
 import RevealSettings from "@/components/create/RevealSettings";
 import QuestionBuilder, { type Question } from "@/components/create/QuestionBuilder";
 import PreviewPublish from "@/components/create/PreviewPublish";
+import { AIDraftButton } from "@/components/create/AIDraftButton";
 import { type Theme } from "@/lib/themes";
+import { type Draft } from "@/lib/ai/draft";
 import { createInvite } from "@/actions/invite";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -202,6 +204,24 @@ export default function CreatePage() {
     return { slug: result.slug, inviteId: result.inviteId };
   }
 
+  function applyDraft(d: Draft) {
+    setTitle(d.title);
+    setMessage(d.message);
+    setSelectedTheme(d.themeId);
+    setQuestions(
+      d.questions.map((q) => ({
+        text: q.text,
+        yesLabel: q.yesLabel,
+        noLabel: q.noLabel,
+        requireAnswer: false,
+        enableDodge: false,
+      }))
+    );
+    // Move to step 2 so user can see the drafted content and add photos
+    setDirection(1);
+    setStep(2);
+  }
+
   return (
     <div className="min-h-screen bg-[#FFF8F0]">
       {/* Nav */}
@@ -233,11 +253,14 @@ export default function CreatePage() {
             >
               {step === 1 && (
                 <div className="space-y-6">
-                  <div>
-                    <h2 className="font-heading text-2xl text-[#2D2926] mb-1">
-                      What&apos;s the occasion?
-                    </h2>
-                    <p className="text-sm text-[#6B5E57]">Pick a type — we&apos;ll suggest a question to get you started</p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h2 className="font-heading text-2xl text-[#2D2926] mb-1">
+                        What&apos;s the occasion?
+                      </h2>
+                      <p className="text-sm text-[#6B5E57]">Pick a type — or let AI draft the whole invite for you</p>
+                    </div>
+                    <AIDraftButton onDraft={applyDraft} />
                   </div>
                   <OccasionSelector
                     selected={occasionType}

@@ -1,10 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
 import FloatingPhotos from "./FloatingPhotos";
+import { getReducedMotionTransition } from "@/lib/a11y";
 
 interface MessageRevealProps {
   title: string;
@@ -14,23 +16,6 @@ interface MessageRevealProps {
   photos?: { url: string; caption?: string; rotation_deg?: number }[];
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.3 } as const,
-  },
-};
-
-const wordVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 } as const,
-  },
-};
-
 export default function MessageReveal({
   title,
   message,
@@ -38,7 +23,28 @@ export default function MessageReveal({
   onComplete,
   photos = [],
 }: MessageRevealProps) {
+  const shouldReduce = useReducedMotion();
   const words = message.split(" ");
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: shouldReduce
+        ? { staggerChildren: 0, delayChildren: 0 }
+        : ({ staggerChildren: 0.08, delayChildren: 0.3 } as const),
+    },
+  };
+
+  const wordVariants = {
+    hidden: { opacity: 0, y: shouldReduce ? 0 : 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transition: getReducedMotionTransition(shouldReduce, { duration: 0.5 }) as any,
+    },
+  };
 
   return (
     <div
@@ -51,9 +57,9 @@ export default function MessageReveal({
         <motion.h2
           className="font-heading text-2xl mb-8"
           style={{ color: theme.colors.text }}
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: shouldReduce ? 0 : 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={getReducedMotionTransition(shouldReduce, { duration: 0.6 })}
         >
           {title}
         </motion.h2>
@@ -73,9 +79,9 @@ export default function MessageReveal({
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: words.length * 0.08 + 0.5 }}
+          transition={getReducedMotionTransition(shouldReduce, { delay: words.length * 0.08 + 0.5 })}
         >
           <Button
             onClick={onComplete}

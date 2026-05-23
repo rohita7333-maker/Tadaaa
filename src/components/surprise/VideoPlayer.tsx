@@ -44,6 +44,7 @@ export default function VideoPlayer({ videoUrl, onComplete }: VideoPlayerProps) 
       {!playing ? (
         <motion.button
           onClick={() => setPlaying(true)}
+          aria-label="Play your surprise video"
           className="flex flex-col items-center gap-4"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

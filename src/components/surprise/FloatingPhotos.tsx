@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { getReducedMotionTransition } from "@/lib/a11y";
 
 interface FloatingPhotosProps {
   photos: { url: string; caption?: string }[];
@@ -75,6 +76,8 @@ function generatePositions(
 }
 
 export default function FloatingPhotos({ photos, screenIndex }: FloatingPhotosProps) {
+  const shouldReduce = useReducedMotion();
+
   if (photos.length === 0) return null;
 
   const { frameW, frameH, imgW, imgH } = getPhotoSize(photos.length);
@@ -106,8 +109,8 @@ export default function FloatingPhotos({ photos, screenIndex }: FloatingPhotosPr
               left: `${pos.leftPct}%`,
             }}
             animate={{ rotate: pos.rotation, opacity: 0.55 }}
-            initial={{ rotate: pos.rotation, opacity: 0, scale: 0.85 }}
-            transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" as const }}
+            initial={{ rotate: pos.rotation, opacity: shouldReduce ? 0.55 : 0, scale: shouldReduce ? 1 : 0.85 }}
+            transition={getReducedMotionTransition(shouldReduce, { duration: 0.5, delay: i * 0.08, ease: "easeOut" as const })}
           >
             <div
               className="bg-white rounded-sm"

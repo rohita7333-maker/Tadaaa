@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
+import { getReducedMotionTransition } from "@/lib/a11y";
 
 interface Photo {
   url: string;
@@ -21,6 +22,8 @@ interface PhotoCarouselProps {
 const TILTS = [-2.5, 2, -1.5, 3, -2, 1.5, -3, 2.5];
 
 export default function PhotoCarousel({ photos, theme, message = "", onComplete }: PhotoCarouselProps) {
+  const shouldReduce = useReducedMotion();
+
   // Clamp via lazy initializer so we never store an out-of-range index.
   const [current, setCurrent] = useState(() => Math.min(0, Math.max(0, photos.length - 1)));
   const [direction, setDirection] = useState(1);
@@ -108,7 +111,7 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
             dragElastic={0.15}
             onDragEnd={handleDragEnd}
             initial={{
-              x: direction > 0 ? 280 : -280,
+              x: shouldReduce ? 0 : (direction > 0 ? 280 : -280),
               rotate: direction > 0 ? 8 : -8,
               opacity: 0,
             }}
@@ -118,11 +121,11 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
               opacity: 1,
             }}
             exit={{
-              x: direction > 0 ? -280 : 280,
+              x: shouldReduce ? 0 : (direction > 0 ? -280 : 280),
               rotate: direction > 0 ? -8 : 8,
               opacity: 0,
             }}
-            transition={{ duration: 0.45, ease: "easeOut" as const }}
+            transition={getReducedMotionTransition(shouldReduce, { duration: 0.45, ease: "easeOut" as const })}
             className="cursor-grab active:cursor-grabbing select-none"
             style={{
               filter: "drop-shadow(0 12px 32px rgba(45,41,38,0.22))",
@@ -197,11 +200,12 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
       {isLast && (
         <motion.button
           onClick={goNext}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: shouldReduce ? 0 : 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={getReducedMotionTransition(shouldReduce, { delay: 0.5 })}
           className="absolute bottom-8 left-0 right-0 mx-auto w-fit px-8 py-3 rounded-full text-white text-sm font-medium shadow-lg"
           style={{ background: theme.colors.accent }}
+          aria-label="Continue to next section"
         >
           Continue ✨
         </motion.button>
@@ -214,7 +218,7 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
           style={{ color: theme.colors.text }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.5 }}
-          transition={{ delay: 1.5 }}
+          transition={getReducedMotionTransition(shouldReduce, { delay: 1.5 })}
         >
           Swipe to flip through ✦
         </motion.p>

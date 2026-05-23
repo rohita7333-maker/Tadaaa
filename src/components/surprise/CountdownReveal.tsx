@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
+import { getReducedMotionTransition } from "@/lib/a11y";
 import PolaroidScroll from "./PolaroidScroll";
 import MessageReveal from "./MessageReveal";
 import RSVPButton from "./RSVPButton";
@@ -77,6 +79,8 @@ export default function CountdownReveal({
     return () => clearInterval(interval);
   }, [stage, target, videoUrl]);
 
+  const shouldReduce = useReducedMotion();
+
   const units = [
     { label: "days", value: timeLeft.days },
     { label: "hours", value: timeLeft.hours },
@@ -138,30 +142,32 @@ export default function CountdownReveal({
       className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden"
       style={{ background: theme.colors.background }}
     >
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 rounded-full opacity-30"
-            style={{
-              backgroundColor: theme.colors.accent,
-              left: `${10 + i * 11}%`,
-              top: `${15 + (i % 4) * 20}%`,
-            }}
-            animate={{ y: [-10, 10, -10], scale: [1, 1.3, 1] }}
-            transition={{ duration: 3 + i, repeat: Infinity, delay: i * 0.4 }}
-          />
-        ))}
-      </div>
+      {/* Floating particles — hidden when reduced-motion is preferred */}
+      {!shouldReduce && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 rounded-full opacity-30"
+              style={{
+                backgroundColor: theme.colors.accent,
+                left: `${10 + i * 11}%`,
+                top: `${15 + (i % 4) * 20}%`,
+              }}
+              animate={{ y: [-10, 10, -10], scale: [1, 1.3, 1] }}
+              transition={{ duration: 3 + i, repeat: Infinity, delay: i * 0.4 }}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="relative z-10 text-center">
         <motion.p
           className="text-sm font-medium mb-4 opacity-60"
           style={{ color: theme.colors.text }}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
           animate={{ opacity: 0.6, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={getReducedMotionTransition(shouldReduce, { delay: 0.2 })}
         >
           Something special is coming…
         </motion.p>
@@ -169,9 +175,9 @@ export default function CountdownReveal({
         <motion.h1
           className="font-heading text-3xl mb-12"
           style={{ color: theme.colors.text }}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={getReducedMotionTransition(shouldReduce, { delay: 0.4 })}
         >
           {title}
         </motion.h1>
@@ -182,9 +188,9 @@ export default function CountdownReveal({
             <motion.div
               key={unit.label}
               className="flex flex-col items-center"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: shouldReduce ? 0 : 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 + i * 0.1 }}
+              transition={getReducedMotionTransition(shouldReduce, { delay: 0.5 + i * 0.1 })}
             >
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center mb-1 shadow-[0_4px_16px_rgba(0,0,0,0.15)]"
@@ -209,7 +215,7 @@ export default function CountdownReveal({
           style={{ color: theme.colors.text }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.5 }}
-          transition={{ delay: 1 }}
+          transition={getReducedMotionTransition(shouldReduce, { delay: 1 })}
         >
           Come back when the timer runs out ✨
         </motion.p>

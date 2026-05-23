@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { type Theme } from "@/lib/themes";
+import { getReducedMotionTransition } from "@/lib/a11y";
 
 interface Photo {
   url: string;
@@ -86,6 +88,8 @@ export default function PolaroidScroll({
     return () => observers.forEach((o) => o.disconnect());
   }, [photos]);
 
+  const shouldReduce = useReducedMotion();
+
   if (photos.length === 0 && notes.length === 0) return null;
 
   const textColor = theme.colors.text;
@@ -117,9 +121,9 @@ export default function PolaroidScroll({
       {/* Title */}
       <motion.div
         className="text-center px-8 pt-12 pb-6"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.2 }}
+        transition={getReducedMotionTransition(shouldReduce, { duration: 0.7, delay: 0.2 })}
       >
         <h1
           className="text-3xl leading-snug font-heading"
@@ -129,8 +133,8 @@ export default function PolaroidScroll({
         </h1>
         <motion.div
           className="flex justify-center mt-6"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+          animate={shouldReduce ? {} : { y: [0, 8, 0] }}
+          transition={getReducedMotionTransition(shouldReduce, { duration: 1.5, repeat: Infinity })}
         >
           <ChevronDown
             className="w-6 h-6 opacity-40"
@@ -155,14 +159,14 @@ export default function PolaroidScroll({
               }}
             >
               <motion.div
-                initial={{ opacity: 0, y: 40, rotate: tilt }}
+                initial={{ opacity: 0, y: shouldReduce ? 0 : 40, rotate: tilt }}
                 animate={
                   visibleCount > idx
                     ? { opacity: 1, y: 0, rotate: tilt }
-                    : { opacity: 0, y: 40, rotate: tilt }
+                    : { opacity: 0, y: shouldReduce ? 0 : 40, rotate: tilt }
                 }
-                transition={{ duration: 0.6, ease: "easeOut", delay: 0.08 }}
-                whileHover={{ rotate: 0, scale: 1.02 }}
+                transition={getReducedMotionTransition(shouldReduce, { duration: 0.6, ease: "easeOut", delay: 0.08 })}
+                whileHover={shouldReduce ? {} : { rotate: 0, scale: 1.02 }}
                 className="cursor-default"
                 style={{
                   filter: "drop-shadow(0 12px 28px rgba(45,41,38,0.18))",
@@ -231,9 +235,9 @@ export default function PolaroidScroll({
             {notes.map((note, idx) => (
               <motion.div
                 key={`note-${idx}`}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.05 * idx }}
+                transition={getReducedMotionTransition(shouldReduce, { duration: 0.5, delay: 0.05 * idx })}
                 className="bg-white rounded-2xl p-5 shadow-[0_6px_18px_rgba(45,41,38,0.10)] border border-[#D4CBC3]/40"
               >
                 <p
@@ -257,9 +261,9 @@ export default function PolaroidScroll({
         {/* CTA sentinel */}
         <div ref={ctaRef} className="pt-4 pb-16 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={allSeen ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
+            animate={allSeen ? { opacity: 1, y: 0 } : { opacity: 0, y: shouldReduce ? 0 : 20 }}
+            transition={getReducedMotionTransition(shouldReduce, { duration: 0.6 })}
           >
             <p
               className="mb-6 opacity-70"
@@ -273,6 +277,7 @@ export default function PolaroidScroll({
             </p>
             <button
               onClick={onComplete}
+              aria-label="Continue to the next part of the surprise"
               className="h-14 px-10 rounded-full text-white text-base font-medium shadow-lg pulse-glow"
               style={{ background: accentColor }}
             >
@@ -284,8 +289,8 @@ export default function PolaroidScroll({
             <motion.p
               className="text-xs opacity-40 mt-8"
               style={{ color: mutedColor }}
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              animate={shouldReduce ? {} : { opacity: [0.3, 0.6, 0.3] }}
+              transition={getReducedMotionTransition(shouldReduce, { duration: 2, repeat: Infinity })}
             >
               Keep scrolling ↓
             </motion.p>

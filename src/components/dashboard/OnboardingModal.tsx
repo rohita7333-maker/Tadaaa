@@ -135,6 +135,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
             <div className="px-6 pt-6 pb-6 flex items-center justify-between">
               <button
                 onClick={dismiss}
+                aria-label="Skip onboarding for now"
                 className="text-xs text-[#6B5E57] hover:text-[#2D2926] underline underline-offset-2"
               >
                 Skip for now
@@ -155,6 +156,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
               ) : (
                 <button
                   onClick={() => setStep((s) => Math.min(steps.length - 1, s + 1))}
+                  aria-label={`Go to step ${step + 2} of ${steps.length}`}
                   className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all shadow-md shadow-[#C4686D]/25"
                 >
                   Keep going

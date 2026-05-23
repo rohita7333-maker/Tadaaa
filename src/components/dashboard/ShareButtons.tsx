@@ -143,6 +143,7 @@ export default function ShareButtons({
         {/* Native share / copy */}
         <button
           onClick={handleShare}
+          aria-label="Share invite link"
           className={`flex items-center justify-center gap-1.5 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 ${!inviteId ? "col-span-2" : ""}`}
           style={{ background: "linear-gradient(135deg, #C4686D 0%, #9B3D42 100%)" }}
         >
@@ -167,6 +168,8 @@ export default function ShareButtons({
         <Button
           onClick={() => setShowQR((v) => !v)}
           variant="outline"
+          aria-label={showQR ? "Hide QR code" : "Show QR code"}
+          aria-expanded={showQR}
           className={`h-11 rounded-full border-[#D4CBC3] text-sm transition-all duration-200 ${
             showQR ? "bg-[#FFF0EE] border-[#C4686D] text-[#C4686D]" : "text-[#2D2926] hover:bg-[#FFF8F0]"
           }`}
@@ -228,6 +231,7 @@ export default function ShareButtons({
             <Button
               type="button"
               variant="outline"
+              aria-label="Copy contribute link"
               onClick={async () => {
                 await navigator.clipboard.writeText(contributeUrl);
                 setContributeCopied(true);

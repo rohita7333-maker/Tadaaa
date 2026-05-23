@@ -66,6 +66,7 @@ export default function ReportButton({ inviteId }: ReportButtonProps) {
                 </p>
                 <button
                   onClick={() => setOpen(false)}
+                  aria-label="Close report confirmation"
                   className="h-10 px-6 rounded-full bg-[#F5EDE3] text-[#6B5E57] text-sm"
                 >
                   Close
@@ -114,6 +115,7 @@ export default function ReportButton({ inviteId }: ReportButtonProps) {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setOpen(false)}
+                    aria-label="Cancel report"
                     className="flex-1 h-11 rounded-full border border-[#D4CBC3] text-[#6B5E57] text-sm hover:bg-[#FFF0E8] transition-colors"
                   >
                     Cancel

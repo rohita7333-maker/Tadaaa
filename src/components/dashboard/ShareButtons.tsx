@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check, Share2, QrCode, Users } from "lucide-react";
+import { Copy, Check, Share2, QrCode, Users, Video, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { APP_URL } from "@/lib/constants";
+import { handleVideoShare } from "@/lib/video-share";
 
 interface ShareButtonsProps {
   slug: string;
@@ -45,6 +46,7 @@ export default function ShareButtons({
   const [copied, setCopied] = useState(false);
   const [contributeCopied, setContributeCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [videoSharing, setVideoSharing] = useState(false);
 
   const url = `${APP_URL}/surprise/${slug}`;
   const contributeUrl = `${APP_URL}/contribute/${slug}`;
@@ -79,16 +81,35 @@ export default function ShareButtons({
     handleCopy();
   }
 
+  async function handleVideoShareClick() {
+    if (!inviteId) return;
+    setVideoSharing(true);
+    try {
+      const result = await handleVideoShare({ inviteId, title, capture });
+      if (result.outcome === "rendering") {
+        toast.info(result.message);
+      } else if (result.outcome === "error") {
+        toast.error(result.message);
+      } else {
+        // "shared" or "downloaded" — positive feedback
+        toast.success(result.message);
+      }
+    } finally {
+      setVideoSharing(false);
+    }
+  }
+
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
+      {/* Row 1: primary share actions — 3 cols */}
+      <div className="grid grid-cols-3 gap-2">
         {/* WhatsApp */}
         <a
           href={waHref}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackShare("whatsapp")}
-          className="flex items-center justify-center gap-2 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95"
+          className="flex items-center justify-center gap-1.5 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95"
           style={{ background: "#25D366" }}
         >
           {/* WhatsApp icon */}
@@ -99,16 +120,37 @@ export default function ShareButtons({
           WhatsApp
         </a>
 
+        {/* Share Video — only shown when inviteId available */}
+        {inviteId ? (
+          <button
+            onClick={handleVideoShareClick}
+            disabled={videoSharing}
+            aria-label="Share video"
+            className="flex items-center justify-center gap-1.5 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ background: "linear-gradient(135deg, #D4868A 0%, #C4686D 100%)" }}
+          >
+            {videoSharing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Video className="w-4 h-4" />
+            )}
+            {videoSharing ? "…" : "Video"}
+          </button>
+        ) : null}
+
         {/* Native share / copy */}
         <button
           onClick={handleShare}
-          className="flex items-center justify-center gap-2 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95"
+          className={`flex items-center justify-center gap-1.5 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 ${!inviteId ? "col-span-2" : ""}`}
           style={{ background: "linear-gradient(135deg, #C4686D 0%, #9B3D42 100%)" }}
         >
           <Share2 className="w-4 h-4" />
           Share
         </button>
+      </div>
 
+      {/* Row 2: utility actions — 2 cols */}
+      <div className="grid grid-cols-2 gap-2">
         {/* Copy link */}
         <Button
           onClick={handleCopy}

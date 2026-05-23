@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { weeklyDigestEmail } from "@/lib/email/templates";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
+import { safeBearerCheck } from "@/lib/cron-auth";
 
 const BATCH_SIZE = 25;
 
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 500 });
   }
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (!safeBearerCheck(authHeader, cronSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -60,6 +61,15 @@ export async function GET(request: NextRequest) {
         .eq("invites.creator_id", profileId)
         .gte("answered_at", since),
     ]);
+
+    if (invitesRes.error || viewsRes.error || answersRes.error) {
+      console.error(
+        "[weekly-digest] supabase error for user",
+        profileId,
+        invitesRes.error ?? viewsRes.error ?? answersRes.error
+      );
+      return "failed";
+    }
 
     const inviteCount = invitesRes.count ?? 0;
     const viewCount = viewsRes.count ?? 0;

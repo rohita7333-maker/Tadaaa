@@ -262,4 +262,135 @@ describe("GET /api/cron/weekly-digest", () => {
     const body = await res.json();
     expect(body.sent).toBe(0);
   });
+
+  // ── Fix 1: timing-safe auth ───────────────────────────────────────────────
+  it("rejects a token that is a prefix of the real token", async () => {
+    // "Bearer test-cron-secre" is shorter than "Bearer test-cron-secret"
+    const res = await GET(makeRequest("Bearer test-cron-secre"));
+    expect(res.status).toBe(401);
+  });
+
+  it("rejects a token that has the correct content but extra padding", async () => {
+    const res = await GET(makeRequest("Bearer test-cron-secret-extra"));
+    expect(res.status).toBe(401);
+  });
+
+  it("accepts the exact correct Bearer token", async () => {
+    const res = await GET(makeRequest("Bearer test-cron-secret"));
+    // No profiles in default mock, so 200 with zeros is the expected success path.
+    expect(res.status).toBe(200);
+  });
+
+  // ── Fix 2: surface Supabase errors as "failed" ────────────────────────────
+  it("counts user as failed when invites query returns a Supabase error", async () => {
+    const profiles = [{ id: "user-db-error" }];
+
+    mockSupabaseChain.from.mockImplementation((table: string) => {
+      if (table === "profiles") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+          }),
+        };
+      }
+      if (table === "invites") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              gte: vi.fn().mockResolvedValue({ count: null, error: { message: "db error" } }),
+            }),
+          }),
+        };
+      }
+      // Other tables return normally
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            gte: vi.fn().mockResolvedValue({ count: 0, error: null }),
+          }),
+        }),
+      };
+    });
+
+    const res = await GET(makeRequest("Bearer test-cron-secret"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.failed).toBe(1);
+    expect(body.sent).toBe(0);
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("counts user as failed when invite_views query returns a Supabase error", async () => {
+    const profiles = [{ id: "user-views-error" }];
+
+    mockSupabaseChain.from.mockImplementation((table: string) => {
+      if (table === "profiles") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+          }),
+        };
+      }
+      if (table === "invite_views") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              gte: vi.fn().mockResolvedValue({ count: null, error: { message: "views error" } }),
+            }),
+          }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            gte: vi.fn().mockResolvedValue({ count: 1, error: null }),
+          }),
+        }),
+      };
+    });
+
+    const res = await GET(makeRequest("Bearer test-cron-secret"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.failed).toBe(1);
+    expect(body.sent).toBe(0);
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("counts user as failed when invite_answers query returns a Supabase error", async () => {
+    const profiles = [{ id: "user-answers-error" }];
+
+    mockSupabaseChain.from.mockImplementation((table: string) => {
+      if (table === "profiles") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+          }),
+        };
+      }
+      if (table === "invite_answers") {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              gte: vi.fn().mockResolvedValue({ count: null, error: { message: "answers error" } }),
+            }),
+          }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            gte: vi.fn().mockResolvedValue({ count: 1, error: null }),
+          }),
+        }),
+      };
+    });
+
+    const res = await GET(makeRequest("Bearer test-cron-secret"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.failed).toBe(1);
+    expect(body.sent).toBe(0);
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
 });

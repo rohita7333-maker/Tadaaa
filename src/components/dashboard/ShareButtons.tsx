@@ -100,7 +100,7 @@ export default function ShareButtons({
   async function handleShare() {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title: shareText, url });
+        await navigator.share({ title, text: shareText, url });
         trackShare("native");
         return;
       } catch {

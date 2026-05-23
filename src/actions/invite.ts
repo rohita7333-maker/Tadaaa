@@ -379,7 +379,10 @@ async function _getInviteBySlugImpl(slug: string) {
   const photoTtl = (invite as { is_paid?: boolean }).is_paid
     ? SIGNED_URL_EXPIRY_PAID
     : SIGNED_URL_EXPIRY_FREE;
-  const signedPhotos = await signPhotoList(STORAGE_BUCKET, photos, photoTtl);
+  const signedPhotos = await signPhotoList(STORAGE_BUCKET, photos, photoTtl, {
+    inviteId: invite.id,
+    inviteSlug: slug,
+  });
 
   const questions = (
     invite.invite_questions as {
@@ -399,7 +402,10 @@ async function _getInviteBySlugImpl(slug: string) {
   let videoUrl: string | null = null;
   const videoStoragePath = (invite as { video_storage_path?: string }).video_storage_path;
   if ((invite as { video_status?: string }).video_status === "ready" && videoStoragePath) {
-    videoUrl = await signStorageUrl("moment-photos", videoStoragePath, 60 * 60 * 24);
+    videoUrl = await signStorageUrl("moment-photos", videoStoragePath, 60 * 60 * 24, {
+      inviteId: invite.id,
+      inviteSlug: slug,
+    });
   }
 
   // Fetch approved contributions (Task B2 — collaborative memory invites).
@@ -427,7 +433,10 @@ async function _getInviteBySlugImpl(slug: string) {
         if (r.photo_url) {
           const path = extractBucketPath(STORAGE_BUCKET, r.photo_url);
           if (path) {
-            freshPhotoUrl = await signStorageUrl(STORAGE_BUCKET, path, SIGNED_URL_TTL_SECONDS);
+            freshPhotoUrl = await signStorageUrl(STORAGE_BUCKET, path, SIGNED_URL_TTL_SECONDS, {
+              inviteId: invite.id,
+              inviteSlug: slug,
+            });
             // On signing failure, omit the photo rather than serve a stale URL
             if (!freshPhotoUrl) freshPhotoUrl = null;
           }

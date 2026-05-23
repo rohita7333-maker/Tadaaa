@@ -20,12 +20,20 @@ import { createAdminClient } from "@/lib/supabase/server";
 const STORAGE_PATH_RE =
   /\/storage\/v1\/object\/(?:sign|public)\/([^/?]+)\/(.+?)(?:\?.*)?$/;
 
+// Derived once at module load — used to reject SSRF attempts where a crafted
+// URL has the /storage/v1/object/sign/<bucket>/ pathname but points to an
+// attacker-controlled host. Falls back to SUPABASE_URL for server-only callers
+// that don't have access to the public env.
+const _supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "";
+const SUPABASE_HOST = _supabaseUrl ? new URL(_supabaseUrl).hostname : "";
+
 /**
  * Extract the bucket-relative storage path from a Supabase storage URL.
  *
  * Returns null when:
  *   - the input is not a valid URL (e.g. already a bare path)
- *   - the URL is from a different domain (external image)
+ *   - the URL hostname does not match the configured Supabase project (SSRF guard)
  *   - the URL belongs to a different bucket
  */
 export function extractBucketPath(
@@ -42,6 +50,11 @@ export function extractBucketPath(
     return null;
   }
 
+  // SSRF guard: reject any URL whose hostname is not our Supabase project.
+  // When SUPABASE_HOST is empty (env not configured in test/CI) we skip the
+  // check rather than blocking all URLs — the bucket/path check still applies.
+  if (SUPABASE_HOST && url.hostname !== SUPABASE_HOST) return null;
+
   const match = STORAGE_PATH_RE.exec(url.pathname);
   if (!match) return null;
 
@@ -51,14 +64,23 @@ export function extractBucketPath(
   return decodeURIComponent(filePath);
 }
 
+export interface SignContext {
+  inviteId?: string;
+  inviteSlug?: string;
+}
+
 /**
  * Sign a single storage path, returning the signed URL string or null on
  * failure. Never throws.
+ *
+ * Pass an optional `context` to include invite_id / invite slug in error logs,
+ * making Sentry/CloudWatch traces actionable without scrubbing PII.
  */
 export async function signStorageUrl(
   bucket: string,
   path: string,
-  ttlSeconds: number
+  ttlSeconds: number,
+  context?: SignContext
 ): Promise<string | null> {
   try {
     const admin = createAdminClient();
@@ -70,14 +92,14 @@ export async function signStorageUrl(
       console.error(
         "[sign-storage] createSignedUrl failed:",
         error?.message ?? "no URL returned",
-        { bucket, path }
+        { bucket, path, ...context }
       );
       return null;
     }
 
     return data.signedUrl;
   } catch (err) {
-    console.error("[sign-storage] createSignedUrl threw:", err, { bucket, path });
+    console.error("[sign-storage] createSignedUrl threw:", err, { bucket, path, ...context });
     return null;
   }
 }
@@ -97,17 +119,20 @@ export interface SignedPhoto extends PhotoRecord {
 /**
  * Sign an array of photo records in parallel using Promise.allSettled.
  * Photos that fail to sign are omitted (not replaced with broken-image URLs).
+ *
+ * Pass an optional `context` to include invite_id in any per-photo error logs.
  */
 export async function signPhotoList(
   bucket: string,
   photos: PhotoRecord[],
-  ttlSeconds: number
+  ttlSeconds: number,
+  context?: SignContext
 ): Promise<SignedPhoto[]> {
   if (photos.length === 0) return [];
 
   const results = await Promise.allSettled(
     photos.map(async (photo) => {
-      const signedUrl = await signStorageUrl(bucket, photo.storage_path, ttlSeconds);
+      const signedUrl = await signStorageUrl(bucket, photo.storage_path, ttlSeconds, context);
       if (!signedUrl) throw new Error(`Failed to sign ${photo.storage_path}`);
       return { ...photo, url: signedUrl } as SignedPhoto;
     })

@@ -65,8 +65,11 @@ export default async function GiftRedeemPage({ searchParams }: GiftRedeemPagePro
     redirect(`/auth/signup?next=${next}`);
   }
 
-  // User is logged in — mark gift as redeemed
-  await adminSupabase
+  // User is logged in — atomically mark gift as redeemed.
+  // Using .eq("status", "pending") on the UPDATE (not just the SELECT) closes
+  // the TOCTOU window: if a concurrent request redeemed it between our SELECT
+  // and this UPDATE, count will be 0 and we show the already-redeemed message.
+  const { data: updatedRows } = await adminSupabase
     .from("gift_purchases")
     .update({
       status: "redeemed",
@@ -74,7 +77,13 @@ export default async function GiftRedeemPage({ searchParams }: GiftRedeemPagePro
       redeemed_at: new Date().toISOString(),
     })
     .eq("id", gift.id)
-    .eq("status", "pending"); // double-check idempotency
+    .eq("status", "pending") // atomic guard — only succeeds if still pending
+    .select("id");
+
+  if (!updatedRows || updatedRows.length !== 1) {
+    // Another request redeemed this gift in the race window.
+    return <InvalidToken reason="This gift has already been redeemed." />;
+  }
 
   // Redirect to /create with gift_id so the create flow can bypass tier check
   redirect(`/create?gift=${gift.id}`);

@@ -3,6 +3,7 @@ import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { PREMIUM_THEME_PRICE, APP_URL } from "@/lib/constants";
 import { giftCheckoutSchema } from "@/lib/schemas";
+import { rateLimit, getIp } from "@/lib/rate-limit";
 
 const UNLIMITED_PRICE_YEARLY = 1999; // $19.99 in cents
 const PLUS_PRICE_PER_INVITE = Math.round(PREMIUM_THEME_PRICE * 100); // $4.99
@@ -18,6 +19,14 @@ export async function POST(request: NextRequest) {
 
   // ── Gift checkout: no auth required ──────────────────────────────────────
   if (mode === "gift") {
+    const ip = getIp(request.headers);
+    if (!(await rateLimit(`gift-checkout:${ip}`, 5, 60_000))) {
+      return NextResponse.json(
+        { error: "Too many gift checkout attempts. Please wait a minute and try again." },
+        { status: 429 }
+      );
+    }
+
     const parsed = giftCheckoutSchema.safeParse(body);
     if (!parsed.success) {
       const firstIssue = parsed.error.issues?.[0]?.message ?? "Invalid input";

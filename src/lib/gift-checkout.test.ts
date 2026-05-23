@@ -1,5 +1,5 @@
 /**
- * Tests for D2: $5 gift checkout
+ * Tests for D2: $5 gift checkout + D2 fixes (C1, C2, I1, I2)
  *
  * Covers:
  * 1. giftCheckoutSchema — Zod validation
@@ -7,8 +7,13 @@
  * 3. Webhook handler   — gift mode creates gift_purchases row + sends email
  * 4. Webhook handler   — idempotent replay returns 200, no duplicate insert
  * 5. Webhook handler   — bad signature → 400
- * 6. Checkout route    — gift mode → returns Stripe URL
- * 7. Checkout route    — rejects self-gift
+ * 6. Webhook handler   — email failure still returns 200
+ * 7. [C1] Webhook handler — DB insert error returns 500 (triggers Stripe retry)
+ * 8. [I2] Webhook handler — audit log uses recipient_domain, NOT recipient_email
+ * 9. Checkout route    — gift mode → returns Stripe URL
+ * 10. Checkout route    — rejects self-gift
+ * 11. Checkout route    — rejects invalid recipient email
+ * 12. [C2] Checkout route — 6th request within 1 min returns 429
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -114,7 +119,7 @@ describe("giftInviteEmail", () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-// 3–5. Webhook handler unit tests
+// 3–8. Webhook handler unit tests
 // ────────────────────────────────────────────────────────────────────────────
 
 // We need to mock: stripe, supabase/server, email/send, audit
@@ -133,15 +138,21 @@ vi.mock("@/lib/stripe", () => ({
 
 // Track what gets inserted into gift_purchases
 const giftInserts: unknown[] = [];
-const giftInsertMock = vi.fn((...args: unknown[]) => {
-  giftInserts.push(args[0]);
-  // Return chainable object for .select().single()
+
+// Controls what the insert mock returns — can be overridden per test.
+// Default: success with a new row (simulates first delivery).
+let giftInsertResult: { data: unknown; error: unknown } = {
+  data: { redeem_token: "token-abc-123", id: "gift-id-001" },
+  error: null,
+};
+
+const giftInsertMock = vi.fn((row: unknown) => {
+  giftInserts.push(row);
+  const result = giftInsertResult;
+  // Return chainable object matching .select().maybeSingle()
   return {
     select: vi.fn().mockReturnValue({
-      single: vi.fn().mockResolvedValue({
-        data: { redeem_token: "token-abc-123", id: "gift-id-001" },
-        error: null,
-      }),
+      maybeSingle: vi.fn().mockResolvedValue(result),
     }),
   };
 });
@@ -187,8 +198,16 @@ vi.mock("@/lib/email/send", () => ({
   sendEmail: sendEmailMock,
 }));
 
+const logAuditMock = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/audit", () => ({
-  logAudit: vi.fn().mockResolvedValue(undefined),
+  logAudit: logAuditMock,
+}));
+
+// Rate limit: allow by default (can be overridden)
+let rateLimitAllow = true;
+vi.mock("@/lib/rate-limit", () => ({
+  rateLimit: vi.fn(async () => rateLimitAllow),
+  getIp: vi.fn(() => "1.2.3.4"),
 }));
 
 import { stripe } from "@/lib/stripe";
@@ -239,6 +258,11 @@ describe("webhook — gift mode", () => {
     vi.clearAllMocks();
     giftInserts.length = 0;
     claimCount = 0;
+    rateLimitAllow = true;
+    giftInsertResult = {
+      data: { redeem_token: "token-abc-123", id: "gift-id-001" },
+      error: null,
+    };
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
     process.env.STRIPE_GIFT_PRICE_ID = "price_gift_test";
     process.env.NEXT_PUBLIC_APP_URL = "https://tadaaaa.app";
@@ -274,15 +298,18 @@ describe("webhook — gift mode", () => {
     // First call succeeds
     await callWebhook(JSON.stringify(event), "sig_ok");
 
-    // Reset giftInsertMock count but keep claimCount incrementing
+    // Simulate duplicate delivery: insert returns null (ON CONFLICT DO NOTHING)
+    giftInsertResult = { data: null, error: null };
+    // Clear mocks so we can assert cleanly on the second call only
     giftInsertMock.mockClear();
+    sendEmailMock.mockClear();
 
     // Second call should be treated as duplicate
     const res2 = await callWebhook(JSON.stringify(event), "sig_ok");
     expect(res2.status).toBe(200);
 
-    // No second insert
-    expect(giftInsertMock).not.toHaveBeenCalled();
+    // Insert was attempted (DB handles dedup via unique constraint), but email must NOT be sent again
+    expect(sendEmailMock).not.toHaveBeenCalled();
   });
 
   it("returns 400 when stripe signature is invalid", async () => {
@@ -306,15 +333,52 @@ describe("webhook — gift mode", () => {
     // Row still inserted despite email failure
     expect(giftInsertMock).toHaveBeenCalledTimes(1);
   });
+
+  // C1: DB insert failure must return 500 so Stripe retries
+  it("[C1] returns 500 when gift_purchases DB insert fails, enabling Stripe retry", async () => {
+    const session = makeGiftSession();
+    const event = makeStripeEvent(session);
+    vi.mocked(stripe.webhooks.constructEvent).mockReturnValue(event);
+
+    // Simulate a real DB error (not a conflict — those return data:null, error:null)
+    giftInsertResult = {
+      data: null,
+      error: { message: "connection refused", code: "08006" },
+    };
+
+    const res = await callWebhook(JSON.stringify(event), "sig_ok");
+    expect(res.status).toBe(500);
+
+    // No email should be sent when insert fails
+    expect(sendEmailMock).not.toHaveBeenCalled();
+  });
+
+  // I2: Audit log must not contain PII (full email), only the domain
+  it("[I2] audit log contains recipient_domain, not recipient_email", async () => {
+    const session = makeGiftSession();
+    const event = makeStripeEvent(session);
+    vi.mocked(stripe.webhooks.constructEvent).mockReturnValue(event);
+
+    await callWebhook(JSON.stringify(event), "sig_ok");
+
+    // Wait for fire-and-forget audit to flush
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(logAuditMock).toHaveBeenCalledTimes(1);
+    const auditCall = logAuditMock.mock.calls[0][0] as { meta: Record<string, unknown> };
+    expect(auditCall.meta).not.toHaveProperty("recipient_email");
+    expect(auditCall.meta).toHaveProperty("recipient_domain", "example.com");
+  });
 });
 
 // ────────────────────────────────────────────────────────────────────────────
-// 6–7. Checkout route unit tests
+// 9–12. Checkout route unit tests
 // ────────────────────────────────────────────────────────────────────────────
 
 describe("checkout route — gift mode", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    rateLimitAllow = true;
     process.env.STRIPE_GIFT_PRICE_ID = "price_gift_test";
     process.env.NEXT_PUBLIC_APP_URL = "https://tadaaaa.app";
   });
@@ -388,5 +452,20 @@ describe("checkout route — gift mode", () => {
       gift_recipient_email: "not-valid",
     });
     expect(res.status).toBe(400);
+  });
+
+  // C2: 6th gift checkout in <1 min from same IP must return 429
+  it("[C2] returns 429 when rate limit exceeded (6th request in 1 min)", async () => {
+    // Simulate rate limit being exceeded
+    rateLimitAllow = false;
+
+    const res = await callCheckout({
+      mode: "gift",
+      gift_recipient_email: "bob@example.com",
+    });
+
+    expect(res.status).toBe(429);
+    const json = await res.json() as { error: string };
+    expect(json.error).toMatch(/too many/i);
   });
 });

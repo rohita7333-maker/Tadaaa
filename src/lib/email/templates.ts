@@ -143,6 +143,63 @@ export function monthlyReengagementEmail(
   };
 }
 
+export function weeklyDigestEmail(opts: {
+  name: string;
+  inviteCount: number;
+  viewCount: number;
+  rsvpCount: number;
+  unsubscribeUrl: string;
+}) {
+  const { name, inviteCount, viewCount, rsvpCount } = opts;
+  const memoriesLabel = inviteCount === 1 ? "memory" : "memories";
+  return {
+    subject: `Your TaDaaaa week — ${inviteCount} ${memoriesLabel} made 💌`,
+    html: layout(
+      `
+      <h1 style="margin:0 0 8px;font-size:22px;color:${BRAND.text}">Your week in surprises</h1>
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6">
+        Hey ${esc(name)}, here's what happened with your TaDaaaa surprises over the past 7 days:
+      </p>
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td align="center" style="background:${BRAND.bg};border-radius:16px;padding:20px;width:33%">
+            <p style="margin:0;font-size:28px;font-weight:800;color:${BRAND.accent}">${inviteCount}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:${BRAND.muted}">New Surprises</p>
+          </td>
+          <td width="8"></td>
+          <td align="center" style="background:${BRAND.bg};border-radius:16px;padding:20px;width:33%">
+            <p style="margin:0;font-size:28px;font-weight:800;color:${BRAND.gold}">${viewCount}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:${BRAND.muted}">Views</p>
+          </td>
+          <td width="8"></td>
+          <td align="center" style="background:${BRAND.bg};border-radius:16px;padding:20px;width:33%">
+            <p style="margin:0;font-size:28px;font-weight:800;color:#5aaa69">${rsvpCount}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:${BRAND.muted}">RSVPs</p>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:24px 0 0;font-size:15px;color:${BRAND.muted};line-height:1.6">
+        Keep the magic going — create another surprise for someone special this week!
+      </p>
+      ${button("Create a Surprise", `${process.env.NEXT_PUBLIC_SITE_URL || "https://tadaaaa.app"}/create`)}
+    `,
+      `Your TaDaaaa week — ${inviteCount} ${memoriesLabel} made`,
+      opts.unsubscribeUrl
+    ),
+    text: [
+      `Hey ${name}, here's your TaDaaaa weekly digest:`,
+      ``,
+      `  New Surprises: ${inviteCount}`,
+      `  Views: ${viewCount}`,
+      `  RSVPs: ${rsvpCount}`,
+      ``,
+      `Keep the magic going at ${process.env.NEXT_PUBLIC_SITE_URL || "https://tadaaaa.app"}/create`,
+      ``,
+      `Unsubscribe: ${opts.unsubscribeUrl}`,
+    ].join("\n"),
+  };
+}
+
 export function welcomeEmail(userName: string, createUrl: string) {
   return {
     subject: "Welcome to TaDaaaa! 🎉",

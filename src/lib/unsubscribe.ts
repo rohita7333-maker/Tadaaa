@@ -16,7 +16,7 @@ function sign(userId: string, listKey: string): string {
 export function unsubscribeUrl(
   baseUrl: string,
   userId: string,
-  listKey: "monthly" | "view" | "answer"
+  listKey: "monthly" | "weekly" | "view" | "answer"
 ): string {
   const token = sign(userId, listKey);
   const url = new URL(`${baseUrl}/api/unsubscribe`);

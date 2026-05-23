@@ -4,7 +4,14 @@ import { cache } from "react";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { createInviteSchema, inviteQuestionsSchema } from "@/lib/schemas";
 import { generateInviteSlug } from "@/lib/utils";
-import { STORAGE_BUCKET, FREE_INVITE_MONTHLY_LIMIT } from "@/lib/constants";
+import {
+  STORAGE_BUCKET,
+  FREE_INVITE_MONTHLY_LIMIT,
+  SIGNED_URL_EXPIRY_FREE,
+  SIGNED_URL_EXPIRY_PAID,
+  SIGNED_URL_TTL_SECONDS,
+} from "@/lib/constants";
+import { signPhotoList, signStorageUrl, extractBucketPath } from "@/lib/sign-storage";
 import { getThemeById } from "@/lib/themes";
 import { trackServer } from "@/lib/analytics";
 import { scanImage } from "@/lib/moderation";
@@ -366,17 +373,13 @@ async function _getInviteBySlugImpl(slug: string) {
   ) || [];
   photos.sort((a, b) => a.sort_order - b.sort_order);
 
-  const signedPhotos = await Promise.all(
-    photos.map(async (p) => {
-      const { data } = await adminClient.storage
-        .from(STORAGE_BUCKET)
-        .createSignedUrl(
-          p.storage_path,
-          invite.is_paid ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7
-        );
-      return { ...p, url: data?.signedUrl || "" };
-    })
-  );
+  // Sign photos using Promise.allSettled so one bad photo never aborts the
+  // page. TTL is tier-aware: paid invites get 30-day links, free get 7-day.
+  // React.cache() on the outer wrapper means this runs once per request.
+  const photoTtl = (invite as { is_paid?: boolean }).is_paid
+    ? SIGNED_URL_EXPIRY_PAID
+    : SIGNED_URL_EXPIRY_FREE;
+  const signedPhotos = await signPhotoList(STORAGE_BUCKET, photos, photoTtl);
 
   const questions = (
     invite.invite_questions as {
@@ -391,13 +394,12 @@ async function _getInviteBySlugImpl(slug: string) {
   ) || [];
   questions.sort((a, b) => a.sort_order - b.sort_order);
 
-  // Generate video URL if ready
+  // Generate video URL if ready. Video lives in the moment-photos bucket;
+  // 24h TTL is generous for a single page session.
   let videoUrl: string | null = null;
-  if ((invite as { video_status?: string }).video_status === "ready" && (invite as { video_storage_path?: string }).video_storage_path) {
-    const { data: videoData } = await adminClient.storage
-      .from("moment-photos")
-      .createSignedUrl((invite as { video_storage_path: string }).video_storage_path, 60 * 60 * 24);
-    videoUrl = videoData?.signedUrl || null;
+  const videoStoragePath = (invite as { video_storage_path?: string }).video_storage_path;
+  if ((invite as { video_status?: string }).video_status === "ready" && videoStoragePath) {
+    videoUrl = await signStorageUrl("moment-photos", videoStoragePath, 60 * 60 * 24);
   }
 
   // Fetch approved contributions (Task B2 — collaborative memory invites).
@@ -415,11 +417,32 @@ async function _getInviteBySlugImpl(slug: string) {
       .eq("invite_id", invite.id)
       .eq("approved", true)
       .order("created_at", { ascending: true });
-    contributions = (rows ?? []).map((r) => ({
-      contributor_name: r.contributor_name,
-      message: r.message,
-      photo_url: r.photo_url,
-    }));
+    // Re-sign contribution photo URLs so they're valid for 1 hour from
+    // this page render. The upload route stores a signed URL — we extract
+    // the bucket path and re-sign it fresh. External URLs (null / different
+    // domain) are passed through unchanged.
+    const resignedRows = await Promise.allSettled(
+      (rows ?? []).map(async (r) => {
+        let freshPhotoUrl: string | null = r.photo_url;
+        if (r.photo_url) {
+          const path = extractBucketPath(STORAGE_BUCKET, r.photo_url);
+          if (path) {
+            freshPhotoUrl = await signStorageUrl(STORAGE_BUCKET, path, SIGNED_URL_TTL_SECONDS);
+            // On signing failure, omit the photo rather than serve a stale URL
+            if (!freshPhotoUrl) freshPhotoUrl = null;
+          }
+          // If path is null (external URL), keep r.photo_url as-is
+        }
+        return {
+          contributor_name: r.contributor_name,
+          message: r.message,
+          photo_url: freshPhotoUrl,
+        };
+      })
+    );
+    contributions = resignedRows
+      .filter((res): res is PromiseFulfilledResult<typeof contributions[0]> => res.status === "fulfilled")
+      .map((res) => res.value);
   }
 
   return { ...invite, photos: signedPhotos, questions, videoUrl, contributions };

@@ -19,17 +19,21 @@ interface PhotoPosition {
   rotation: number;
 }
 
-// 8 named anchor zones — top-left corner of the photo frame as % of container
+// 8 named anchor zones — top-left corner of the photo frame as % of container.
+// Insets keep frames safely off the screen edges (top >= 8%, side >= 8%).
 const ZONES: Zone[] = [
-  { topPct: 6,  leftPct: 3  },  // top-left
-  { topPct: 3,  leftPct: 38 },  // top-center
-  { topPct: 6,  leftPct: 72 },  // top-right
-  { topPct: 42, leftPct: 1  },  // left-middle
-  { topPct: 42, leftPct: 74 },  // right-middle
-  { topPct: 70, leftPct: 3  },  // bottom-left
-  { topPct: 76, leftPct: 38 },  // bottom-center
-  { topPct: 70, leftPct: 72 },  // bottom-right
+  { topPct: 10, leftPct: 8  },  // top-left
+  { topPct: 8,  leftPct: 38 },  // top-center
+  { topPct: 10, leftPct: 68 },  // top-right
+  { topPct: 40, leftPct: 6  },  // left-middle
+  { topPct: 40, leftPct: 70 },  // right-middle
+  { topPct: 65, leftPct: 8  },  // bottom-left
+  { topPct: 70, leftPct: 38 },  // bottom-center
+  { topPct: 65, leftPct: 68 },  // bottom-right
 ];
+
+// Min distance (in % of container) between any two photo centers, prevents overlap.
+const MIN_SEPARATION_PCT = 26;
 
 // Seeded pseudo-random [0, 1] — stable across renders
 function sr(seed: number): number {
@@ -53,26 +57,45 @@ function generatePositions(
   const indices = Array.from({ length: ZONES.length }, (_, i) => i);
   indices.sort((a, b) => sr(seed + a * 2.3) - sr(seed + b * 2.3));
 
-  return indices.slice(0, count).map((zoneIdx, i) => {
+  // Safe inset from screen edges (keeps photo well off the borders)
+  const TOP_INSET = 6;
+  const SIDE_INSET = 6;
+  const minTop = TOP_INSET;
+  const maxTop = Math.max(TOP_INSET, 100 - frameHPct - TOP_INSET);
+  const minLeft = SIDE_INSET;
+  const maxLeft = Math.max(SIDE_INSET, 100 - frameWPct - SIDE_INSET);
+
+  const placed: PhotoPosition[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const zoneIdx = indices[i % indices.length];
     const zone = ZONES[zoneIdx];
 
-    // ±3% jitter
-    const jitterTop = (sr(seed + i * 4.1 + 0.5) - 0.5) * 6;
-    const jitterLeft = (sr(seed + i * 4.1 + 1.3) - 0.5) * 6;
+    // Try a small jitter, retry a few times to avoid overlap with already-placed photos.
+    let topPct = zone.topPct;
+    let leftPct = zone.leftPct;
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const jitterTop = (sr(seed + i * 4.1 + attempt * 0.7 + 0.5) - 0.5) * 4; // ±2%
+      const jitterLeft = (sr(seed + i * 4.1 + attempt * 0.7 + 1.3) - 0.5) * 4;
+      const t = Math.max(minTop, Math.min(maxTop, zone.topPct + jitterTop));
+      const l = Math.max(minLeft, Math.min(maxLeft, zone.leftPct + jitterLeft));
 
-    let topPct = zone.topPct + jitterTop;
-    let leftPct = zone.leftPct + jitterLeft;
+      const overlap = placed.some((p) => {
+        const dt = (p.topPct + frameHPct / 2) - (t + frameHPct / 2);
+        const dl = (p.leftPct + frameWPct / 2) - (l + frameWPct / 2);
+        return Math.hypot(dt, dl) < MIN_SEPARATION_PCT;
+      });
 
-    // Clamp so photo frame never goes outside container
-    // min 20px from edges — approximated in % (assume ~600px container; 20/600 ≈ 3.3%)
-    // We clamp topPct so that top >= 0 and top + frameH% <= 100
-    topPct = Math.max(0, Math.min(100 - frameHPct, topPct));
-    leftPct = Math.max(0, Math.min(100 - frameWPct, leftPct));
+      topPct = t;
+      leftPct = l;
+      if (!overlap) break;
+    }
 
-    const rotation = (sr(seed + i * 7.7 + 2.2) - 0.5) * 10; // -5 to +5 degrees
+    const rotation = (sr(seed + i * 7.7 + 2.2) - 0.5) * 8; // ±4 deg (tighter)
+    placed.push({ topPct, leftPct, rotation });
+  }
 
-    return { topPct, leftPct, rotation };
-  });
+  return placed;
 }
 
 export default function FloatingPhotos({ photos, screenIndex }: FloatingPhotosProps) {

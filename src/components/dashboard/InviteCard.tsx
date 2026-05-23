@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Eye, Trash2, ExternalLink, MessageCircleQuestion, Share2, Heart, MessageCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,36 +59,50 @@ export default function InviteCard({ invite, creatorName }: InviteCardProps) {
 
   return (
     <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30 overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgba(45,41,38,0.12)] hover:-translate-y-1.5 group">
-      {/* Thumbnail preview */}
-      <div
-        className="h-28 flex items-center justify-center relative overflow-hidden"
+      {/* Thumbnail preview — click opens preview */}
+      <Link
+        href={`/surprise/${invite.slug}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Open ${invite.title} preview`}
+        className="block h-28 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40"
         style={{
           background: theme?.colors.background
             ? `linear-gradient(135deg, ${theme.colors.background} 0%, ${theme.colors.accent}22 100%)`
             : "linear-gradient(135deg, #FFF0E8 0%, #F5E6E0 100%)",
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3 w-full h-full">
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300"
             style={{ background: theme?.colors.accent || "#C4686D" }}
           >
             <Heart className="w-7 h-7 fill-white text-white" />
           </div>
-          <div
-            className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-            style={{ background: `${theme?.colors.accent || "#C4686D"}20`, color: theme?.colors.accent || "#C4686D" }}
-          >
-            {invite.reveal_type === "tap" ? "✨ Tap reveal" : "⏱ Countdown"}
-          </div>
         </div>
-      </div>
+        <div
+          className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-semibold pointer-events-none"
+          style={{ background: `${theme?.colors.accent || "#C4686D"}20`, color: theme?.colors.accent || "#C4686D" }}
+          title={invite.reveal_type === "tap" ? "Recipient taps to reveal" : "Counts down to reveal time"}
+        >
+          {invite.reveal_type === "tap" ? "✨ Tap to reveal" : "⏱ Countdown"}
+        </div>
+      </Link>
 
       <div className="p-5">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-heading text-lg text-[#2D2926] truncate">{invite.title}</h3>
+            <Link
+              href={`/surprise/${invite.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block focus:outline-none focus:underline"
+            >
+              <h3 className="font-heading text-lg text-[#2D2926] truncate group-hover:text-[#C4686D] transition-colors">
+                {invite.title}
+              </h3>
+            </Link>
             <p className="text-[#6B5E57] text-xs mt-0.5">
               {theme?.name || invite.theme}
             </p>

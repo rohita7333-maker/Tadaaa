@@ -8,11 +8,11 @@ import OccasionFilter from "@/components/dashboard/OccasionFilter";
 import OnboardingModal from "@/components/dashboard/OnboardingModal";
 
 interface Props {
-  searchParams: Promise<{ occasion?: string }>;
+  searchParams: Promise<{ occasion?: string; sort?: string; status?: string }>;
 }
 
 export default async function DashboardPage({ searchParams }: Props) {
-  const { occasion } = await searchParams;
+  const { occasion, sort, status: statusFilter } = await searchParams;
 
   const supabase = await createClient();
   const {
@@ -49,10 +49,18 @@ export default async function DashboardPage({ searchParams }: Props) {
     }
   }
 
-  // Filter by occasion if set
-  const list = occasion
-    ? all.filter((inv) => inv.occasion_type === occasion)
-    : all;
+  // Filter by occasion + status, sort by chosen metric.
+  let list = all;
+  if (occasion) list = list.filter((inv) => inv.occasion_type === occasion);
+  if (statusFilter === "active") list = list.filter((inv) => inv.is_active);
+
+  if (sort === "views") {
+    list = [...list].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0));
+  } else if (sort === "rsvps") {
+    list = [...list].sort((a, b) => (rsvpMap[b.id] ?? 0) - (rsvpMap[a.id] ?? 0));
+  } else if (sort === "responses") {
+    list = [...list].sort((a, b) => (b.response_count ?? 0) - (a.response_count ?? 0));
+  }
 
   const totalViews = all.reduce((sum, inv) => sum + (inv.view_count || 0), 0);
   const totalResponses = all.reduce((sum, inv) => sum + (inv.response_count || 0), 0);
@@ -60,11 +68,11 @@ export default async function DashboardPage({ searchParams }: Props) {
   const activeCount = all.filter((inv) => inv.is_active).length;
 
   const stats = [
-    { label: "Total Surprises", value: all.length, icon: Gift, color: "#C4686D" },
-    { label: "Total Views", value: totalViews.toLocaleString(), icon: Eye, color: "#C9A96E" },
-    { label: "RSVPs", value: totalRsvps.toLocaleString(), icon: Heart, color: "#C4686D" },
-    { label: "Responses", value: totalResponses.toLocaleString(), icon: MessageCircle, color: "#6B8F71" },
-    { label: "Active", value: activeCount, icon: TrendingUp, color: "#B07CC6" },
+    { label: "Total Surprises", value: all.length, icon: Gift, color: "#C4686D", href: "/dashboard", hint: "All your surprises" },
+    { label: "Total Views", value: totalViews.toLocaleString(), icon: Eye, color: "#C9A96E", href: "/dashboard?sort=views", hint: "Sort by most viewed" },
+    { label: "RSVPs", value: totalRsvps.toLocaleString(), icon: Heart, color: "#C4686D", href: "/dashboard?sort=rsvps", hint: "Sort by most RSVPs" },
+    { label: "Responses", value: totalResponses.toLocaleString(), icon: MessageCircle, color: "#6B8F71", href: "/dashboard?sort=responses", hint: "Sort by responses" },
+    { label: "Active", value: activeCount, icon: TrendingUp, color: "#B07CC6", href: "/dashboard?status=active", hint: "Filter to active surprises" },
   ];
 
   return (
@@ -89,13 +97,15 @@ export default async function DashboardPage({ searchParams }: Props) {
         </Link>
       </div>
 
-      {/* Stats strip */}
+      {/* Stats strip — clickable filters/sorts */}
       {all.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           {stats.map((s) => (
-            <div
+            <Link
               key={s.label}
-              className="bg-white rounded-2xl p-4 border border-[#D4CBC3]/30 shadow-[0_2px_12px_rgba(45,41,38,0.04)] flex items-center gap-3"
+              href={s.href}
+              title={s.hint}
+              className="bg-white rounded-2xl p-4 border border-[#D4CBC3]/30 shadow-[0_2px_12px_rgba(45,41,38,0.04)] flex items-center gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,41,38,0.10)] hover:border-[#C4686D]/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40"
             >
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -107,7 +117,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                 <p className="font-heading text-xl text-[#2D2926] font-bold leading-none">{s.value}</p>
                 <p className="text-[#6B5E57] text-xs mt-0.5">{s.label}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

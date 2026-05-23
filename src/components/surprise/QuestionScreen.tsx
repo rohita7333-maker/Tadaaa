@@ -46,7 +46,7 @@ interface QuestionScreenProps {
   photos?: { url: string; caption?: string; rotation_deg?: number }[];
 }
 
-const MAX_DODGES = 3;
+const MAX_DODGES = 5;
 
 export default function QuestionScreen({
   questions,

@@ -25,6 +25,14 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
+  const { count: inviteCount } = await supabase
+    .from("invites")
+    .select("id", { count: "exact", head: true })
+    .eq("creator_id", user.id);
+
+  const greetingName =
+    (user.user_metadata?.full_name as string | undefined)?.trim() || undefined;
+
   return (
     <div className="min-h-screen bg-[#FFF8F0]">
       <Navbar
@@ -32,6 +40,8 @@ export default async function DashboardLayout({
         userInitial={initial}
         avatarUrl={profile?.avatar_url}
         subscriptionTier={profile?.subscription_tier ?? "free"}
+        inviteCount={inviteCount ?? 0}
+        greetingName={greetingName}
       />
       <div className="max-w-6xl mx-auto px-6 py-8">{children}</div>
     </div>

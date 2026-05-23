@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, LogOut, Settings } from "lucide-react";
+import { Heart, LogOut, Settings, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +16,18 @@ interface NavbarProps {
   userInitial?: string;
   avatarUrl?: string | null;
   subscriptionTier?: string;
+  inviteCount?: number;
+  greetingName?: string;
 }
 
-export default function Navbar({ userEmail, userInitial = "U", avatarUrl, subscriptionTier = "free" }: NavbarProps) {
+export default function Navbar({
+  userEmail,
+  userInitial = "U",
+  avatarUrl,
+  subscriptionTier = "free",
+  inviteCount = 0,
+  greetingName,
+}: NavbarProps) {
   const router = useRouter();
   const tierBadge =
     subscriptionTier === "unlimited"
@@ -26,6 +35,11 @@ export default function Navbar({ userEmail, userInitial = "U", avatarUrl, subscr
       : subscriptionTier === "plus"
       ? { label: "Plus", cls: "bg-rose-100 text-rose-700" }
       : null;
+
+  const hour = new Date().getHours();
+  const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+  const firstName = greetingName?.split(" ")[0];
+
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-[#D4CBC3]/40 px-6 py-3.5 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -36,27 +50,28 @@ export default function Navbar({ userEmail, userInitial = "U", avatarUrl, subscr
           <span className="font-heading text-lg text-[#2D2926]">TaDaaaa</span>
         </Link>
 
+        {/* Middle: greeting + streak/counter */}
+        <div className="hidden md:flex flex-1 items-center justify-center gap-3 px-6">
+          {firstName && (
+            <span className="text-sm text-[#6B5E57]">
+              Good {timeOfDay},{" "}
+              <span className="font-semibold text-[#2D2926]">{firstName}</span>
+            </span>
+          )}
+          {inviteCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#9B3D42] bg-[#FFF0EE] px-3 py-1 rounded-full">
+              <Sparkles className="w-3 h-3" />
+              {inviteCount} surprise{inviteCount !== 1 ? "s" : ""} crafted
+            </span>
+          )}
+        </div>
+
         <div className="flex items-center gap-2.5">
           {tierBadge && (
             <span className={`hidden sm:inline-block text-xs font-semibold px-3 py-1 rounded-full ${tierBadge.cls}`}>
               {tierBadge.label}
             </span>
           )}
-
-          <Link
-            href="/create"
-            className="inline-flex items-center rounded-xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white text-sm h-9 px-4 font-semibold transition-all duration-300 hover:scale-[1.02] shadow-sm shadow-[#C4686D]/20"
-          >
-            + New Surprise
-          </Link>
-
-          <Link
-            href="/settings"
-            className="w-9 h-9 rounded-xl border border-[#D4CBC3]/60 flex items-center justify-center text-[#6B5E57] hover:text-[#C4686D] hover:border-[#C4686D]/40 hover:bg-[#FFF8F0] transition-all"
-            aria-label="Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </Link>
 
           <DropdownMenu>
             <DropdownMenuTrigger

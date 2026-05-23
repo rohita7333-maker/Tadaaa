@@ -200,6 +200,59 @@ export function weeklyDigestEmail(opts: {
   };
 }
 
+export function giftInviteEmail(opts: {
+  recipientEmail: string;
+  redeemUrl: string;
+  senderName?: string;
+  giftMessage?: string;
+}) {
+  const { redeemUrl, senderName, giftMessage } = opts;
+  const senderDisplay = senderName ? esc(senderName) : "Someone special";
+  const subject = `${senderName ? esc(senderName) : "Someone"} sent you a TaDaaaa surprise gift 🎁`;
+
+  const messageBlock = giftMessage
+    ? `<div style="background:${BRAND.bg};border-radius:16px;padding:20px;border:1px solid ${BRAND.border}30;margin:16px 0">
+        <p style="margin:0 0 4px;font-size:12px;color:${BRAND.muted};text-transform:uppercase;letter-spacing:0.5px">Personal message</p>
+        <p style="margin:0;font-size:15px;color:${BRAND.text};line-height:1.6;font-style:italic">"${esc(giftMessage)}"</p>
+      </div>`
+    : "";
+
+  const html = layout(
+    `
+    <h1 style="margin:0 0 8px;font-size:22px;color:${BRAND.text}">You got a gift! 🎁</h1>
+    <p style="margin:0 0 16px;font-size:15px;color:${BRAND.muted};line-height:1.6">
+      <strong style="color:${BRAND.text}">${senderDisplay}</strong> just gifted you a TaDaaaa invite —
+      your own magical surprise to share with someone you love.
+    </p>
+    ${messageBlock}
+    <p style="margin:0 0 4px;font-size:15px;color:${BRAND.muted};line-height:1.6">
+      Click below to redeem your gift and start creating:
+    </p>
+    ${button("Redeem Your Gift", redeemUrl)}
+    <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6">
+      This link expires in 90 days. If the button doesn't work, copy this URL:<br>
+      <span style="color:${BRAND.accent};word-break:break-all">${redeemUrl}</span>
+    </p>
+    `,
+    `${senderDisplay} sent you a TaDaaaa gift — redeem your free invite!`
+  );
+
+  const text = [
+    `${senderDisplay} sent you a TaDaaaa surprise gift!`,
+    ``,
+    giftMessage ? `Their message: "${giftMessage}"` : "",
+    ``,
+    `Redeem your free invite here:`,
+    redeemUrl,
+    ``,
+    `This link expires in 90 days.`,
+  ]
+    .filter((l) => l !== undefined)
+    .join("\n");
+
+  return { subject, html, text };
+}
+
 export function welcomeEmail(userName: string, createUrl: string) {
   return {
     subject: "Welcome to TaDaaaa! 🎉",

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { PREMIUM_THEME_PRICE, APP_URL } from "@/lib/constants";
+import { giftCheckoutSchema } from "@/lib/schemas";
 
 const UNLIMITED_PRICE_YEARLY = 1999; // $19.99 in cents
 const PLUS_PRICE_PER_INVITE = Math.round(PREMIUM_THEME_PRICE * 100); // $4.99
@@ -12,12 +13,57 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const body = await request.json() as Record<string, unknown>;
+  const { mode } = body as { mode?: string };
+
+  // ── Gift checkout: no auth required ──────────────────────────────────────
+  if (mode === "gift") {
+    const parsed = giftCheckoutSchema.safeParse(body);
+    if (!parsed.success) {
+      const firstIssue = parsed.error.issues?.[0]?.message ?? "Invalid input";
+      return NextResponse.json({ error: firstIssue }, { status: 400 });
+    }
+
+    const { gift_recipient_email, gift_message, gift_sender_name } = parsed.data;
+
+    // Anti-self-gift: when logged in, reject same email
+    if (user && user.email && user.email.toLowerCase() === gift_recipient_email.toLowerCase()) {
+      return NextResponse.json(
+        { error: "Cannot send a gift to yourself" },
+        { status: 400 }
+      );
+    }
+
+    const giftPriceId = process.env.STRIPE_GIFT_PRICE_ID;
+    if (!giftPriceId) {
+      console.error("[gift] STRIPE_GIFT_PRICE_ID not configured");
+      return NextResponse.json({ error: "Gift checkout not configured" }, { status: 500 });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [{ price: giftPriceId, quantity: 1 }],
+      metadata: {
+        mode: "gift",
+        gift_recipient_email,
+        ...(gift_message ? { gift_message } : {}),
+        ...(gift_sender_name ? { gift_sender_name } : {}),
+        ...(user?.email ? { sender_email: user.email } : {}),
+      },
+      customer_email: user?.email ?? undefined,
+      success_url: `${APP_URL}/gift/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${APP_URL}/pricing`,
+    });
+
+    return NextResponse.json({ url: session.url });
+  }
+
+  // For non-gift modes, auth is required
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { mode, themeId } = body as { mode?: string; themeId?: string };
+  const { themeId } = body as { themeId?: string };
 
   // Unlimited subscription
   if (mode === "unlimited") {

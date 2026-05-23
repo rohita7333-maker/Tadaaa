@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Heart, Check, Zap, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import PricingCTA from "@/components/pricing/PricingCTA";
+import GiftCTA from "@/components/pricing/GiftCTA";
 
 export const metadata = { title: "Pricing — TaDaaaa" };
 
@@ -11,7 +12,7 @@ type Plan = {
   period: string;
   description: string;
   cta: string;
-  planKey: "free" | "plus" | "unlimited";
+  planKey: "free" | "plus" | "unlimited" | "gift";
   highlight: boolean;
   badge: string | null;
   features: string[];
@@ -75,6 +76,24 @@ const plans: Plan[] = [
       "Priority support",
     ],
   },
+  {
+    name: "Gift",
+    price: "$5",
+    period: "one invite",
+    description: "Send someone the gift of making a surprise.",
+    cta: "Buy as a gift",
+    planKey: "gift",
+    highlight: false,
+    badge: "Gift 🎁",
+    features: [
+      "One full TaDaaaa invite",
+      "Delivered by email",
+      "Recipient redeems anytime",
+      "90-day redemption window",
+      "All premium themes included",
+      "No account needed to buy",
+    ],
+  },
 ];
 
 export default async function PricingPage() {
@@ -119,7 +138,7 @@ export default async function PricingPage() {
         </div>
 
         {/* Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -175,16 +194,23 @@ export default async function PricingPage() {
               </ul>
 
               {/* CTA */}
-              <PricingCTA
-                plan={plan.planKey}
-                label={plan.cta}
-                isAuthed={isAuthed}
-                className={`h-12 rounded-2xl flex items-center justify-center text-sm font-semibold transition-all duration-300 hover:scale-[1.02] disabled:opacity-60 ${
-                  plan.highlight
-                    ? "bg-white text-[#C4686D] hover:bg-[#FFF0E8] shadow-lg"
-                    : "bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white hover:from-[#9B3D42] hover:to-[#C4686D] shadow-md shadow-[#C4686D]/20"
-                }`}
-              />
+              {plan.planKey === "gift" ? (
+                <GiftCTA
+                  label={plan.cta}
+                  className={`h-12 rounded-2xl flex items-center justify-center text-sm font-semibold transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white hover:from-[#9B3D42] hover:to-[#C4686D] shadow-md shadow-[#C4686D]/20`}
+                />
+              ) : (
+                <PricingCTA
+                  plan={plan.planKey as "free" | "plus" | "unlimited"}
+                  label={plan.cta}
+                  isAuthed={isAuthed}
+                  className={`h-12 rounded-2xl flex items-center justify-center text-sm font-semibold transition-all duration-300 hover:scale-[1.02] disabled:opacity-60 ${
+                    plan.highlight
+                      ? "bg-white text-[#C4686D] hover:bg-[#FFF0E8] shadow-lg"
+                      : "bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white hover:from-[#9B3D42] hover:to-[#C4686D] shadow-md shadow-[#C4686D]/20"
+                  }`}
+                />
+              )}
             </div>
           ))}
         </div>

@@ -46,6 +46,14 @@ export const magicLinkSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
+export const giftCheckoutSchema = z.object({
+  mode: z.literal("gift"),
+  gift_recipient_email: z.string().email("Invalid recipient email"),
+  gift_message: z.string().max(500).optional(),
+  gift_sender_name: z.string().max(100).optional(),
+});
+
 export type SignUpValues = z.infer<typeof signUpSchema>;
 export type SignInValues = z.infer<typeof signInSchema>;
 export type CreateInviteValues = z.infer<typeof createInviteSchema>;
+export type GiftCheckoutValues = z.infer<typeof giftCheckoutSchema>;

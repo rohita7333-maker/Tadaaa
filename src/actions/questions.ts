@@ -75,3 +75,51 @@ export async function getInviteResponses(
 
   return (data as QuestionWithAnswers[]) ?? [];
 }
+
+export interface InviteInsights {
+  rsvps: { responded_at: string; user_agent: string | null }[];
+  viewCount: number;
+  rsvpCount: number;
+}
+
+/**
+ * Returns anonymized activity: RSVP timestamps + view counter for the invite
+ * owner. RSVPs and views are stored without PII by design — visitor_hash
+ * is one-way and not surfaced to the dashboard.
+ */
+export async function getInviteInsights(
+  inviteId: string
+): Promise<InviteInsights | null> {
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  if (!user) return null;
+
+  const { data: invite } = await authClient
+    .from("invites")
+    .select("id, creator_id, view_count")
+    .eq("id", inviteId)
+    .single();
+
+  if (!invite || invite.creator_id !== user.id) return null;
+
+  const service = await createServiceClient();
+  const { data: rsvpRows } = await service
+    .from("invite_rsvps")
+    .select("responded_at, user_agent")
+    .eq("invite_id", inviteId)
+    .order("responded_at", { ascending: false })
+    .limit(200);
+
+  const rsvps = (rsvpRows ?? []).map((r) => ({
+    responded_at: r.responded_at as string,
+    user_agent: (r.user_agent as string | null) ?? null,
+  }));
+
+  return {
+    rsvps,
+    viewCount: invite.view_count ?? 0,
+    rsvpCount: rsvps.length,
+  };
+}

@@ -4,8 +4,9 @@ import { getProfile, updateNotifications } from "@/actions/account";
 import DeleteAccountButton from "./DeleteAccountButton";
 import AvatarUpload from "./AvatarUpload";
 import Link from "next/link";
-import { ArrowLeft, User, Bell, ShieldAlert, Crown, Lock, Download } from "lucide-react";
+import { ArrowLeft, User, Bell, ShieldAlert, Crown, Lock, Download, Sparkles } from "lucide-react";
 import ChangePasswordForm from "./ChangePasswordForm";
+import { SettingsSection, ToggleRow } from "./SettingsAnimated";
 
 export const metadata = { title: "Settings — TaDaaaa" };
 
@@ -40,8 +41,26 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0] py-10 px-6">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-screen relative overflow-hidden bg-[#FFF8F0]">
+      {/* Decorative bloom */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full opacity-40 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(closest-side, #F8B4B8 0%, #FFE7D9 60%, transparent 100%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-40 -left-24 w-[380px] h-[380px] rounded-full opacity-30 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(closest-side, #FFC97A 0%, #FFE9C2 60%, transparent 100%)",
+        }}
+      />
+
+      <div className="relative max-w-xl mx-auto px-6 py-10">
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors mb-8 group"
@@ -50,13 +69,31 @@ export default async function SettingsPage() {
           Back to dashboard
         </Link>
 
-        <h1 className="font-heading text-3xl text-[#2D2926] mb-8">Settings</h1>
+        {/* Hero */}
+        <SettingsSection index={0}>
+          <div className="mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 border border-[#D4CBC3]/60 shadow-sm backdrop-blur-sm mb-4">
+              <Sparkles className="w-3.5 h-3.5 text-[#C4686D]" />
+              <span className="text-xs font-medium text-[#6B5E57]">Your account</span>
+            </div>
+            <h1 className="font-heading text-4xl sm:text-5xl text-[#2D2926] tracking-tight">
+              Settings
+            </h1>
+            <p className="text-[#6B5E57] mt-2 text-sm leading-relaxed max-w-md">
+              Make TaDaaaa feel like you. Tweak your profile, notifications, and privacy
+              from one calm place.
+            </p>
+          </div>
+        </SettingsSection>
 
         {/* Account */}
-        <section className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30 mb-5">
+        <SettingsSection
+          index={1}
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
+        >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-xl bg-[#FFF0E8] flex items-center justify-center">
-              <User className="w-4 h-4 text-[#C4686D]" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FFE7D9] to-[#F8B4B8]/60 flex items-center justify-center">
+              <User className="w-4 h-4 text-[#B33A45]" />
             </div>
             <h2 className="font-heading text-lg text-[#2D2926]">Account</h2>
           </div>
@@ -91,61 +128,60 @@ export default async function SettingsPage() {
               </div>
             )}
           </div>
-        </section>
+        </SettingsSection>
 
         {/* Notifications */}
-        <section className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30 mb-5">
+        <SettingsSection
+          index={2}
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
+        >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-xl bg-[#FFF0E8] flex items-center justify-center">
-              <Bell className="w-4 h-4 text-[#C4686D]" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FFE9C2] to-[#FFC97A]/60 flex items-center justify-center">
+              <Bell className="w-4 h-4 text-[#B6802A]" />
             </div>
             <h2 className="font-heading text-lg text-[#2D2926]">Notifications</h2>
           </div>
-          <form action={updateNotifications} className="space-y-3">
+          <form action={updateNotifications} className="space-y-1.5">
             {notifItems.map((item) => (
-              <label
+              <ToggleRow
                 key={item.name}
-                className="flex items-start justify-between gap-4 cursor-pointer p-4 rounded-2xl hover:bg-[#FFF8F0] transition-colors group"
-              >
-                <div>
-                  <p className="text-sm text-[#2D2926] font-medium">{item.label}</p>
-                  <p className="text-xs text-[#6B5E57] mt-0.5">{item.sub}</p>
-                </div>
-                <div className="flex-shrink-0 pt-0.5">
-                  <input
-                    type="checkbox"
-                    name={item.name}
-                    defaultChecked={item.defaultChecked}
-                    className="w-4 h-4 accent-[#C4686D] cursor-pointer"
-                  />
-                </div>
-              </label>
+                name={item.name}
+                defaultChecked={item.defaultChecked}
+                label={item.label}
+                sub={item.sub}
+              />
             ))}
             <button
               type="submit"
-              className="mt-3 w-full h-11 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/20"
+              className="mt-4 w-full h-11 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/20"
             >
               Save preferences
             </button>
           </form>
-        </section>
+        </SettingsSection>
 
         {/* Security */}
-        <section className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30 mb-5">
+        <SettingsSection
+          index={3}
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
+        >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-xl bg-[#FFF0E8] flex items-center justify-center">
-              <Lock className="w-4 h-4 text-[#C4686D]" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#F0E6F8] to-[#D4B8E0]/60 flex items-center justify-center">
+              <Lock className="w-4 h-4 text-[#7B61A6]" />
             </div>
             <h2 className="font-heading text-lg text-[#2D2926]">Security</h2>
           </div>
           <ChangePasswordForm />
-        </section>
+        </SettingsSection>
 
         {/* Your Data */}
-        <section className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30 mb-5">
+        <SettingsSection
+          index={4}
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
+        >
           <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-[#FFF0E8] flex items-center justify-center">
-              <Download className="w-4 h-4 text-[#C4686D]" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E6F2F0] to-[#7CC5C5]/40 flex items-center justify-center">
+              <Download className="w-4 h-4 text-[#2B8A8A]" />
             </div>
             <h2 className="font-heading text-lg text-[#2D2926]">Your Data</h2>
           </div>
@@ -158,10 +194,13 @@ export default async function SettingsPage() {
           >
             Export my data →
           </Link>
-        </section>
+        </SettingsSection>
 
         {/* Danger zone */}
-        <section className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-red-100">
+        <SettingsSection
+          index={5}
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-red-100"
+        >
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center">
               <ShieldAlert className="w-4 h-4 text-red-500" />
@@ -172,7 +211,7 @@ export default async function SettingsPage() {
             Permanently delete your account and all surprises. This cannot be undone.
           </p>
           <DeleteAccountButton />
-        </section>
+        </SettingsSection>
       </div>
     </div>
   );

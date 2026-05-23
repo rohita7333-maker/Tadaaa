@@ -1,15 +1,22 @@
-# TaDaaaa — Session Handoff (2026-05-22)
+# TaDaaaa — Session Handoff (2026-05-23)
 
-## Status: SHIP-READY (Phase A + B1 + B2 on feat/sophistication)
+## Status: LOCAL-READY · DEPLOY-PENDING (Phase A + B1 + B2 on feat/sophistication)
 
-All P0 + P1 + P2 closed. Phase A (Sentry, PostHog, audit log, GDPR export, Sightengine moderation, cookie consent) + Phase B1 (AI invite drafter) + Phase B2 (collaborative memory invites — multi-contributor photos/notes) shipped on `feat/sophistication` — 14 commits ahead of `main`.
+All P0 + P1 + P2 closed. Phase A + B1 + B2 shipped. All SQL migrations applied via Supabase MCP. Code pushed to GitHub. Local dev fully wired.
 
 **Tests:** 47/47 pass · **tsc:** 0 errors · **lint:** 0 errors
 
-**Next action for user:**
-1. Add `ANTHROPIC_API_KEY` to Vercel env vars (TODO — not yet done)
-2. Run remaining SQL migrations (see below — `ai_drafts.sql` ✓ already run, `invite_contributions.sql` NEW B2)
-3. Merge `feat/sophistication` → `main` + push → Vercel auto-deploys
+**Completed since last handoff:**
+- ✅ All 8 SQL migrations applied directly via Supabase MCP (no manual copy-paste)
+- ✅ GitHub repo: https://github.com/rohita7333-maker/Tadaaa (both branches pushed)
+- ✅ `ANTHROPIC_API_KEY` added to `.env.local` — AI drafter (B1) works locally
+- ✅ graphify updated — 535 nodes, 1012 edges, 51 communities
+
+**Next actions:**
+1. Get Stripe test keys → add to `.env.local` (payments broken until then)
+2. Get Resend API key → add to `.env.local` (emails silent-fail until then)
+3. Connect GitHub repo to Vercel → set prod env vars → deploy
+4. Merge `feat/sophistication` → `main` before Vercel deploy
 
 ---
 
@@ -18,12 +25,17 @@ All P0 + P1 + P2 closed. Phase A (Sentry, PostHog, audit log, GDPR export, Sight
 | Layer | State | Notes |
 |---|---|---|
 | TypeScript | exit 0 | `npx tsc --noEmit` |
-| Tests | 43/43 pass | `npm test` (vitest) — schemas, utils, unsubscribe HMAC, AI draft parsing |
+| Tests | 47/47 pass | `npm test` (vitest) |
 | Lint | 0 errors | 10 warnings (intentional) |
 | Browser QA | 0 console errors | Playwright probed `/`, `/auth/signin`, `/auth/signup`, `/auth/verify-email`, `/pricing`, `/settings` |
 | Google OAuth | Verified live | Provider enabled in Supabase; client ID + secret configured in Google Cloud |
 | Dev server | http://localhost:3000 | Restart cleanly via `npm run dev` from `surprise-invite/` |
-| Branch | feat/sophistication | 11 commits ahead of main — merge when ready to deploy |
+| Branch | feat/sophistication | 15 commits ahead of main — merge when ready to deploy |
+| GitHub | pushed | https://github.com/rohita7333-maker/Tadaaa |
+| SQL migrations | all applied | via Supabase MCP 2026-05-23 |
+| ANTHROPIC_API_KEY | .env.local ✅ | AI drafter works locally |
+| Stripe | .env.local placeholder | need real test keys |
+| Resend | .env.local empty | emails silent-fail |
 
 ---
 

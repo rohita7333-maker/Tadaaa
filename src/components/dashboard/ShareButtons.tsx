@@ -86,7 +86,9 @@ export default function ShareButtons({
     setVideoSharing(true);
     try {
       const result = await handleVideoShare({ inviteId, title, capture });
-      if (result.outcome === "rendering") {
+      if (result.outcome === "cancelled" || result.message === null) {
+        // User dismissed the native share sheet — stay silent
+      } else if (result.outcome === "rendering") {
         toast.info(result.message);
       } else if (result.outcome === "error") {
         toast.error(result.message);

@@ -9,15 +9,23 @@
  *   "shared"     — navigator.share() resolved successfully
  *   "downloaded" — file was saved via anchor-click fallback
  *   "rendering"  — video not ready; generate job triggered; show toast
+ *   "cancelled"  — user explicitly cancelled the native share sheet (AbortError)
  *   "error"      — unrecoverable fetch/network error
  */
 
-export type VideoShareOutcome = "shared" | "downloaded" | "rendering" | "error";
+import { APP_URL } from "@/lib/constants";
+
+export type VideoShareOutcome =
+  | "shared"
+  | "downloaded"
+  | "rendering"
+  | "cancelled"
+  | "error";
 
 export interface VideoShareResult {
   outcome: VideoShareOutcome;
-  /** Human-readable message suitable for a toast */
-  message: string;
+  /** Human-readable message suitable for a toast. null = silent (no toast). */
+  message: string | null;
 }
 
 export interface VideoShareArgs {
@@ -25,6 +33,54 @@ export interface VideoShareArgs {
   title: string;
   /** PostHog capture helper — same signature as the one in ShareButtons */
   capture: (event: string, props?: Record<string, unknown>) => void;
+}
+
+// ---------------------------------------------------------------------------
+// SSRF guard — built once at module load time
+// ---------------------------------------------------------------------------
+
+/**
+ * Derives the set of allowed video source hostnames.
+ * - Same hostname as APP_URL (e.g. localhost, tadaaaa.com)
+ * - Supabase storage host derived from NEXT_PUBLIC_SUPABASE_URL
+ *   (e.g. xrlmnlknymgakswsbawk.supabase.co)
+ */
+function buildAllowedVideoHosts(): Set<string> {
+  const hosts = new Set<string>();
+
+  try {
+    const appHost = new URL(APP_URL).hostname;
+    if (appHost) hosts.add(appHost);
+  } catch {
+    // misconfigured APP_URL — skip
+  }
+
+  const supabaseUrl =
+    typeof process !== "undefined"
+      ? process.env.NEXT_PUBLIC_SUPABASE_URL
+      : undefined;
+  if (supabaseUrl) {
+    try {
+      const supabaseHost = new URL(supabaseUrl).hostname;
+      if (supabaseHost) hosts.add(supabaseHost);
+    } catch {
+      // misconfigured SUPABASE_URL — skip
+    }
+  }
+
+  return hosts;
+}
+
+export const ALLOWED_VIDEO_HOSTS: Set<string> = buildAllowedVideoHosts();
+
+function isAllowedVideoUrl(raw: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return false;
+  }
+  return ALLOWED_VIDEO_HOSTS.has(parsed.hostname);
 }
 
 // ---------------------------------------------------------------------------
@@ -68,7 +124,8 @@ export async function handleVideoShare(
   // 1. Check if video is ready
   let statusRes: Response;
   try {
-    statusRes = await fetch(`/api/video/status?inviteId=${inviteId}`);
+    const params = new URLSearchParams({ inviteId });
+    statusRes = await fetch(`/api/video/status?${params.toString()}`);
   } catch {
     return { outcome: "error", message: "Network error — please try again." };
   }
@@ -84,25 +141,45 @@ export async function handleVideoShare(
 
   // 2. If video not ready, trigger rendering
   if (!statusJson.videoUrl) {
+    let generateRes: Response;
     try {
-      await fetch("/api/video/generate", {
+      generateRes = await fetch("/api/video/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ inviteId }),
       });
     } catch {
-      // best-effort — the toast still fires
+      return {
+        outcome: "error",
+        message: "Could not start rendering. Try again.",
+      };
     }
+
+    if (!generateRes.ok) {
+      return {
+        outcome: "error",
+        message: "Could not start rendering. Try again.",
+      };
+    }
+
     return {
       outcome: "rendering",
       message: "Video rendering — try again in 30s",
     };
   }
 
-  // 3. Fetch the video blob
+  // 3. SSRF guard — validate videoUrl hostname before fetching
+  if (!isAllowedVideoUrl(statusJson.videoUrl)) {
+    return { outcome: "error", message: "Invalid video source." };
+  }
+
+  // 4. Fetch the video blob
   let blob: Blob;
   try {
     const blobRes = await fetch(statusJson.videoUrl);
+    if (!blobRes.ok) {
+      return { outcome: "error", message: "Video unavailable." };
+    }
     blob = await blobRes.blob();
   } catch {
     return { outcome: "error", message: "Could not download video." };
@@ -111,18 +188,22 @@ export async function handleVideoShare(
   const filename = `${title.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.mp4`;
   const file = new File([blob], filename, { type: "video/mp4" });
 
-  // 4. Try native share (files), fall back to download
+  // 5. Try native share (files), fall back to download
   if (canShareFiles()) {
     try {
       await navigator.share({ files: [file], title });
       capture("invite_shared", { channel: "video", inviteId });
       return { outcome: "shared", message: "Shared!" };
-    } catch {
-      // User cancelled or share failed — fall through to download
+    } catch (error) {
+      // AbortError = user cancelled — silent, no download fallback
+      if ((error as { name?: string })?.name === "AbortError") {
+        return { outcome: "cancelled", message: null };
+      }
+      // Other share failures — fall through to download
     }
   }
 
-  // 5. Download fallback
+  // 6. Download fallback
   triggerDownload(blob, filename);
   return { outcome: "downloaded", message: "Video saved — ready to share!" };
 }

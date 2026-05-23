@@ -41,8 +41,7 @@ export default function MessageReveal({
     visible: {
       opacity: 1,
       y: 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      transition: getReducedMotionTransition(shouldReduce, { duration: 0.5 }) as any,
+      transition: getReducedMotionTransition(shouldReduce, { duration: 0.5 }),
     },
   };
 

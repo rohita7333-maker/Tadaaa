@@ -31,6 +31,6 @@ export function getReducedMotionTransition(
   shouldReduce: boolean | null | undefined,
   normal: object,
   reduced: object = { duration: 0 }
-): object {
-  return shouldReduce === true ? reduced : normal;
+): import("framer-motion").Transition {
+  return (shouldReduce === true ? reduced : normal) as import("framer-motion").Transition;
 }

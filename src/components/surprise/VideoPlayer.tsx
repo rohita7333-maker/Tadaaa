@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Play, AlertCircle, SkipForward } from "lucide-react";
+import { useReducedMotion, getReducedMotionTransition } from "@/lib/a11y";
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -12,6 +13,7 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ videoUrl, onComplete }: VideoPlayerProps) {
   const [playing, setPlaying] = useState(false);
   const [errored, setErrored] = useState(false);
+  const shouldReduce = useReducedMotion();
 
   if (errored) {
     return (
@@ -48,7 +50,7 @@ export default function VideoPlayer({ videoUrl, onComplete }: VideoPlayerProps) 
           className="flex flex-col items-center gap-4"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring" }}
+          transition={getReducedMotionTransition(shouldReduce, { type: "spring" })}
         >
           <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
             <Play className="w-8 h-8 text-white fill-white ml-1" />

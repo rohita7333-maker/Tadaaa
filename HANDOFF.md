@@ -7,16 +7,27 @@ All P0 + P1 + P2 closed. Phase A + B1 + B2 shipped. All SQL migrations applied v
 **Tests:** 47/47 pass · **tsc:** 0 errors · **lint:** 0 errors
 
 **Completed since last handoff:**
-- ✅ All 8 SQL migrations applied directly via Supabase MCP (no manual copy-paste)
-- ✅ GitHub repo: https://github.com/rohita7333-maker/Tadaaa (both branches pushed)
-- ✅ `ANTHROPIC_API_KEY` added to `.env.local` — AI drafter (B1) works locally
+- ✅ All 8 SQL migrations applied via Supabase MCP
+- ✅ GitHub repo: https://github.com/rohita7333-maker/Tadaaa (pushed)
+- ✅ `ANTHROPIC_API_KEY` in `.env.local`
 - ✅ graphify updated — 535 nodes, 1012 edges, 51 communities
 
+**Sprint 2026-05-23: 6 features shipped on `feat/sophistication` (12 commits):**
+- ✅ B3 Video share button — `navigator.share({files})` w/ SSRF guard
+- ✅ E6 A11y + reduced-motion — `useReducedMotionTransition` helper + aria sweep
+- ✅ E4 Weekly digest cron — `/api/cron/weekly-digest` Mon 14:00 UTC, timing-safe auth
+- ✅ E8 Per-recipient signed URLs — 1h TTL on photos/contributions/video, hostname allowlist
+- ✅ D2 $5 gift checkout — Stripe + redeem magic link + 90-day expiry + rate limit
+- ✅ C3 Share copy A/B — PostHog `share_copy_v1` flag, 3 variants
+
+**Test/quality**: 132/132 vitest · tsc 0 errors · lint 0 errors
+
 **Next actions:**
-1. Get Stripe test keys → add to `.env.local` (payments broken until then)
-2. Get Resend API key → add to `.env.local` (emails silent-fail until then)
-3. Connect GitHub repo to Vercel → set prod env vars → deploy
-4. Merge `feat/sophistication` → `main` before Vercel deploy
+1. Get Stripe test keys + create $5 gift Price → add `STRIPE_GIFT_PRICE_ID` to `.env.local`
+2. Get Resend API key → add to `.env.local`
+3. PostHog: create feature flag `share_copy_v1` w/ values `control|personal|intrigue`
+4. Connect GitHub repo to Vercel → set prod env vars → deploy
+5. Merge `feat/sophistication` → `main` before Vercel deploy
 
 ---
 

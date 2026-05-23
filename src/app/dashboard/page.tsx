@@ -21,6 +21,9 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   if (!user) redirect("/auth/signin");
 
+  const creatorName =
+    (user.user_metadata?.full_name as string | undefined)?.trim() || undefined;
+
   const { data: invites, error } = await supabase
     .from("invites")
     .select("*")
@@ -155,6 +158,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           {list.map((invite) => (
             <InviteCard
               key={invite.id}
+              creatorName={creatorName}
               invite={{
                 id: invite.id,
                 slug: invite.slug,

@@ -29,9 +29,10 @@ interface InviteCardProps {
     reveal_type: "tap" | "countdown";
     accept_contributions?: boolean;
   };
+  creatorName?: string;
 }
 
-export default function InviteCard({ invite }: InviteCardProps) {
+export default function InviteCard({ invite, creatorName }: InviteCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [responsesOpen, setResponsesOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -186,6 +187,7 @@ export default function InviteCard({ invite }: InviteCardProps) {
                   slug={invite.slug}
                   title={invite.title}
                   inviteId={invite.id}
+                  creatorName={creatorName}
                   acceptContributions={invite.accept_contributions ?? false}
                 />
               </div>

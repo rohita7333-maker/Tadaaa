@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Check, Share2, QrCode, Users, Video, Loader2 } from "lucide-react";
@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { APP_URL } from "@/lib/constants";
 import { handleVideoShare } from "@/lib/video-share";
+import { getShareCopy, type ShareCopyVariant } from "@/lib/share-copy";
 
 interface ShareButtonsProps {
   slug: string;
   title: string;
   inviteId?: string;
+  creatorName?: string;
   /**
    * When true, renders a secondary "Contribute link" row pointing at
    * /contribute/<slug>. Owner-facing flow: the family-facing link is
@@ -25,7 +27,10 @@ interface ShareButtonsProps {
 // Posthog is loaded lazily via the snippet in layout.tsx after cookie consent.
 // We probe the global rather than importing posthog-js directly so that the
 // capture truly no-ops when the user hasn't accepted cookies (or no key set).
-type PosthogGlobal = { capture?: (event: string, props?: Record<string, unknown>) => void };
+type PosthogGlobal = {
+  capture?: (event: string, props?: Record<string, unknown>) => void;
+  getFeatureFlag?: (flag: string) => string | boolean | undefined;
+};
 function capture(event: string, props?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   const ph = (window as unknown as { posthog?: PosthogGlobal }).posthog;
@@ -37,27 +42,51 @@ function capture(event: string, props?: Record<string, unknown>) {
   }
 }
 
+function getPosthogVariant(): ShareCopyVariant {
+  if (typeof window === "undefined") return "control";
+  try {
+    const ph = (window as unknown as { posthog?: PosthogGlobal }).posthog;
+    if (!ph || typeof ph.getFeatureFlag !== "function") return "control";
+    const flag = ph.getFeatureFlag("share_copy_v1");
+    if (flag === "personal" || flag === "intrigue" || flag === "control") return flag;
+  } catch {
+    // posthog unavailable — degrade gracefully
+  }
+  return "control";
+}
+
 export default function ShareButtons({
   slug,
   title,
   inviteId,
+  creatorName,
   acceptContributions = false,
 }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
   const [contributeCopied, setContributeCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [videoSharing, setVideoSharing] = useState(false);
+  const [copyVariant, setCopyVariant] = useState<ShareCopyVariant>("control");
+
+  // Read PostHog feature flag on mount (client-only, after posthog has loaded).
+  // Pre-mount render must match SSR ("control") to avoid hydration mismatch.
+  // setState-in-effect is correct here — same pattern as LandingShell.tsx.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCopyVariant(getPosthogVariant());
+  }, []);
 
   const url = `${APP_URL}/surprise/${slug}`;
   const contributeUrl = `${APP_URL}/contribute/${slug}`;
-  const waText = encodeURIComponent(`💌 ${title} — Someone made something special for you! Open this: ${url}`);
+  const shareText = getShareCopy(copyVariant, { title, url, creatorName });
+  const waText = encodeURIComponent(shareText);
   const isMobile = typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent);
   const waHref = isMobile
     ? `https://api.whatsapp.com/send?text=${waText}`
     : `https://web.whatsapp.com/send?text=${waText}`;
 
   function trackShare(channel: string) {
-    capture("invite_shared", { channel, inviteId, slug });
+    capture("invite_shared", { channel, inviteId, slug, copy_variant: copyVariant });
   }
 
   async function handleCopy() {
@@ -71,7 +100,7 @@ export default function ShareButtons({
   async function handleShare() {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title, url });
+        await navigator.share({ title: shareText, url });
         trackShare("native");
         return;
       } catch {

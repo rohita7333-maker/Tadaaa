@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/supabase/server", () => ({
-  createServiceClient: async () => ({
-    from: vi.fn().mockReturnValue({
-      upsert: vi.fn().mockResolvedValue({ error: null }),
-    }),
+  createClient: async () => ({
+    rpc: vi.fn().mockResolvedValue({ data: true, error: null }),
   }),
 }));
 
@@ -28,28 +26,27 @@ function makeRequest(params: Record<string, string>) {
 
 describe("GET /api/unsubscribe", () => {
   it("returns 400 for unknown list key", async () => {
-    const res = await GET(makeRequest({ u: "user-1", k: "bogus", t: "tok" }));
+    const res = await GET(makeRequest({ u: "user-1", k: "bogus", t: "tok", d: "20000" }));
     expect(res.status).toBe(400);
   });
 
   it("handles k=monthly and returns 200", async () => {
-    const res = await GET(makeRequest({ u: "user-1", k: "monthly", t: "tok" }));
+    const res = await GET(makeRequest({ u: "user-1", k: "monthly", t: "tok", d: "20000" }));
     expect(res.status).toBe(200);
   });
 
   it("handles k=weekly and returns 200", async () => {
-    // This test FAILS before 'weekly' is added to ListKey / COLUMN_FOR_LIST.
-    const res = await GET(makeRequest({ u: "user-1", k: "weekly", t: "tok" }));
+    const res = await GET(makeRequest({ u: "user-1", k: "weekly", t: "tok", d: "20000" }));
     expect(res.status).toBe(200);
   });
 
   it("handles k=view and returns 200", async () => {
-    const res = await GET(makeRequest({ u: "user-1", k: "view", t: "tok" }));
+    const res = await GET(makeRequest({ u: "user-1", k: "view", t: "tok", d: "20000" }));
     expect(res.status).toBe(200);
   });
 
   it("handles k=answer and returns 200", async () => {
-    const res = await GET(makeRequest({ u: "user-1", k: "answer", t: "tok" }));
+    const res = await GET(makeRequest({ u: "user-1", k: "answer", t: "tok", d: "20000" }));
     expect(res.status).toBe(200);
   });
 });

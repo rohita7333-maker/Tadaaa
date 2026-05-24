@@ -1,25 +1,18 @@
 "use server";
 
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { type QuestionWithAnswers } from "@/lib/types";
 
 export async function saveQuestions(
   inviteId: string,
   questions: { text: string; requireAnswer: boolean }[]
 ) {
-  const authClient = await createClient();
-  const { data: { user } } = await authClient.auth.getUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  const { data: invite } = await authClient
-    .from("invites")
-    .select("creator_id")
-    .eq("id", inviteId)
-    .single();
-  if (!invite || invite.creator_id !== user.id) return { error: "Not found" };
-
-  const supabase = await createServiceClient();
-
+  // RLS policy "Creators can manage questions" enforces creator_id = auth.uid()
+  // via invites join — no ownership check needed in app code beyond getUser().
   await supabase.from("invite_questions").delete().eq("invite_id", inviteId);
 
   if (questions.length === 0) return { ok: true };
@@ -45,24 +38,14 @@ export async function saveQuestions(
 export async function getInviteResponses(
   inviteId: string
 ): Promise<QuestionWithAnswers[] | null> {
-  // Verify creator owns this invite
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: invite } = await supabase
-    .from("invites")
-    .select("id, creator_id")
-    .eq("id", inviteId)
-    .single();
-
-  if (!invite || invite.creator_id !== user.id) return null;
-
-  // Fetch questions with their answers
-  const serviceClient = await createServiceClient();
-  const { data, error } = await serviceClient
+  // RLS on invite_questions ("Creators can manage questions") and invite_answers
+  // ("Creators can view answers to their invites") both scope to auth.uid() —
+  // this query returns null/empty automatically if the caller doesn't own the invite.
+  const { data, error } = await supabase
     .from("invite_questions")
     .select("*, invite_answers(id, question_id, answer, answered_at, user_agent)")
     .eq("invite_id", inviteId)
@@ -90,13 +73,12 @@ export interface InviteInsights {
 export async function getInviteInsights(
   inviteId: string
 ): Promise<InviteInsights | null> {
-  const authClient = await createClient();
-  const {
-    data: { user },
-  } = await authClient.auth.getUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: invite } = await authClient
+  // RLS "Anyone can view active invites" returns the row; view_count is included.
+  const { data: invite } = await supabase
     .from("invites")
     .select("id, creator_id, view_count")
     .eq("id", inviteId)
@@ -104,8 +86,8 @@ export async function getInviteInsights(
 
   if (!invite || invite.creator_id !== user.id) return null;
 
-  const service = await createServiceClient();
-  const { data: rsvpRows } = await service
+  // RLS "owner-read" on invite_rsvps scopes to auth.uid() via invites join.
+  const { data: rsvpRows } = await supabase
     .from("invite_rsvps")
     .select("responded_at, user_agent")
     .eq("invite_id", inviteId)

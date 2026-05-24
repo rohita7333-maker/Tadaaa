@@ -1,28 +1,19 @@
 import Link from "next/link";
-import { Heart, Check, Zap, Star } from "lucide-react";
+import { Heart, Zap, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import PricingCTA from "@/components/pricing/PricingCTA";
-import GiftCTA from "@/components/pricing/GiftCTA";
+import PricingTiers, { type ClientPlan } from "@/components/pricing/PricingTiers";
 
 export const metadata = { title: "Pricing — TaDaaaa" };
 
-type Plan = {
-  name: string;
-  price: string;
-  period: string;
-  description: string;
-  cta: string;
-  planKey: "free" | "plus" | "unlimited" | "gift";
-  highlight: boolean;
-  badge: string | null;
-  features: string[];
-};
-
-const plans: Plan[] = [
+// Pricing source of truth. monthlyPrice/yearlyPrice are numbers so NumberFlow
+// can animate transitions. periodOverride pins the "/x" suffix for plans whose
+// cadence isn't simply monthly/yearly (one-off, per-surprise, gift).
+const plans: ClientPlan[] = [
   {
     name: "Free",
-    price: "$0",
-    period: "forever",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    periodOverride: "forever",
     description: "Try it out. No card needed, ever.",
     cta: "Get started free",
     planKey: "free",
@@ -39,8 +30,9 @@ const plans: Plan[] = [
   },
   {
     name: "Plus",
-    price: "$4.99",
-    period: "per surprise",
+    monthlyPrice: 4.99,
+    yearlyPrice: 4.99,
+    periodOverride: "per surprise",
     description: "Pay only when you create something special.",
     cta: "Create a surprise",
     planKey: "plus",
@@ -57,9 +49,12 @@ const plans: Plan[] = [
     ],
   },
   {
+    // Unlimited — monthly vs yearly is the live toggle in PricingTiers.
+    // yearlyPrice derived as 10x monthly (2 months free).
     name: "Unlimited",
-    price: "$19.99",
-    period: "per year",
+    monthlyPrice: 1.99,
+    yearlyPrice: 19.99,
+    periodOverride: null,
     description: "For the person who loves to celebrate everyone.",
     cta: "Go unlimited",
     planKey: "unlimited",
@@ -78,8 +73,9 @@ const plans: Plan[] = [
   },
   {
     name: "Gift",
-    price: "$5",
-    period: "one invite",
+    monthlyPrice: 5,
+    yearlyPrice: 5,
+    periodOverride: "one invite",
     description: "Send someone the gift of making a surprise.",
     cta: "Buy as a gift",
     planKey: "gift",
@@ -137,83 +133,8 @@ export default async function PricingPage() {
           </p>
         </div>
 
-        {/* Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`rounded-3xl p-8 flex flex-col relative overflow-hidden ${
-                plan.highlight
-                  ? "bg-gradient-to-br from-[#C4686D] to-[#9B3D42] text-white shadow-[0_12px_48px_rgba(196,104,109,0.35)]"
-                  : "bg-white shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30"
-              }`}
-            >
-              {/* Badge */}
-              {plan.badge && (
-                <div
-                  className={`absolute top-5 right-5 text-xs font-bold px-2.5 py-1 rounded-full ${
-                    plan.highlight
-                      ? "bg-white/20 text-white"
-                      : "bg-[#C9A96E]/15 text-[#C9A96E]"
-                  }`}
-                >
-                  {plan.badge}
-                </div>
-              )}
+        <PricingTiers plans={plans} isAuthed={isAuthed} />
 
-              {/* Plan info */}
-              <div className="mb-7">
-                <h2 className={`font-heading text-xl mb-3 ${plan.highlight ? "text-white" : "text-[#2D2926]"}`}>
-                  {plan.name}
-                </h2>
-                <div className="flex items-end gap-1 mb-2">
-                  <span className={`font-heading text-5xl font-bold leading-none ${plan.highlight ? "text-white" : "text-[#2D2926]"}`}>
-                    {plan.price}
-                  </span>
-                  <span className={`text-sm mb-1.5 ${plan.highlight ? "opacity-60" : "text-[#6B5E57]"}`}>
-                    /{plan.period}
-                  </span>
-                </div>
-                <p className={`text-sm leading-relaxed ${plan.highlight ? "opacity-70" : "text-[#6B5E57]"}`}>
-                  {plan.description}
-                </p>
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm">
-                    <Check
-                      className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                        plan.highlight ? "text-white/80" : "text-[#C4686D]"
-                      }`}
-                    />
-                    <span className={plan.highlight ? "text-white/90" : "text-[#2D2926]"}>{f}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA */}
-              {plan.planKey === "gift" ? (
-                <GiftCTA
-                  label={plan.cta}
-                  className={`h-12 rounded-2xl flex items-center justify-center text-sm font-semibold transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white hover:from-[#9B3D42] hover:to-[#C4686D] shadow-md shadow-[#C4686D]/20`}
-                />
-              ) : (
-                <PricingCTA
-                  plan={plan.planKey as "free" | "plus" | "unlimited"}
-                  label={plan.cta}
-                  isAuthed={isAuthed}
-                  className={`h-12 rounded-2xl flex items-center justify-center text-sm font-semibold transition-all duration-300 hover:scale-[1.02] disabled:opacity-60 ${
-                    plan.highlight
-                      ? "bg-white text-[#C4686D] hover:bg-[#FFF0E8] shadow-lg"
-                      : "bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white hover:from-[#9B3D42] hover:to-[#C4686D] shadow-md shadow-[#C4686D]/20"
-                  }`}
-                />
-              )}
-            </div>
-          ))}
-        </div>
 
         {/* Social proof */}
         <div className="mt-16 flex flex-col items-center gap-4">

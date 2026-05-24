@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { STORAGE_BUCKET } from "@/lib/constants";
 import { getThemeById } from "@/lib/themes";
 import { rateLimit } from "@/lib/rate-limit";
+import { getActiveTier, canGenerateVideo } from "@/lib/tier";
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   // Verify ownership + tier
   const { data: invite } = await supabase
     .from("invites")
-    .select("id, creator_id, title, message, theme, video_status")
+    .select("id, creator_id, title, message, theme, video_status, is_paid")
     .eq("id", inviteId)
     .single();
 
@@ -44,13 +45,9 @@ export async function POST(request: NextRequest) {
     .eq("id", user.id)
     .single();
 
-  const tier = profile?.subscription_tier ?? "free";
-  const isActive =
-    tier !== "free" &&
-    (!profile?.subscription_expires_at ||
-      new Date(profile.subscription_expires_at) > new Date());
-
-  if (!isActive) {
+  const activeTier = getActiveTier(profile ?? null);
+  const inviteIsPaid = !!(invite as { is_paid?: boolean }).is_paid;
+  if (!canGenerateVideo(activeTier, inviteIsPaid)) {
     return NextResponse.json(
       { error: "Video generation requires Plus or Unlimited plan" },
       { status: 403 }

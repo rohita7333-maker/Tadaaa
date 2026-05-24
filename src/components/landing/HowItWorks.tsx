@@ -1,32 +1,36 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Palette, ImagePlus, Send, ArrowRight } from "lucide-react";
+import { Palette, ImagePlus, Send } from "lucide-react";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
 
 const steps = [
   {
-    icon: Palette,
-    step: "01",
-    title: "Pick your occasion",
-    description: "Birthday, anniversary, proposal, Mother's Day — choose from 6 occasion types with matching themes and suggested messages.",
-    color: "#C4686D",
-    bg: "#FFF0E8",
-  },
-  {
     icon: ImagePlus,
-    step: "02",
+    step: "01",
     title: "Add photos & a message",
     description: "Upload up to 8 photos as polaroids, write captions, and craft a heartfelt message. Add a playful yes/no question too.",
     color: "#C9A96E",
     bg: "#FFF8E8",
+    span: 2,
+  },
+  {
+    icon: Palette,
+    step: "02",
+    title: "Pick your occasion",
+    description: "Birthday, anniversary, proposal, Mother's Day — 6 occasion types with matching themes.",
+    color: "#C4686D",
+    bg: "#FFF0E8",
+    span: 1,
   },
   {
     icon: Send,
     step: "03",
     title: "Share the magic link",
-    description: "Publish and get a unique link. Share via WhatsApp, iMessage, anywhere. They'll never see it coming.",
+    description: "Publish and get a unique link. Share via WhatsApp, iMessage, anywhere.",
     color: "#6B8F71",
     bg: "#F0F7F1",
+    span: 1,
   },
 ];
 
@@ -51,40 +55,38 @@ export default function HowItWorks() {
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 auto-rows-fr">
           {steps.map((step, i) => (
             <motion.div
               key={step.step}
-              className="relative"
+              className={step.span === 2 ? "md:col-span-2" : "md:col-span-1"}
               initial={{ opacity: 0, y: 32 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.15 }}
             >
-              <div className="bg-[#FFF8F0] rounded-3xl p-7 h-full border border-[#D4CBC3]/20 hover:border-[#D4CBC3]/50 hover:shadow-[0_8px_32px_rgba(45,41,38,0.08)] transition-all duration-300 group">
-                <div className="flex items-center gap-3 mb-5">
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform"
-                    style={{ background: step.bg }}
-                  >
-                    <step.icon className="w-5 h-5" style={{ color: step.color }} />
+              <SpotlightCard
+                className="h-full bg-[#FFF8F0] hover:border-[#D4CBC3]/50 hover:shadow-[0_8px_32px_rgba(45,41,38,0.08)] transition-all duration-300 group"
+              >
+                <div className="p-7 h-full flex flex-col">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform"
+                      style={{ background: step.bg }}
+                    >
+                      <step.icon className="w-5 h-5" style={{ color: step.color }} />
+                    </div>
+                    <span
+                      className="font-heading text-4xl font-bold leading-none"
+                      style={{ color: step.color, opacity: 0.18 }}
+                    >
+                      {step.step}
+                    </span>
                   </div>
-                  <span
-                    className="font-heading text-4xl font-bold leading-none"
-                    style={{ color: step.color, opacity: 0.18 }}
-                  >
-                    {step.step}
-                  </span>
+                  <h3 className="font-heading text-xl text-[#2D2926] mb-3">{step.title}</h3>
+                  <p className="text-[#6B5E57] text-sm leading-relaxed">{step.description}</p>
                 </div>
-                <h3 className="font-heading text-xl text-[#2D2926] mb-3">{step.title}</h3>
-                <p className="text-[#6B5E57] text-sm leading-relaxed">{step.description}</p>
-              </div>
-
-              {i < steps.length - 1 && (
-                <div className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-[#D4CBC3]/40 shadow-sm items-center justify-center">
-                  <ArrowRight className="w-4 h-4 text-[#C4686D]" />
-                </div>
-              )}
+              </SpotlightCard>
             </motion.div>
           ))}
         </div>

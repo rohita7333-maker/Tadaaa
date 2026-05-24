@@ -5,9 +5,68 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MagneticButton } from "@/components/ui/magnetic-button";
+
+function computePasswordStrength(pwd: string): number {
+  if (!pwd) return 0;
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (pwd.length >= 12) score++;
+  if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+  if (/\d/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  return Math.min(4, score);
+}
+
+function PasswordStrengthMeter({ password }: { password: string }) {
+  const shouldReduce = useReducedMotion();
+  const strength = computePasswordStrength(password);
+  const segments = [
+    { color: "#DC6B6B", label: "Weak" },
+    { color: "#E2A56B", label: "Fair" },
+    { color: "#D4B85A", label: "Good" },
+    { color: "#6B8F71", label: "Strong" },
+  ];
+  if (!password) return null;
+  const activeLabel = strength > 0 ? segments[strength - 1].label : "";
+  return (
+    <div className="mt-2 space-y-1.5">
+      <div className="flex gap-1.5">
+        {segments.map((seg, i) => {
+          const active = i < strength;
+          return (
+            <motion.div
+              key={i}
+              className="h-1 flex-1 rounded-full bg-[#D4CBC3]/40 overflow-hidden"
+            >
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: seg.color, originX: 0 }}
+                initial={false}
+                animate={{
+                  scaleX: active ? 1 : 0,
+                  opacity: active ? 1 : 0,
+                }}
+                transition={
+                  shouldReduce
+                    ? { duration: 0.15 }
+                    : { type: "spring", stiffness: 240, damping: 22 }
+                }
+              />
+            </motion.div>
+          );
+        })}
+      </div>
+      <p className="text-[10px] text-[#6B5E57] uppercase tracking-wider font-medium">
+        {activeLabel}
+      </p>
+    </div>
+  );
+}
 import { signIn, signUp, signInWithGoogle, signInWithMagicLink } from "@/actions/auth";
 import { signInSchema, signUpSchema, type SignInValues, type SignUpValues } from "@/lib/schemas";
 import { toast } from "sonner";
@@ -29,10 +88,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
     register,
     handleSubmit,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<SignUpValues | SignInValues>({
     resolver: zodResolver(isSignUp ? signUpSchema : signInSchema),
   });
+
+  const watchedPassword = watch("password") || "";
 
   async function onSubmit(data: SignUpValues | SignInValues) {
     setLoading(true);
@@ -200,6 +262,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           {errors.password && (
             <p className="text-[#C4686D] text-xs">{errors.password.message}</p>
           )}
+          {isSignUp && <PasswordStrengthMeter password={watchedPassword as string} />}
         </div>
 
         {isSignUp && (
@@ -223,14 +286,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </label>
         )}
 
-        <Button
+        <MagneticButton
           type="submit"
           disabled={loading || (isSignUp && !acceptedTerms)}
-          className="w-full h-12 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-semibold transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/25 mt-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full h-12 rounded-2xl font-semibold mt-2"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
           {isSignUp ? "Create account" : "Sign in"}
-        </Button>
+        </MagneticButton>
 
         {!isSignUp && (
           <button

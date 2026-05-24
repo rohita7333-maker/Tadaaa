@@ -1,6 +1,8 @@
 import AuthForm from "@/components/auth/AuthForm";
 import Link from "next/link";
-import { Heart, Star, CheckCircle2 } from "lucide-react";
+import { Heart, Star } from "lucide-react";
+import { GridPattern } from "@/components/ui/grid-pattern";
+import { PerksList } from "@/components/auth/PerksList";
 
 const polaroids = [
   { rotate: "6deg", top: "8%", left: "5%", emoji: "🥳", label: "Best day ever!" },
@@ -28,6 +30,7 @@ export default function SignUpPage() {
               "radial-gradient(ellipse at 70% 20%, rgba(196,104,109,0.25) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(201,169,110,0.2) 0%, transparent 55%)",
           }}
         />
+        <GridPattern variant="dots" cellSize={32} opacity={0.3} strokeColor="#C9A96E" />
         {polaroids.map((p, i) => (
           <div
             key={i}
@@ -54,14 +57,7 @@ export default function SignUpPage() {
           <p className="text-white/60 text-base leading-relaxed max-w-xs mb-8">
             Join thousands creating unforgettable moments for people they love.
           </p>
-          <div className="space-y-3 w-full max-w-xs text-left">
-            {perks.map((perk) => (
-              <div key={perk} className="flex items-center gap-3">
-                <CheckCircle2 className="w-4 h-4 text-[#C9A96E] flex-shrink-0" />
-                <span className="text-white/70 text-sm">{perk}</span>
-              </div>
-            ))}
-          </div>
+          <PerksList perks={perks} />
         </div>
         <div className="relative z-10 px-10 pb-10">
           <div className="bg-white/8 border border-white/10 rounded-2xl p-5">

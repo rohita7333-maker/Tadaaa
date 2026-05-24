@@ -14,6 +14,7 @@ import { deleteInvite } from "@/actions/invite";
 import { APP_URL } from "@/lib/constants";
 import ResponsesModal from "@/components/dashboard/ResponsesModal";
 import ShareButtons from "@/components/dashboard/ShareButtons";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
 
 interface InviteCardProps {
   invite: {
@@ -58,7 +59,21 @@ export default function InviteCard({ invite, creatorName }: InviteCardProps) {
     : "active";
 
   return (
-    <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30 overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgba(45,41,38,0.12)] hover:-translate-y-1.5 group">
+    <SpotlightCard bare className="bg-white rounded-3xl border border-[#D4CBC3]/20 overflow-hidden transition-all duration-300 group"
+      style={{
+        boxShadow: "0 2px 4px rgba(45,41,38,0.04), 0 8px 24px rgba(45,41,38,0.08), 0 24px 48px rgba(45,41,38,0.06)",
+        transform: "translateY(0)",
+        transition: "box-shadow 0.3s ease, transform 0.3s ease",
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 8px rgba(45,41,38,0.06), 0 16px 40px rgba(45,41,38,0.14), 0 40px 80px rgba(45,41,38,0.10)";
+        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-6px)";
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 4px rgba(45,41,38,0.04), 0 8px 24px rgba(45,41,38,0.08), 0 24px 48px rgba(45,41,38,0.06)";
+        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
+      }}
+    >
       {/* Thumbnail preview — click opens preview */}
       <Link
         href={`/surprise/${invite.slug}`}
@@ -120,29 +135,31 @@ export default function InviteCard({ invite, creatorName }: InviteCardProps) {
         </div>
 
         {/* Stats */}
-        <div className="flex items-center gap-3 mb-4 text-sm text-[#6B5E57] bg-[#FFF8F0] rounded-xl px-3 py-2">
-          <span className="flex items-center gap-1.5">
-            <Eye className="w-3.5 h-3.5 text-[#C4686D]" />
-            <span className="font-semibold text-[#2D2926]">{formatViewCount(invite.view_count)}</span>
-            <span className="text-xs">views</span>
-          </span>
-          <div className="w-px h-3.5 bg-[#D4CBC3]" />
-          <span className="flex items-center gap-1.5" title="RSVPs">
-            <Heart className="w-3.5 h-3.5 text-[#C4686D]" />
-            <span className="font-semibold text-[#2D2926]">{invite.rsvp_count ?? 0}</span>
-            <span className="text-xs">RSVPs</span>
-          </span>
-          <div className="w-px h-3.5 bg-[#D4CBC3]" />
-          <span className="flex items-center gap-1.5">
-            <MessageCircle className="w-3.5 h-3.5 text-[#C9A96E]" />
-            <span className="font-semibold text-[#2D2926]">{invite.response_count ?? 0}</span>
-            <span className="text-xs">responses</span>
-          </span>
-          <div className="w-px h-3.5 bg-[#D4CBC3]" />
-          <span className="text-xs">
+        <div className="mb-1 bg-[#FFF8F0] rounded-xl px-3 py-2">
+          <div className="flex items-center gap-3 text-sm text-[#6B5E57]">
+            <span className="flex items-center gap-1.5">
+              <Eye className="w-3.5 h-3.5 text-[#C4686D]" />
+              <span className="font-semibold text-[#2D2926]">{formatViewCount(invite.view_count)}</span>
+              <span className="text-xs">views</span>
+            </span>
+            <div className="w-px h-3.5 bg-[#D4CBC3]" />
+            <span className="flex items-center gap-1.5" title="RSVPs">
+              <Heart className="w-3.5 h-3.5 text-[#C4686D]" />
+              <span className="font-semibold text-[#2D2926]">{invite.rsvp_count ?? 0}</span>
+              <span className="text-xs">RSVPs</span>
+            </span>
+            <div className="w-px h-3.5 bg-[#D4CBC3]" />
+            <span className="flex items-center gap-1.5">
+              <MessageCircle className="w-3.5 h-3.5 text-[#C9A96E]" />
+              <span className="font-semibold text-[#2D2926]">{invite.response_count ?? 0}</span>
+              <span className="text-xs">responses</span>
+            </span>
+          </div>
+          <p className="text-[11px] text-[#9B8E87] mt-1.5">
             {formatDistanceToNow(new Date(invite.created_at), { addSuffix: true })}
-          </span>
+          </p>
         </div>
+        <div className="mb-3" />
 
         {/* Actions */}
         <div className="flex gap-2">
@@ -216,6 +233,6 @@ export default function InviteCard({ invite, creatorName }: InviteCardProps) {
         open={responsesOpen}
         onClose={() => setResponsesOpen(false)}
       />
-    </div>
+    </SpotlightCard>
   );
 }

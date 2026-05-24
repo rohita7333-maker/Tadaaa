@@ -123,7 +123,7 @@ export function AIDraftButton({ onDraft }: { onDraft: (d: Draft) => void }) {
           disabled={loading || !recipient.trim() || !occasion.trim()}
           className="px-4 py-2 rounded-full bg-gradient-to-r from-violet-500 to-pink-500 text-white text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
         >
-          {loading ? "Drafting…" : "Generate"}
+          {loading ? <span className="shimmer-text-gradient">Drafting…</span> : "Generate"}
         </button>
       </div>
     </div>

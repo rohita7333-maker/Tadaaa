@@ -6,7 +6,7 @@ import AvatarUpload from "./AvatarUpload";
 import Link from "next/link";
 import { ArrowLeft, User, Bell, ShieldAlert, Crown, Lock, Download, Sparkles } from "lucide-react";
 import ChangePasswordForm from "./ChangePasswordForm";
-import { SettingsSection, ToggleRow } from "./SettingsAnimated";
+import { SavePreferencesButton, SettingsSection, ToggleRow } from "./SettingsAnimated";
 
 export const metadata = { title: "Settings — TaDaaaa" };
 
@@ -92,8 +92,8 @@ export default async function SettingsPage() {
           className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FFE7D9] to-[#F8B4B8]/60 flex items-center justify-center">
-              <User className="w-4 h-4 text-[#B33A45]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
+              <User className="w-4 h-4 text-[#C4686D]" />
             </div>
             <h2 className="font-heading text-lg text-[#2D2926]">Account</h2>
           </div>
@@ -136,8 +136,8 @@ export default async function SettingsPage() {
           className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FFE9C2] to-[#FFC97A]/60 flex items-center justify-center">
-              <Bell className="w-4 h-4 text-[#B6802A]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
+              <Bell className="w-4 h-4 text-[#C4686D]" />
             </div>
             <h2 className="font-heading text-lg text-[#2D2926]">Notifications</h2>
           </div>
@@ -151,12 +151,7 @@ export default async function SettingsPage() {
                 sub={item.sub}
               />
             ))}
-            <button
-              type="submit"
-              className="mt-4 w-full h-11 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/20"
-            >
-              Save preferences
-            </button>
+            <SavePreferencesButton />
           </form>
         </SettingsSection>
 
@@ -166,8 +161,8 @@ export default async function SettingsPage() {
           className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#F0E6F8] to-[#D4B8E0]/60 flex items-center justify-center">
-              <Lock className="w-4 h-4 text-[#7B61A6]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
+              <Lock className="w-4 h-4 text-[#C4686D]" />
             </div>
             <h2 className="font-heading text-lg text-[#2D2926]">Security</h2>
           </div>
@@ -180,8 +175,8 @@ export default async function SettingsPage() {
           className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E6F2F0] to-[#7CC5C5]/40 flex items-center justify-center">
-              <Download className="w-4 h-4 text-[#2B8A8A]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
+              <Download className="w-4 h-4 text-[#C4686D]" />
             </div>
             <h2 className="font-heading text-lg text-[#2D2926]">Your Data</h2>
           </div>
@@ -202,7 +197,7 @@ export default async function SettingsPage() {
           className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-red-100"
         >
           <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
               <ShieldAlert className="w-4 h-4 text-red-500" />
             </div>
             <h2 className="font-heading text-lg text-red-600">Danger zone</h2>

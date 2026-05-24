@@ -10,6 +10,7 @@ import CountdownReveal from "@/components/surprise/CountdownReveal";
 import ReportButton from "@/components/surprise/ReportButton";
 import Link from "next/link";
 import { Heart } from "lucide-react";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -48,12 +49,11 @@ export default async function SurprisePage({ params }: Props) {
         <p className="text-[#6B5E57] mb-8">
           The link may be invalid or the surprise was deleted.
         </p>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white px-6 py-3 rounded-full font-medium hover:opacity-90 transition-opacity"
-        >
-          <Heart className="w-4 h-4 fill-white" />
-          Create your own surprise
+        <Link href="/" aria-label="Create your own surprise">
+          <MagneticButton type="button" tabIndex={-1}>
+            <Heart className="w-4 h-4 fill-white" />
+            Create your own surprise
+          </MagneticButton>
         </Link>
       </div>
     );
@@ -83,11 +83,10 @@ export default async function SurprisePage({ params }: Props) {
         <p className="text-[#6B5E57] mb-8">
           The moment has passed, but the memory lives on.
         </p>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white px-6 py-3 rounded-full font-medium hover:opacity-90 transition-opacity"
-        >
-          Create a new surprise
+        <Link href="/" aria-label="Create a new surprise">
+          <MagneticButton type="button" tabIndex={-1}>
+            Create a new surprise
+          </MagneticButton>
         </Link>
       </div>
     );

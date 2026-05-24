@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { ImagePlus, X, Loader2, GripVertical } from "lucide-react";
+import { ImagePlus, X, Loader2, GripVertical, Sparkles } from "lucide-react";
 import imageCompression from "browser-image-compression";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { MAX_PHOTOS, PHOTO_MAX_DIMENSION, PHOTO_MAX_SIZE_MB } from "@/lib/constants";
 import { randomRotation } from "@/lib/utils";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const shouldReduce = useReducedMotion();
 
   const processFiles = useCallback(
     async (files: File[]) => {
@@ -116,16 +118,33 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
       {/* Drop zone */}
       {photos.length < MAX_PHOTOS && (
         <div
-          className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 ${
+          className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 ${
             isDragging
-              ? "border-[#C4686D] bg-[#FFF0EE] scale-[1.01]"
+              ? "border-[#C4686D] bg-[var(--rose-glow,#F4D5D7)]/60 scale-[1.01]"
               : "border-[#D4CBC3] bg-[#FFF8F0] hover:border-[#C4686D]/50 hover:bg-[#FFF5F0]"
           }`}
+          onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
         >
+          <AnimatePresence>
+            {isDragging && !compressing && (
+              <motion.div
+                initial={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 4 }}
+                animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+                exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.18 }}
+                className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-lg border border-[#C4686D]/30 text-[#C4686D] font-semibold text-sm">
+                  <Sparkles className="w-4 h-4" />
+                  Drop photos here
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <input
             ref={inputRef}
             type="file"

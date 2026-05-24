@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
 import FloatingPhotos from "./FloatingPhotos";
 import { getReducedMotionTransition } from "@/lib/a11y";
+import { ShimmerText } from "@/components/ui/shimmer-text";
 
 interface MessageRevealProps {
   title: string;
@@ -60,7 +61,7 @@ export default function MessageReveal({
           animate={{ opacity: 1, y: 0 }}
           transition={getReducedMotionTransition(shouldReduce, { duration: 0.6 })}
         >
-          {title}
+          <ShimmerText>{title}</ShimmerText>
         </motion.h2>
 
         <motion.p

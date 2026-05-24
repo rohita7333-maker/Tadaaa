@@ -1,6 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useFormStatus } from "react-dom";
+import { CheckCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { getReducedMotionTransition } from "@/lib/a11y";
 
 interface SectionProps {
@@ -62,12 +65,87 @@ export function ToggleRow({ name, defaultChecked, label, sub }: ToggleProps) {
           aria-hidden="true"
           className="absolute inset-0 rounded-full bg-[#D4CBC3] peer-checked:bg-[#C4686D] peer-focus-visible:ring-2 peer-focus-visible:ring-[#C4686D]/40 transition-colors duration-300"
         />
-        {/* Thumb — peer sibling of checkbox, slides on peer-checked */}
+        {/* Thumb — peer sibling of checkbox, slides on peer-checked.
+            Spring micro-bounce on tap via active: scale (CSS-driven to avoid
+            wiring framer-motion to a hidden checkbox). */}
         <span
           aria-hidden="true"
-          className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 will-change-transform peer-checked:translate-x-5"
+          className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 will-change-transform peer-checked:translate-x-5 peer-active:scale-90 motion-reduce:peer-active:scale-100"
         />
       </div>
     </label>
+  );
+}
+
+/**
+ * Submit button for the notifications form. While the action is pending the
+ * label sweeps with the brand shimmer gradient; once it resolves we briefly
+ * pop a checkmark to confirm the save without yanking the user out of flow.
+ *
+ * Uses useFormStatus so it stays a drop-in replacement for the previous
+ * `<button type="submit">` — no parent rewiring needed.
+ */
+export function SavePreferencesButton() {
+  const shouldReduce = useReducedMotion();
+  const { pending } = useFormStatus();
+  const [justSaved, setJustSaved] = useState(false);
+  const [wasPending, setWasPending] = useState(false);
+
+  useEffect(() => {
+    if (pending) {
+      setWasPending(true);
+      return;
+    }
+    if (wasPending) {
+      setJustSaved(true);
+      const t = window.setTimeout(() => {
+        setJustSaved(false);
+        setWasPending(false);
+      }, 1500);
+      return () => window.clearTimeout(t);
+    }
+  }, [pending, wasPending]);
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="mt-4 w-full h-11 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/20 disabled:opacity-80 relative overflow-hidden"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {justSaved ? (
+          <motion.span
+            key="saved"
+            initial={{ opacity: 0, scale: shouldReduce ? 1 : 0.6 }}
+            animate={
+              shouldReduce
+                ? { opacity: 1, scale: 1 }
+                : { opacity: 1, scale: [1, 1.2, 1] }
+            }
+            exit={{ opacity: 0 }}
+            transition={getReducedMotionTransition(shouldReduce, {
+              duration: 0.4,
+            })}
+            className="inline-flex items-center gap-2"
+          >
+            <CheckCircle className="w-4 h-4" />
+            Saved
+          </motion.span>
+        ) : (
+          <motion.span
+            key="label"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={getReducedMotionTransition(shouldReduce, {
+              duration: 0.15,
+            })}
+            className={pending ? "shimmer-text-gradient" : ""}
+          >
+            {pending ? "Saving…" : "Save preferences"}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </button>
   );
 }

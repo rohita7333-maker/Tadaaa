@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sparkles } from "lucide-react";
+import { ShimmerText } from "@/components/ui/shimmer-text";
 
 /**
  * 3-second intro animation — plays once per session.
@@ -116,7 +117,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.0, duration: 0.4 }}
             >
-              Crafting something special...
+              Crafting something <ShimmerText>special</ShimmerText>...
             </motion.p>
 
             {/* Dot loading indicator */}

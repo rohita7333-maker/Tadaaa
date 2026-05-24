@@ -3,6 +3,10 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Heart, Sparkles, Star, Play } from "lucide-react";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { MagneticButton } from "@/components/ui/magnetic-button";
+import { GridPattern } from "@/components/ui/grid-pattern";
+import { ShimmerText } from "@/components/ui/shimmer-text";
 
 const floatingCards = [
   { emoji: "🎂", title: "Birthday Surprise", views: "142 views", rotate: "-8deg", x: "-60%", y: "-20%", delay: 0 },
@@ -11,19 +15,7 @@ const floatingCards = [
   { emoji: "🎉", title: "Anniversary", views: "67 views", rotate: "9deg", x: "52%", y: "35%", delay: 0.6 },
 ];
 
-function formatCount(n: number): string {
-  if (n >= 10000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k+`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k+`;
-  if (n > 0) return `${n}+`;
-  return "0";
-}
-
 export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) {
-  const stats = [
-    { num: surpriseCount > 0 ? formatCount(surpriseCount) : "Start free", label: "Surprises created" },
-    { num: "98%", label: "Recipients loved it" },
-    { num: "3 min", label: "Average create time" },
-  ];
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden px-6 pt-20 pb-16">
       {/* Background */}
@@ -35,14 +27,8 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
         }}
       />
 
-      {/* Subtle dot grid */}
-      <div
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage: "radial-gradient(circle, #D4CBC3 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-        }}
-      />
+      {/* Subtle grid pattern overlay */}
+      <GridPattern variant="grid" cellSize={48} opacity={0.35} />
 
       <div className="relative z-10 max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -53,9 +39,19 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-flex items-center gap-2 bg-white text-[#C4686D] text-xs font-semibold px-4 py-2 rounded-full mb-8 border border-[#E8A5A8]/40 shadow-sm uppercase tracking-widest">
+              <span className="inline-flex items-center gap-2 bg-white text-[#C4686D] text-xs font-semibold px-4 py-2 rounded-full mb-5 border border-[#E8A5A8]/40 shadow-sm uppercase tracking-widest">
                 <Sparkles className="w-3 h-3 fill-current" />
-                Surprise invite builder
+                New: AI-drafted surprises
+              </span>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.05 }}
+            >
+              <span className="inline-flex items-center gap-2 bg-[#FFF8F0] text-[#6B5E57] text-[11px] font-medium px-3 py-1 rounded-full mb-6 border border-[#D4CBC3]/60">
+                ✨ Surprise invite builder
               </span>
             </motion.div>
 
@@ -67,9 +63,9 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
             >
               Make them
               <br />
-              <span className="text-gradient">feel it</span>
+              feel the <ShimmerText>magic</ShimmerText>
               <br />
-              forever
+              <ShimmerText>forever</ShimmerText>
             </motion.h1>
 
             <motion.p
@@ -87,12 +83,14 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
             >
-              <Link
-                href="/auth/signup"
-                className="inline-flex items-center justify-center h-14 px-8 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-semibold transition-all duration-300 hover:scale-[1.02] pulse-glow shadow-lg shadow-[#C4686D]/25 text-base"
-              >
-                Create a surprise — free
-                <ArrowRight className="ml-2 w-4 h-4" />
+              <Link href="/auth/signup" className="inline-flex">
+                <MagneticButton
+                  className="h-14 px-8 rounded-2xl text-base"
+                  type="button"
+                >
+                  Create a surprise — free
+                  <ArrowRight className="ml-1 w-4 h-4" />
+                </MagneticButton>
               </Link>
               <Link
                 href="#how-it-works"
@@ -110,18 +108,44 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               animate={{ opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.5 }}
             >
-              {stats.map((s, i) => (
-                <motion.div
-                  key={s.label}
-                  className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 + i * 0.1, duration: 0.5 }}
-                >
-                  <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">{s.num}</p>
-                  <p className="text-[#6B5E57] text-[11px] mt-1">{s.label}</p>
-                </motion.div>
-              ))}
+              <motion.div
+                className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+              >
+                <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">
+                  {surpriseCount > 0 ? (
+                    <AnimatedCounter
+                      value={surpriseCount}
+                      format={(v) => `${Math.round(v).toLocaleString()}+`}
+                    />
+                  ) : (
+                    "Start free"
+                  )}
+                </p>
+                <p className="text-[#6B5E57] text-[11px] mt-1">Surprises created</p>
+              </motion.div>
+              <motion.div
+                className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+              >
+                <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">
+                  <AnimatedCounter value={98} format={(v) => `${Math.round(v)}%`} />
+                </p>
+                <p className="text-[#6B5E57] text-[11px] mt-1">Recipients loved it</p>
+              </motion.div>
+              <motion.div
+                className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+              >
+                <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">3 min</p>
+                <p className="text-[#6B5E57] text-[11px] mt-1">Average create time</p>
+              </motion.div>
             </motion.div>
           </div>
 

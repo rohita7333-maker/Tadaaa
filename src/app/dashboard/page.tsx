@@ -6,6 +6,8 @@ import { Plus, Sparkles, Eye, Gift, TrendingUp, MessageCircle, Heart } from "luc
 import InviteCard from "@/components/dashboard/InviteCard";
 import OccasionFilter from "@/components/dashboard/OccasionFilter";
 import OnboardingModal from "@/components/dashboard/OnboardingModal";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
+import CommandPalette from "@/components/dashboard/CommandPalette";
 
 interface Props {
   searchParams: Promise<{ occasion?: string; sort?: string; status?: string }>;
@@ -67,16 +69,19 @@ export default async function DashboardPage({ searchParams }: Props) {
   const totalRsvps = Object.values(rsvpMap).reduce((s, n) => s + n, 0);
   const activeCount = all.filter((inv) => inv.is_active).length;
 
-  const stats = [
+  const stats: { label: string; value: number; icon: typeof Gift; color: string; href: string; hint: string }[] = [
     { label: "Total Surprises", value: all.length, icon: Gift, color: "#C4686D", href: "/dashboard", hint: "All your surprises" },
-    { label: "Total Views", value: totalViews.toLocaleString(), icon: Eye, color: "#C9A96E", href: "/dashboard?sort=views", hint: "Sort by most viewed" },
-    { label: "RSVPs", value: totalRsvps.toLocaleString(), icon: Heart, color: "#C4686D", href: "/dashboard?sort=rsvps", hint: "Sort by most RSVPs" },
-    { label: "Responses", value: totalResponses.toLocaleString(), icon: MessageCircle, color: "#6B8F71", href: "/dashboard?sort=responses", hint: "Sort by responses" },
+    { label: "Total Views", value: totalViews, icon: Eye, color: "#C9A96E", href: "/dashboard?sort=views", hint: "Sort by most viewed" },
+    { label: "RSVPs", value: totalRsvps, icon: Heart, color: "#C4686D", href: "/dashboard?sort=rsvps", hint: "Sort by most RSVPs" },
+    { label: "Responses", value: totalResponses, icon: MessageCircle, color: "#6B8F71", href: "/dashboard?sort=responses", hint: "Sort by responses" },
     { label: "Active", value: activeCount, icon: TrendingUp, color: "#B07CC6", href: "/dashboard?status=active", hint: "Filter to active surprises" },
   ];
 
+  const occasionsInUse = Array.from(new Set(all.map((inv) => inv.occasion_type).filter(Boolean))) as string[];
+
   return (
     <div>
+      <CommandPalette occasionsInUse={occasionsInUse} />
       <OnboardingModal forceShow={all.length === 0} />
       {/* Page header */}
       <div className="flex items-start justify-between mb-8">
@@ -114,7 +119,9 @@ export default async function DashboardPage({ searchParams }: Props) {
                 <s.icon className="w-4 h-4" style={{ color: s.color }} />
               </div>
               <div>
-                <p className="font-heading text-xl text-[#2D2926] font-bold leading-none">{s.value}</p>
+                <p className="font-heading text-xl text-[#2D2926] font-bold leading-none">
+                  <AnimatedCounter value={s.value} />
+                </p>
                 <p className="text-[#6B5E57] text-xs mt-0.5">{s.label}</p>
               </div>
             </Link>

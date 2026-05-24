@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import { type Theme } from "@/lib/themes";
 import { getReducedMotionTransition } from "@/lib/a11y";
 
@@ -84,6 +84,21 @@ export default function PolaroidScroll({
 
   const textColor = theme.colors.text;
   const accentColor = theme.colors.accent;
+
+  // Final-photo sparkle burst — fires when user lands on the last polaroid
+  // (not the notes screen, since notes already feel like an outro).
+  const isFinalPhoto = photos.length > 0 && idx === photos.length - 1 && !shouldReduce;
+  // Deterministic positions so SSR/CSR match.
+  const sparkles = [
+    { x: -120, y: -90, delay: 0 },
+    { x: 110, y: -110, delay: 0.05 },
+    { x: -90, y: 80, delay: 0.1 },
+    { x: 130, y: 60, delay: 0.15 },
+    { x: 0, y: -140, delay: 0.2 },
+    { x: -150, y: 0, delay: 0.25 },
+    { x: 150, y: -20, delay: 0.3 },
+    { x: 20, y: 130, delay: 0.35 },
+  ];
   const showingNotes = hasNotes && idx === photos.length;
   const currentPhoto = !showingNotes ? photos[idx] : null;
   const tilt =
@@ -166,11 +181,42 @@ export default function PolaroidScroll({
                 stiffness: 220,
                 damping: 26,
               })}
-              className="w-full"
+              className="w-full relative"
               style={{
                 filter: "drop-shadow(0 18px 36px rgba(45,41,38,0.25))",
               }}
             >
+              {isFinalPhoto && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                  style={{ zIndex: 30 }}
+                >
+                  {sparkles.map((s, i) => (
+                    <motion.span
+                      key={`spark-${i}`}
+                      initial={{ opacity: 0, x: 0, y: 0, scale: 0.4 }}
+                      animate={{
+                        opacity: [0, 1, 0],
+                        x: s.x,
+                        y: s.y,
+                        scale: [0.4, 1.1, 0.8],
+                      }}
+                      transition={{
+                        duration: 1.4,
+                        delay: s.delay,
+                        ease: "easeOut",
+                      }}
+                      className="absolute"
+                    >
+                      <Sparkles
+                        className="w-4 h-4"
+                        style={{ color: accentColor }}
+                      />
+                    </motion.span>
+                  ))}
+                </div>
+              )}
               <div
                 className="bg-white mx-auto"
                 style={{

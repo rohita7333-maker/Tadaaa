@@ -84,6 +84,11 @@
   --sidebar-accent-foreground: #2D2926;
   --sidebar-border: #D4CBC3;
   --sidebar-ring: #C4686D;
+
+  /* Phase 1 modernization tokens — supporting tints */
+  --rose-glow: #F4D5D7;
+  --midnight: #1F1B19;
+  --cream-deep: #F0E5D8;
 }
 
 @layer base {
@@ -237,12 +242,59 @@
   animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+/* Phase 1: Shimmer for skeleton + text gradients */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(212, 203, 195, 0.15) 0%,
+    rgba(244, 213, 215, 0.5) 50%,
+    rgba(212, 203, 195, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Phase 1: Text gradient sweep (for shimmer-text component) */
+@keyframes shimmerText {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+.shimmer-text-gradient {
+  background: linear-gradient(
+    90deg,
+    var(--rose-deep, #9B3D42) 0%,
+    var(--rose, #C4686D) 25%,
+    var(--gold, #C9A96E) 50%,
+    var(--rose, #C4686D) 75%,
+    var(--rose-deep, #9B3D42) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerText 3.5s linear infinite;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .ken-burns,
   .particle,
   .pulse-glow,
   .animate-fade-in-up,
+  .animate-shimmer,
+  .shimmer-text-gradient,
   .confetti-piece {
     animation: none;
   }

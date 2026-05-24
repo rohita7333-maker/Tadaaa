@@ -117,10 +117,12 @@ describe("GET /api/cron/weekly-digest", () => {
     process.env.CRON_SECRET = "test-cron-secret";
     process.env.NEXT_PUBLIC_SITE_URL = "https://tadaaaa.app";
 
-    // Default: no profiles
+    // Default: no profiles (supports pagination chain)
     mockSupabaseChain.from.mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        eq: vi.fn().mockReturnValue({
+          range: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
       }),
     }));
   });
@@ -161,7 +163,9 @@ describe("GET /api/cron/weekly-digest", () => {
       if (table === "profiles") {
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            eq: vi.fn().mockReturnValue({
+              range: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            }),
           }),
         };
       }
@@ -222,7 +226,9 @@ describe("GET /api/cron/weekly-digest", () => {
       if (table === "profiles") {
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            eq: vi.fn().mockReturnValue({
+              range: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            }),
           }),
         };
       }
@@ -289,7 +295,9 @@ describe("GET /api/cron/weekly-digest", () => {
       if (table === "profiles") {
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            eq: vi.fn().mockReturnValue({
+              range: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            }),
           }),
         };
       }
@@ -327,7 +335,9 @@ describe("GET /api/cron/weekly-digest", () => {
       if (table === "profiles") {
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            eq: vi.fn().mockReturnValue({
+              range: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            }),
           }),
         };
       }
@@ -364,7 +374,9 @@ describe("GET /api/cron/weekly-digest", () => {
       if (table === "profiles") {
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            eq: vi.fn().mockReturnValue({
+              range: vi.fn().mockResolvedValue({ data: profiles, error: null }),
+            }),
           }),
         };
       }
@@ -392,5 +404,42 @@ describe("GET /api/cron/weekly-digest", () => {
     expect(body.failed).toBe(1);
     expect(body.sent).toBe(0);
     expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  // ── Fix 5: cursor-based pagination ───────────────────────────────────────
+  it("fetches profiles in two pages when total exceeds PAGE_SIZE", async () => {
+    // 600 profiles: page 1 returns 500 (= PAGE_SIZE → continue), page 2 returns 100 (< PAGE_SIZE → stop)
+    const PAGE_SIZE = 500;
+    const batch1 = Array.from({ length: PAGE_SIZE }, (_, i) => ({ id: `user-${i}` }));
+    const batch2 = Array.from({ length: 100 }, (_, i) => ({ id: `user-${PAGE_SIZE + i}` }));
+    let profileFetchCount = 0;
+
+    mockSupabaseChain.from.mockImplementation((table: string) => {
+      if (table === "profiles") {
+        profileFetchCount++;
+        const data = profileFetchCount === 1 ? batch1 : batch2;
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              range: vi.fn().mockResolvedValue({ data, error: null }),
+            }),
+          }),
+        };
+      }
+      // Stats tables: zero activity so users are skipped (no email needed)
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            gte: vi.fn().mockResolvedValue({ count: 0, error: null }),
+          }),
+        }),
+      };
+    });
+
+    mockSupabaseChain.auth.admin.getUserById.mockResolvedValue({ data: { user: null } });
+
+    const res = await GET(makeRequest("Bearer test-cron-secret"));
+    expect(res.status).toBe(200);
+    expect(profileFetchCount).toBe(2); // Must have made 2 paginated calls, not 1
   });
 });

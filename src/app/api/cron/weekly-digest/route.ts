@@ -26,12 +26,22 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createServiceClient();
 
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, notify_occasions")
-    .eq("notify_occasions", true);
+  const PAGE_SIZE = 500;
+  const profiles: { id: string }[] = [];
+  let offset = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("notify_occasions", true)
+      .range(offset, offset + PAGE_SIZE - 1);
+    if (error || !data || data.length === 0) break;
+    profiles.push(...data);
+    if (data.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
 
-  if (!profiles || profiles.length === 0) {
+  if (profiles.length === 0) {
     return NextResponse.json({ sent: 0, skipped: 0, failed: 0 });
   }
 

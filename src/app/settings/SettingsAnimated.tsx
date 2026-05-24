@@ -49,7 +49,7 @@ export function ToggleRow({ name, defaultChecked, label, sub }: ToggleProps) {
         <p className="text-sm text-[#2D2926] font-medium">{label}</p>
         <p className="text-xs text-[#6B5E57] mt-0.5">{sub}</p>
       </div>
-      <div className="flex-shrink-0 pt-0.5">
+      <div className="flex-shrink-0 pt-0.5 relative w-11 h-6">
         <input
           type="checkbox"
           name={name}
@@ -57,12 +57,16 @@ export function ToggleRow({ name, defaultChecked, label, sub }: ToggleProps) {
           className="sr-only peer"
           aria-label={label}
         />
+        {/* Track — peer-checked changes bg color */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 rounded-full bg-[#D4CBC3] peer-checked:bg-[#C4686D] peer-focus-visible:ring-2 peer-focus-visible:ring-[#C4686D]/40 transition-colors duration-300"
+        />
+        {/* Thumb — peer sibling of checkbox, slides on peer-checked */}
         <span
           aria-hidden="true"
-          className="block w-11 h-6 rounded-full bg-[#D4CBC3] peer-checked:bg-[#C4686D] peer-focus-visible:ring-2 peer-focus-visible:ring-[#C4686D]/40 transition-colors duration-300 relative peer-checked:[&>span]:translate-x-5"
-        >
-          <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 will-change-transform" />
-        </span>
+          className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 will-change-transform peer-checked:translate-x-5"
+        />
       </div>
     </label>
   );

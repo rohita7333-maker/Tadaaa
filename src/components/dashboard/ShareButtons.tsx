@@ -90,11 +90,15 @@ export default function ShareButtons({
   }
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    toast.success("Link copied!");
-    trackShare("copy");
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("Link copied!");
+      trackShare("copy");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Could not copy — tap the link to copy manually");
+    }
   }
 
   async function handleShare() {
@@ -262,11 +266,15 @@ export default function ShareButtons({
               variant="outline"
               aria-label="Copy contribute link"
               onClick={async () => {
-                await navigator.clipboard.writeText(contributeUrl);
-                setContributeCopied(true);
-                toast.success("Contribute link copied!");
-                trackShare("contribute_copy");
-                setTimeout(() => setContributeCopied(false), 2000);
+                try {
+                  await navigator.clipboard.writeText(contributeUrl);
+                  setContributeCopied(true);
+                  toast.success("Contribute link copied!");
+                  trackShare("contribute_copy");
+                  setTimeout(() => setContributeCopied(false), 2000);
+                } catch {
+                  toast.error("Could not copy — tap the link to copy manually");
+                }
               }}
               className="h-10 px-3 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF0EE] text-xs transition-all duration-200"
             >

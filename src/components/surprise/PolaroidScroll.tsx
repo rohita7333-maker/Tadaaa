@@ -110,7 +110,9 @@ export default function PolaroidScroll({
       type="button"
       onClick={advance}
       aria-label={
-        showingNotes
+        idx + 1 >= totalSteps
+          ? "Finish and continue to the reveal"
+          : showingNotes
           ? "Continue to next part of the surprise"
           : `Photo ${idx + 1} of ${photos.length} — tap for next`
       }

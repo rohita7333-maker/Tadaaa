@@ -247,7 +247,7 @@ export function giftInviteEmail(opts: {
     ``,
     `This link expires in 90 days.`,
   ]
-    .filter((l) => l !== undefined)
+    .filter(Boolean)
     .join("\n");
 
   return { subject, html, text };

@@ -579,3 +579,162 @@ HANDOFF.md is the ship-readiness doc. BUILD_PROCESS.md is the cross-project play
 
 **Branch state:** feat/sophistication — ready to merge + deploy after Stripe/Resend env vars set
 
+
+---
+
+## 2026-05-24 — 4-Phase 21st.dev Modernization + Dev-Server Fix
+
+### Session
+Full-app visual modernization using 21st.dev Magic MCP component catalog.
+
+### Bug Fixed
+**middleware.ts + proxy.ts conflict** — Next.js 16 detected both files and threw unhandled rejection on startup.
+- Fix: deleted `src/middleware.ts` (both files had identical Supabase auth guard; `proxy.ts` is the Next.js 16 convention).
+
+### Phase 1 — Foundation Primitives
+6 new shared UI components in `src/components/ui/`:
+- `animated-counter.tsx` — viewport-triggered spring counter (framer-motion + react-intersection-observer), respects `useReducedMotion()`
+- `skeleton.tsx` — shimmer skeleton base + `InviteCardSkeleton` + `StatTileSkeleton`
+- `magnetic-button.tsx` — mouse-follow spring pull ±8px, disables on touch, rose gradient default
+- `spotlight-card.tsx` — cursor radial gradient via `useMotionTemplate`, `bare` prop to skip chrome
+- `grid-pattern.tsx` — dotted/grid CSS background with radial fade mask
+- `shimmer-text.tsx` — rose→gold gradient sweep on accent words
+
+Also added `@keyframes shimmer` + `@keyframes shimmerText` + 3 CSS tokens (`--rose-glow`, `--midnight`, `--cream-deep`) to `globals.css`.
+
+New deps: `@number-flow/react`, `react-intersection-observer`.
+
+### Phase 2 — Landing + Auth
+- **Hero.tsx**: grid background, "magic" wrapped in ShimmerText, AnimatedCounter for live stats, MagneticButton CTA, eyebrow pill "AI-drafted surprises"
+- **HowItWorks.tsx**: rebuilt as asymmetric bento grid (2+1+1 cols), each cell in SpotlightCard
+- **AuthForm.tsx**: inline `PasswordStrengthMeter` (4 segments, signup only), submit → MagneticButton
+- **PerksList.tsx** (NEW): staggered `motion.li` perks (separate client component because signup/page.tsx is server)
+
+### Phase 3 — Dashboard + Create
+- **dashboard/page.tsx**: AnimatedCounter for stat tiles (removed `format` function prop — RSC can't pass functions to client components)
+- **InviteCard.tsx**: SpotlightCard wrapper, 3-layer floating shadow, -6px hover lift via inline style
+- **CommandPalette.tsx** (NEW): Cmd+K dialog — new surprise, settings, pricing, sign out, filter by occasion; arrow-nav + Enter/Esc
+- **dashboard/loading.tsx** (NEW): Next.js route-segment skeleton (StatTileSkeleton × 5 + InviteCardSkeleton × 3)
+- **StepIndicator.tsx**: numbered circles (completed/active/future states), animated rose fill bar, sticky top progress bar
+- **PhotoUploader.tsx**: drag-over rose dashed border + floating "Drop photos here" badge
+- **MessageEditor.tsx**: floating-label inputs via `peer-placeholder-shown` CSS
+- **AIDraftButton.tsx**: "Drafting…" in shimmer-text-gradient during generation
+
+### Phase 4 — Reveal + Pricing + Settings
+- **PricingTiers.tsx** (NEW): monthly/yearly toggle, NumberFlow animated prices, SpotlightCard per tier, pulse badge on "Most popular", MagneticButton CTAs, staggered feature checklist entrance
+- **pricing/page.tsx**: refactored — server-only header, delegates to `<PricingTiers>` client
+- **PolaroidScroll.tsx**: sparkle burst on final card (8 deterministic positions, framer-motion, reduced-motion safe)
+- **MessageReveal.tsx**: reveal title in ShimmerText
+- **settings/page.tsx**: section headers get icon badge (rose gradient bg)
+- **SettingsAnimated.tsx**: shimmer on save pending, CheckCircle on success (1.5s reset)
+
+### Key Bug Fixed (RSC → CC boundary)
+`format` prop dropped from `<AnimatedCounter>` in dashboard/page.tsx (Server Component passing `(v) => v.toLocaleString()` to Client Component fails React serialization). Default format already handles it.
+
+### SpotlightCard Composition Fix
+Patched to destructure `onMouseEnter/Leave/Move` from props and compose with internal handlers — prevents InviteCard's shadow/lift handlers from being overridden by SpotlightCard.
+
+### Build Status
+- tsc: 0 errors
+- npm test: 171/171 pass
+- Committed: `1d3e440` on `feat/sophistication`
+- Pushed: `https://github.com/rohita7333-maker/Tadaaa`
+
+### Patterns Reinforced
+- **RSC → CC serialization**: functions (closures) can't cross the React Server/Client boundary. Only primitives, plain objects, arrays. Remove function props; use defaults on the client side.
+- **loading.tsx vs inline Suspense**: When a page is a single async function that fetches its own data, `loading.tsx` is the right Suspense boundary — cleaner than manually wrapping each child.
+- **SpotlightCard composition with bare prop**: `bare` prop pattern lets existing styled containers opt into cursor-radial behavior without re-theming — "open for extension, closed for modification."
+- **next/font vs inline Geist**: Project uses next/font for Geist — don't add Google Fonts `<link>`; they're loaded via the layout.
+- **Next.js 16 middleware/proxy**: `middleware.ts` is deprecated; only `proxy.ts` should exist. Both causes unhandled rejection at startup.
+
+### Next Steps
+1. Merge `feat/sophistication` → `main`
+2. Connect to Vercel
+3. Set env vars: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, CRON_SECRET, ANTHROPIC_API_KEY, STRIPE_GIFT_PRICE_ID
+4. Apply any remaining SQL migrations
+
+---
+
+## 2026-05-24 (security fix — rateLimit service-role)
+
+**What happened:** Graphify graph traversal on `rateLimit()` surfaced a security issue. 4 public routes called `rateLimit()` before auth check, opening a service-role Supabase connection for every unauthenticated request.
+
+**Affected routes (rateLimit before auth):**
+- `/api/invite/answer` — line 9 vs auth line 98
+- `/api/invite/rsvp` — public route, no user auth at all
+- `/api/report` — public route, no user auth at all
+- `/api/invite/[slug]/contribute` — public route, no user auth at all
+
+**Root cause:** `rateLimit()` used `createServiceClient()` (service-role key). Service-role = admin DB access. Every anonymous RSVP/answer/report/contribute hit opened a service-role connection unnecessarily.
+
+**Fix shipped:**
+- `src/lib/rate-limit.ts`: `createServiceClient()` → `createClient()` (anon key)
+- `sql/rate_limits_anon_rpc.sql`: rebuilt `consume_rate_limit` with `SECURITY DEFINER` + `GRANT EXECUTE TO anon, authenticated` + `ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY`
+- Migration applied live via Supabase MCP (project `xrlmnlknymgakswsbawk`)
+
+**Verified in Supabase:**
+- `prosecdef: true` — RPC runs as owner regardless of caller
+- `rls_enabled: true` — anon cannot read/write `rate_limits` table directly
+
+**Pattern reinforced:** Supabase SECURITY DEFINER + GRANT EXECUTE to anon = correct pattern for public-callable RPCs that need to write protected tables. Service-role key should only be used when you actually need to bypass RLS (admin operations, webhooks, etc.).
+
+**Commit:** `74c828a` on `feat/sophistication`, pushed to GitHub.
+
+---
+
+## 2026-05-24 (security audit — full privilege review)
+
+**What happened:** Full audit of all `createServiceClient()` usage across the codebase. Found 4 P0s (service-role exposed to unauthenticated public paths) and 2 P1s (overcredentialed but auth-gated). All closed.
+
+### P0 Findings + Fixes
+
+**P0 #1 — `src/lib/invite-view.ts`**
+- `createServiceClient()` used for `increment_view_count` RPC on public view path
+- RPC had no SECURITY DEFINER or GRANT — service-role was the only reason it worked
+- Fix: added SECURITY DEFINER + GRANT to RPC; `invite-view.ts` uses `createClient()` for invite SELECT + RPC; `createAdminClient()` isolated to notification block (profile reads, `auth.admin.getUserById`, email)
+
+**P0 #2 — `src/app/api/invite/rsvp/route.ts`**
+- Service-role on public POST; `invite_rsvps` had RLS enabled with no INSERT policy
+- Fix: new `record_rsvp(p_invite_id, p_visitor_hash, p_user_agent)` SECURITY DEFINER RPC handles validation + upsert atomically, returns `{ok, code}`; route uses `createClient()`
+
+**P0 #3 — `src/app/api/invite/answer/route.ts`**
+- Worst: `auth.admin.getUserById()` called on a public POST route — admin auth API reachable by unauthenticated traffic
+- Fix: new `record_answer(p_question_id, p_invite_id, p_answer, p_user_agent)` SECURITY DEFINER RPC returns `{ok, creator_id, title}`; route uses `createClient()`; `auth.admin.getUserById` moved to `createAdminClient()` inside email block
+
+**P0 #4 — `src/app/api/unsubscribe/route.ts`**
+- Service-role for profiles upsert on public path; HMAC token had no expiry (tokens from 3-year-old emails still valid forever)
+- Fix: new `unsubscribe_user(p_user_id, p_list)` SECURITY DEFINER RPC; `verifyUnsubscribe()` now takes 4 args (added `dayParam`); tokens expire after 90 days via day-granular HMAC input + `d` URL param
+
+### P1 Findings + Fixes
+
+**P1 #1 — `src/actions/questions.ts`**
+- `createServiceClient()` used for `invite_questions`, `invite_answers`, `invite_rsvps` reads/writes after correct `getUser()` + ownership check
+- Discovery: RLS policies already existed and covered everything (`Creators can manage questions` ALL policy, `Creators can view answers` SELECT, `owner-read` on rsvps) — service-role was pure dead weight
+- Fix: removed `createServiceClient()` entirely; all queries use the `createClient()` already initialized for auth; explicit ownership fetch retained in `saveQuestions` so callers get `{ error: "Not found" }` instead of silent RLS no-op returning `ok: true`
+
+**P1 #2 — `expire-invites/route.ts` (already fixed — audit agent false positive)**
+- Audit agent flagged raw `!==` timing oracle; code actually already used `safeBearerCheck()` at line 12. No change needed.
+
+### Cleanup
+- Dead `rsvp_count()` RPC dropped from DB (`drop_dead_rsvp_count_rpc` migration) + removed from `sql/invite_rsvps.sql`
+- `sql/increment_view_count.sql` synced with deployed SECURITY DEFINER state
+
+### SQL Migration
+- `sql/public_rpc_security.sql` — 4 RPCs rebuilt/created with SECURITY DEFINER + GRANT to anon, authenticated; applied live via Supabase MCP
+
+### Tests
+- 7 new unsubscribe tests (expiry, missing-day, tamper cases)
+- `src/app/api/unsubscribe/route.test.ts` updated to mock `createClient` (was `createServiceClient`)
+- All 171 tests pass
+
+### Commits
+- `5f868d3` — fix(security): eliminate service-role from all public request paths
+- `e9fb5f7` — fix(security): drop service-role from questions server actions
+- `723bf67` — fix: restore ownership check in saveQuestions; drop dead rsvp_count RPC
+
+### Pattern Reinforced
+**`createServiceClient()` should never appear on a public (unauthenticated) request path.** The correct pattern:
+- Public reads → `createClient()` (anon, RLS enforced)
+- Public writes to RLS-protected tables → SECURITY DEFINER RPC + `createClient()`
+- `auth.admin.*` calls → `createAdminClient()` (raw service-role, no cookies, narrowly scoped)
+- `createServiceClient()` → cron routes + Stripe webhook only (cross-user, behind auth gate)

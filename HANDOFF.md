@@ -1,40 +1,42 @@
-# TaDaaaa — Session Handoff (2026-05-23)
+# TaDaaaa — Session Handoff (2026-05-24)
 
-## Status: LOCAL-READY · DEPLOY-PENDING · CODE-REVIEW-CLEAN
+## Status: LOCAL-READY · DEPLOY-PENDING · MODERNIZED · SECURITY-HARDENED
 
-All P0 + P1 + P2 closed. Phase A + B1 + B2 + B3 shipped. All SQL migrations applied. 7 code-review issues fixed. Branch clean.
+All P0 + P1 + P2 closed. Phase A + B1 + B2 + B3 + full 21st.dev modernization + full privilege audit + security hardening shipped. All SQL migrations applied live in Supabase. Branch clean.
 
 **Tests:** 171/171 pass · **tsc:** 0 errors · **lint:** 0 errors (13 pre-existing warnings)
 
-**Completed since last handoff:**
-- ✅ All 8 SQL migrations applied via Supabase MCP
-- ✅ GitHub repo: https://github.com/rohita7333-maker/Tadaaa (pushed)
-- ✅ `ANTHROPIC_API_KEY` in `.env.local`
-- ✅ graphify updated — 535 nodes, 1012 edges, 51 communities
+**Latest commit:** `723bf67` on `feat/sophistication` — fix: restore ownership check in saveQuestions; drop dead rsvp_count RPC
 
-**Sprint 2026-05-23: 6 features + 7 code-review fixes on `feat/sophistication`:**
-- ✅ B3 Video share button — `navigator.share({files})` w/ SSRF guard
-- ✅ E6 A11y + reduced-motion — `useReducedMotionTransition` helper + aria sweep
-- ✅ E4 Weekly digest cron — `/api/cron/weekly-digest` Mon 14:00 UTC, timing-safe auth
-- ✅ E8 Per-recipient signed URLs — 1h TTL on photos/contributions/video, hostname allowlist
-- ✅ D2 $5 gift checkout — Stripe + redeem magic link + 90-day expiry + rate limit
-- ✅ C3 Share copy A/B — PostHog `share_copy_v1` flag, 3 variants
-- ✅ **CR fix: unsubscribe weekly** — k=weekly now returns 200 (was GDPR violation)
-- ✅ **CR fix: gift tier bypass** — `validateGiftForUser` in createInvite; marks status="used" post-creation
-- ✅ **CR fix: toggle thumb** — SettingsAnimated.tsx peer sibling restructure
-- ✅ **CR fix: clipboard errors** — try/catch + error toast in ShareButtons.tsx
-- ✅ **CR fix: digest pagination** — PAGE_SIZE=500 range() loop in weekly-digest route
-- ✅ **CR fix: email blank lines** — filter(Boolean) in templates.ts
-- ✅ **CR fix: polaroid aria-label** — final screen shows "Finish and continue to the reveal"
+---
 
-**Test/quality**: 171/171 vitest · tsc 0 errors · lint 0 errors
+## What shipped this session (2026-05-24)
 
-**Next actions (to deploy):**
-1. Get Stripe test keys + create $5 gift Price → add `STRIPE_GIFT_PRICE_ID` to `.env.local`
-2. Get Resend API key → add to `.env.local`
-3. PostHog: create feature flag `share_copy_v1` w/ values `control|personal|intrigue`
-4. Connect GitHub repo to Vercel → set prod env vars → deploy
-5. Merge `feat/sophistication` → `main` before Vercel deploy
+**Bug fix:**
+- ✅ Deleted `src/middleware.ts` — was conflicting with `proxy.ts` (Next.js 16), causing dev server crash
+
+**Security fix #1 — rate limiter (graphify-surfaced):**
+- ✅ `rateLimit()` swapped `createServiceClient()` → `createClient()` — 4 public routes were opening service-role connections on every unauthenticated request
+- ✅ `consume_rate_limit` RPC rebuilt with `SECURITY DEFINER` + `GRANT EXECUTE TO anon, authenticated`
+- ✅ `ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY` — blocks direct table access
+
+**Security fix #2 — full privilege audit (P0 + P1 all closed):**
+- ✅ Audited all `createServiceClient()` usage across codebase — found 4 P0s (service-role on public request paths) + 2 P1s (overcredentialed but auth-gated)
+- ✅ `increment_view_count` RPC: added `SECURITY DEFINER` + `GRANT EXECUTE TO anon, authenticated`; `invite-view.ts` now uses `createClient()` for public reads, `createAdminClient()` for notification block
+- ✅ RSVP route: new `record_rsvp(p_invite_id, p_visitor_hash, p_user_agent)` SECURITY DEFINER RPC handles validation + upsert atomically; route uses `createClient()`
+- ✅ Answer route: new `record_answer(p_question_id, p_invite_id, p_answer, p_user_agent)` SECURITY DEFINER RPC returns `{ok, creator_id, title}`; `auth.admin.getUserById` isolated to `createAdminClient()` in email block
+- ✅ Unsubscribe route: new `unsubscribe_user(p_user_id, p_list)` SECURITY DEFINER RPC; token expiry added (90-day HMAC with day param `d` in URL)
+- ✅ `questions.ts` server actions: removed `createServiceClient()` — RLS policies on `invite_questions`/`invite_answers`/`invite_rsvps` already scope to `auth.uid()`; ownership check retained in `saveQuestions` for clear error messaging
+- ✅ Dead `rsvp_count()` RPC dropped from DB + sql file
+- ✅ `sql/increment_view_count.sql` synced with deployed SECURITY DEFINER state
+- ✅ Migration `public_rpc_security.sql` applied live in Supabase
+- ✅ 7 new unsubscribe tests (expiry, missing-day, tamper cases); all 171 tests pass
+
+**4-Phase 21st.dev Modernization:**
+- ✅ Phase 1 — 6 new UI primitives: animated-counter, skeleton, magnetic-button, spotlight-card, grid-pattern, shimmer-text + CSS tokens + keyframes + deps
+- ✅ Phase 2 — Landing + Auth: bento HowItWorks, hero grid + shimmer + animated counters + magnetic CTA, password strength meter, staggered perks list
+- ✅ Phase 3 — Dashboard + Create: stat animated counters, spotlight floating invite cards, Cmd+K command palette, loading skeleton, step indicator w/ progress bar, floating-label inputs, drag-over uploader
+- ✅ Phase 4 — Pricing + Settings + Reveal: NumberFlow price toggle, PricingTiers client component, sparkle burst on final polaroid, ShimmerText reveal title, settings icon badges, shimmer/success save button
 
 ---
 
@@ -44,255 +46,101 @@ All P0 + P1 + P2 closed. Phase A + B1 + B2 + B3 shipped. All SQL migrations appl
 |---|---|---|
 | TypeScript | exit 0 | `npx tsc --noEmit` |
 | Tests | 171/171 pass | `npm test` (vitest) |
-| Lint | 0 errors | 10 warnings (intentional) |
-| Browser QA | 0 console errors | Playwright probed `/`, `/auth/signin`, `/auth/signup`, `/auth/verify-email`, `/pricing`, `/settings` |
-| Google OAuth | Verified live | Provider enabled in Supabase; client ID + secret configured in Google Cloud |
-| Dev server | http://localhost:3000 | Restart cleanly via `npm run dev` from `surprise-invite/` |
-| Branch | feat/sophistication | 15 commits ahead of main — merge when ready to deploy |
+| Lint | 0 errors | 13 warnings (intentional) |
+| Dev server | http://localhost:3000 | `npm run dev` from `surprise-invite/` |
+| Branch | feat/sophistication | 5 commits ahead of main |
 | GitHub | pushed | https://github.com/rohita7333-maker/Tadaaa |
-| SQL migrations | all applied | via Supabase MCP 2026-05-23 |
+| SQL migrations | all applied | via Supabase MCP (incl. rate_limits_anon_rpc, public_rpc_security) |
 | ANTHROPIC_API_KEY | .env.local ✅ | AI drafter works locally |
 | Stripe | .env.local placeholder | need real test keys |
-| Resend | .env.local empty | emails silent-fail |
+| Resend | .env.local empty | emails silent-fail locally |
+| Google OAuth | Verified live | Provider + Google Cloud client configured |
 
 ---
-
-## Total fixes shipped
-
-- **14 P0** ship-blockers (Stripe webhook hardening, rate limiter, atomic claims, view-count race, etc.)
-- **25 P1** (RSVP, paywall, retries, unsubscribe, tests, error boundaries, PWA, onboarding, etc.)
-- **8 P2** (lint baseline cleared, CSP tightened, aria-labels, VideoPlayer fallback, etc.)
-- **3 SSR/CSR hydration** mismatches (LandingShell, OnboardingModal, create/page.tsx)
-- **1 dev-server reframe** (Google "provider not enabled" → friendly toast)
-
-Full per-item breakdown lives in `memory/diary.md`.
-
----
-
-## P0 — DONE
-
-| # | Area | Fix |
-|---|---|---|
-| 1 | Stripe webhook tier-mint | `claim_stripe_event` dedupe + `verify_stripe_customer` binding |
-| 2 | Stripe Plus invite mapping | `stripe_session_id` preferred lookup, UNPAID-of-theme fallback |
-| 3 | Video DoS | Per-user 5/hr + atomic `.neq("processing").select()` claim |
-| 4 | Auth IP rate limits | signUp 5/min, signIn 10/min, magicLink 3/min, reset 3/min |
-| 5 | DB-backed rate limiter | `consume_rate_limit` RPC; fails OPEN |
-| 6 | View-count race | `increment_view_count RETURNS INTEGER`; gate on `newCount === 1` |
-| 7 | `getInviteBySlug` active filter | is_active + status + expires_at |
-| 8 | Cron split-brain | Sets both `status='expired'` AND `is_active=false` |
-| 9 | Google OAuth try/catch | AuthForm `handleGoogle` w/ finally |
-| 10 | Magic-link DOM antipattern | `getValues("email")` via react-hook-form |
-| 11 | Answer route HTTP 410 | Rejects inactive / expired |
-| 12 | Schema tighten | datetime() check, 10-question cap, 64-char theme |
-| 13 | Premium theme paywall | `createInvite` rejects premium when not Unlimited |
-| 14 | Report API hardening | `inviteId` existence check |
-
-## P1 — DONE (25 items)
-
-| # | Area | Fix |
-|---|---|---|
-| 15 | RSVP black-hole | `invite_rsvps` table + `/api/invite/rsvp` + button wired + dashboard count |
-| 16 | Answer-drop retry | QuestionScreen 3× retry w/ backoff |
-| 17 | Required-question gate | Client blocks advance on retry exhaustion |
-| 18 | Tier expiry honoured | `/create` downgrades stale Unlimited to free |
-| 19 | Pricing CTAs wired | `PricingCTA` client component; Unlimited → checkout |
-| 20 | Premium theme button | `handlePremiumClick` → Stripe; sessionStorage unlock on return |
-| 21 | deleteInvite storage purge | Video + photos cleaned |
-| 22 | deleteAccount session ordering | signOut BEFORE deleteUser; full storage purge |
-| 23 | (covered by 21) | — |
-| 24 | Avatar upload rate limit | 5/hr per user |
-| 25 | CountdownReveal | `useMemo` target Date |
-| 26 | Unsubscribe link + handler | HMAC tokens, `/api/unsubscribe` GET+POST |
-| 27 | Welcome email dedup | `profiles.welcomed_at` gate; fires once from `/auth/callback` |
-| 28 | Verify-email holding screen | `/auth/verify-email` brand-styled |
-| 29 | Magic-link Terms gate | `shouldCreateUser: false` |
-| 30 | Notify default-on + auto-upsert | view + answer routes use `maybeSingle()` |
-| 31 | updatePassword | Requires currentPassword + reverify + rate-limit |
-| 32 | Auth callback allowlist | `safeNext()` blocks open-redirect |
-| 33 | Settings change-password | ChangePasswordForm wired |
-| 34 | Monthly cron batching | `BATCH_SIZE=25` + `Promise.allSettled` |
-| 35 | Test suite | Vitest + 29 tests |
-| 36 | Per-route error boundaries | dashboard, create, surprise |
-| 37 | `vercel.json` | Cron schedule registered |
-| 38 | PWA | `app/manifest.ts` + dynamic `icon1`/`icon2` |
-| 39 | Onboarding modal | Hallmark-designed, sessionStorage-persisted |
-| 40 | View-fetch URL hop | `logInviteViewBySlug` shared lib |
-
-## P2 — DONE
-
-- Lint baseline cleared (6 errors → 0); 10 warnings intentional
-- VideoPlayer onError + skip
-- PhotoCarousel dot aria-label + aria-current
-- Navbar avatar aria-label
-- `releaseSounds(names?)` helper
-- LottieAnimation orphan deleted
-- CSP: `'unsafe-eval'` dev-only via NODE_ENV; `frame-ancestors 'none'`, `form-action 'self'`, `upgrade-insecure-requests`
-- `.nvmrc` pins Node 22
-
-## Hydration fixes (caught via Playwright)
-
-- `LandingShell` — `useState(false)` + `useEffect` sync from sessionStorage
-- `OnboardingModal` — same pattern
-- `create/page.tsx` — `useState([])` / `useState("warm-embrace")` + `useEffect` hydrate from sessionStorage + URL
-- Pattern: SSR-safe defaults; never read `window`/`storage`/`matchMedia` in `useState(() => …)` initializer. Lint rule `react-hooks/set-state-in-effect` disabled per-line with rationale.
-
-## Provider-error reframe (latest)
-
-- `signInWithGoogle` intercepts `"Unsupported provider: provider is not enabled"` and re-frames to: "Google sign-in isn't configured yet. Use email + password or the magic link."
-- User has since enabled the provider in Supabase and added Google Cloud OAuth client. Live test via Playwright: signin → `accounts.google.com` reached with correct `client_id` + `redirect_uri`.
-
----
-
-## SQL Migrations Required (run in Supabase SQL Editor in this order)
-
-```
-sql/increment_view_count.sql       # UPDATED — RETURNS INTEGER
-sql/stripe_events.sql              # NEW — events dedupe + claim_stripe_event()
-sql/rate_limits.sql                # NEW — rate-limit table + consume_rate_limit()
-sql/stripe_customers.sql           # NEW — profiles.stripe_customer_id + verify_stripe_customer()
-sql/invite_rsvps.sql               # NEW — RSVP table + rsvp_count()
-sql/profiles_welcomed_at.sql       # NEW — profiles.welcomed_at flag
-sql/account_audit.sql              # NEW (Phase A) — audit log table + RLS
-sql/ai_drafts.sql                  # NEW (Phase B1) — AI draft log + RLS  ✓ ALREADY RUN
-sql/invite_contributions.sql       # NEW (Phase B2) — contributions table + RLS + invites.accept_contributions
-```
-
-All idempotent (`CREATE OR REPLACE` / `IF NOT EXISTS`).
-
-## Env Vars
-
-```
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# Stripe
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-
-# App (MUST match dev port — mismatch = OAuth callback 500)
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-
-# Email
-RESEND_API_KEY=
-RESEND_FROM_EMAIL=
-
-# Cron + Unsubscribe HMAC (same secret powers both)
-CRON_SECRET=
-
-# Phase A — Sentry, PostHog, Sightengine (fail-open when unset)
-SENTRY_DSN=
-NEXT_PUBLIC_SENTRY_DSN=
-SENTRY_AUTH_TOKEN=
-SENTRY_ORG=
-SENTRY_PROJECT=
-POSTHOG_API_KEY=
-NEXT_PUBLIC_POSTHOG_KEY=
-POSTHOG_HOST=https://app.posthog.com
-NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-SIGHTENGINE_API_USER=
-SIGHTENGINE_API_SECRET=
-
-# Phase B1 — AI invite drafter (TODO: add to Vercel before deploy)
-ANTHROPIC_API_KEY=
-```
-
-## Supabase Dashboard — required config
-
-1. **Authentication → Providers → Google → Enabled** ✓ (done)
-2. **Authentication → URL Configuration**:
-   - **Site URL** = `http://localhost:3000` (dev) — update before prod deploy
-   - **Redirect URLs** allowlist: `http://localhost:3000/auth/callback`, `http://localhost:3000/**`, plus prod URLs
-
-## Google Cloud Console — required config
-
-1. **APIs & Services → Credentials → OAuth 2.0 Client**:
-   - **Authorized JavaScript origins**: `http://localhost:3000`, `https://xrlmnlknymgakswsbawk.supabase.co`
-   - **Authorized redirect URIs**: `https://xrlmnlknymgakswsbawk.supabase.co/auth/v1/callback`
-
----
-
-## Dev Server Runbook
-
-1. From `tadaaaa/surprise-invite/`: `npm run dev`
-2. If Tailwind / Turbopack errors after a workspace change: `rm -rf .next node_modules/.cache && npm run dev`
-3. Never `npm install` at `/ClaudeCodeProject/` or `/tadaaaa/` (parent dirs). Always cd into `surprise-invite/` first.
-4. `NEXT_PUBLIC_APP_URL` MUST match the actual dev port (default 3000). Port mismatch = OAuth callback 500.
 
 ## Deploy Checklist
 
-1. Run the 6 SQL files in Supabase SQL Editor in order
-2. Confirm all env vars in Vercel project settings
-3. Update Supabase **Site URL** to prod URL
-4. Add prod URL to Supabase **Redirect URLs** allowlist
-5. Add prod URL to Google Cloud Console **Authorized JavaScript origins**
-6. Configure Stripe webhook endpoint pointing to `https://<prod>/api/stripe/webhook` with the matching `STRIPE_WEBHOOK_SECRET`
-7. `git push` → Vercel auto-deploys → cron registers from `vercel.json`
-8. Smoke-test: `/auth/signup` → email confirm → `/dashboard`; create invite → share link → view; PWA install
-9. Stripe CLI: `stripe trigger checkout.session.completed` → confirm webhook 200 + idempotent on replay
-10. `/api/cron/expire-invites` + `/api/cron/monthly-email` with `Authorization: Bearer $CRON_SECRET` → 200
+**Before merging to main:**
+- [ ] Stripe: create test Price for $5 gift → get `STRIPE_GIFT_PRICE_ID`
+- [ ] Stripe: get `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`
+- [ ] Resend: get `RESEND_API_KEY`
+- [ ] PostHog: create feature flag `share_copy_v1` (values: `control|personal|intrigue`)
+
+**Vercel deploy:**
+1. Connect GitHub repo (`rohita7333-maker/Tadaaa`) to Vercel
+2. Set env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PLUS_PRICE_ID`, `STRIPE_GIFT_PRICE_ID`, `RESEND_API_KEY`, `CRON_SECRET`, `NEXT_PUBLIC_APP_URL`, `POSTHOG_API_KEY`
+3. After deploy: update Supabase Auth → Site URL + Redirect URLs to prod domain
+4. After deploy: update Stripe webhook URL to prod
+5. Merge `feat/sophistication` → `main`
 
 ---
 
-## Architecture / Patterns (carry-forward)
+## All Features Shipped (cumulative)
 
-Full pattern library: `BUILD_PROCESS.md` (project root). Reusable for future apps.
+### Foundation
+- 4-step create wizard (Occasion → Photos → Message → Publish)
+- 6 occasion types with themes, Polaroid photo uploader, yes/no dodge question, confetti RSVP
 
-Highlights:
-- **Distributed rate limit via Postgres RPC** — no Redis; fails OPEN
-- **3-layer Stripe webhook** — constructEvent → claim_stripe_event → verify_stripe_customer
-- **Atomic claim** — `.neq(field, target).select()` is per-row atomic in Postgres
-- **HMAC unsubscribe** — reuses `CRON_SECRET`; GET+POST per RFC 8058
-- **Welcome dedup** — `profiles.welcomed_at` set on first auth callback
-- **SSR-safe state hydration** — never lazy-init useState from window
-- **Shared lib over server→own-API hop** — extract to a lib both call
-- **Inline derivation > effect-driven clamp**
-- **CSP dev/prod NODE_ENV split** — `unsafe-eval` dev-only
+### Platform
+- Subscription tiers (Free / Plus / Unlimited / Gift), Stripe checkout + webhook + tier enforcement
+- $5 gift purchase → magic-link redemption (90-day expiry)
+- Settings page (notifications, password change, delete account + storage purge)
+- RSVP persistence, content reporting + moderation table
 
-## Known Trade-offs (intentional)
+### Security (all P0 + P1 closed — full privilege audit done)
+- DB-backed rate limiter (`consume_rate_limit` RPC, fails OPEN, anon key)
+- Stripe webhook dedup + customer binding, atomic video claim
+- Auth IP rate limits, server-side theme paywall
+- Atomic view count, open-redirect prevention
+- `record_rsvp`, `record_answer`, `increment_view_count`, `unsubscribe_user` — all SECURITY DEFINER + GRANT to anon; no service-role on public request paths
+- Unsubscribe tokens: 90-day HMAC expiry (day param in URL)
+- `createServiceClient()` confined to cron routes only (cross-user system ops behind `safeBearerCheck`)
 
-- **Stripe Plus per-invite race** — webhook falls back to "most recent UNPAID invite of theme" when `stripe_session_id` doesn't match. Idempotency prevents reruns. Durable fix: pre-stamp `stripe_session_id` at checkout-start OR migrate Plus to credit-balance.
-- **Onboarding modal trigger** — `localStorage.tadaaaa.onboarded`. Per-device, not per-account. Acceptable for soft education.
-- **PWA dynamic icons** — `ImageResponse` adds latency on first install; cached after.
-- **Full CSP nonce migration deferred** — would require Tailwind + framer-motion inline-style refactor.
+### Features
+- AI invite drafter (claude-sonnet-4-6, prompt caching, 10/hr)
+- Collaborative memory invites (contributions + photo upload + merge into polaroids)
+- Video share button (`navigator.share({files})` + download fallback)
+- Onboarding modal (empty dashboard, anti-slop copy)
+- Command palette (Cmd+K, 6 quick actions, arrow nav)
+- HMAC unsubscribe (weekly/monthly/all, RFC 8058)
+- Per-route error boundaries, PWA manifest, vitest suite (171 tests)
 
-## Reusable Artifacts
+### UI Modernization (21st.dev — new this session)
+- Animated spring counters (viewport-triggered, reduced-motion safe)
+- Spotlight cards (cursor radial gradient), floating 3-layer shadows
+- Magnetic buttons (spring pull, touch-safe)
+- Grid/dot backgrounds, shimmer text, NumberFlow price transitions
+- Bento grid HowItWorks, password strength meter
+- Skeleton loading states, step indicator with progress bar
+- Floating-label inputs, drag-over upload highlight
+- Sparkle burst on final polaroid reveal, shimmer + checkmark save
 
-| Path | Purpose |
-|---|---|
-| `BUILD_PROCESS.md` | 12-section playbook for idea→ship |
-| `~/.claude/agents/idea-to-app.md` | Autonomous build agent |
-| `~/.claude/commands/idea-to-app.md` | `/idea-to-app <idea>` slash command |
-| `~/.claude/projects/-Users-rohit-Downloads-ClaudeCodeProject/memory/project_tadaaaa_security_patterns.md` | Pattern library carried forward across projects |
-| `memory/diary.md` | Session-by-session log |
+---
 
-## Genuinely Open (low priority)
+## SQL Migrations Applied (all run)
 
-- Full CSP nonce migration
-- Prettier config
-- Optional auto-`releaseSounds()` on reveal unmount
-- `posthog.identify(user.id)` on client (currently anon-only)
-- `auditAfter()` DRY wrapper in auth.ts (7 boilerplate blocks)
-- Happy-path test for `/api/account/export`
+1. `sql/stripe_events.sql`
+2. `sql/rate_limits.sql`
+3. `sql/stripe_customers.sql`
+4. `sql/increment_view_count.sql`
+5. `sql/invite_rsvps.sql`
+6. `sql/invite_contributions.sql`
+7. `sql/ai_drafts.sql`
+8. `sql/gift_purchases.sql`
+9. `sql/profiles_welcomed_at.sql`
+10. `sql/rate_limits_anon_rpc.sql` — SECURITY DEFINER + RLS on rate_limits (applied 2026-05-24)
+11. `sql/public_rpc_security.sql` — SECURITY DEFINER + anon GRANT for increment_view_count, record_rsvp, record_answer, unsubscribe_user; drops dead rsvp_count RPC (applied 2026-05-24)
 
-## Next Phases (sophistication plan)
+---
 
-- **B2** Collaborative memory invites — multi-contributor photos/questions
-- **B3** Reveal video as default share asset (Remotion already wired)
-- **C–F** Templates marketplace, pricing restructure, Web Push, i18n, edge runtime, Inngest
+## Architecture Notes
 
-## Prior Sessions
+- **Rate limit fails OPEN** — DB outage won't lock everyone out
+- **RSC → CC boundary** — functions can't cross; only primitives. Removed `format` function prop from AnimatedCounter in Server Component.
+- **Next.js 16**: `proxy.ts` is middleware; `middleware.ts` must not exist alongside it
+- **Two-render SSR pattern** — `useState(false)` + `useEffect(() => readStorage())` for window/storage access; lazy initializer = hydration mismatch
+- **loading.tsx vs inline Suspense** — for single async page functions, `loading.tsx` is the correct segment boundary
+- **Supabase least-privilege pattern** — `SECURITY DEFINER` + `GRANT EXECUTE TO anon` on RPCs that need to write protected tables. Service-role key only for true admin ops (webhooks, cron, storage admin). Public routes must use `createClient()` (anon) or `createAdminClient()` for isolated admin API calls — never `createServiceClient()` on a public request path.
+- **`createAdminClient()` vs `createServiceClient()`** — both are service-role but `createAdminClient()` is raw (no cookies), purpose-built for `auth.admin.*` calls. `createServiceClient()` has cookie plumbing — only valid in SSR contexts that legitimately need cross-session service-role access (cron, webhooks).
 
-- 2026-05-18: Phases 1-5 (favicons, OG, avatar, magic link, Lottie/sounds, branded emails, Remotion video, security fixes, PWA manifest, expire cron)
-- 2026-05-20 early: 14 P0 ship-blockers
-- 2026-05-20 mid: 10 high-impact P1
-- 2026-05-20 late: 15 remaining P1 + Hallmark onboarding + tests
-- 2026-05-20 final: P2 polish + lint baseline cleared
-- 2026-05-21: Server restart, hydration fixes, port-sync, BUILD_PROCESS.md + idea-to-app agent; Google OAuth verified live
-- 2026-05-21 sophistication: Phase A — Sentry, PostHog, audit log, GDPR export, Sightengine moderation, cookie consent (10 commits)
-- 2026-05-22: Phase B1 — AI invite drafter; sql/ai_drafts.sql run in Supabase
-- 2026-05-22: Phase B2 — collaborative memory invites (contribute table + RLS, /contribute/[slug] page, ContributeForm, anon upload via service role, surprise reveal renders contributions as polaroids + notes, audit on dedup, React.cache on hot path)
+Full session diary: `memory/diary.md`

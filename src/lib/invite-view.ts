@@ -1,4 +1,4 @@
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email/send";
 import { inviteViewedEmail } from "@/lib/email/templates";
@@ -23,7 +23,8 @@ export async function logInviteViewBySlug(
     return { ok: false, status: 429 };
   }
 
-  const supabase = await createServiceClient();
+  // Anon client — invites table has public SELECT policy for active invites.
+  const supabase = await createClient();
 
   const { data: invite } = await supabase
     .from("invites")
@@ -43,11 +44,16 @@ export async function logInviteViewBySlug(
     return { ok: false, status: 404 };
   }
 
+  // increment_view_count has SECURITY DEFINER + GRANT to anon — no service-role needed.
   const { data: newCount } = await supabase.rpc("increment_view_count", {
     invite_id: invite.id,
   });
 
-  await supabase.from("invite_views").insert({
+  // Notification side-effects use the admin client (no RLS policies on invite_views/profiles
+  // for anon writes, and auth.admin.getUserById requires service-role regardless).
+  const admin = createAdminClient();
+
+  await admin.from("invite_views").insert({
     invite_id: invite.id,
     user_agent: ua.slice(0, 255),
   });
@@ -56,14 +62,14 @@ export async function logInviteViewBySlug(
     // notify_on_view defaults to true. Use maybeSingle + null-coalesce so a
     // user with no profile row (legacy or just-confirmed) still gets notified.
     // Upsert a default row to plug the hole going forward.
-    const { data: profile } = await supabase
+    const { data: profile } = await admin
       .from("profiles")
       .select("notify_on_view")
       .eq("id", invite.creator_id)
       .maybeSingle();
 
     if (!profile) {
-      await supabase.from("profiles").upsert({
+      await admin.from("profiles").upsert({
         id: invite.creator_id,
         notify_on_view: true,
         notify_on_answer: true,
@@ -73,7 +79,7 @@ export async function logInviteViewBySlug(
 
     const wantsNotify = profile?.notify_on_view ?? true;
     if (wantsNotify) {
-      const { data: authUser } = await supabase.auth.admin.getUserById(invite.creator_id);
+      const { data: authUser } = await admin.auth.admin.getUserById(invite.creator_id);
       if (authUser?.user?.email) {
         const name = (authUser.user.user_metadata?.full_name as string) || "there";
         const dashUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://tadaaaa.app"}/dashboard`;

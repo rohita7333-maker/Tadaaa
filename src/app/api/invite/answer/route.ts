@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email/send";
 import { inviteAnsweredEmail } from "@/lib/email/templates";
@@ -22,46 +22,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const supabase = await createServiceClient();
-
-  // Verify invite is still active and not expired
-  const { data: inviteRow } = await supabase
-    .from("invites")
-    .select("id, is_active, expires_at, status")
-    .eq("id", inviteId)
-    .single();
-
-  const isExpired =
-    inviteRow?.expires_at && new Date(inviteRow.expires_at) < new Date();
-
-  if (
-    !inviteRow ||
-    !inviteRow.is_active ||
-    inviteRow.status === "expired" ||
-    isExpired
-  ) {
-    return NextResponse.json({ error: "Invite unavailable" }, { status: 410 });
-  }
-
-  // Verify question belongs to invite
-  const { data: question } = await supabase
-    .from("invite_questions")
-    .select("id")
-    .eq("id", questionId)
-    .eq("invite_id", inviteId)
-    .single();
-
-  if (!question) {
-    return NextResponse.json({ error: "Invalid question" }, { status: 400 });
-  }
-
   const rawUa = request.headers.get("user-agent") ?? "";
-  const { error } = await supabase.from("invite_answers").insert({
-    question_id: questionId,
-    invite_id: inviteId,
-    answer,
-    answered_at: new Date().toISOString(),
-    user_agent: rawUa.slice(0, 255),
+
+  // record_answer has SECURITY DEFINER + GRANT to anon — validates invite, verifies
+  // question ownership, inserts answer, and returns creator_id+title for the notification.
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("record_answer", {
+    p_question_id: questionId,
+    p_invite_id: inviteId,
+    p_answer: answer,
+    p_user_agent: rawUa,
   });
 
   if (error) {
@@ -69,24 +39,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to record answer" }, { status: 500 });
   }
 
-  // Send answer notification email (fire and forget)
-  const { data: invite } = await supabase
-    .from("invites")
-    .select("creator_id, title")
-    .eq("id", inviteId)
-    .single();
+  if (!data?.ok) {
+    if (data?.code === "invalid_question") {
+      return NextResponse.json({ error: "Invalid question" }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Invite unavailable" }, { status: 410 });
+  }
 
-  if (invite) {
-    // Default-on with auto-upsert so missing profile rows still receive emails.
-    const { data: profile } = await supabase
+  // Send answer notification email (fire and forget).
+  // auth.admin.getUserById requires service-role — isolated to this block.
+  if (data.creator_id) {
+    const admin = createAdminClient();
+
+    const { data: profile } = await admin
       .from("profiles")
       .select("notify_on_answer")
-      .eq("id", invite.creator_id)
+      .eq("id", data.creator_id)
       .maybeSingle();
 
     if (!profile) {
-      await supabase.from("profiles").upsert({
-        id: invite.creator_id,
+      await admin.from("profiles").upsert({
+        id: data.creator_id,
         notify_on_view: true,
         notify_on_answer: true,
         notify_occasions: true,
@@ -95,16 +68,16 @@ export async function POST(request: NextRequest) {
 
     const wantsNotify = profile?.notify_on_answer ?? true;
     if (wantsNotify) {
-      const { data: authUser } = await supabase.auth.admin.getUserById(invite.creator_id);
+      const { data: authUser } = await admin.auth.admin.getUserById(data.creator_id);
       if (authUser?.user?.email) {
-        const { data: q } = await supabase
+        const { data: q } = await admin
           .from("invite_questions")
           .select("question_text")
           .eq("id", questionId)
           .single();
         const name = (authUser.user.user_metadata?.full_name as string) || "there";
         const dashUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://tadaaaa.app"}/dashboard`;
-        const email = inviteAnsweredEmail(name, invite.title, q?.question_text || "", answer, dashUrl);
+        const email = inviteAnsweredEmail(name, data.title, q?.question_text || "", answer, dashUrl);
         sendEmail(authUser.user.email, email.subject, email.html).catch(() => {});
       }
     }

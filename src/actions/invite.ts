@@ -6,16 +6,15 @@ import { createInviteSchema, inviteQuestionsSchema } from "@/lib/schemas";
 import { generateInviteSlug } from "@/lib/utils";
 import {
   STORAGE_BUCKET,
-  FREE_INVITE_MONTHLY_LIMIT,
-  SIGNED_URL_EXPIRY_FREE,
-  SIGNED_URL_EXPIRY_PAID,
   SIGNED_URL_TTL_SECONDS,
 } from "@/lib/constants";
+import { getActiveTier, canCreateInvite, canUsePremiumTheme, getSignedUrlExpiry, monthlyInviteLimit } from "@/lib/tier";
 import { signPhotoList, signStorageUrl, extractBucketPath } from "@/lib/sign-storage";
 import { getThemeById } from "@/lib/themes";
 import { trackServer } from "@/lib/analytics";
 import { scanImage } from "@/lib/moderation";
 import { logAudit } from "@/lib/audit";
+import { validateGiftForUser } from "@/lib/gift-redemption";
 
 const MAX_PHOTOS = 8;
 import { revalidatePath } from "next/cache";
@@ -28,6 +27,10 @@ export async function createInvite(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  // Gift redemption bypass: if a valid redeemed gift is attached, skip tier check.
+  const rawGiftId = (formData.get("giftId") as string | null) || null;
+  const validGift = await validateGiftForUser(adminClient, rawGiftId, user.id);
+
   // Check subscription tier and apply rate limits
   const { data: profile } = await supabase
     .from("profiles")
@@ -35,13 +38,9 @@ export async function createInvite(formData: FormData) {
     .eq("id", user.id)
     .single();
 
-  const tier = profile?.subscription_tier ?? "free";
-  const isUnlimited =
-    tier === "unlimited" &&
-    (!profile?.subscription_expires_at ||
-      new Date(profile.subscription_expires_at) > new Date());
+  const activeTier = getActiveTier(profile ?? null);
 
-  if (!isUnlimited) {
+  if (!validGift && monthlyInviteLimit(activeTier) !== null) {
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
@@ -50,11 +49,8 @@ export async function createInvite(formData: FormData) {
       .select("*", { count: "exact", head: true })
       .eq("creator_id", user.id)
       .gte("created_at", monthStart.toISOString());
-    if ((count ?? 0) >= FREE_INVITE_MONTHLY_LIMIT) {
-      return {
-        error: `Monthly limit reached. Free plan allows ${FREE_INVITE_MONTHLY_LIMIT} surprises per month. Upgrade to Unlimited for more!`,
-      };
-    }
+    const check = canCreateInvite(activeTier, count ?? 0);
+    if (!check.allowed) return { error: check.reason! };
   }
 
   const raw = {
@@ -78,7 +74,7 @@ export async function createInvite(formData: FormData) {
   if (!themeMeta) {
     return { error: "Unknown theme" };
   }
-  if (themeMeta.isPremium && !isUnlimited) {
+  if (themeMeta.isPremium && !canUsePremiumTheme(activeTier, false)) {
     return {
       error:
         "Premium theme requires upgrade. Buy this theme on the pricing page or upgrade to Unlimited.",
@@ -277,6 +273,17 @@ export async function createInvite(formData: FormData) {
     }
   }
 
+  // Mark gift as used now that invite is confirmed created.
+  // .eq("status", "redeemed") is an atomic guard: a race that already marked
+  // it "used" simply produces 0 rows updated, which is safe to ignore.
+  if (validGift) {
+    await adminClient
+      .from("gift_purchases")
+      .update({ status: "used" })
+      .eq("id", validGift.id)
+      .eq("status", "redeemed");
+  }
+
   revalidatePath("/dashboard");
   return { slug, inviteId: invite.id };
 }
@@ -376,9 +383,8 @@ async function _getInviteBySlugImpl(slug: string) {
   // Sign photos using Promise.allSettled so one bad photo never aborts the
   // page. TTL is tier-aware: paid invites get 30-day links, free get 7-day.
   // React.cache() on the outer wrapper means this runs once per request.
-  const photoTtl = (invite as { is_paid?: boolean }).is_paid
-    ? SIGNED_URL_EXPIRY_PAID
-    : SIGNED_URL_EXPIRY_FREE;
+  const inviteIsPaid = !!(invite as { is_paid?: boolean }).is_paid;
+  const photoTtl = getSignedUrlExpiry(inviteIsPaid ? "plus" : "free");
   const signedPhotos = await signPhotoList(STORAGE_BUCKET, photos, photoTtl, {
     inviteId: invite.id,
     inviteSlug: slug,

@@ -47,6 +47,11 @@ function readCheckoutReturn(): { theme: string | null; status: "success" | "canc
   return { theme: null, status: null };
 }
 
+function readGiftId(): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("gift");
+}
+
 export default function CreatePage() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -55,6 +60,7 @@ export default function CreatePage() {
   // SSR-safe defaults. Real values get hydrated from sessionStorage/URL in
   // the mount effect below to avoid SSR/CSR hydration mismatches.
   const [unlockedPremium, setUnlockedPremium] = useState<string[]>([]);
+  const [giftId, setGiftId] = useState<string | null>(null);
 
   // Step 2 — Theme, photos, message, reveal
   const [selectedTheme, setSelectedTheme] = useState<string>("warm-embrace");
@@ -79,6 +85,11 @@ export default function CreatePage() {
       }
     }
     fetchTier();
+
+    // Hydrate gift ID from URL — passed from /gift/redeem?token=... redirect.
+    const gid = readGiftId();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (gid) setGiftId(gid);
 
     // Hydrate unlocked-premium state from sessionStorage + URL after mount.
     // Doing this in useState() initializer would mismatch SSR (empty array)
@@ -196,6 +207,7 @@ export default function CreatePage() {
     });
     formData.append("photoCount", String(photos.length));
     formData.append("questions", JSON.stringify(questions));
+    if (giftId) formData.append("giftId", giftId);
 
     const result = await createInvite(formData);
     if (result?.error) {

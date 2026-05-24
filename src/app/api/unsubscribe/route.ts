@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { verifyUnsubscribe } from "@/lib/unsubscribe";
 
-type ListKey = "monthly" | "view" | "answer";
+type ListKey = "monthly" | "weekly" | "view" | "answer";
 
 const COLUMN_FOR_LIST: Record<ListKey, string> = {
   monthly: "notify_occasions",
+  weekly: "notify_occasions",
   view: "notify_on_view",
   answer: "notify_on_answer",
 };

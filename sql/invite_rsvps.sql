@@ -13,12 +13,3 @@ CREATE TABLE IF NOT EXISTS invite_rsvps (
 );
 
 CREATE INDEX IF NOT EXISTS invite_rsvps_invite_idx ON invite_rsvps(invite_id);
-
--- Convenience: aggregate rsvp_count per invite for dashboard.
-CREATE OR REPLACE FUNCTION rsvp_count(p_invite_id UUID)
-RETURNS INTEGER
-LANGUAGE sql
-STABLE
-AS $$
-  SELECT COUNT(*)::INTEGER FROM invite_rsvps WHERE invite_id = p_invite_id;
-$$;

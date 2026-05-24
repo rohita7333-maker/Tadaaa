@@ -11,8 +11,15 @@ export async function saveQuestions(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  // RLS policy "Creators can manage questions" enforces creator_id = auth.uid()
-  // via invites join — no ownership check needed in app code beyond getUser().
+  // Explicit ownership check so callers get a clear error (not silent RLS no-op)
+  // when inviteId is wrong or belongs to another user.
+  const { data: invite } = await supabase
+    .from("invites")
+    .select("creator_id")
+    .eq("id", inviteId)
+    .single();
+  if (!invite || invite.creator_id !== user.id) return { error: "Not found" };
+
   await supabase.from("invite_questions").delete().eq("invite_id", inviteId);
 
   if (questions.length === 0) return { ok: true };

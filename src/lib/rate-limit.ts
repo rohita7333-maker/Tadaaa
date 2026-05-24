@@ -1,4 +1,4 @@
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Distributed rate limiter backed by Postgres via the `consume_rate_limit` RPC.
@@ -6,6 +6,10 @@ import { createServiceClient } from "@/lib/supabase/server";
  *
  * Returns true when the call is allowed, false when blocked.
  * Fails OPEN on DB errors (logged) so a Supabase outage cannot lock everyone out.
+ *
+ * Uses the anon Supabase client — the RPC is SECURITY DEFINER so it executes
+ * with owner privileges regardless of caller. Direct table access is blocked by
+ * RLS. No service-role key needed here.
  *
  * @param key       Unique key (e.g. "auth:signup:1.2.3.4" or "video:<userId>")
  * @param limit     Max calls per window
@@ -17,7 +21,7 @@ export async function rateLimit(
   windowMs: number
 ): Promise<boolean> {
   try {
-    const supabase = await createServiceClient();
+    const supabase = await createClient();
     const { data, error } = await supabase.rpc("consume_rate_limit", {
       p_key: key,
       p_limit: limit,

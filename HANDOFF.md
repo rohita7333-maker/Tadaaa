@@ -1,10 +1,10 @@
 # TaDaaaa — Session Handoff (2026-05-23)
 
-## Status: LOCAL-READY · DEPLOY-PENDING (Phase A + B1 + B2 on feat/sophistication)
+## Status: LOCAL-READY · DEPLOY-PENDING · CODE-REVIEW-CLEAN
 
-All P0 + P1 + P2 closed. Phase A + B1 + B2 shipped. All SQL migrations applied via Supabase MCP. Code pushed to GitHub. Local dev fully wired.
+All P0 + P1 + P2 closed. Phase A + B1 + B2 + B3 shipped. All SQL migrations applied. 7 code-review issues fixed. Branch clean.
 
-**Tests:** 47/47 pass · **tsc:** 0 errors · **lint:** 0 errors
+**Tests:** 171/171 pass · **tsc:** 0 errors · **lint:** 0 errors (13 pre-existing warnings)
 
 **Completed since last handoff:**
 - ✅ All 8 SQL migrations applied via Supabase MCP
@@ -12,17 +12,24 @@ All P0 + P1 + P2 closed. Phase A + B1 + B2 shipped. All SQL migrations applied v
 - ✅ `ANTHROPIC_API_KEY` in `.env.local`
 - ✅ graphify updated — 535 nodes, 1012 edges, 51 communities
 
-**Sprint 2026-05-23: 6 features shipped on `feat/sophistication` (12 commits):**
+**Sprint 2026-05-23: 6 features + 7 code-review fixes on `feat/sophistication`:**
 - ✅ B3 Video share button — `navigator.share({files})` w/ SSRF guard
 - ✅ E6 A11y + reduced-motion — `useReducedMotionTransition` helper + aria sweep
 - ✅ E4 Weekly digest cron — `/api/cron/weekly-digest` Mon 14:00 UTC, timing-safe auth
 - ✅ E8 Per-recipient signed URLs — 1h TTL on photos/contributions/video, hostname allowlist
 - ✅ D2 $5 gift checkout — Stripe + redeem magic link + 90-day expiry + rate limit
 - ✅ C3 Share copy A/B — PostHog `share_copy_v1` flag, 3 variants
+- ✅ **CR fix: unsubscribe weekly** — k=weekly now returns 200 (was GDPR violation)
+- ✅ **CR fix: gift tier bypass** — `validateGiftForUser` in createInvite; marks status="used" post-creation
+- ✅ **CR fix: toggle thumb** — SettingsAnimated.tsx peer sibling restructure
+- ✅ **CR fix: clipboard errors** — try/catch + error toast in ShareButtons.tsx
+- ✅ **CR fix: digest pagination** — PAGE_SIZE=500 range() loop in weekly-digest route
+- ✅ **CR fix: email blank lines** — filter(Boolean) in templates.ts
+- ✅ **CR fix: polaroid aria-label** — final screen shows "Finish and continue to the reveal"
 
-**Test/quality**: 132/132 vitest · tsc 0 errors · lint 0 errors
+**Test/quality**: 171/171 vitest · tsc 0 errors · lint 0 errors
 
-**Next actions:**
+**Next actions (to deploy):**
 1. Get Stripe test keys + create $5 gift Price → add `STRIPE_GIFT_PRICE_ID` to `.env.local`
 2. Get Resend API key → add to `.env.local`
 3. PostHog: create feature flag `share_copy_v1` w/ values `control|personal|intrigue`
@@ -36,7 +43,7 @@ All P0 + P1 + P2 closed. Phase A + B1 + B2 shipped. All SQL migrations applied v
 | Layer | State | Notes |
 |---|---|---|
 | TypeScript | exit 0 | `npx tsc --noEmit` |
-| Tests | 47/47 pass | `npm test` (vitest) |
+| Tests | 171/171 pass | `npm test` (vitest) |
 | Lint | 0 errors | 10 warnings (intentional) |
 | Browser QA | 0 console errors | Playwright probed `/`, `/auth/signin`, `/auth/signup`, `/auth/verify-email`, `/pricing`, `/settings` |
 | Google OAuth | Verified live | Provider enabled in Supabase; client ID + secret configured in Google Cloud |

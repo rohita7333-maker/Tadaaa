@@ -489,3 +489,93 @@ HANDOFF.md is the ship-readiness doc. BUILD_PROCESS.md is the cross-project play
 - Follow-ups documented: orphan-file cleanup cron, explicit getInviteBySlug return type, per-invite rate limit tuning
 
 ---
+
+## 2026-05-23 (Phase B3 — video share button)
+
+**What happened:** Phase B3 (reveal video as default share asset) shipped on `feat/sophistication`. TDD cycle: RED → GREEN → TypeScript + lint clean.
+
+**What was built:**
+- `src/lib/video-share.ts` — pure TS orchestration: fetch status → if ready fetch blob → `navigator.share({files})` with `canShare` gate → download fallback via anchor click; if not ready → POST /api/video/generate; returns typed `VideoShareOutcome` union (`shared|downloaded|rendering|error`)
+- `src/lib/video-share.test.ts` — 9 vitest tests covering: correct status URL, generate POST trigger, native share with File, PostHog event, mobile Safari share rejection → download, no navigator.share → download, canShare false → download, rendering path, HTTP error path. Globals stubbed via `vi.stubGlobal` + `Object.defineProperty` (navigator is read-only).
+- `src/components/dashboard/ShareButtons.tsx` — added `Video`+`Loader2` lucide icons; `videoSharing` state; `handleVideoShareClick` wrapping the helper; UI reorganized into 3-col row (WhatsApp | Video | Share) + 2-col row (Copy | QR); Video button hidden when no `inviteId`; disabled+spinner during fetch; toast for each outcome.
+
+**Key design decisions:**
+- Extracted logic to `video-share.ts` (not inline in component) so it can be tested in node/vitest without jsdom or React Testing Library (vitest config is `environment: node`, `include: src/**/*.test.ts`).
+- `canShare({files})` checked before `navigator.share` to handle the mobile Safari files quirk.
+- `capture` injected as a prop to `handleVideoShare` — no window.posthog probing in helper.
+- Grid shifted to 3-col for primary row; Video button absent (no col taken) when `inviteId` undefined.
+
+**Tests:** 56/56 (was 47; added 9 new)
+
+**Commit:** `4d955e3 feat(b3): video share button on dashboard`
+
+**Build status:** tsc 0, lint 0 errors (10 pre-existing warnings), tests 56/56.
+
+**Pending:**
+- Run `sql/invite_contributions.sql` in Supabase if not yet done (B2 dependency)
+- `ANTHROPIC_API_KEY` → add to Vercel env vars before prod deploy
+- Phase B3 is done — next: merge `feat/sophistication` → `main` + deploy, OR pick next B-phase item
+
+---
+
+## 2026-05-23
+
+**What happened:** D2 — $5 gift checkout shipped.
+
+**What was built:**
+- `giftCheckoutSchema` in `schemas.ts` (mode=gift, recipient_email, optional message/sender_name)
+- `giftInviteEmail()` template in `email/templates.ts` (brand cream+rose, XSS-escaped, plain-text field)
+- `POST /api/stripe/checkout` extended with gift mode — no auth required; anti-self-gift when logged in; reads `STRIPE_GIFT_PRICE_ID` env var
+- Webhook handler: new gift branch; inserts `gift_purchases` (service-role); sends email via Resend; audit log `gift.sent`; email failure → 200 (idempotency already claimed)
+- `GET /gift/redeem?token=X` — validates status+expiry; redirects authed user to `/create?gift=<id>`; unauthenticated → signup with `?next=` redirect
+- `/gift/success` — thank-you page post-Stripe
+- `GiftCTA` modal component — recipient email + optional sender name/message
+- Pricing page updated: Gift tile added (4-col grid on lg)
+- `sql/gift_purchases.sql` added; migration applied via Supabase MCP
+
+**Commit:** f77cbf1
+
+**TODO before prod:**
+- Add `STRIPE_GIFT_PRICE_ID` to Vercel env vars (create $5 Price in Stripe dashboard first)
+- Wire gift bypass in `/create` route: check `?gift=<gift_id>` → look up `gift_purchases` where `redeemed_by = current_user` and `status = redeemed` → skip tier check for that invite
+
+---
+
+## 2026-05-23 (evening)
+
+**What happened:** Code review fixes — 7 issues on feat/sophistication.
+
+**What was fixed:**
+
+**🔴 Critical #1 — Unsubscribe weekly (GDPR)**
+- `src/app/api/unsubscribe/route.ts`: added `"weekly"` to `ListKey` type + `COLUMN_FOR_LIST → "notify_occasions"`
+- k=weekly param now returns 200 instead of 400 (was GDPR violation — users couldn't opt out)
+- Test: `src/app/api/unsubscribe/route.test.ts` (new file, 5 tests)
+
+**🔴 Critical #2 — Gift tier bypass**
+- `src/lib/gift-redemption.ts` (new): `validateGiftForUser(adminClient, giftId, userId)` helper
+- `src/actions/invite.ts`: reads `giftId` from formData; skips monthly cap if gift valid; marks `status="used"` after invite created
+- `src/app/create/page.tsx`: reads `?gift=` from URL on mount, passes in formData during publish
+- Test: `src/lib/gift-redemption.test.ts` (new file, 6 tests)
+
+**🟡 Important #3 — Toggle thumb never slides**
+- `src/app/settings/SettingsAnimated.tsx`: restructured ToggleRow so thumb span is a peer SIBLING of checkbox (was a child of the track span — invalid Tailwind peer usage). `peer-checked:translate-x-5` now works.
+
+**🟡 Important #4 — Clipboard unhandled rejection**
+- `src/components/dashboard/ShareButtons.tsx`: both clipboard copy paths wrapped in try/catch with `toast.error("Could not copy — tap the link to copy manually")`
+
+**🟡 Important #5 — Weekly digest OOM at scale**
+- `src/app/api/cron/weekly-digest/route.ts`: replaced single `.select()` with `PAGE_SIZE=500` cursor loop using `.range(offset, offset+PAGE_SIZE-1)`
+- Updated all 5 profile mocks in `route.test.ts` to include `.range()` in chain; added pagination test (600 profiles → asserts 2 DB calls)
+
+**🟢 Minor #6 — Gift email double blank lines**
+- `src/lib/email/templates.ts`: `.filter(Boolean)` (was `.filter(l => l !== undefined)` — didn't remove empty strings)
+
+**🟢 Minor #7 — PolaroidScroll final aria-label**
+- `src/components/surprise/PolaroidScroll.tsx`: final screen now shows "Finish and continue to the reveal" instead of always showing "Continue to next part of the surprise"
+
+**Build status:** 171/171 tests · tsc 0 errors · lint 0 errors
+**Commits:** fbd210c (criticals) · 1a3063c (importants) · 65ae356 (minors)
+
+**Branch state:** feat/sophistication — ready to merge + deploy after Stripe/Resend env vars set
+

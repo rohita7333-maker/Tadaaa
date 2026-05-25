@@ -44,9 +44,16 @@ export async function POST(request: NextRequest) {
   if (typeof index !== "number" || index < 0 || index > 7) {
     return NextResponse.json({ error: "Invalid index" }, { status: 400 });
   }
-  const ext = ALLOWED_EXT.includes((rawExt ?? "").toLowerCase())
-    ? (rawExt as string).toLowerCase()
-    : "jpg";
+  const ext = (() => {
+    switch ((rawExt ?? "").toLowerCase()) {
+      case "jpg": return "jpg";
+      case "jpeg": return "jpeg";
+      case "png": return "png";
+      case "webp": return "webp";
+      case "gif": return "gif";
+      default: return "jpg";
+    }
+  })();
 
   // Verify the invite belongs to the requesting user before issuing a URL.
   const { data: invite } = await supabase
@@ -60,7 +67,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invite not found" }, { status: 404 });
   }
 
-  const path = `${user.id}/${inviteId}/${index}.${ext}`;
+  const path = `pending/${user.id}/${inviteId}/${index}.${ext}`;
 
   // 10-minute TTL is enough for the upload even on a slow connection.
   const { data, error } = await adminClient.storage

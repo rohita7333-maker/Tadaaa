@@ -240,9 +240,11 @@ export async function finalizeInvite(
 
   const safePhotos = photos.slice(0, MAX_PHOTOS);
 
-  // Validate that each claimed storage path is under the user's own prefix
-  // so a malicious client can't claim ownership of another user's files.
-  const allowedPrefix = `${user.id}/${inviteId}/`;
+  // Validate that each claimed storage path is under the pending/ prefix for
+  // this user+invite. Accepts only paths created by the signed-URL route —
+  // never a direct canonical path — so the copy+delete sequence below is the
+  // only way a file moves to its final location.
+  const allowedPrefix = `pending/${user.id}/${inviteId}/`;
   for (const p of safePhotos) {
     if (!p.path.startsWith(allowedPrefix)) {
       return { error: "Invalid photo path" };
@@ -258,23 +260,33 @@ export async function finalizeInvite(
     sort_order: number;
   }[] = [];
 
+  // Track pending paths for rollback; canonical paths built during the loop.
+  const canonicalPaths: string[] = [];
+
   for (let i = 0; i < safePhotos.length; i++) {
-    const { path, caption, rotation_deg } = safePhotos[i];
+    const { path: pendingPath, caption, rotation_deg } = safePhotos[i];
+
+    // Derive canonical path from the pending path structure.
+    // pending/{userId}/{inviteId}/{index}.{ext} → {userId}/{inviteId}/{index}.{ext}
+    const canonicalPath = pendingPath.replace(/^pending\//, "");
 
     // Sightengine needs to fetch the image. Generate a short-lived signed URL
     // just for the scan — 5 min is enough without leaving a usable link.
     // Fail OPEN if signing fails (same posture as a Sightengine outage).
     const { data: signed } = await adminClient.storage
       .from(STORAGE_BUCKET)
-      .createSignedUrl(path, 60 * 5);
+      .createSignedUrl(pendingPath, 60 * 5);
     const scanUrl = signed?.signedUrl;
 
     if (scanUrl) {
       const { safe, reason } = await scanImage(scanUrl);
       if (!safe) {
-        // Roll back ALL photos + the parent invite row. Partial invites are
-        // worse than no invite for the recipient experience.
-        await adminClient.storage.from(STORAGE_BUCKET).remove(uploadedPaths);
+        // Roll back: delete all pending files + any canonicals already moved +
+        // the parent invite row. Partial invites are worse than no invite.
+        await adminClient.storage.from(STORAGE_BUCKET).remove([
+          ...uploadedPaths,
+          ...canonicalPaths,
+        ]);
         await supabase.from("invites").delete().eq("id", inviteId);
 
         const rejectedReason = reason ?? "unknown";
@@ -297,9 +309,28 @@ export async function finalizeInvite(
       }
     }
 
+    // Moderation passed — move file from pending/ to canonical location.
+    const { error: copyError } = await adminClient.storage
+      .from(STORAGE_BUCKET)
+      .copy(pendingPath, canonicalPath);
+
+    if (copyError) {
+      console.error("[finalizeInvite] Failed to copy pending file:", copyError);
+      await adminClient.storage.from(STORAGE_BUCKET).remove([
+        ...uploadedPaths,
+        ...canonicalPaths,
+      ]);
+      await supabase.from("invites").delete().eq("id", inviteId);
+      return { error: "Failed to process photo. Please try again." };
+    }
+
+    // Delete the pending file now that the canonical copy is in place.
+    await adminClient.storage.from(STORAGE_BUCKET).remove([pendingPath]);
+    canonicalPaths.push(canonicalPath);
+
     photoRecords.push({
       invite_id: inviteId,
-      storage_path: path,
+      storage_path: canonicalPath,
       caption: caption.slice(0, 120),
       rotation_deg: Math.max(-8, Math.min(8, rotation_deg)),
       sort_order: i,
@@ -309,6 +340,9 @@ export async function finalizeInvite(
   if (photoRecords.length > 0) {
     await supabase.from("invite_photos").insert(photoRecords);
   }
+
+  // Activate the invite — only reachable after all photos pass moderation.
+  await supabase.from("invites").update({ is_active: true }).eq("id", inviteId);
 
   revalidatePath("/dashboard");
   return { slug: invite.slug as string, inviteId };

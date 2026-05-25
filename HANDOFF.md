@@ -1,12 +1,47 @@
-# TaDaaaa — Session Handoff (2026-05-24)
+# TaDaaaa — Session Handoff (2026-05-25)
 
-## Status: LOCAL-READY · DEPLOY-PENDING · MODERNIZED · SECURITY-HARDENED
+## Status: LOCAL-READY · DEPLOY-PENDING · MODERNIZED · SECURITY-HARDENED · SEC-001/002/003 CLOSED · CFG-004/005/006 CLOSED
 
-All P0 + P1 + P2 closed. Phase A + B1 + B2 + B3 + full 21st.dev modernization + full privilege audit + security hardening shipped. All SQL migrations applied live in Supabase. Branch clean.
+All 6 code blockers from LAUNCH_PLAN.md closed. Remaining blockers (#7-#10) require external dashboard access.
 
-**Tests:** 171/171 pass · **tsc:** 0 errors · **lint:** 0 errors (13 pre-existing warnings)
+**Tests:** 190/190 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors in untouched UI components
 
-**Latest commit:** `723bf67` on `feat/sophistication` — fix: restore ownership check in saveQuestions; drop dead rsvp_count RPC
+**Latest commit:** `3537711` on `feat/sophistication` — fix(vercel): extend AI drafter timeout and pin region to iad1
+
+---
+
+## What shipped this session (2026-05-25 Hour 2 — code-only)
+
+**CFG-004 — PWA manifest path (CLOSED):**
+- ✅ `layout.tsx`: `manifest: "/manifest.json"` → `manifest: "/manifest.webmanifest"`
+
+**CFG-005 — Missing viewport export (CLOSED):**
+- ✅ `layout.tsx`: Added `export const viewport: Viewport` with `width: "device-width"`, `initialScale: 1`, `themeColor: "#FFF8F0"` (confirmed brand color from globals.css)
+
+**CFG-006 — vercel.json function config (CLOSED):**
+- ✅ `vercel.json`: Added `functions` block (`maxDuration: 30` for draft-invite route) + `regions: ["iad1"]`
+
+**Commits:** `19fef7d` (layout) · `3537711` (vercel)
+
+---
+
+## What shipped this session (2026-05-25 Hour 1)
+
+**SEC-001 — Orphan photo storage (CLOSED):**
+- ✅ `signed-upload-url/route.ts`: path now targets `pending/{user}/{invite}/{i}.{ext}`
+- ✅ `invite.ts` / `finalizeInvite`: validates `pending/` prefix, copies file to canonical path after moderation, deletes pending original; stores canonical path in `invite_photos`
+- ✅ New `/api/cron/sweep-orphans/route.ts`: deletes pending files >30 min old + invite rows (is_active=false, no photos) >30 min old
+- ✅ `vercel.json`: registered sweep-orphans at `0 */6 * * *`
+
+**SEC-002 — Orphan invite rows / quota evasion (CLOSED):**
+- ✅ Monthly cap query now filters `.eq("is_active", true)` — abandoned shells don't count
+- ✅ New invite INSERT defaults `is_active: false`
+- ✅ `finalizeInvite`: flips `is_active: true` only on success past moderation
+
+**SEC-003 — Path ext brittleness (CLOSED):**
+- ✅ `signed-upload-url/route.ts`: replaced `ALLOWED_EXT.includes(userInput).toLowerCase()` with explicit `switch` returning hardcoded string literals
+
+**Tests added:** +17 new tests (invite.test.ts × 5, route.test.ts × 6, sweep-orphans/route.test.ts × 6)
 
 ---
 

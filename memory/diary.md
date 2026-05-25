@@ -2,6 +2,63 @@
 
 ---
 
+## 2026-05-25 — Hour 1: Launch Blockers Closed (SEC-001/002/003)
+
+**What happened:** Executed Hour 1 of LAUNCH_PLAN.md Section 5. Fixed all 3 code blockers that were preventing launch. 190/190 tests pass, 0 tsc errors, 0 lint errors in modified files.
+
+**What was built/changed:**
+
+**SEC-001 — Orphan photo storage attack (FIXED):**
+- `signed-upload-url/route.ts`: signed URLs now point to `pending/{user}/{invite}/{i}.{ext}` not the canonical path. Attackers who get a URL and never finalize can only pollute `pending/`, which the sweep cron cleans.
+- `invite.ts` / `finalizeInvite`: prefix validation now requires `pending/` prefix. After moderation passes, copies each file to canonical `{user}/{invite}/{i}.{ext}` via `adminClient.storage.copy()`, deletes pending original, stores canonical path in `invite_photos`.
+- New `sweep-orphans/route.ts` cron: lists `pending/` tree recursively, deletes files >30 min old; also finds `invites` rows with `is_active=false` and no `invite_photos` joins older than 30 min and deletes them.
+- `vercel.json`: registered sweep at `0 */6 * * *`.
+
+**SEC-002 — Quota evasion via abandoned shells (FIXED):**
+- Monthly cap query in `createInviteShell` now adds `.eq("is_active", true)` so dead shells don't count toward free limit.
+- New invites INSERT with `is_active: false`. Only `finalizeInvite` success path flips `is_active: true`.
+
+**SEC-003 — Path ext brittleness (FIXED):**
+- Replaced `ALLOWED_EXT.includes(userInput)` + `.toLowerCase()` interpolation with explicit `switch` returning hardcoded string literals (`"jpg"`, `"jpeg"`, `"png"`, `"webp"`, `"gif"`). User-controlled string can never reach storage path.
+
+**Commits (3 separate, all on feat/sophistication):**
+- `5e065fa` — fix(invites): gate monthly cap on is_active; default shells inactive
+- `605db70` — fix(photos): harden ext to hardcoded literals in signed-upload-url
+- `109f11f` — fix(photos): quarantine uploads to pending/ and sweep orphans via cron
+
+**Tests:** 173 → 190 (+17 new). All pass.
+
+**Key gotcha:** Supabase Storage `copy()` method needed (not documented prominently). The two-phase pending→canonical move works because `adminClient.storage.from(bucket).copy(fromPath, toPath)` returns `{ data, error }`. After copy succeeds, remove the pending file separately.
+
+**Next (Hour 2 — needs external dashboards):** Fix manifest path, viewport export, vercel.json function config, then Stripe live keys + Resend + Sightengine keys.
+
+---
+
+## 2026-05-25 — Hour 2 (code-only): Config Blockers #4/#5/#6 Closed
+
+**What happened:** Executed code-only portion of LAUNCH_PLAN.md Hour 2. Three config blockers fixed. No external dashboards touched.
+
+**What was built/changed:**
+
+**Blocker #4 — PWA manifest path (FIXED):**
+- `layout.tsx`: `manifest: "/manifest.json"` → `manifest: "/manifest.webmanifest"`. Next.js serves `app/manifest.ts` at `/manifest.webmanifest` — `.json` returned 404, suppressing mobile install prompt.
+
+**Blocker #5 — Viewport export (FIXED):**
+- `layout.tsx`: Added `import type { Viewport }` + `export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#FFF8F0" }`. Next.js 15+ requires viewport as separate named export; brand color confirmed `#FFF8F0` from `globals.css`. Without this: mobile renders at desktop width, browser chrome color doesn't apply.
+
+**Blocker #6 — vercel.json function config (FIXED):**
+- `vercel.json`: Added `"functions"` block with `maxDuration: 30` for `draft-invite/route.ts`. Added `"regions": ["iad1"]`. Default 10s killed ~50% of Anthropic API calls. `iad1` co-locates with Supabase (US-East).
+
+**Commits (2, both on feat/sophistication):**
+- `19fef7d` — fix(layout): fix PWA manifest path and add viewport export
+- `3537711` — fix(vercel): extend AI drafter timeout and pin region to iad1
+
+**Verification:** tsc exit 0 · 4 lint errors (pre-existing) · 190/190 tests pass.
+
+**Remaining (needs human dashboard access):** Blockers #7-#10 — Stripe live keys, Resend API key, Sightengine keys, Vercel env var paste.
+
+---
+
 ## 2026-05-07
 
 **What happened:** Merged MomentAsk's best features into TaDaaaa. MomentAsk was a parallel project built to explore polaroid aesthetics + better question UX — user decided not to maintain two projects.

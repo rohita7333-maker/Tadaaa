@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, DM_Sans, Caveat } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,6 +26,12 @@ const caveat = Caveat({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#FFF8F0",
+};
+
 export const metadata: Metadata = {
   title: "TaDaaaa — Turn Memories Into Magic",
   description:
@@ -41,7 +47,7 @@ export const metadata: Metadata = {
     description: "Create beautiful surprise pages for the people you love ✨",
   },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://tadaaaa.app"),
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({

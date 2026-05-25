@@ -59,7 +59,8 @@ export async function createInviteShell(formData: FormData) {
       .from("invites")
       .select("*", { count: "exact", head: true })
       .eq("creator_id", user.id)
-      .gte("created_at", monthStart.toISOString());
+      .gte("created_at", monthStart.toISOString())
+      .eq("is_active", true);
     const check = canCreateInvite(activeTier, count ?? 0);
     if (!check.allowed) return { error: check.reason! };
   }
@@ -129,6 +130,7 @@ export async function createInviteShell(formData: FormData) {
       expires_at: expiresAt || null,
       occasion_type: occasionType,
       accept_contributions: acceptContributions,
+      is_active: false,
     })
     .select("id")
     .single();

@@ -16,7 +16,7 @@ import PreviewPublish from "@/components/create/PreviewPublish";
 import { AIDraftButton } from "@/components/create/AIDraftButton";
 import { type Theme } from "@/lib/themes";
 import { type Draft } from "@/lib/ai/draft";
-import { createInvite } from "@/actions/invite";
+import { createInviteShell, finalizeInvite } from "@/actions/invite";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
@@ -187,6 +187,7 @@ export default function CreatePage() {
   }
 
   async function handlePublish(): Promise<{ slug: string; inviteId: string } | null> {
+    // Phase 1: create invite shell (metadata only, no binary files).
     const formData = new FormData();
     formData.append("title", title);
     formData.append("theme", selectedTheme);
@@ -200,16 +201,53 @@ export default function CreatePage() {
       formData.append("expiresAt", new Date(expiresAt).toISOString());
     }
     formData.append("acceptContributions", acceptContributions ? "true" : "false");
-    photos.forEach((p, i) => {
-      formData.append(`photo_${i}`, p.file, p.file.name);
-      formData.append(`photo_caption_${i}`, p.caption);
-      formData.append(`photo_rotation_${i}`, String(p.rotation_deg));
-    });
-    formData.append("photoCount", String(photos.length));
     formData.append("questions", JSON.stringify(questions));
     if (giftId) formData.append("giftId", giftId);
 
-    const result = await createInvite(formData);
+    const shell = await createInviteShell(formData);
+    if (shell?.error) {
+      toast.error(shell.error);
+      return null;
+    }
+    if (!shell?.inviteId) return null;
+
+    // Phase 2: upload photos directly to Supabase Storage via signed URLs,
+    // bypassing the Server Action body-size limit entirely.
+    const photoDescriptors: { path: string; caption: string; rotation_deg: number }[] = [];
+
+    for (let i = 0; i < photos.length; i++) {
+      const p = photos[i];
+      const rawExt = (p.file.name.split(".").pop() ?? "jpg").toLowerCase();
+      const ext = ["jpg", "jpeg", "png", "webp", "gif"].includes(rawExt) ? rawExt : "jpg";
+
+      // Request a signed upload URL from the server.
+      const urlRes = await fetch("/api/photos/signed-upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteId: shell.inviteId, index: i, ext }),
+      });
+      if (!urlRes.ok) {
+        toast.error("Failed to prepare photo upload. Please try again.");
+        return null;
+      }
+      const { path, signedUrl } = await urlRes.json() as { path: string; signedUrl: string };
+
+      // Upload the binary directly to Supabase — no Next.js middleware involved.
+      const uploadRes = await fetch(signedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": p.file.type || "image/jpeg" },
+        body: p.file,
+      });
+      if (!uploadRes.ok) {
+        toast.error(`Failed to upload photo ${i + 1}. Please try again.`);
+        return null;
+      }
+
+      photoDescriptors.push({ path, caption: p.caption, rotation_deg: p.rotation_deg });
+    }
+
+    // Phase 3: finalize — server runs moderation + inserts invite_photos rows.
+    const result = await finalizeInvite(shell.inviteId, photoDescriptors);
     if (result?.error) {
       toast.error(result.error);
       return null;

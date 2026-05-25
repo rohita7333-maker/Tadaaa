@@ -20,7 +20,18 @@ const MAX_PHOTOS = 8;
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
-export async function createInvite(formData: FormData) {
+// ---------------------------------------------------------------------------
+// createInviteShell
+// ---------------------------------------------------------------------------
+// Phase 1 of the two-phase publish flow.  Creates the invite row + validates
+// all metadata.  Does NOT accept photos — the client uploads photos directly
+// to Supabase Storage using signed URLs from /api/photos/signed-upload-url,
+// then calls finalizeInvite() to run moderation + insert invite_photos rows.
+//
+// This split eliminates the 1 MB Server Action body-size limit that fires when
+// users upload multiple photos through FormData.
+// ---------------------------------------------------------------------------
+export async function createInviteShell(formData: FormData) {
   const supabase = await createClient();
   const adminClient = createAdminClient();
 
@@ -138,10 +149,105 @@ export async function createInvite(formData: FormData) {
     });
   });
 
-  // Upload photos with caption + rotation
-  const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-  const ALLOWED_EXT = ["jpg", "jpeg", "png", "webp", "gif"];
-  const photoCount = Math.min(parseInt(formData.get("photoCount") as string) || 0, MAX_PHOTOS);
+  // Save questions with yes/no labels + dodge flag.
+  // Server-side validated: cap count, cap field lengths. Reject malformed JSON.
+  const questionsJson = formData.get("questions") as string | null;
+  if (questionsJson && questionsJson.length < 10_000) {
+    try {
+      const parsed = inviteQuestionsSchema.safeParse(JSON.parse(questionsJson));
+      if (parsed.success) {
+        const questions = parsed.data;
+        const nonEmpty = questions.filter((q) => q.text.trim().length > 0);
+        if (nonEmpty.length > 0) {
+          // Determine enable_dodge_no from first question (invite-level)
+          const enableDodge = nonEmpty[0].enableDodge ?? true;
+          await supabase
+            .from("invites")
+            .update({ enable_dodge_no: enableDodge })
+            .eq("id", invite.id);
+
+          const records = nonEmpty.map((q, i) => ({
+            invite_id: invite.id,
+            question_text: q.text.slice(0, 100),
+            require_answer: q.requireAnswer,
+            yes_label: q.yesLabel || "Yes",
+            no_label: q.noLabel || "No",
+            sort_order: i,
+            attached_photo_index: null,
+          }));
+          await supabase.from("invite_questions").insert(records);
+        }
+      }
+    } catch (err) {
+      console.error("[invite] Failed to parse questions JSON:", err);
+    }
+  }
+
+  // Mark gift as used now that invite is confirmed created.
+  // .eq("status", "redeemed") is an atomic guard: a race that already marked
+  // it "used" simply produces 0 rows updated, which is safe to ignore.
+  if (validGift) {
+    await adminClient
+      .from("gift_purchases")
+      .update({ status: "used" })
+      .eq("id", validGift.id)
+      .eq("status", "redeemed");
+  }
+
+  revalidatePath("/dashboard");
+  // Return inviteId so the client can request signed upload URLs, then call
+  // finalizeInvite() once all photos are uploaded to Supabase Storage.
+  return { inviteId: invite.id, slug };
+}
+
+// ---------------------------------------------------------------------------
+// finalizeInvite
+// ---------------------------------------------------------------------------
+// Phase 2 of the two-phase publish flow.  Called after the client has
+// uploaded all photos directly to Supabase Storage via signed URLs.
+//
+// Accepts an array of photo descriptors (storage path + caption + rotation).
+// Runs moderation on each, rolls back everything on any rejection, then
+// inserts invite_photos rows and returns the public-facing slug.
+// ---------------------------------------------------------------------------
+export interface PhotoDescriptor {
+  path: string;
+  caption: string;
+  rotation_deg: number;
+}
+
+export async function finalizeInvite(
+  inviteId: string,
+  photos: PhotoDescriptor[]
+) {
+  const supabase = await createClient();
+  const adminClient = createAdminClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  // Verify the invite belongs to this user and hasn't been finalised already.
+  const { data: invite } = await supabase
+    .from("invites")
+    .select("id, slug, creator_id")
+    .eq("id", inviteId)
+    .eq("creator_id", user.id)
+    .single();
+
+  if (!invite) return { error: "Invite not found" };
+
+  const safePhotos = photos.slice(0, MAX_PHOTOS);
+
+  // Validate that each claimed storage path is under the user's own prefix
+  // so a malicious client can't claim ownership of another user's files.
+  const allowedPrefix = `${user.id}/${inviteId}/`;
+  for (const p of safePhotos) {
+    if (!p.path.startsWith(allowedPrefix)) {
+      return { error: "Invalid photo path" };
+    }
+  }
+
+  const uploadedPaths = safePhotos.map((p) => p.path);
   const photoRecords: {
     invite_id: string;
     storage_path: string;
@@ -150,35 +256,12 @@ export async function createInvite(formData: FormData) {
     sort_order: number;
   }[] = [];
 
-  // Track uploaded storage paths separately so we can roll back the entire
-  // submission if any single photo trips moderation. A partial 4-of-5 upload
-  // would confuse the recipient and silently drop user content.
-  const uploadedPaths: string[] = [];
+  for (let i = 0; i < safePhotos.length; i++) {
+    const { path, caption, rotation_deg } = safePhotos[i];
 
-  for (let i = 0; i < photoCount; i++) {
-    const file = formData.get(`photo_${i}`) as File;
-    if (!file) continue;
-
-    if (!ALLOWED_MIME.includes(file.type)) continue;
-    const rawExt = (file.name.split(".").pop() ?? "").toLowerCase();
-    const ext = ALLOWED_EXT.includes(rawExt) ? rawExt : "jpg";
-    const path = `${user.id}/${invite.id}/${i}.${ext}`;
-
-    const { error: uploadError } = await adminClient.storage
-      .from(STORAGE_BUCKET)
-      .upload(path, file, { contentType: file.type, upsert: false });
-
-    if (uploadError) {
-      console.error(`Failed to upload photo ${i}:`, uploadError);
-      continue;
-    }
-    uploadedPaths.push(path);
-
-    // Sightengine needs to fetch the image. The invite-photos bucket is
-    // private, so generate a short-lived signed URL just for the scan. 5
-    // minutes is enough cushion for API queueing without leaving a usable
-    // link around. If the URL can't be signed, fail OPEN — same posture as
-    // a Sightengine outage.
+    // Sightengine needs to fetch the image. Generate a short-lived signed URL
+    // just for the scan — 5 min is enough without leaving a usable link.
+    // Fail OPEN if signing fails (same posture as a Sightengine outage).
     const { data: signed } = await adminClient.storage
       .from(STORAGE_BUCKET)
       .createSignedUrl(path, 60 * 5);
@@ -187,19 +270,11 @@ export async function createInvite(formData: FormData) {
     if (scanUrl) {
       const { safe, reason } = await scanImage(scanUrl);
       if (!safe) {
-        // Roll back ALL photos uploaded in this submission, plus the parent
-        // invite row. Partial invites are worse than no invite. Also drop
-        // any invite_photos rows that might have been written (none yet at
-        // this point — DB insert is post-loop — but defensive in case the
-        // loop layout changes).
+        // Roll back ALL photos + the parent invite row. Partial invites are
+        // worse than no invite for the recipient experience.
         await adminClient.storage.from(STORAGE_BUCKET).remove(uploadedPaths);
-        await supabase.from("invites").delete().eq("id", invite.id);
+        await supabase.from("invites").delete().eq("id", inviteId);
 
-        // Audit-log the rejection off the critical path. Do NOT log the photo
-        // URL or storage path — both are PII-adjacent and the file is being
-        // deleted anyway. `i` records how many photos uploaded before the
-        // reject so admins can spot abuse patterns (e.g. always the 5th
-        // photo).
         const rejectedReason = reason ?? "unknown";
         const rejectedIndex = i;
         after(async () => {
@@ -220,12 +295,8 @@ export async function createInvite(formData: FormData) {
       }
     }
 
-    const caption = (formData.get(`photo_caption_${i}`) as string) || "";
-    const rotationRaw = formData.get(`photo_rotation_${i}`);
-    const rotation_deg = rotationRaw ? parseFloat(String(rotationRaw)) : 0;
-
     photoRecords.push({
-      invite_id: invite.id,
+      invite_id: inviteId,
       storage_path: path,
       caption: caption.slice(0, 120),
       rotation_deg: Math.max(-8, Math.min(8, rotation_deg)),
@@ -237,55 +308,8 @@ export async function createInvite(formData: FormData) {
     await supabase.from("invite_photos").insert(photoRecords);
   }
 
-  // Save questions with yes/no labels + dodge flag.
-  // Server-side validated: cap count, cap field lengths. Reject malformed JSON.
-  const questionsJson = formData.get("questions") as string | null;
-  if (questionsJson && questionsJson.length < 10_000) {
-    try {
-      const parsed = inviteQuestionsSchema.safeParse(JSON.parse(questionsJson));
-      if (!parsed.success) {
-        // Skip silently; questions are optional. Could surface error here if desired.
-        return { slug, inviteId: invite.id };
-      }
-      const questions = parsed.data;
-      const nonEmpty = questions.filter((q) => q.text.trim().length > 0);
-      if (nonEmpty.length > 0) {
-        // Determine enable_dodge_no from first question (invite-level)
-        const enableDodge = nonEmpty[0].enableDodge ?? true;
-        await supabase
-          .from("invites")
-          .update({ enable_dodge_no: enableDodge })
-          .eq("id", invite.id);
-
-        const records = nonEmpty.map((q, i) => ({
-          invite_id: invite.id,
-          question_text: q.text.slice(0, 100),
-          require_answer: q.requireAnswer,
-          yes_label: q.yesLabel || "Yes",
-          no_label: q.noLabel || "No",
-          sort_order: i,
-          attached_photo_index: null,
-        }));
-        await supabase.from("invite_questions").insert(records);
-      }
-    } catch (err) {
-      console.error("[invite] Failed to parse questions JSON:", err);
-    }
-  }
-
-  // Mark gift as used now that invite is confirmed created.
-  // .eq("status", "redeemed") is an atomic guard: a race that already marked
-  // it "used" simply produces 0 rows updated, which is safe to ignore.
-  if (validGift) {
-    await adminClient
-      .from("gift_purchases")
-      .update({ status: "used" })
-      .eq("id", validGift.id)
-      .eq("status", "redeemed");
-  }
-
   revalidatePath("/dashboard");
-  return { slug, inviteId: invite.id };
+  return { slug: invite.slug as string, inviteId };
 }
 
 export async function deleteInvite(inviteId: string) {

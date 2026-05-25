@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type Theme } from "@/lib/themes";
-import PolaroidScroll from "./PolaroidScroll";
+import PolaroidCarousel from "./PolaroidCarousel";
 import MessageReveal from "./MessageReveal";
 import RSVPButton from "./RSVPButton";
 import QuestionScreen from "./QuestionScreen";
@@ -193,7 +193,7 @@ export default function TapToReveal({ theme, photos, title, message, questions =
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <PolaroidScroll
+            <PolaroidCarousel
               photos={photos}
               theme={theme}
               title={title}

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
 import { getReducedMotionTransition } from "@/lib/a11y";
-import PolaroidScroll from "./PolaroidScroll";
+import PolaroidCarousel from "./PolaroidCarousel";
 import MessageReveal from "./MessageReveal";
 import RSVPButton from "./RSVPButton";
 import QuestionScreen from "./QuestionScreen";
@@ -98,7 +98,7 @@ export default function CountdownReveal({
   }
   if (stage === "photos") {
     return (
-      <PolaroidScroll
+      <PolaroidCarousel
         photos={photos}
         theme={theme}
         title={title}

@@ -1,5 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "src/app/api/ai/draft-invite/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "regions": ["iad1"],
   "crons": [
     {
       "path": "/api/cron/expire-invites",

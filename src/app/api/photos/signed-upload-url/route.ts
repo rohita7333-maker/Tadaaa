@@ -3,8 +3,6 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { STORAGE_BUCKET } from "@/lib/constants";
 import { rateLimit } from "@/lib/rate-limit";
 
-const ALLOWED_EXT = ["jpg", "jpeg", "png", "webp", "gif"];
-
 /**
  * POST /api/photos/signed-upload-url
  *

@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { animate, useReducedMotion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { cn } from "@/lib/utils";
+import { easings, durations } from "@/lib/motion";
 
 interface AnimatedCounterProps {
   /** Final value to count up to */
   value: number;
   /** Starting value (default 0) */
   from?: number;
-  /** Duration in seconds (default 1.6) */
+  /** Duration in seconds (default durations.slow = 0.6) */
   duration?: number;
   /** Format helper — e.g. v => `${v.toLocaleString()}+` */
   format?: (v: number) => string;
@@ -30,7 +31,7 @@ interface AnimatedCounterProps {
 export function AnimatedCounter({
   value,
   from = 0,
-  duration = 1.6,
+  duration = durations.slow,
   format = (v) => Math.round(v).toLocaleString(),
   triggerOnce = true,
   className,
@@ -38,7 +39,9 @@ export function AnimatedCounter({
 }: AnimatedCounterProps) {
   const shouldReduce = useReducedMotion();
   const { ref, inView } = useInView({ triggerOnce, threshold: 0.3 });
-  const [display, setDisplay] = useState(shouldReduce ? value : from);
+  // SSR-safe: always start from `from` so server + first client render match.
+  // Effect immediately jumps to `value` when reduced-motion is active.
+  const [display, setDisplay] = useState(from);
   const hasRun = useRef(false);
 
   useEffect(() => {
@@ -52,7 +55,7 @@ export function AnimatedCounter({
 
     const controls = animate(from, value, {
       duration,
-      ease: [0.22, 1, 0.36, 1],
+      ease: easings.entrance,
       onUpdate: (latest) => setDisplay(latest),
     });
     return () => controls.stop();

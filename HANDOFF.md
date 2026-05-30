@@ -1,8 +1,83 @@
 # TaDaaaa — Session Handoff (2026-05-30)
 
-## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P3-DONE · SECURITY-HARDENED
+## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P4-DONE · SECURITY-HARDENED
 
-**Tests:** 227/227 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors, 15 warnings (no new from P3) · **branch:** feat/sophistication
+**Tests:** 238/238 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors, 15 warnings (0 new from P4) · **branch:** feat/sophistication
+
+---
+
+## What shipped this session (2026-05-30 — Motion P4 Dashboard)
+
+**P4 — Dashboard surface motion layer (DONE, gates P5):**
+
+- ✅ `src/components/dashboard/InviteList.tsx` (NEW — client component):
+  - Extracted invite grid from RSC page.tsx into client component
+  - `AnimatePresence mode="popLayout"` wraps all cards — enables exit animation on delete
+  - Stagger-with-intent entrance via `variants` + `staggerChildren: staggers.support` (0.06s):
+    - Card index 0 (lead): `y:12, scale:0.97 → springs.soft` settle (heavier, more presence)
+    - Cards 1+ (support): `y:6 → durations.base + easings.entrance` (lighter ease)
+  - Reduced-motion variant: `opacity:0→1` only, `durations.instant`
+  - Card exit on delete: `opacity:0, scale:0.95, y:-4` + `durations.quick + easings.exit`; reduced = instant opacity
+  - `whileHover={{ y:-6, boxShadow: HOVER_SHADOW }}` + `whileTap={{ scale:0.98 }}` on `motion.div` wrapper — spring `springs.soft`; reduced-motion: hover/tap disabled
+  - Box-shadow promoted to outer `motion.div` (not SpotlightCard) so framer-motion can interpolate it
+  - Optimistic delete: `removingIds: Set<string>` state + `router.refresh()` — card exits before server revalidates
+
+- ✅ `src/components/dashboard/InviteCard.tsx`:
+  - Removed imperative `onMouseEnter/Leave` style mutations (`translateY(-6px)`, inline box-shadow override)
+  - Removed `style={{ boxShadow, transform, transition }}` from SpotlightCard (now on InviteList's motion.div)
+  - Added `onDelete?: () => void` prop — called on server action success
+  - Added `useReducedMotion()` + imports from `@/lib/motion`
+  - Share panel transition tokenized: `makeReducedMotionTransition(shouldReduce, { duration: durations.quick, ease: easings.entrance })` (was inline `duration:0.25, ease:"easeInOut"`)
+
+- ✅ `src/components/dashboard/OnboardingModal.tsx`:
+  - Added `useReducedMotion()` — was completely missing
+  - Backdrop: `transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}` (was bare opacity-only, untransitioned)
+  - Modal slide: `initial/exit={{ y: shouldReduce ? 0 : 40, opacity:0 }}`, `transition={makeReducedMotionTransition(shouldReduce, springs.soft)}` — was `{ type:"spring", stiffness:280, damping:26 }` inline magic
+  - Step content: wrapped in `<AnimatePresence mode="wait" initial={false}>` with `key={step}` — directional slide `x:±12` on step change; reduced = instant opacity swap
+
+- ✅ `src/components/ui/animated-counter.tsx`:
+  - `ease: easings.entrance` (was inline `[0.22,1,0.36,1]`)
+  - Default `duration` changed to `durations.slow` (0.6s) from hardcoded `1.6` (too slow for dashboard small numbers)
+  - SSR hydration fix: `useState(from)` always (was `useState(shouldReduce ? value : from)` — would mismatch if client has reduced-motion on first paint)
+
+- ✅ `src/app/dashboard/page.tsx`:
+  - Replaced inline `<div className="grid..."> {list.map(InviteCard)}` with `<InviteList invites={...} creatorName={...} />`
+
+- ✅ `src/lib/motion.test.ts` — +11 P4 token contract tests:
+  - Card lead entrance uses springs.soft (stiffness 260/damping 22)
+  - Card support entrance uses durations.base + easings.entrance
+  - Card reduced path uses durations.instant (opacity-only)
+  - Card exit uses durations.quick < durations.base (snappy removal)
+  - Card exit reduced = instant
+  - 10 cards at support stagger ≤ 0.6s cap
+  - Modal slide uses springs.soft (same hand as card hover/press)
+  - Modal reduced = instant, no y
+  - Share panel uses durations.quick + easings.entrance
+  - AnimatedCounter ease = easings.entrance (no inline array)
+  - AnimatedCounter default duration = durations.slow (0.6s)
+
+**Files touched:** `src/components/dashboard/InviteList.tsx` (NEW) · `src/components/dashboard/InviteCard.tsx` · `src/components/dashboard/OnboardingModal.tsx` · `src/components/ui/animated-counter.tsx` · `src/app/dashboard/page.tsx` · `src/lib/motion.test.ts`
+
+**NOT touched:** `src/components/dashboard/CommandPalette.tsx` (text nav only — CSS transitions acceptable) · `src/components/dashboard/OccasionFilter.tsx` · `src/components/ui/spotlight-card.tsx` (already has useReducedMotion, reference-quality gem)
+
+**Verification:**
+- `npx tsc --noEmit` → exit 0 ✓
+- `npm test` → 238/238 pass (+11 new P4 token contract tests) ✓
+- `npm run lint` → 0 new errors from P4 (4 pre-existing in animated-counter/magnetic-button) ✓
+- `useReducedMotion()` on all animated dashboard components: InviteList ✓ · InviteCard ✓ · OnboardingModal ✓ · AnimatedCounter ✓ · SpotlightCard (pre-existing) ✓
+- No uniform fade-up: lead card spring settle, support cards ease — role-differentiated ✓
+- RSC boundary clean: no function props crossing RSC→client (AnimatedCounter uses default formatter, no RSC-passed fn) ✓
+- InviteCard SpotlightCard GEM: untouched (spotlight gradient behavior preserved) ✓
+- Box-shadow animated via framer-motion (3-layer compatible strings) — no CSS transition conflict ✓
+- Transforms + opacity only on card hot path — no layout dim animation ✓
+- Optimistic delete + router.refresh() pattern: card exits while server revalidates ✓
+
+**Open risks / next phase entry point:**
+- 60fps mobile profile: real-device Playwright verification still needed for dashboard scroll
+- P5 carry-over: (a) Hero.tsx:320/348/356 ambient-loop inline durations + raw "easeInOut" → durations.floatA/B + easeInOut token; (b) create components inline spatial offsets (y:±6, scale:0.97, x:±20/±60) → consider spatial token scale
+- P5 = cross-surface hardening, perf pass, security-review, CEO ship sign-off
+
+---
 
 ---
 

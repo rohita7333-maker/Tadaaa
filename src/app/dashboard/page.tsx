@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Plus, Sparkles, Eye, Gift, TrendingUp, MessageCircle, Heart } from "lucide-react";
-import InviteCard from "@/components/dashboard/InviteCard";
+import InviteList from "@/components/dashboard/InviteList";
 import OccasionFilter from "@/components/dashboard/OccasionFilter";
 import OnboardingModal from "@/components/dashboard/OnboardingModal";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
@@ -171,28 +171,23 @@ export default async function DashboardPage({ searchParams }: Props) {
 
       {/* Invite grid */}
       {list.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {list.map((invite) => (
-            <InviteCard
-              key={invite.id}
-              creatorName={creatorName}
-              invite={{
-                id: invite.id,
-                slug: invite.slug,
-                title: invite.title,
-                theme: invite.theme,
-                view_count: invite.view_count ?? 0,
-                response_count: invite.response_count ?? 0,
-                rsvp_count: rsvpMap[invite.id] ?? 0,
-                is_active: invite.is_active,
-                expires_at: invite.expires_at,
-                created_at: invite.created_at,
-                reveal_type: invite.reveal_type,
-                accept_contributions: invite.accept_contributions ?? false,
-              }}
-            />
-          ))}
-        </div>
+        <InviteList
+          creatorName={creatorName}
+          invites={list.map((invite) => ({
+            id: invite.id,
+            slug: invite.slug,
+            title: invite.title,
+            theme: invite.theme,
+            view_count: invite.view_count ?? 0,
+            response_count: invite.response_count ?? 0,
+            rsvp_count: rsvpMap[invite.id] ?? 0,
+            is_active: invite.is_active,
+            expires_at: invite.expires_at,
+            created_at: invite.created_at,
+            reveal_type: invite.reveal_type,
+            accept_contributions: invite.accept_contributions ?? false,
+          }))}
+        />
       )}
 
       {/* Mobile FAB */}

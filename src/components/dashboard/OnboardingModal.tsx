@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { X, ArrowRight, ImageIcon, MessageSquare, Sparkles } from "lucide-react";
+import { springs, durations, easings, makeReducedMotionTransition } from "@/lib/motion";
 
 const STORAGE_KEY = "tadaaaa.onboarded";
 
@@ -37,6 +38,7 @@ const steps = [
 ];
 
 export default function OnboardingModal({ forceShow = false }: OnboardingModalProps) {
+  const shouldReduce = useReducedMotion();
   // SSR + first client render = same output (closed). After mount, read
   // localStorage and conditionally open. Two-render pattern avoids
   // hydration mismatch.
@@ -75,14 +77,15 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
           onClick={dismiss}
         >
           <motion.div
             className="w-full max-w-md bg-white rounded-3xl shadow-[0_20px_60px_rgba(45,41,38,0.18)] border border-[#D4CBC3]/40 overflow-hidden"
-            initial={{ y: 40, opacity: 0 }}
+            initial={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 40, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 280, damping: 26 }}
+            exit={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
+            transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -110,27 +113,40 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
               </button>
             </div>
 
-            <div className="px-6 pt-6 pb-2 text-left">
-              <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(196,104,109,0.12), rgba(201,169,110,0.12))",
-                }}
+            {/* Step content — AnimatePresence swaps on step change with directional slide */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={step}
+                className="px-6 pt-6 pb-2 text-left"
+                initial={{ opacity: 0, x: shouldReduce ? 0 : 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: shouldReduce ? 0 : -12 }}
+                transition={makeReducedMotionTransition(shouldReduce, {
+                  duration: durations.quick,
+                  ease: easings.entrance,
+                })}
               >
-                <current.icon className="w-5 h-5 text-[#C4686D]" />
-              </div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#C4686D] mb-2">
-                {current.eyebrow}
-              </p>
-              <h2
-                id="onboarding-title"
-                className="font-heading text-[22px] leading-tight text-[#2D2926] mb-3"
-              >
-                {current.title}
-              </h2>
-              <p className="text-[#6B5E57] text-sm leading-relaxed">{current.body}</p>
-            </div>
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(196,104,109,0.12), rgba(201,169,110,0.12))",
+                  }}
+                >
+                  <current.icon className="w-5 h-5 text-[#C4686D]" />
+                </div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#C4686D] mb-2">
+                  {current.eyebrow}
+                </p>
+                <h2
+                  id="onboarding-title"
+                  className="font-heading text-[22px] leading-tight text-[#2D2926] mb-3"
+                >
+                  {current.title}
+                </h2>
+                <p className="text-[#6B5E57] text-sm leading-relaxed">{current.body}</p>
+              </motion.div>
+            </AnimatePresence>
 
             <div className="px-6 pt-6 pb-6 flex items-center justify-between">
               <button

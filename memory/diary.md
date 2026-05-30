@@ -2,6 +2,27 @@
 
 ---
 
+## 2026-05-30 — Motion P4: Dashboard Surface
+
+**What happened:** Implemented P4 of MOTION_MASTERPLAN — full motion layer on the dashboard. Audited all dashboard components, found: (1) cards with zero entrance animation, (2) imperative JS hover (`onMouseEnter` style mutations, no spring, no reduced-motion), (3) OnboardingModal with no `useReducedMotion` at all, (4) AnimatedCounter with inline easing and SSR hydration mismatch risk. Fixed all.
+
+**What changed:**
+
+- `InviteList.tsx` (NEW) — extracted invite grid to client component. `AnimatePresence mode="popLayout"` for optimistic delete exits. Role-differentiated entrance: card[0] = `springs.soft` settle from y:12/scale:0.97 (lead), cards[1+] = ease entrance from y:6 (support). staggerChildren: staggers.support. `whileHover={{ y:-6, boxShadow }}` + `whileTap={{ scale:0.98 }}` via `springs.soft` on motion.div wrapper. Reduced-motion: all disabled.
+- `InviteCard.tsx` — removed imperative `onMouseEnter/Leave` style mutations. Added `onDelete` callback. Tokenized share panel transition: `makeReducedMotionTransition(shouldReduce, { duration: durations.quick, ease: easings.entrance })`. Added `useReducedMotion()`.
+- `OnboardingModal.tsx` — added `useReducedMotion()` (was completely missing). Tokenized modal slide: `springs.soft` via `makeReducedMotionTransition`. Guarded y:40 initial/exit with `shouldReduce ? 0 : 40`. Added `AnimatePresence mode="wait"` for step content — directional `x:±12` slide on step change; reduced = opacity swap.
+- `animated-counter.tsx` — `ease: easings.entrance` (was inline array). Default `duration` now `durations.slow` (0.6s, was 1.6). SSR fix: `useState(from)` always — avoids hydration mismatch when user has prefers-reduced-motion.
+- `page.tsx` — replaced inline grid with `<InviteList>`.
+- `motion.test.ts` — +11 P4 token contract tests.
+
+**NOT touched:** CommandPalette (text nav, CSS transitions acceptable — karpathy-guidelines), OccasionFilter, SpotlightCard (pre-existing gem with useReducedMotion — untouched).
+
+**Verification:** tsc 0 · 238/238 tests (+11 P4) · lint 0 new errors · reduced-motion on InviteList/InviteCard/OnboardingModal/AnimatedCounter/SpotlightCard ✓ · no uniform fade-up (role-differentiated) ✓ · RSC boundary clean (no fn props) ✓ · transforms+opacity only ✓ · optimistic delete with exit animation ✓
+
+**Commit:** feat/sophistication branch
+
+---
+
 ## 2026-05-30 — Motion P3: Create Wizard
 
 **What happened:** Implemented P3 of MOTION_MASTERPLAN — full motion layer on the 4-step create wizard. Audited all 9 create components, named every flat opacity swap + uniform fade-up, then replaced all of them with role-differentiated authored motion.

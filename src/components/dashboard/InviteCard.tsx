@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Eye, Trash2, ExternalLink, MessageCircleQuestion, Share2, Heart, MessageCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { durations, easings, makeReducedMotionTransition } from "@/lib/motion";
 import { formatDistanceToNow } from "date-fns";
 import { formatViewCount, isExpired } from "@/lib/utils";
 import { getThemeById } from "@/lib/themes";
@@ -32,9 +33,12 @@ interface InviteCardProps {
     accept_contributions?: boolean;
   };
   creatorName?: string;
+  /** Called after successful delete so parent can animate removal. */
+  onDelete?: () => void;
 }
 
-export default function InviteCard({ invite, creatorName }: InviteCardProps) {
+export default function InviteCard({ invite, creatorName, onDelete }: InviteCardProps) {
+  const shouldReduce = useReducedMotion();
   const [deleting, setDeleting] = useState(false);
   const [responsesOpen, setResponsesOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -49,6 +53,8 @@ export default function InviteCard({ invite, creatorName }: InviteCardProps) {
     if (result?.error) {
       toast.error(result.error);
       setDeleting(false);
+    } else {
+      onDelete?.();
     }
   }
 
@@ -59,21 +65,7 @@ export default function InviteCard({ invite, creatorName }: InviteCardProps) {
     : "active";
 
   return (
-    <SpotlightCard bare className="bg-white rounded-3xl border border-[#D4CBC3]/20 overflow-hidden transition-all duration-300 group"
-      style={{
-        boxShadow: "0 2px 4px rgba(45,41,38,0.04), 0 8px 24px rgba(45,41,38,0.08), 0 24px 48px rgba(45,41,38,0.06)",
-        transform: "translateY(0)",
-        transition: "box-shadow 0.3s ease, transform 0.3s ease",
-      }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 8px rgba(45,41,38,0.06), 0 16px 40px rgba(45,41,38,0.14), 0 40px 80px rgba(45,41,38,0.10)";
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-6px)";
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 4px rgba(45,41,38,0.04), 0 8px 24px rgba(45,41,38,0.08), 0 24px 48px rgba(45,41,38,0.06)";
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-      }}
-    >
+    <SpotlightCard bare className="bg-white rounded-3xl border border-[#D4CBC3]/20 overflow-hidden group">
       {/* Thumbnail preview — click opens preview */}
       <Link
         href={`/surprise/${invite.slug}`}
@@ -211,7 +203,10 @@ export default function InviteCard({ invite, creatorName }: InviteCardProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
+              transition={makeReducedMotionTransition(shouldReduce, {
+                duration: durations.quick,
+                ease: easings.entrance,
+              })}
               className="overflow-hidden"
             >
               <div className="pt-4 border-t border-[#D4CBC3]/40 mt-4">

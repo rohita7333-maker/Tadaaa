@@ -163,3 +163,61 @@ describe("P3 create flow — token contracts", () => {
     expect(t).toMatchObject({ duration: durations.instant });
   });
 });
+
+// P4 dashboard motion contracts
+describe("P4 dashboard — token contracts", () => {
+  it("card entrance lead (index 0) uses springs.soft — stiffness 260, damping 22", () => {
+    expect(springs.soft).toMatchObject({ type: "spring", stiffness: 260, damping: 22 });
+  });
+
+  it("card entrance support (index 1+) uses durations.base + easings.entrance", () => {
+    const t = makeReducedMotionTransition(false, { duration: durations.base, ease: easings.entrance });
+    expect(t).toMatchObject({ duration: durations.base, ease: easings.entrance });
+  });
+
+  it("card entrance reduced path uses durations.instant (opacity-only)", () => {
+    const t = makeReducedMotionTransition(true, { duration: durations.base, ease: easings.entrance });
+    expect(t).toMatchObject({ duration: durations.instant });
+  });
+
+  it("card exit uses durations.quick — faster than base (snappy removal)", () => {
+    expect(durations.quick).toBeLessThan(durations.base);
+    const t = makeReducedMotionTransition(false, { duration: durations.quick, ease: easings.exit });
+    expect(t).toMatchObject({ duration: durations.quick, ease: easings.exit });
+  });
+
+  it("card exit reduced path returns instant", () => {
+    const t = makeReducedMotionTransition(true, { duration: durations.quick, ease: easings.exit });
+    expect(t).toMatchObject({ duration: durations.instant });
+  });
+
+  it("stagger cap: 10 dashboard cards at support cadence stay under 0.6s total wait", () => {
+    // 10 cards × 0.06s stagger = 0.6s — last card starts animating within threshold
+    expect(10 * staggers.support).toBeLessThanOrEqual(0.6);
+  });
+
+  it("modal slide uses springs.soft (same hand as card hover/press)", () => {
+    const t = makeReducedMotionTransition(false, springs.soft);
+    expect(t).toMatchObject({ type: "spring", stiffness: 260, damping: 22 });
+  });
+
+  it("modal reduced path: no y movement (instant, opacity-only)", () => {
+    const t = makeReducedMotionTransition(true, springs.soft);
+    expect(t).toMatchObject({ duration: durations.instant });
+  });
+
+  it("share panel transition uses durations.quick + easings.entrance", () => {
+    const t = makeReducedMotionTransition(false, { duration: durations.quick, ease: easings.entrance });
+    expect(t).toMatchObject({ duration: durations.quick, ease: easings.entrance });
+  });
+
+  it("AnimatedCounter ease references easings.entrance (not inline array)", () => {
+    // Easing used in animate() call must be the shared token
+    expect(easings.entrance).toEqual([0.22, 1, 0.36, 1]);
+  });
+
+  it("AnimatedCounter default duration is durations.slow (0.6s)", () => {
+    // Default changed from 1.6 (too slow for small dashboard numbers) to slow token
+    expect(durations.slow).toBe(0.6);
+  });
+});

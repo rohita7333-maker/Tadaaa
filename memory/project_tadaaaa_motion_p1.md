@@ -38,3 +38,32 @@ metadata:
 **Gate:** tsc 0 · vitest 220/220 · lint 0 new · reduced-motion verified Hero+HowItWorks+Testimonials+Navbar · gems untouched · no uniform fade-up remaining.
 
 **P3 entry:** `src/components/create/` — step transitions, tactile inputs, publish confetti payoff.
+
+---
+
+# TaDaaaa Motion P3 — Create Wizard
+
+**Status:** DONE (2026-05-30). Commit `7049e40` + fix `cd99331` on `feat/sophistication`.
+
+**What shipped:** Full motion layer on 9 create components. Directional step transitions (x:±60+scale:0.96). Spring card press (OccasionSelector, ThemeSelector). Spatial photo list AnimatePresence. Authored loading states (Sparkles rotate, Film breathe, ✨ pulse). AnimatePresence mode=wait on AIDraftButton panel + VideoGenerator status states. PreviewPublish springs.weighty payoff. RevealSettings conditional fields animated. QuestionBuilder add/remove list. All components: useReducedMotion(). Zero inline magic numbers.
+
+**Gate:** tsc 0 · vitest 227/227 · lint 0 new · reduced-motion all 7 create components ✓ · transforms+opacity only ✓ · StepIndicator gem untouched ✓
+
+**P4 entry:** `src/components/dashboard/` — card stagger, hover spring, OnboardingModal a11y.
+
+---
+
+# TaDaaaa Motion P4 — Dashboard Surface
+
+**Status:** DONE (2026-05-30). Commit `188ada6` on `feat/sophistication`.
+
+**What shipped:**
+- `InviteList.tsx` (new): client wrapper, AnimatePresence mode=popLayout, role-differentiated entrance (lead=springs.soft from y:12/scale:0.97; support=ease from y:6), staggerChildren=staggers.support, spring whileHover/whileTap, optimistic delete, reduced-motion all disabled.
+- `InviteCard.tsx`: removed imperative hover mutations, onDelete callback, tokenized share panel, useReducedMotion().
+- `OnboardingModal.tsx`: added useReducedMotion() (was missing). springs.soft modal slide. AnimatePresence step content (directional x:±12 or opacity-only reduced).
+- `animated-counter.tsx`: easings.entrance token, durations.slow default, SSR hydration fix.
+- `motion.test.ts`: +11 P4 contract tests.
+
+**Gate:** tsc 0 · vitest 238/238 · lint 0 new · reduced-motion all dashboard components ✓ · no uniform fade-up ✓ · RSC boundary clean ✓
+
+**P5 entry:** Cross-surface hardening — Hero.tsx ambient loop inline durations (lines 320/348/356), spatial offset tokens, security-review, CEO ship sign-off. See MOTION_MASTERPLAN §5 P5.

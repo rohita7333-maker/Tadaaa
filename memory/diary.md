@@ -2,6 +2,30 @@
 
 ---
 
+## 2026-05-30 — Motion P3: Create Wizard
+
+**What happened:** Implemented P3 of MOTION_MASTERPLAN — full motion layer on the 4-step create wizard. Audited all 9 create components, named every flat opacity swap + uniform fade-up, then replaced all of them with role-differentiated authored motion.
+
+**What changed:**
+
+- `src/app/create/page.tsx` — directional step transitions. `makeSlideVariants(shouldReduce)` drives x:±60+scale:0.96 forward/back. Replaced inline `0.3, "easeInOut"` with `durations.base + easings.entrance`.
+- `OccasionSelector.tsx` + `ThemeSelector.tsx` — `motion.button` spring press (whileTap) + selection confirm (animate scale:1.02). CSS color-only transitions remain; transforms owned by framer-motion.
+- `PhotoUploader.tsx` — `<AnimatePresence initial={false}>` + `layout` on photo items for spatial list. `Loader2 animate-spin` → authored ImagePlus breathing pulse. Fixed inline `0.18` → `durations.instant`.
+- `AIDraftButton.tsx` — `<AnimatePresence mode="wait">` panel open/close. Sparkles icon rotate+scale loop while loading. No more flat opacity toggle.
+- `RevealSettings.tsx` — `motion.button` for tap/countdown selection. `<AnimatePresence>` around conditional date fields (countdown date, expiry date).
+- `QuestionBuilder.tsx` — `<AnimatePresence initial={false}>` on question list. Add: y:10+scale:0.97 entrance; Remove: y:-10 exit. Springs.soft.
+- `PreviewPublish.tsx` — `<AnimatePresence mode="wait">` form↔success. Check circle: `springs.weighty` (payoff moment). Headline/copy: staggered. CTA press: `springs.soft`. Publishing ✨: keyframe pulse.
+- `VideoGenerator.tsx` — `<AnimatePresence mode="wait">` across 4 status states. Film icon breathes while processing. CheckCircle2 springs.soft entrance on ready.
+- `motion.test.ts` — +7 P3 token contract tests.
+
+**NOT touched:** StepIndicator (P0 gem — expo easing intact), MessageEditor (inputs settle quietly via CSS).
+
+**Verification:** tsc 0 · 227/227 tests · lint 0 new errors · reduced-motion verified all 7 animated create components · wizard direction correct · StepIndicator untouched · zero inline magic numbers · transforms+opacity only
+
+**Commit:** feat/sophistication branch (pending caveman-commit)
+
+---
+
 ## 2026-05-25 — Hour 1: Launch Blockers Closed (SEC-001/002/003)
 
 **What happened:** Executed Hour 1 of LAUNCH_PLAN.md Section 5. Fixed all 3 code blockers that were preventing launch. 190/190 tests pass, 0 tsc errors, 0 lint errors in modified files.

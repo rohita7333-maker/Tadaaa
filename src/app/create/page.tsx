@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { easings, durations, makeReducedMotionTransition } from "@/lib/motion";
 import { ArrowLeft, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -20,11 +21,23 @@ import { createInviteShell, finalizeInvite } from "@/actions/invite";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
-const slideVariants = {
-  enter: (direction: number) => ({ x: direction > 0 ? 60 : -60, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (direction: number) => ({ x: direction > 0 ? -60 : 60, opacity: 0 }),
-};
+// direction > 0 = forward, direction < 0 = back
+// Outgoing step scales to 0.96 (depth cue) as incoming rises from same depth.
+// Reduced-motion: opacity-only instant swap (variants collapse to opacity, no x/scale).
+function makeSlideVariants(shouldReduce: boolean | null | undefined) {
+  if (shouldReduce) {
+    return {
+      enter: () => ({ opacity: 0 }),
+      center: { opacity: 1 },
+      exit: () => ({ opacity: 0 }),
+    };
+  }
+  return {
+    enter: (direction: number) => ({ x: direction > 0 ? 60 : -60, opacity: 0, scale: 0.96 }),
+    center: { x: 0, opacity: 1, scale: 1 },
+    exit: (direction: number) => ({ x: direction > 0 ? -60 : 60, opacity: 0, scale: 0.96 }),
+  };
+}
 
 function readUnlockedPremium(): string[] {
   if (typeof window === "undefined") return [];
@@ -53,6 +66,8 @@ function readGiftId(): string | null {
 }
 
 export default function CreatePage() {
+  const shouldReduce = useReducedMotion();
+  const slideVariants = makeSlideVariants(shouldReduce);
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [userTier, setUserTier] = useState("free");
@@ -301,7 +316,10 @@ export default function CreatePage() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={makeReducedMotionTransition(shouldReduce, {
+                duration: durations.base,
+                ease: easings.entrance,
+              })}
             >
               {step === 1 && (
                 <div className="space-y-6">

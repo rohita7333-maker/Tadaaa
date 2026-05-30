@@ -1,8 +1,88 @@
 # TaDaaaa — Session Handoff (2026-05-30)
 
-## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P2-DONE · SECURITY-HARDENED
+## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P3-DONE · SECURITY-HARDENED
 
-**Tests:** 220/220 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors, 15 warnings (no new from P2) · **branch:** feat/sophistication
+**Tests:** 227/227 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors, 15 warnings (no new from P3) · **branch:** feat/sophistication
+
+---
+
+## What shipped this session (2026-05-30 — Motion P3 Create Wizard)
+
+**P3 — Create flow motion layer (DONE, gates P4):**
+
+- ✅ `src/app/create/page.tsx` — directional step transitions:
+  - `makeSlideVariants(shouldReduce)` — reduced=true returns opacity-only; reduced=false returns `x:±60, opacity, scale:0.96` (depth cue on exit)
+  - Transition tokenized: `durations.base + easings.entrance` (was inline `0.3, "easeInOut"`)
+  - `useReducedMotion()` added at component top; `direction` state (1=fwd, -1=back) drives x polarity
+- ✅ `src/components/create/OccasionSelector.tsx` — spring card feedback:
+  - `motion.button` with `whileTap={{ scale:0.94 }}` + `animate={{ scale: selected ? 1.02 : 1, y: selected ? -1 : 0 }}`
+  - `springs.soft` for all transitions — press feedback + selection confirm (not instant class flip)
+  - `useReducedMotion()` guards whileTap
+- ✅ `src/components/create/ThemeSelector.tsx` — same spring pattern (larger cards = `scale:0.96` whileTap):
+  - `motion.button initial={false} animate={{ scale: isSelected ? 1.02 : 1 }}`
+  - CSS `transition-all duration-300` → `transition-colors` (CSS only for color; motion owns transforms)
+  - `useReducedMotion()` at component top
+- ✅ `src/components/create/PhotoUploader.tsx` — spatial photo list:
+  - Fixed inline magic `0.18` → `durations.instant`
+  - `Loader2 animate-spin` → authored breathing `ImagePlus` (scale+opacity pulse via `durations.slow`)
+  - `<AnimatePresence initial={false}>` + `<motion.div layout>` per photo — items enter from x:20 / exit to x:-20 with `springs.soft`
+  - `useReducedMotion()` guards all; reduced = opacity-only instant
+- ✅ `src/components/create/AIDraftButton.tsx` — authored loading state:
+  - `<AnimatePresence mode="wait">` wraps open/closed panel states
+  - Panel entrance: `scale:0.97, y:-8 → springs.soft` (not flat opacity)
+  - Sparkles icon: `rotate:[0,20,-20,0], scale:[1,1.2,1]` loop while loading (authored pending, not Loader2)
+  - `useReducedMotion()` guards all motion
+- ✅ `src/components/create/RevealSettings.tsx` — was CSS-only; now spring selection + AnimatePresence fields:
+  - `conditionalFieldTransition()` helper using `durations.quick + easings.entrance`
+  - Tap/Countdown option buttons: `motion.button` with spring select confirm + whileTap
+  - Countdown date + expiry date fields: `<AnimatePresence>` with `y:-6→0` slide-in/out
+  - `useReducedMotion()` at component top
+- ✅ `src/components/create/QuestionBuilder.tsx` — was no framer-motion; now AnimatePresence add/remove:
+  - `<AnimatePresence initial={false}>` around question list
+  - Add: `{ opacity:0, y:10, scale:0.97 } → { opacity:1, y:0, scale:1 }` via `springs.soft`
+  - Remove: exits to `{ opacity:0, y:-10, scale:0.97 }`
+  - `useReducedMotion()` gates — reduced = opacity only
+- ✅ `src/components/create/PreviewPublish.tsx` — full success payoff + publish pending:
+  - `<AnimatePresence mode="wait">` wraps form ↔ published success states
+  - **Check circle payoff** — `springs.weighty` (mass:1.1, stiffness:140) — settles with tangible weight
+  - Success headline: `y:8→0` with `durations.base + durations.instant` delay
+  - Publish CTA: `<motion.div whileTap={{ scale:0.97 }} transition={springs.soft}>` wrapper (removed CSS hover:scale)
+  - Publishing ✨: `scale:[1,1.15,1] opacity:[1,0.7,1]` loop via `durations.base`
+  - `useReducedMotion()` throughout; reduced delays = 0
+- ✅ `src/components/create/VideoGenerator.tsx` — was no framer-motion; now AnimatePresence status machine:
+  - All 4 status blocks (none/processing/ready/failed): `y:6→0` entry, `y:-6` exit via `<AnimatePresence mode="wait">`
+  - Processing: Film icon breathing pulse (not Loader2 spin) via `durations.slow`
+  - Ready: CheckCircle2 entrance with `springs.soft`
+  - `useReducedMotion()` guards all motion; Film pulse disabled on reduce
+- ✅ `src/lib/motion.test.ts` — +7 P3 token contract tests:
+  - Step transition uses `durations.base` (not magic 0.3)
+  - Card press `springs.soft` non-reduced path returns full spring config
+  - `springs.weighty.mass > 1` and lower stiffness than soft
+  - Reduced path returns `durations.instant`
+  - Conditional fields use `durations.quick < durations.base`
+  - Processing loops use `durations.slow` = 0.6
+  - Reduced step returns instant
+
+**Files touched:** `src/app/create/page.tsx` · `src/components/create/OccasionSelector.tsx` · `src/components/create/ThemeSelector.tsx` · `src/components/create/PhotoUploader.tsx` · `src/components/create/AIDraftButton.tsx` · `src/components/create/RevealSettings.tsx` · `src/components/create/QuestionBuilder.tsx` · `src/components/create/PreviewPublish.tsx` · `src/components/create/VideoGenerator.tsx` · `src/lib/motion.test.ts`
+
+**NOT touched:** `src/components/create/StepIndicator.tsx` (P0 gem — expo easing intact) · `src/components/create/MessageEditor.tsx` (inputs settle quietly via CSS — correct per spec)
+
+**Verification:**
+- `npx tsc --noEmit` → exit 0 ✓
+- `npm test` → 227/227 pass (+7 new P3 token contract tests) ✓
+- `npm run lint` → 0 new errors from P3 (4 pre-existing in animated-counter/magnetic-button) ✓
+- Reduced-motion: all 7 animated create components have `useReducedMotion()` + guarded paths ✓
+- Wizard direction correct: forward=enter-from-right (x:+60), back=enter-from-left (x:-60) ✓
+- StepIndicator GEM byte-equivalent: untouched ✓
+- Zero inline magic numbers in touched files ✓
+- Transforms+opacity only — no width/height/margin animated ✓
+- Authored pending states: AIDraftButton (Sparkles rotate+scale), PhotoUploader (ImagePlus breathe), VideoGenerator (Film breathe), PreviewPublish (✨ pulse) — no Loader2 spin ✓
+- No uniform fade-up: every create element has role-differentiated motion (springs for cards/CTA, quick slide for fields, weighty for payoff) ✓
+
+**Open risks / next phase entry point:**
+- 60fps mobile profile: real-device Playwright verification still needed
+- P4 (Dashboard — invite cards stagger/hover, command palette, onboarding modal, empty states) can now start
+- P5 carry-over (Hero.tsx lines 320/348/356 ambient-loop inline durations + raw "easeInOut") — needs `durations.floatA/B` + easeInOut token before P5 hardening
 
 ---
 

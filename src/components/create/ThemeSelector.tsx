@@ -1,8 +1,10 @@
 "use client";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { Lock } from "lucide-react";
 import { themes, type Theme } from "@/lib/themes";
 import { cn } from "@/lib/utils";
+import { springs, makeReducedMotionTransition } from "@/lib/motion";
 
 interface ThemeSelectorProps {
   selectedTheme: string;
@@ -17,6 +19,7 @@ export default function ThemeSelector({
   onPremiumClick,
   unlockedPremiumThemes,
 }: ThemeSelectorProps) {
+  const shouldReduce = useReducedMotion();
   // `undefined` means the caller is on an Unlimited plan — all premium themes unlocked.
   const allUnlocked = unlockedPremiumThemes === undefined;
   const unlockedSet = unlockedPremiumThemes ?? [];
@@ -34,7 +37,7 @@ export default function ThemeSelector({
           const isSelected = selectedTheme === theme.id;
 
           return (
-            <button
+            <motion.button
               key={theme.id}
               onClick={() => {
                 if (isUnlocked) {
@@ -43,8 +46,12 @@ export default function ThemeSelector({
                   onPremiumClick(theme);
                 }
               }}
+              initial={false}
+              animate={{ scale: isSelected ? 1.02 : 1 }}
+              whileTap={shouldReduce ? {} : { scale: 0.96 }}
+              transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
               className={cn(
-                "relative rounded-2xl overflow-hidden border-2 transition-all duration-300 text-left group",
+                "relative rounded-2xl overflow-hidden border-2 transition-colors text-left group",
                 isSelected
                   ? "border-[#C4686D] shadow-[0_0_0_4px_rgba(196,104,109,0.15)]"
                   : "border-transparent hover:border-[#D4CBC3] hover:shadow-[0_4px_16px_rgba(45,41,38,0.08)]"
@@ -107,7 +114,7 @@ export default function ThemeSelector({
                   </div>
                 </div>
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>

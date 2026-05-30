@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { ImagePlus, X, Loader2, GripVertical, Sparkles } from "lucide-react";
+import { ImagePlus, X, GripVertical, Sparkles } from "lucide-react";
 import imageCompression from "browser-image-compression";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { MAX_PHOTOS, PHOTO_MAX_DIMENSION, PHOTO_MAX_SIZE_MB } from "@/lib/constants";
 import { randomRotation } from "@/lib/utils";
+import { springs, durations, makeReducedMotionTransition } from "@/lib/motion";
 import { toast } from "sonner";
 
 export interface PhotoFile {
@@ -135,7 +136,7 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
                 initial={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 4 }}
                 animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
                 exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.18 }}
+                transition={{ duration: durations.instant }}
                 className="absolute inset-0 flex items-center justify-center pointer-events-none"
               >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-lg border border-[#C4686D]/30 text-[#C4686D] font-semibold text-sm">
@@ -155,7 +156,12 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
           />
           {compressing ? (
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="w-8 h-8 text-[#C4686D] animate-spin" />
+              <motion.div
+                animate={shouldReduce ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.6, 1] }}
+                transition={{ repeat: Infinity, duration: durations.slow, ease: "linear" }}
+              >
+                <ImagePlus className="w-8 h-8 text-[#C4686D]" />
+              </motion.div>
               <p className="text-[#6B5E57] text-sm">Optimising photos…</p>
             </div>
           ) : (
@@ -173,72 +179,79 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
       {/* Photo list with polaroid preview + captions */}
       {photos.length > 0 && (
         <div className="mt-4 space-y-3">
-          {photos.map((photo, idx) => (
-            <div
-              key={photo.id}
-              draggable
-              onDragStart={() => setDragIdx(idx)}
-              onDragOver={(e) => { e.preventDefault(); setOverIdx(idx); }}
-              onDragEnd={handleDragEnd}
-              className={`flex gap-3 bg-white rounded-2xl border border-[#D4CBC3]/40 p-3 transition-all ${
-                overIdx === idx && dragIdx !== idx ? "ring-2 ring-[#C4686D]" : ""
-              }`}
-            >
-              {/* Drag handle */}
-              <div className="flex items-center text-[#D4CBC3] cursor-grab active:cursor-grabbing">
-                <GripVertical className="w-4 h-4" />
-              </div>
-
-              {/* Polaroid thumbnail */}
-              <div
-                className="polaroid-frame flex-shrink-0 w-20"
-                style={{ "--rotation": `${photo.rotation_deg}deg` } as React.CSSProperties}
+          <AnimatePresence initial={false}>
+            {photos.map((photo, idx) => (
+              <motion.div
+                key={photo.id}
+                layout
+                initial={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={shouldReduce ? { opacity: 0 } : { opacity: 0, x: -20, scale: 0.95 }}
+                transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
+                draggable
+                onDragStart={() => setDragIdx(idx)}
+                onDragOver={(e) => { e.preventDefault(); setOverIdx(idx); }}
+                onDragEnd={handleDragEnd}
+                className={`flex gap-3 bg-white rounded-2xl border border-[#D4CBC3]/40 p-3 ${
+                  overIdx === idx && dragIdx !== idx ? "ring-2 ring-[#C4686D]" : ""
+                }`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photo.preview}
-                  alt={`Photo ${idx + 1}`}
-                  className="w-full aspect-square object-cover"
-                />
-                <p
-                  className="polaroid-caption text-xs truncate"
-                  style={{ fontFamily: "var(--font-caveat), cursive" }}
+                {/* Drag handle */}
+                <div className="flex items-center text-[#D4CBC3] cursor-grab active:cursor-grabbing">
+                  <GripVertical className="w-4 h-4" />
+                </div>
+
+                {/* Polaroid thumbnail */}
+                <div
+                  className="polaroid-frame flex-shrink-0 w-20"
+                  style={{ "--rotation": `${photo.rotation_deg}deg` } as React.CSSProperties}
                 >
-                  {photo.caption || "caption…"}
-                </p>
-              </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.preview}
+                    alt={`Photo ${idx + 1}`}
+                    className="w-full aspect-square object-cover"
+                  />
+                  <p
+                    className="polaroid-caption text-xs truncate"
+                    style={{ fontFamily: "var(--font-caveat), cursive" }}
+                  >
+                    {photo.caption || "caption…"}
+                  </p>
+                </div>
 
-              {/* Caption input */}
-              <div className="flex-1 flex flex-col justify-center">
-                {idx === 0 && (
-                  <span className="text-[9px] font-semibold text-[#C4686D] uppercase tracking-wider mb-1">
-                    Cover photo
-                  </span>
-                )}
-                <label className="text-[10px] text-[#6B5E57] mb-1">Polaroid caption</label>
-                <textarea
-                  value={photo.caption}
-                  onChange={(e) => updateCaption(photo.id, e.target.value)}
-                  placeholder="Write something sweet…"
-                  maxLength={120}
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-xl border border-[#D4CBC3] bg-[#FFF8F0] text-[#2D2926] placeholder:text-[#6B5E57]/40 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 focus:border-[#C4686D] resize-none"
-                  style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1rem" }}
-                />
-                <p className="text-right text-[10px] text-[#6B5E57] mt-0.5">
-                  {photo.caption.length}/120
-                </p>
-              </div>
+                {/* Caption input */}
+                <div className="flex-1 flex flex-col justify-center">
+                  {idx === 0 && (
+                    <span className="text-[9px] font-semibold text-[#C4686D] uppercase tracking-wider mb-1">
+                      Cover photo
+                    </span>
+                  )}
+                  <label className="text-[10px] text-[#6B5E57] mb-1">Polaroid caption</label>
+                  <textarea
+                    value={photo.caption}
+                    onChange={(e) => updateCaption(photo.id, e.target.value)}
+                    placeholder="Write something sweet…"
+                    maxLength={120}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-xl border border-[#D4CBC3] bg-[#FFF8F0] text-[#2D2926] placeholder:text-[#6B5E57]/40 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 focus:border-[#C4686D] resize-none"
+                    style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1rem" }}
+                  />
+                  <p className="text-right text-[10px] text-[#6B5E57] mt-0.5">
+                    {photo.caption.length}/120
+                  </p>
+                </div>
 
-              {/* Remove */}
-              <button
-                onClick={() => removePhoto(photo.id)}
-                className="self-start mt-1 w-6 h-6 rounded-full bg-[#FFF0EE] text-[#C4686D] flex items-center justify-center hover:bg-[#C4686D] hover:text-white transition-colors flex-shrink-0"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
+                {/* Remove */}
+                <button
+                  onClick={() => removePhoto(photo.id)}
+                  className="self-start mt-1 w-6 h-6 rounded-full bg-[#FFF0EE] text-[#C4686D] flex items-center justify-center hover:bg-[#C4686D] hover:text-white transition-colors flex-shrink-0"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </div>

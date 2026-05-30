@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Film, Loader2, CheckCircle2, AlertCircle, Crown } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { Film, CheckCircle2, AlertCircle, Crown } from "lucide-react";
 import { toast } from "sonner";
+import { springs, durations, easings, makeReducedMotionTransition } from "@/lib/motion";
 
 interface VideoGeneratorProps {
   inviteId: string;
@@ -14,6 +16,7 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
   const [status, setStatus] = useState<string>(initialStatus || "none");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const shouldReduce = useReducedMotion();
 
   const isPremium = tier === "plus" || tier === "unlimited";
 
@@ -68,6 +71,11 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
     }
   }
 
+  const statusTransition = makeReducedMotionTransition(shouldReduce, {
+    duration: durations.quick,
+    ease: easings.entrance,
+  });
+
   if (!isPremium) {
     return (
       <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200/60">
@@ -100,60 +108,97 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
         </div>
       </div>
 
-      {status === "none" && (
-        <button
-          onClick={handleGenerate}
-          disabled={generating}
-          className="w-full h-11 rounded-xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          {generating ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Film className="w-4 h-4" />
-          )}
-          Generate Video
-        </button>
-      )}
-
-      {status === "processing" && (
-        <div className="flex items-center gap-3 py-2">
-          <Loader2 className="w-5 h-5 text-[#C4686D] animate-spin" />
-          <div>
-            <p className="text-sm font-medium text-[#2D2926]">Generating your video...</p>
-            <p className="text-xs text-[#6B5E57]">This may take 30-60 seconds</p>
-          </div>
-        </div>
-      )}
-
-      {status === "ready" && videoUrl && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-green-700">
-            <CheckCircle2 className="w-4 h-4" />
-            <p className="text-sm font-medium">Video ready!</p>
-          </div>
-          <video
-            src={videoUrl}
-            controls
-            className="w-full rounded-xl border border-[#D4CBC3]/40"
-            style={{ maxHeight: 300 }}
-          />
-        </div>
-      )}
-
-      {status === "failed" && (
-        <div className="flex items-center gap-3 py-2">
-          <AlertCircle className="w-5 h-5 text-red-500" />
-          <div>
-            <p className="text-sm font-medium text-red-700">Generation failed</p>
+      <AnimatePresence mode="wait">
+        {status === "none" && (
+          <motion.div
+            key="none"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={statusTransition}
+          >
             <button
               onClick={handleGenerate}
-              className="text-xs text-[#C4686D] hover:underline font-medium mt-1"
+              disabled={generating}
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Try again
+              <Film className="w-4 h-4" />
+              Generate Video
             </button>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+
+        {status === "processing" && (
+          <motion.div
+            key="processing"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={statusTransition}
+            className="flex items-center gap-3 py-2"
+          >
+            <motion.div
+              animate={shouldReduce ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.6, 1] }}
+              transition={{ repeat: Infinity, duration: durations.slow, ease: "linear" }}
+            >
+              <Film className="w-5 h-5 text-[#C4686D]" />
+            </motion.div>
+            <div>
+              <p className="text-sm font-medium text-[#2D2926]">Generating your video...</p>
+              <p className="text-xs text-[#6B5E57]">This may take 30–60 seconds</p>
+            </div>
+          </motion.div>
+        )}
+
+        {status === "ready" && videoUrl && (
+          <motion.div
+            key="ready"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={statusTransition}
+            className="space-y-3"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
+              className="flex items-center gap-2 text-green-700"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <p className="text-sm font-medium">Video ready!</p>
+            </motion.div>
+            <video
+              src={videoUrl}
+              controls
+              className="w-full rounded-xl border border-[#D4CBC3]/40"
+              style={{ maxHeight: 300 }}
+            />
+          </motion.div>
+        )}
+
+        {status === "failed" && (
+          <motion.div
+            key="failed"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={statusTransition}
+            className="flex items-center gap-3 py-2"
+          >
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <div>
+              <p className="text-sm font-medium text-red-700">Generation failed</p>
+              <button
+                onClick={handleGenerate}
+                className="text-xs text-[#C4686D] hover:underline font-medium mt-1"
+              >
+                Try again
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

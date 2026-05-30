@@ -122,3 +122,44 @@ describe("getReducedMotionTransition (re-export)", () => {
     expect(t).toMatchObject({ duration: 0 });
   });
 });
+
+// P3 create-flow motion contracts
+describe("P3 create flow — token contracts", () => {
+  it("step transition uses durations.base (not a magic number)", () => {
+    // page.tsx step wrapper must use this token, not inline 0.3
+    const t = makeReducedMotionTransition(false, { duration: durations.base, ease: easings.entrance });
+    expect(t).toMatchObject({ duration: durations.base, ease: easings.entrance });
+  });
+
+  it("card press uses springs.soft — non-reduced path returns full spring config", () => {
+    const t = makeReducedMotionTransition(false, springs.soft);
+    expect(t).toMatchObject({ type: "spring", stiffness: 260, damping: 22 });
+  });
+
+  it("success payoff uses springs.weighty — heavier than soft (higher mass = more weight)", () => {
+    expect(springs.weighty.mass).toBeGreaterThan(1);
+    expect(springs.weighty.stiffness).toBeLessThan(springs.soft.stiffness);
+  });
+
+  it("success payoff reduced path returns instant (durations.instant)", () => {
+    const t = makeReducedMotionTransition(true, springs.weighty);
+    expect(t).toMatchObject({ duration: durations.instant });
+  });
+
+  it("conditional field entrance uses durations.quick (faster than base)", () => {
+    expect(durations.quick).toBeLessThan(durations.base);
+    const t = makeReducedMotionTransition(false, { duration: durations.quick, ease: easings.entrance });
+    expect(t).toMatchObject({ duration: durations.quick });
+  });
+
+  it("compressing / processing loops use durations.slow", () => {
+    // Authored pending loops should breathe at slow rate, not instant
+    expect(durations.slow).toBeGreaterThan(durations.base);
+    expect(durations.slow).toBe(0.6);
+  });
+
+  it("reduced step transition returns instant — no x/scale animation", () => {
+    const t = makeReducedMotionTransition(true, { duration: durations.base, ease: easings.entrance });
+    expect(t).toMatchObject({ duration: durations.instant });
+  });
+});

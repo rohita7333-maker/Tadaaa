@@ -1,8 +1,10 @@
 "use client";
 
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Trash2, Plus, HelpCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { springs, makeReducedMotionTransition } from "@/lib/motion";
 
 export interface Question {
   text: string;
@@ -27,6 +29,7 @@ const EMPTY_QUESTION: Question = {
 
 export default function QuestionBuilder({ questions, onQuestionsChange }: QuestionBuilderProps) {
   const MAX_QUESTIONS = 3;
+  const shouldReduce = useReducedMotion();
 
   function addQuestion() {
     if (questions.length >= MAX_QUESTIONS) return;
@@ -52,81 +55,90 @@ export default function QuestionBuilder({ questions, onQuestionsChange }: Questi
       </p>
 
       <div className="space-y-4">
-        {questions.map((q, i) => (
-          <div key={i} className="bg-[#FFF8F0] rounded-2xl border border-[#D4CBC3]/50 p-4 space-y-3">
-            {/* Question text */}
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={q.text}
-                  onChange={(e) => updateQuestion(i, { text: e.target.value.slice(0, 100) })}
-                  placeholder={`Question ${i + 1}…`}
-                  maxLength={100}
-                  className="w-full h-10 bg-white rounded-xl border border-[#D4CBC3] px-3 text-sm text-[#2D2926] placeholder:text-[#D4CBC3] focus:outline-none focus:border-[#C4686D] focus:ring-2 focus:ring-[#C4686D]/20 transition-all"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#D4CBC3] pointer-events-none">
-                  {q.text.length}/100
-                </span>
+        <AnimatePresence initial={false}>
+          {questions.map((q, i) => (
+            <motion.div
+              key={i}
+              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.97 }}
+              transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
+              className="bg-[#FFF8F0] rounded-2xl border border-[#D4CBC3]/50 p-4 space-y-3"
+            >
+              {/* Question text */}
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={q.text}
+                    onChange={(e) => updateQuestion(i, { text: e.target.value.slice(0, 100) })}
+                    placeholder={`Question ${i + 1}…`}
+                    maxLength={100}
+                    className="w-full h-10 bg-white rounded-xl border border-[#D4CBC3] px-3 text-sm text-[#2D2926] placeholder:text-[#D4CBC3] focus:outline-none focus:border-[#C4686D] focus:ring-2 focus:ring-[#C4686D]/20 transition-all"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#D4CBC3] pointer-events-none">
+                    {q.text.length}/100
+                  </span>
+                </div>
+                <button
+                  onClick={() => removeQuestion(i)}
+                  className="h-10 w-10 rounded-full border border-[#D4CBC3] text-[#C4686D] hover:bg-[#FFF0EE] flex items-center justify-center transition-all shrink-0"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
-              <button
-                onClick={() => removeQuestion(i)}
-                className="h-10 w-10 rounded-full border border-[#D4CBC3] text-[#C4686D] hover:bg-[#FFF0EE] flex items-center justify-center transition-all shrink-0"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
 
-            {/* YES / NO labels */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[10px] font-semibold text-[#6B8F71] uppercase tracking-wider mb-1">
-                  YES label
-                </label>
-                <input
-                  value={q.yesLabel}
-                  onChange={(e) => updateQuestion(i, { yesLabel: e.target.value.slice(0, 20) })}
-                  placeholder="Yes"
-                  maxLength={20}
-                  className="w-full h-9 bg-white rounded-xl border border-[#6B8F71]/40 px-3 text-sm text-[#2D2926] focus:outline-none focus:border-[#6B8F71] focus:ring-2 focus:ring-[#6B8F71]/20 transition-all"
+              {/* YES / NO labels */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#6B8F71] uppercase tracking-wider mb-1">
+                    YES label
+                  </label>
+                  <input
+                    value={q.yesLabel}
+                    onChange={(e) => updateQuestion(i, { yesLabel: e.target.value.slice(0, 20) })}
+                    placeholder="Yes"
+                    maxLength={20}
+                    className="w-full h-9 bg-white rounded-xl border border-[#6B8F71]/40 px-3 text-sm text-[#2D2926] focus:outline-none focus:border-[#6B8F71] focus:ring-2 focus:ring-[#6B8F71]/20 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#C4686D] uppercase tracking-wider mb-1">
+                    NO label
+                  </label>
+                  <input
+                    value={q.noLabel}
+                    onChange={(e) => updateQuestion(i, { noLabel: e.target.value.slice(0, 20) })}
+                    placeholder="No"
+                    maxLength={20}
+                    className="w-full h-9 bg-white rounded-xl border border-[#C4686D]/40 px-3 text-sm text-[#2D2926] focus:outline-none focus:border-[#C4686D] focus:ring-2 focus:ring-[#C4686D]/20 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Dodge toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-[#2D2926] font-medium">Dodging No button 😄</p>
+                  <p className="text-[10px] text-[#6B5E57]">No button runs away on desktop hover</p>
+                </div>
+                <Switch
+                  checked={q.enableDodge}
+                  onCheckedChange={(checked) => updateQuestion(i, { enableDodge: checked })}
                 />
               </div>
-              <div>
-                <label className="block text-[10px] font-semibold text-[#C4686D] uppercase tracking-wider mb-1">
-                  NO label
-                </label>
-                <input
-                  value={q.noLabel}
-                  onChange={(e) => updateQuestion(i, { noLabel: e.target.value.slice(0, 20) })}
-                  placeholder="No"
-                  maxLength={20}
-                  className="w-full h-9 bg-white rounded-xl border border-[#C4686D]/40 px-3 text-sm text-[#2D2926] focus:outline-none focus:border-[#C4686D] focus:ring-2 focus:ring-[#C4686D]/20 transition-all"
+
+              {/* Require answer toggle */}
+              <div className="flex items-center justify-between border-t border-[#D4CBC3]/40 pt-3">
+                <span className="text-xs text-[#6B5E57]">Require answer to continue</span>
+                <Switch
+                  checked={q.requireAnswer}
+                  onCheckedChange={(checked) => updateQuestion(i, { requireAnswer: checked })}
                 />
               </div>
-            </div>
-
-            {/* Dodge toggle */}
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-[#2D2926] font-medium">Dodging No button 😄</p>
-                <p className="text-[10px] text-[#6B5E57]">No button runs away on desktop hover</p>
-              </div>
-              <Switch
-                checked={q.enableDodge}
-                onCheckedChange={(checked) => updateQuestion(i, { enableDodge: checked })}
-              />
-            </div>
-
-            {/* Require answer toggle */}
-            <div className="flex items-center justify-between border-t border-[#D4CBC3]/40 pt-3">
-              <span className="text-xs text-[#6B5E57]">Require answer to continue</span>
-              <Switch
-                checked={q.requireAnswer}
-                onCheckedChange={(checked) => updateQuestion(i, { requireAnswer: checked })}
-              />
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {questions.length < MAX_QUESTIONS && (

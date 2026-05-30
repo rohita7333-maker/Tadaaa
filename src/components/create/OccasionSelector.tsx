@@ -1,6 +1,8 @@
 "use client";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { occasions } from "@/lib/themes";
+import { springs, makeReducedMotionTransition } from "@/lib/motion";
 
 interface Props {
   selected: string;
@@ -10,6 +12,7 @@ interface Props {
 
 export default function OccasionSelector({ selected, onSelect, onPromptSelect }: Props) {
   const selectedOcc = occasions.find((o) => o.id === selected);
+  const shouldReduce = useReducedMotion();
 
   return (
     <div className="space-y-4">
@@ -17,11 +20,15 @@ export default function OccasionSelector({ selected, onSelect, onPromptSelect }:
         <p className="text-[#2D2926] font-medium text-sm mb-3">Occasion</p>
         <div className="grid grid-cols-3 gap-2">
           {occasions.map((occ) => (
-            <button
+            <motion.button
               key={occ.id}
               type="button"
               onClick={() => onSelect(occ.id)}
-              className={`py-3 px-2 rounded-2xl border-2 text-center transition-all ${
+              initial={false}
+              animate={{ scale: selected === occ.id ? 1.02 : 1, y: selected === occ.id ? -1 : 0 }}
+              whileTap={shouldReduce ? {} : { scale: 0.94 }}
+              transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
+              className={`py-3 px-2 rounded-2xl border-2 text-center transition-colors ${
                 selected === occ.id
                   ? "border-[#C4686D] bg-[#FFF0EE]"
                   : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
@@ -29,7 +36,7 @@ export default function OccasionSelector({ selected, onSelect, onPromptSelect }:
             >
               <div className="text-2xl mb-1">{occ.emoji}</div>
               <div className="text-[11px] font-medium text-[#2D2926] leading-tight">{occ.label}</div>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

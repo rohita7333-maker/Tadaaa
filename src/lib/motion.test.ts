@@ -85,18 +85,31 @@ describe("staggers", () => {
   it("lead is 0 (no delay — first element)", () => {
     expect(staggers.lead).toBe(0);
   });
+  it("word is 0.04 (per-word blur reveal cadence)", () => {
+    expect(staggers.word).toBe(0.04);
+  });
   it("support is 0.06 (secondary elements)", () => {
     expect(staggers.support).toBe(0.06);
   });
   it("detail is 0.10 (body/copy content)", () => {
     expect(staggers.detail).toBe(0.10);
   });
-  it("lead < support < detail (ascending hierarchy)", () => {
-    expect(staggers.lead).toBeLessThan(staggers.support);
+  it("lead < word < support < detail (ascending hierarchy)", () => {
+    expect(staggers.lead).toBeLessThan(staggers.word);
+    expect(staggers.word).toBeLessThan(staggers.support);
     expect(staggers.support).toBeLessThan(staggers.detail);
   });
   it("total stagger of 5 detail items stays at or under 0.5s cap", () => {
     expect(5 * staggers.detail).toBeLessThanOrEqual(0.5);
+  });
+  it("6-word headline stagger completes within 0.25s (word × 5 trailing words)", () => {
+    // Hero headline: 6 words, last word starts at headlineStart + 5*word
+    const lastWordStart = 0.15 + 5 * staggers.word;
+    expect(lastWordStart).toBeLessThanOrEqual(0.4);
+  });
+  it("hero headline fully settled before 0.8s (lastWordStart + base duration)", () => {
+    const headlineEnd = 0.15 + 5 * staggers.word + durations.base;
+    expect(headlineEnd).toBeLessThan(0.8);
   });
 });
 

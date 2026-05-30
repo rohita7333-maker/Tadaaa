@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart, Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { easings, durations, makeReducedMotionTransition } from "@/lib/motion";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     function onScroll() {
@@ -82,14 +84,17 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — opacity+y only (no height animation = no layout thrash) */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={makeReducedMotionTransition(reducedMotion, {
+              duration: durations.quick,
+              ease: easings.entrance,
+            })}
             className="sm:hidden overflow-hidden bg-white/95 backdrop-blur-md border-b border-[#D4CBC3]/40"
           >
             <div className="px-6 py-4 flex flex-col gap-3">

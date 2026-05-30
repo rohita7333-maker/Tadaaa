@@ -1,8 +1,63 @@
 # TaDaaaa — Session Handoff (2026-05-30)
 
-## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P1-DONE · SECURITY-HARDENED
+## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P2-DONE · SECURITY-HARDENED
 
-**Tests:** 217/217 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors, 15 warnings (1 FEWER than P0 baseline) · **branch:** feat/sophistication
+**Tests:** 220/220 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors, 15 warnings (no new from P2) · **branch:** feat/sophistication
+
+---
+
+## What shipped this session (2026-05-30 — Motion P2 Landing)
+
+**P2 — Landing surface de-uniform + a11y (DONE, gates P3):**
+
+- ✅ `src/components/landing/Hero.tsx` — full motion overhaul:
+  - Eyebrow badge: `scale:0.85→1` via `springs.soft` (pop, not fade-up)
+  - Subtitle badge: `opacity:0→1` only (supporting — doesn't compete)
+  - h1 headline: **word-by-word blur reveal** — each of 6 words animates `filter:blur(8px)→0, opacity:0→1, y:6→0` with `staggers.word` offset; `ShimmerText` words treated as single units; reduced-motion = single `opacity` fade-in
+  - Subcopy: `y:10→0, opacity:0→1` with `durations.slow` — quieter than hero, starts overlapping headline tail
+  - CTA group: `scale:0.95→1` via `springs.soft` — pops in, not another y:24 drip
+  - Stats ×3: **horizontal slide** `x:-16→0` with `staggers.detail` cadence (reading direction, not vertical drip)
+  - Right panel entrance: `scale:0.92→1` via `springs.weighty` (weighted settle)
+  - All ambient loops (heart pulse, polaroid float, reaction badges): fully guarded with `!reducedMotion` conditional
+  - `useReducedMotion()` at component top — honored everywhere
+  - Zero inline magic numbers — all from `@/lib/motion` T timing ladder
+- ✅ `src/components/landing/HowItWorks.tsx` — directional card entrances:
+  - Step 01 (wide/dominant): slides from left `x:-24→0` (reading direction)
+  - Steps 02+03 (subordinate): rise `y:20→0` with `support`/`detail` stagger
+  - Header: simpler `y:16→0` (not competing with hero)
+  - `useReducedMotion()` guards all — instant opacity on reduce
+  - Zero inline magic numbers
+- ✅ `src/components/landing/Testimonials.tsx` — reading cadence stagger:
+  - Cards: `y:20→0` (shorter travel = more refined; was 32), `staggers.support` between cards
+  - Duration: `durations.base` (was inline 0.6)
+  - `useReducedMotion()` + `makeReducedMotionTransition` on all cards + header
+- ✅ `src/components/landing/Navbar.tsx` — fixed layout animation:
+  - Mobile menu: **removed `height:0→"auto"`** (was animating layout property — violates transforms+opacity rule)
+  - Replaced with `opacity:0→1, y:-8→0` (transforms+opacity only)
+  - Exit: `opacity:0, y:-4`; duration: `durations.quick`
+  - `useReducedMotion()` added — historic gap fixed
+- ✅ `src/lib/motion.test.ts` — 3 new tests for P2 timing invariants:
+  - `staggers.word` = 0.04 verified
+  - `lead < word < support < detail` ordering
+  - Hero headline settles before 0.8s (timing ladder contract)
+
+**Files touched:** `src/components/landing/Hero.tsx` · `src/components/landing/HowItWorks.tsx` · `src/components/landing/Testimonials.tsx` · `src/components/landing/Navbar.tsx` · `src/lib/motion.test.ts`
+
+**Verification:**
+- `npx tsc --noEmit` → exit 0 ✓
+- `npm test` → 220/220 pass (+3 new P2 motion tests) ✓
+- `npm run lint` → 19 problems (4 errors, 15 warnings) — 0 new errors from P2 ✓
+- Reduced-motion: Hero (badge/headline/subcopy/cta/stats/ambient loops), HowItWorks (header+cards), Testimonials (header+cards), Navbar (mobile menu) — all guarded ✓
+- Gems intact: PolaroidCarousel untouched, StepIndicator untouched ✓
+- Zero uniform fade-up remaining: every element has role-differentiated motion ✓
+- Zero inline magic numbers in touched files ✓
+- No layout animations: Navbar height removed; all use transforms+opacity only ✓
+- Mobile fps: transforms + opacity only on hot path ✓
+
+**Open risks / next phase entry point:**
+- 60fps mobile profile: needs real-device Playwright verification
+- P3 (Create wizard — step transitions, tactile inputs, publish payoff) can now start
+- 4 pre-existing lint errors (animated-counter, magnetic-button) — not from motion work
 
 ---
 

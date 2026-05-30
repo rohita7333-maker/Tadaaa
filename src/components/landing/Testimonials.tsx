@@ -1,7 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Star } from "lucide-react";
+import {
+  easings,
+  durations,
+  staggers,
+  makeReducedMotionTransition,
+} from "@/lib/motion";
 
 const testimonials = [
   {
@@ -31,15 +37,21 @@ const testimonials = [
 ];
 
 export default function Testimonials() {
+  const reducedMotion = useReducedMotion();
+
   return (
     <section className="py-24 px-6 bg-[#FFF8F0]">
       <div className="max-w-5xl mx-auto">
+        {/* Section header */}
         <motion.div
           className="text-center mb-16"
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={makeReducedMotionTransition(reducedMotion, {
+            duration: durations.base,
+            ease: easings.entrance,
+          })}
         >
           <span className="text-[#C4686D] text-sm font-medium uppercase tracking-widest mb-3 block">
             Real stories
@@ -49,15 +61,20 @@ export default function Testimonials() {
           </h2>
         </motion.div>
 
+        {/* Cards — reading cadence L→R stagger, shorter y travel (20 not 32) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
               className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/40"
-              initial={{ opacity: 0, y: 32 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
+              transition={makeReducedMotionTransition(reducedMotion, {
+                duration: durations.base,
+                ease: easings.entrance,
+                delay: i * staggers.support,
+              })}
             >
               <div className="flex gap-1 mb-4">
                 {[...Array(t.rating)].map((_, j) => (

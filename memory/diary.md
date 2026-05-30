@@ -860,3 +860,26 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 - `vibrate(20)` in `onAnimationComplete` on photos/video stages only — settle haptic, not repeated per-animation
 
 **Next:** P2 — Landing (Hero.tsx de-uniform, scroll choreography, a11y gaps). Entry: `src/components/home/Hero.tsx`.
+
+---
+
+## 2026-05-30 — Motion P2: Landing surface de-uniform
+
+**What happened:** Implemented P2 of MOTION_MASTERPLAN. Killed uniform fade-up-everything across all landing components. Added `useReducedMotion` to every animated landing component (historic gap).
+
+**Key decisions:**
+- Hero headline → word-by-word blur reveal (6 words, `staggers.word=0.04` cadence). Rhymes with PolaroidCarousel captions. Reduced path = single opacity fade-in.
+- Badge entrance → `scale:0.85→1, springs.soft` (pop, not drift). Role: first trust signal should feel confident.
+- Stats → horizontal slide `x:-16→0` (reading direction L→R), not another y drip.
+- CTA → `scale:0.95→1, springs.soft` (action item pops).
+- Subcopy → quieter `y:10→0, durations.slow`, starts while headline tail is still coming in (intentional overlap).
+- HowItWorks step 01 → `x:-24→0` (wide dominant card slides from reading direction). Steps 02+03 → `y:20→0` (subordinate, rise).
+- Testimonials → `y:20→0` (shorter than y:32 original — more refined), `staggers.support` cadence.
+- Navbar mobile menu → **removed `height:0→"auto"`** (was animating layout property). Replaced with `opacity+y:-8→0` transforms only.
+- All ambient loops (heart, polaroid float, reaction badges) → conditional render on `!reducedMotion`.
+
+**P1 fix committed first:** `staggers.word=0.04` token + MessageReveal.tsx hardcoded 0.04 → token (`54ab8c7`).
+
+**Gates passed:** tsc 0 · vitest 220/220 (+3 new tests) · lint 0 new errors · reduced-motion on all 4 landing components · gems untouched · no uniform fade-up remaining.
+
+**Next:** P3 — Create wizard (step transitions, tactile inputs, publish payoff). Entry: `src/components/create/`.

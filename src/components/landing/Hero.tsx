@@ -1,21 +1,42 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Heart, Sparkles, Star, Play } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import { ShimmerText } from "@/components/ui/shimmer-text";
+import {
+  easings,
+  durations,
+  staggers,
+  springs,
+  makeReducedMotionTransition,
+} from "@/lib/motion";
 
 const floatingCards = [
-  { emoji: "🎂", title: "Birthday Surprise", views: "142 views", rotate: "-8deg", x: "-60%", y: "-20%", delay: 0 },
-  { emoji: "💍", title: "She said YES!", views: "89 views", rotate: "6deg", x: "55%", y: "-10%", delay: 0.2 },
-  { emoji: "🌸", title: "Mother's Day", views: "203 views", rotate: "-4deg", x: "-55%", y: "30%", delay: 0.4 },
-  { emoji: "🎉", title: "Anniversary", views: "67 views", rotate: "9deg", x: "52%", y: "35%", delay: 0.6 },
+  { emoji: "🎂", title: "Birthday Surprise", rotate: "-8deg", x: "-60%", y: "-20%", delay: 0 },
+  { emoji: "💍", title: "She said YES!", rotate: "6deg", x: "55%", y: "-10%", delay: 0.2 },
+  { emoji: "🌸", title: "Mother's Day", rotate: "-4deg", x: "-55%", y: "30%", delay: 0.4 },
+  { emoji: "🎉", title: "Anniversary", rotate: "9deg", x: "52%", y: "35%", delay: 0.6 },
 ];
 
+// Timing ladder (seconds) — all derived from tokens
+const T = {
+  badge: 0,
+  subtitle: staggers.support,          // 0.06
+  headlineStart: 0.15,
+  // headline: 6 words × staggers.word + durations.base = 0.15 + 0.20 + 0.35 = 0.70
+  headlineEnd: 0.15 + 5 * staggers.word + durations.base,
+  subcopyStart: 0.5,                    // overlaps headline tail intentionally
+  ctaStart: 0.7,                        // after headline completes
+  statsStart: 0.85,
+} as const;
+
 export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) {
+  const reducedMotion = useReducedMotion();
+
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden px-6 pt-20 pb-16">
       {/* Background */}
@@ -26,18 +47,20 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
             "radial-gradient(ellipse at 25% 35%, rgba(196,104,109,0.1) 0%, transparent 55%), radial-gradient(ellipse at 75% 65%, rgba(201,169,110,0.08) 0%, transparent 55%), #FFF8F0",
         }}
       />
-
-      {/* Subtle grid pattern overlay */}
       <GridPattern variant="grid" cellSize={48} opacity={0.35} />
 
       <div className="relative z-10 max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left — copy */}
           <div>
+            {/* Eyebrow badge — scale pop, not fade-up (role: first trust signal) */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={makeReducedMotionTransition(reducedMotion, {
+                ...springs.soft,
+                delay: T.badge,
+              })}
             >
               <span className="inline-flex items-center gap-2 bg-white text-[#C4686D] text-xs font-semibold px-4 py-2 rounded-full mb-5 border border-[#E8A5A8]/40 shadow-sm uppercase tracking-widest">
                 <Sparkles className="w-3 h-3 fill-current" />
@@ -45,43 +68,122 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               </span>
             </motion.div>
 
+            {/* Subtitle badge — opacity only (supporting, not competing) */}
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.05 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={makeReducedMotionTransition(reducedMotion, {
+                duration: durations.quick,
+                ease: easings.entrance,
+                delay: T.subtitle,
+              })}
             >
               <span className="inline-flex items-center gap-2 bg-[#FFF8F0] text-[#6B5E57] text-[11px] font-medium px-3 py-1 rounded-full mb-6 border border-[#D4CBC3]/60">
                 ✨ Surprise invite builder
               </span>
             </motion.div>
 
-            <motion.h1
-              className="font-heading text-6xl md:text-7xl text-[#2D2926] leading-[1.05] mb-6"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 }}
-            >
-              Make them
-              <br />
-              feel the <ShimmerText>magic</ShimmerText>
-              <br />
-              <ShimmerText>forever</ShimmerText>
-            </motion.h1>
+            {/* Headline — word-by-word blur reveal (hero beat — loudest) */}
+            <h1 className="font-heading text-6xl md:text-7xl text-[#2D2926] leading-[1.05] mb-6">
+              {reducedMotion ? (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: durations.instant }}
+                >
+                  Make them
+                  <br />
+                  feel the <ShimmerText>magic</ShimmerText>
+                  <br />
+                  <ShimmerText>forever</ShimmerText>
+                </motion.span>
+              ) : (
+                <>
+                  {(["Make", "them"] as const).map((word, i) => (
+                    <motion.span
+                      key={word}
+                      initial={{ opacity: 0, filter: "blur(8px)", y: 6 }}
+                      animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                      transition={{
+                        duration: durations.base,
+                        ease: easings.entrance,
+                        delay: T.headlineStart + i * staggers.word,
+                      }}
+                      style={{ display: "inline-block", marginRight: "0.3em" }}
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                  <br />
+                  {(["feel", "the"] as const).map((word, i) => (
+                    <motion.span
+                      key={word}
+                      initial={{ opacity: 0, filter: "blur(8px)", y: 6 }}
+                      animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                      transition={{
+                        duration: durations.base,
+                        ease: easings.entrance,
+                        delay: T.headlineStart + (2 + i) * staggers.word,
+                      }}
+                      style={{ display: "inline-block", marginRight: "0.3em" }}
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                  {/* "magic" — ShimmerText as single word unit */}
+                  <motion.span
+                    initial={{ opacity: 0, filter: "blur(8px)", y: 6 }}
+                    animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                    transition={{
+                      duration: durations.base,
+                      ease: easings.entrance,
+                      delay: T.headlineStart + 4 * staggers.word,
+                    }}
+                    style={{ display: "inline-block" }}
+                  >
+                    <ShimmerText>magic</ShimmerText>
+                  </motion.span>
+                  <br />
+                  {/* "forever" — ShimmerText as single word unit */}
+                  <motion.span
+                    initial={{ opacity: 0, filter: "blur(8px)", y: 6 }}
+                    animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                    transition={{
+                      duration: durations.base,
+                      ease: easings.entrance,
+                      delay: T.headlineStart + 5 * staggers.word,
+                    }}
+                    style={{ display: "inline-block" }}
+                  >
+                    <ShimmerText>forever</ShimmerText>
+                  </motion.span>
+                </>
+              )}
+            </h1>
 
+            {/* Subcopy — quieter rise, starts while headline tail comes in */}
             <motion.p
               className="text-[#6B5E57] text-lg leading-relaxed mb-10 max-w-md"
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
+              transition={makeReducedMotionTransition(reducedMotion, {
+                duration: durations.slow,
+                ease: easings.entrance,
+                delay: T.subcopyStart,
+              })}
             >
               Build a beautiful surprise page with your photos, a heartfelt message, and a playful yes/no question. Share it — watch the magic happen.
             </motion.p>
 
+            {/* CTA — spring pop (role: action, most clickable) */}
             <motion.div
               className="flex flex-col sm:flex-row gap-3 mb-12"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={makeReducedMotionTransition(reducedMotion, {
+                ...springs.soft,
+                delay: T.ctaStart,
+              })}
             >
               <Link href="/auth/signup" className="inline-flex">
                 <MagneticButton
@@ -101,77 +203,88 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               </Link>
             </motion.div>
 
-            {/* Stats */}
+            {/* Stats — horizontal slide L→R (reading direction, not another y:12 drip) */}
             <motion.div
               className="flex gap-6 pt-8 border-t border-[#D4CBC3]/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.7, delay: 0.5 }}
+              transition={makeReducedMotionTransition(reducedMotion, {
+                duration: durations.quick,
+                delay: T.statsStart,
+              })}
             >
-              <motion.div
-                className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-              >
-                <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">
-                  {surpriseCount > 0 ? (
+              {[
+                {
+                  value: surpriseCount,
+                  label: "Surprises created",
+                  content: surpriseCount > 0 ? (
                     <AnimatedCounter
                       value={surpriseCount}
                       format={(v) => `${Math.round(v).toLocaleString()}+`}
                     />
-                  ) : (
-                    "Start free"
-                  )}
-                </p>
-                <p className="text-[#6B5E57] text-[11px] mt-1">Surprises created</p>
-              </motion.div>
-              <motion.div
-                className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.5 }}
-              >
-                <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">
-                  <AnimatedCounter value={98} format={(v) => `${Math.round(v)}%`} />
-                </p>
-                <p className="text-[#6B5E57] text-[11px] mt-1">Recipients loved it</p>
-              </motion.div>
-              <motion.div
-                className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
-              >
-                <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">3 min</p>
-                <p className="text-[#6B5E57] text-[11px] mt-1">Average create time</p>
-              </motion.div>
+                  ) : "Start free",
+                },
+                {
+                  value: 98,
+                  label: "Recipients loved it",
+                  content: <AnimatedCounter value={98} format={(v) => `${Math.round(v)}%`} />,
+                },
+                {
+                  value: null,
+                  label: "Average create time",
+                  content: "3 min",
+                },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={makeReducedMotionTransition(reducedMotion, {
+                    duration: durations.base,
+                    ease: easings.entrance,
+                    delay: T.statsStart + i * staggers.detail,
+                  })}
+                >
+                  <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">
+                    {stat.content}
+                  </p>
+                  <p className="text-[#6B5E57] text-[11px] mt-1">{stat.label}</p>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
 
-          {/* Right — floating invite cards */}
+          {/* Right — floating invite cards (spring settle, ambient loops guarded) */}
           <motion.div
             className="relative flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, delay: 0.4 }}
+            transition={makeReducedMotionTransition(reducedMotion, {
+              ...springs.weighty,
+              delay: T.ctaStart,
+            })}
           >
-            {/* Center card — main invite preview (links to demo) */}
+            {/* Center card */}
             <Link
               href="/surprise/test"
               className="relative w-72 h-96 bg-white rounded-3xl shadow-[0_24px_80px_rgba(196,104,109,0.18),0_8px_24px_rgba(45,41,38,0.1)] overflow-hidden border border-[#E8A5A8]/30 z-10 block hover:shadow-[0_32px_100px_rgba(196,104,109,0.25),0_12px_32px_rgba(45,41,38,0.12)] hover:-translate-y-2 transition-all duration-500 ring-1 ring-[#C4686D]/5"
             >
-              {/* Top gradient */}
               <div
                 className="h-48 flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, #FFF0E8 0%, #F5E6E0 100%)" }}
               >
-                <motion.div
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                >
+                {/* Heart ambient pulse — guarded */}
+                {!reducedMotion ? (
+                  <motion.div
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: durations.ambient, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Heart className="w-20 h-20 fill-[#C4686D] text-[#C4686D]" />
+                  </motion.div>
+                ) : (
                   <Heart className="w-20 h-20 fill-[#C4686D] text-[#C4686D]" />
-                </motion.div>
+                )}
               </div>
               <div className="p-6">
                 <p className="font-heading text-lg text-[#2D2926] mb-1">Someone made this for you</p>
@@ -190,7 +303,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               </div>
             </Link>
 
-            {/* Floating polaroid cards — hidden on mobile to prevent overlap */}
+            {/* Floating polaroid cards — ambient loops guarded */}
             {floatingCards.map((card, i) => (
               <motion.div
                 key={i}
@@ -201,8 +314,15 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
                   width: "108px",
                   zIndex: 5,
                 }}
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3 + i * 0.5, repeat: Infinity, delay: card.delay, ease: "easeInOut" }}
+                {...(!reducedMotion && {
+                  animate: { y: [0, -8, 0] },
+                  transition: {
+                    duration: 3 + i * 0.5,
+                    repeat: Infinity,
+                    delay: card.delay,
+                    ease: "easeInOut",
+                  },
+                })}
               >
                 <div
                   className="w-full aspect-square rounded-sm flex items-center justify-center text-2xl"
@@ -219,23 +339,27 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               </motion.div>
             ))}
 
-            {/* Floating reaction badges — hidden on mobile */}
-            <motion.div
-              className="absolute hidden md:flex top-4 right-0 bg-white rounded-2xl shadow-lg px-3 py-2 items-center gap-2 z-20"
-              animate={{ y: [-4, 4, -4] }}
-              transition={{ duration: 4, repeat: Infinity }}
-            >
-              <span className="text-base">😭</span>
-              <span className="text-xs font-medium text-[#2D2926]">She&apos;s crying!</span>
-            </motion.div>
-            <motion.div
-              className="absolute hidden md:flex bottom-8 left-0 bg-white rounded-2xl shadow-lg px-3 py-2 items-center gap-2 z-20"
-              animate={{ y: [4, -4, 4] }}
-              transition={{ duration: 3.5, repeat: Infinity }}
-            >
-              <span className="text-base">🎊</span>
-              <span className="text-xs font-medium text-[#2D2926]">He said YES!</span>
-            </motion.div>
+            {/* Floating reaction badges — ambient guarded */}
+            {!reducedMotion && (
+              <>
+                <motion.div
+                  className="absolute hidden md:flex top-4 right-0 bg-white rounded-2xl shadow-lg px-3 py-2 items-center gap-2 z-20"
+                  animate={{ y: [-4, 4, -4] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <span className="text-base">😭</span>
+                  <span className="text-xs font-medium text-[#2D2926]">She&apos;s crying!</span>
+                </motion.div>
+                <motion.div
+                  className="absolute hidden md:flex bottom-8 left-0 bg-white rounded-2xl shadow-lg px-3 py-2 items-center gap-2 z-20"
+                  animate={{ y: [4, -4, 4] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <span className="text-base">🎊</span>
+                  <span className="text-xs font-medium text-[#2D2926]">He said YES!</span>
+                </motion.div>
+              </>
+            )}
           </motion.div>
         </div>
       </div>

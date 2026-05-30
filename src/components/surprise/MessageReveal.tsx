@@ -6,8 +6,7 @@ import { type Theme } from "@/lib/themes";
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
 import FloatingPhotos from "./FloatingPhotos";
-import { getReducedMotionTransition } from "@/lib/a11y";
-import { ShimmerText } from "@/components/ui/shimmer-text";
+import { easings, durations, springs, staggers, makeReducedMotionTransition } from "@/lib/motion";
 
 interface MessageRevealProps {
   title: string;
@@ -25,26 +24,15 @@ export default function MessageReveal({
   photos = [],
 }: MessageRevealProps) {
   const shouldReduce = useReducedMotion();
-  const words = message.split(" ");
+  const titleWords = title.split(" ");
+  // Split by explicit line breaks; fallback = single block
+  const bodyLines = message.split("\n").filter(Boolean);
+  const safeBodyLines = bodyLines.length > 0 ? bodyLines : [message];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: shouldReduce
-        ? { staggerChildren: 0, delayChildren: 0 }
-        : ({ staggerChildren: 0.08, delayChildren: 0.3 } as const),
-    },
-  };
-
-  const wordVariants = {
-    hidden: { opacity: 0, y: shouldReduce ? 0 : 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: getReducedMotionTransition(shouldReduce, { duration: 0.5 }),
-    },
-  };
+  // Title completes at: titleWords.length * 0.04 + one word's duration
+  const titleEndDelay = titleWords.length * 0.04 + durations.quick;
+  // Body lines start after title settles
+  const bodyStartDelay = titleEndDelay + staggers.support;
 
   return (
     <div
@@ -54,34 +42,72 @@ export default function MessageReveal({
       <FloatingPhotos photos={photos} screenIndex={100} />
 
       <div className="relative max-w-xs text-center" style={{ zIndex: 20 }}>
+        {/* Title — word-by-word blur reveal, rhymes with PolaroidCarousel captions */}
         <motion.h2
           className="font-heading text-2xl mb-8"
           style={{ color: theme.colors.text }}
-          initial={{ opacity: 0, y: shouldReduce ? 0 : 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={getReducedMotionTransition(shouldReduce, { duration: 0.6 })}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
         >
-          <ShimmerText>{title}</ShimmerText>
-        </motion.h2>
-
-        <motion.p
-          className="font-heading text-xl leading-relaxed mb-12"
-          style={{ color: theme.colors.text }}
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {words.map((word, i) => (
-            <motion.span key={i} variants={wordVariants} className="inline-block mr-1">
+          {titleWords.map((word, i) => (
+            <motion.span
+              key={i}
+              initial={shouldReduce
+                ? { opacity: 1 }
+                : { filter: "blur(8px)", opacity: 0, y: 4 }
+              }
+              animate={shouldReduce
+                ? { opacity: 1 }
+                : { filter: "blur(0px)", opacity: 1, y: 0 }
+              }
+              transition={shouldReduce
+                ? { duration: durations.instant }
+                : {
+                    duration: durations.quick,
+                    ease: easings.entrance,
+                    delay: staggers.lead + i * 0.04,
+                  }
+              }
+              style={{ display: "inline-block", marginRight: "0.25em" }}
+            >
               {word}
             </motion.span>
           ))}
-        </motion.p>
+        </motion.h2>
 
+        {/* Body — line-by-line with hierarchy stagger (not a uniform word drip) */}
+        <div
+          className="font-heading text-xl leading-relaxed mb-12"
+          style={{ color: theme.colors.text }}
+        >
+          {safeBodyLines.map((line, i) => (
+            <motion.p
+              key={i}
+              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
+              animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              transition={makeReducedMotionTransition(shouldReduce, {
+                ease: easings.entrance,
+                duration: durations.base,
+                delay: bodyStartDelay + i * staggers.detail,
+              })}
+              style={{ marginBottom: i < safeBodyLines.length - 1 ? "0.5em" : 0 }}
+            >
+              {line}
+            </motion.p>
+          ))}
+        </div>
+
+        {/* CTA — arrives after all body lines settle */}
         <motion.div
-          initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={getReducedMotionTransition(shouldReduce, { delay: words.length * 0.08 + 0.5 })}
+          initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
+          animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+          transition={shouldReduce
+            ? { duration: durations.instant }
+            : {
+                ...springs.soft,
+                delay: bodyStartDelay + safeBodyLines.length * staggers.detail + staggers.support,
+              }
+          }
         >
           <Button
             onClick={onComplete}

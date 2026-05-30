@@ -817,3 +817,46 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 - Duration mismatches: StepIndicator uses 0.5/0.45, PolaroidCarousel CSS uses 0.8s — none have exact token matches. Kept raw to preserve zero visual change. These will align in P1+ when those animations are redesigned.
 
 **Next:** P1 (Reveal surface) — unwrap, continuity, message reveal, particle + reduced-motion fixes. Entry point: `src/components/surprise/TapToReveal.tsx`.
+
+---
+
+## 2026-05-30 — Motion P1: Reveal Surface Choreography
+
+**Status:** DONE — gates P2 (Landing).
+
+**What changed:**
+
+**`src/lib/motion.ts`** — additive extensions:
+- `durations.ambient = 2.8` (loop-range duration, 2.5–4s band, for FloatingParticles + reveal icon ambient loops)
+- `staggers = { lead: 0, support: 0.06, detail: 0.10 }` — hierarchy-aware stagger offsets; replaces uniform drips
+
+**`src/lib/motion.test.ts`** — +6 tests: staggers hierarchy, boundary cap (5×detail ≤ 0.5s), `durations.ambient` value, count assertion updated 5→6.
+
+**`src/components/surprise/TapToReveal.tsx`** — full motion rework (logic machine untouched):
+- FIXED: `FloatingParticles` had zero reduced-motion guard — vestibular hazard. Now receives `shouldReduce` prop; when true, `animate={}` (static particles, visible but no motion).
+- FIXED: Reveal icon ambient loop had no reduced-motion guard. When `shouldReduce`, settles to `scale:1, rotate:0` instantly.
+- REPLACED: All 6 stage transitions were flat opacity crossfades. Now:
+  - Landing exit: `scale:1.08, y:-16` with `easings.exit` — unwrap "lid lifts"
+  - Photos/Video enter: `scale:0.96, y:20 → springs.weighty` — hand-placed arrival with `vibrate(20)` on settle
+  - Questions: directional slide (`x:±20`) with `easings.entrance`
+  - Celebrate: scale-pop (`scale:1.04→1`) with `springs.soft`
+  - Message: `y:20 → springs.weighty` — emotional weight
+  - CTA: `y:16 → springs.soft`
+- All inline magic numbers removed — 100% from `@/lib/motion` tokens.
+- Removed unused `color` prop from FloatingParticles (−1 lint warning).
+
+**`src/components/surprise/MessageReveal.tsx`** — stagger-with-intent:
+- Title h2: word-by-word `blur(8px)→0` reveal, 0.04s `lead` stagger/word (rhymes with PolaroidCarousel captions)
+- Body: `\n`-split line-by-line reveal, 0.10s `detail` stagger/line — killed the uniform word drip
+- Button: token-computed delay after all body lines settle
+- Imports switched from `@/lib/a11y` → `@/lib/motion` exclusively
+
+**Gate results:** tsc 0 · vitest 217/217 · lint 19 problems (0 new from P1, −1 warning vs P0)
+
+**Decisions:**
+- `\n` split for body lines (not `. `) — preserves author intent, safe for URLs/abbreviations/ellipses
+- Embedding `transition` inside `exit` objects — lets each stage own its departure physics independently
+- `color` prop removal: was passed but never used in FloatingParticles (pre-existing dead code)
+- `vibrate(20)` in `onAnimationComplete` on photos/video stages only — settle haptic, not repeated per-animation
+
+**Next:** P2 — Landing (Hero.tsx de-uniform, scroll choreography, a11y gaps). Entry: `src/components/home/Hero.tsx`.

@@ -4,6 +4,7 @@ import {
   cssEasings,
   durations,
   springs,
+  staggers,
   makeReducedMotionTransition,
   getReducedMotionTransition,
 } from "./motion";
@@ -36,14 +37,15 @@ describe("cssEasings", () => {
 });
 
 describe("durations", () => {
-  it("has 5 named steps", () => {
-    expect(Object.keys(durations)).toHaveLength(5);
+  it("has 6 named steps (instant/quick/base/slow/cinematic/ambient)", () => {
+    expect(Object.keys(durations)).toHaveLength(6);
   });
   it("instant is 0.12", () => expect(durations.instant).toBe(0.12));
   it("quick is 0.2", () => expect(durations.quick).toBe(0.2));
   it("base is 0.35", () => expect(durations.base).toBe(0.35));
   it("slow is 0.6", () => expect(durations.slow).toBe(0.6));
   it("cinematic is 0.9", () => expect(durations.cinematic).toBe(0.9));
+  it("ambient is 2.8 (loop range, 2.5–4s)", () => expect(durations.ambient).toBe(2.8));
 });
 
 describe("springs", () => {
@@ -76,6 +78,25 @@ describe("makeReducedMotionTransition", () => {
   it("accepts custom reduced transition", () => {
     const t = makeReducedMotionTransition(true, { duration: 0.5 }, { duration: 0 });
     expect(t).toMatchObject({ duration: 0 });
+  });
+});
+
+describe("staggers", () => {
+  it("lead is 0 (no delay — first element)", () => {
+    expect(staggers.lead).toBe(0);
+  });
+  it("support is 0.06 (secondary elements)", () => {
+    expect(staggers.support).toBe(0.06);
+  });
+  it("detail is 0.10 (body/copy content)", () => {
+    expect(staggers.detail).toBe(0.10);
+  });
+  it("lead < support < detail (ascending hierarchy)", () => {
+    expect(staggers.lead).toBeLessThan(staggers.support);
+    expect(staggers.support).toBeLessThan(staggers.detail);
+  });
+  it("total stagger of 5 detail items stays at or under 0.5s cap", () => {
+    expect(5 * staggers.detail).toBeLessThanOrEqual(0.5);
   });
 });
 

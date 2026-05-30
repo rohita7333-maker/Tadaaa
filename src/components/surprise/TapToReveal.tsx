@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
 import PolaroidCarousel from "./PolaroidCarousel";
 import MessageReveal from "./MessageReveal";
@@ -10,6 +10,7 @@ import QuestionScreen from "./QuestionScreen";
 import CelebrationOverlay from "./CelebrationOverlay";
 import VideoPlayer from "./VideoPlayer";
 import { playSound } from "@/lib/sounds";
+import { easings, durations, springs, makeReducedMotionTransition } from "@/lib/motion";
 
 interface TapToRevealProps {
   theme: Theme;
@@ -33,10 +34,10 @@ type Stage = "landing" | "video" | "photos" | "questions" | "celebrate" | "messa
 
 function FloatingParticles({
   type,
-  color,
+  shouldReduce,
 }: {
   type: Theme["particleType"];
-  color: string;
+  shouldReduce: boolean | null | undefined;
 }) {
   const particles = Array.from({ length: 12 });
   const icons: Record<Theme["particleType"], string> = {
@@ -48,7 +49,7 @@ function FloatingParticles({
   };
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
       {particles.map((_, i) => (
         <motion.span
           key={i}
@@ -57,16 +58,17 @@ function FloatingParticles({
             left: `${5 + (i * 8) % 90}%`,
             top: `${10 + (i * 13) % 80}%`,
           }}
-          animate={{
+          // Reduced-motion: particles visible but fully static (no vestibular stimulus)
+          animate={shouldReduce ? {} : {
             y: [-10, 10, -10],
             x: [-5, 5, -5],
             rotate: [0, 20, -20, 0],
             opacity: [0.4, 0.8, 0.4],
           }}
-          transition={{
-            duration: 3 + (i % 3),
+          transition={shouldReduce ? {} : {
+            duration: durations.ambient + (i % 3) * durations.quick,
             repeat: Infinity,
-            delay: i * 0.3,
+            delay: i * durations.quick,
             ease: "easeInOut",
           }}
         >
@@ -79,6 +81,7 @@ function FloatingParticles({
 
 export default function TapToReveal({ theme, photos, title, message, questions = [], inviteId = "", enableDodge = true, videoUrl, contributorNotes = [] }: TapToRevealProps) {
   const [stage, setStage] = useState<Stage>("landing");
+  const shouldReduce = useReducedMotion();
 
   const revealEmoji =
     theme.revealIcon === "envelope"
@@ -99,6 +102,15 @@ export default function TapToReveal({ theme, photos, title, message, questions =
     setStage(videoUrl ? "video" : "photos");
   }
 
+  function handleSettleVibrate() {
+    if (!shouldReduce && typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(20);
+    }
+  }
+
+  // Reduced-motion: opacity-only instant swap for all stage wrappers
+  const rmInstant = { duration: durations.instant };
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <AnimatePresence mode="wait">
@@ -109,18 +121,26 @@ export default function TapToReveal({ theme, photos, title, message, questions =
             style={{ background: theme.colors.background }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.5 }}
+            // Unwrap exit: lid lifts up and away, revealing what's beneath
+            exit={shouldReduce
+              ? { opacity: 0, transition: rmInstant }
+              : { opacity: 0, scale: 1.08, y: -16, transition: { ease: easings.exit, duration: durations.base } }
+            }
+            transition={makeReducedMotionTransition(shouldReduce, { ease: easings.entrance, duration: durations.base })}
           >
-            <FloatingParticles type={theme.particleType} color={theme.colors.accent} />
+            <FloatingParticles type={theme.particleType} shouldReduce={shouldReduce} />
 
             <div className="relative z-10 text-center px-8">
               <motion.p
                 className="text-sm font-medium mb-8 opacity-70"
                 style={{ color: theme.colors.text }}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
                 animate={{ opacity: 0.7, y: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={makeReducedMotionTransition(shouldReduce, {
+                  ease: easings.entrance,
+                  duration: durations.base,
+                  delay: durations.quick,
+                })}
               >
                 Someone made this for you ✨
               </motion.p>
@@ -128,17 +148,24 @@ export default function TapToReveal({ theme, photos, title, message, questions =
               <motion.button
                 onClick={handleTap}
                 className="text-8xl mb-8 block select-none cursor-pointer"
-                initial={{ scale: 0, rotate: -10 }}
-                animate={{
-                  scale: [1, 1.08, 1],
-                  rotate: [0, -3, 3, 0],
-                }}
-                transition={{
-                  scale: { duration: 2, repeat: Infinity },
-                  rotate: { duration: 3, repeat: Infinity },
-                  delay: 0.4,
-                }}
-                whileTap={{ scale: 0.9 }}
+                // Entrance: pops in from nothing
+                initial={{ scale: 0, rotate: -10, opacity: 0 }}
+                // Ambient loop — skip entirely when reduced (settle at resting state)
+                animate={shouldReduce
+                  ? { scale: 1, rotate: 0, opacity: 1 }
+                  : { scale: [1, 1.08, 1], rotate: [0, -3, 3, 0], opacity: 1 }
+                }
+                transition={shouldReduce
+                  ? rmInstant
+                  : {
+                      scale: { duration: durations.ambient, repeat: Infinity },
+                      rotate: { duration: durations.ambient * 1.2, repeat: Infinity },
+                      opacity: { duration: durations.base, delay: durations.base },
+                      delay: durations.base,
+                    }
+                }
+                // Weighted tap: resistance feel before the gift opens
+                whileTap={{ scale: shouldReduce ? 0.96 : 0.88, rotate: shouldReduce ? 0 : -5 }}
               >
                 {revealEmoji}
               </motion.button>
@@ -146,9 +173,13 @@ export default function TapToReveal({ theme, photos, title, message, questions =
               <motion.h1
                 className="font-heading text-3xl mb-3"
                 style={{ color: theme.colors.text }}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={makeReducedMotionTransition(shouldReduce, {
+                  ease: easings.entrance,
+                  duration: durations.base,
+                  delay: durations.slow,
+                })}
               >
                 {title}
               </motion.h1>
@@ -157,10 +188,14 @@ export default function TapToReveal({ theme, photos, title, message, questions =
                 onClick={handleTap}
                 className="mt-6 text-white text-sm font-medium px-8 py-3 rounded-full pulse-glow"
                 style={{ background: theme.colors.accent }}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                whileTap={{ scale: 0.95 }}
+                transition={makeReducedMotionTransition(shouldReduce, {
+                  ease: easings.entrance,
+                  duration: durations.base,
+                  delay: durations.slow + durations.quick,
+                })}
+                whileTap={{ scale: shouldReduce ? 0.96 : 0.95 }}
               >
                 Tap to Open
               </motion.button>
@@ -172,10 +207,15 @@ export default function TapToReveal({ theme, photos, title, message, questions =
           <motion.div
             key="video"
             className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            // Weighted arrival — the gift content settles in with gravity
+            initial={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 20 }}
+            animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={shouldReduce
+              ? { opacity: 0, transition: rmInstant }
+              : { opacity: 0, x: -20, transition: { ease: easings.exit, duration: durations.quick } }
+            }
+            transition={shouldReduce ? rmInstant : springs.weighty}
+            onAnimationComplete={handleSettleVibrate}
           >
             <VideoPlayer
               videoUrl={videoUrl}
@@ -188,10 +228,15 @@ export default function TapToReveal({ theme, photos, title, message, questions =
           <motion.div
             key="photos"
             className="absolute inset-0 overflow-y-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
+            // Weighted arrival — first reveal, feels hand-placed
+            initial={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 20 }}
+            animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={shouldReduce
+              ? { opacity: 0, transition: rmInstant }
+              : { opacity: 0, x: -20, transition: { ease: easings.exit, duration: durations.quick } }
+            }
+            transition={shouldReduce ? rmInstant : springs.weighty}
+            onAnimationComplete={handleSettleVibrate}
           >
             <PolaroidCarousel
               photos={photos}
@@ -207,10 +252,14 @@ export default function TapToReveal({ theme, photos, title, message, questions =
           <motion.div
             key="questions"
             className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            // Directional slide: forward navigation from right
+            initial={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 20 }}
+            animate={shouldReduce ? { opacity: 1 } : { opacity: 1, x: 0 }}
+            exit={shouldReduce
+              ? { opacity: 0, transition: rmInstant }
+              : { opacity: 0, x: -20, transition: { ease: easings.exit, duration: durations.quick } }
+            }
+            transition={shouldReduce ? rmInstant : { ease: easings.entrance, duration: durations.base }}
           >
             <QuestionScreen
               questions={questions}
@@ -227,9 +276,14 @@ export default function TapToReveal({ theme, photos, title, message, questions =
           <motion.div
             key="celebrate"
             className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            // Scale pop: celebration bursts in from slightly above scale
+            initial={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 1.04 }}
+            animate={shouldReduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+            exit={shouldReduce
+              ? { opacity: 0, transition: rmInstant }
+              : { opacity: 0, y: -12, transition: { ease: easings.exit, duration: durations.quick } }
+            }
+            transition={shouldReduce ? rmInstant : springs.soft}
           >
             <CelebrationOverlay onComplete={() => setStage("message")} duration={2200} />
           </motion.div>
@@ -239,10 +293,14 @@ export default function TapToReveal({ theme, photos, title, message, questions =
           <motion.div
             key="message"
             className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
+            // Emotional weight: rises from below and settles with gravity
+            initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
+            animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            exit={shouldReduce
+              ? { opacity: 0, transition: rmInstant }
+              : { opacity: 0, y: -12, transition: { ease: easings.exit, duration: durations.quick } }
+            }
+            transition={shouldReduce ? rmInstant : springs.weighty}
           >
             <MessageReveal
               title={title}
@@ -258,9 +316,10 @@ export default function TapToReveal({ theme, photos, title, message, questions =
           <motion.div
             key="cta"
             className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
+            // Soft spring arrival — the final action beat
+            initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 16 }}
+            animate={shouldReduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            transition={shouldReduce ? rmInstant : springs.soft}
           >
             <RSVPButton theme={theme} title={title} photos={photos} inviteId={inviteId} />
           </motion.div>

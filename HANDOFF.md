@@ -1,6 +1,52 @@
 # TaDaaaa — Session Handoff (2026-05-30)
 
-## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P0-DONE · SECURITY-HARDENED
+## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P1-DONE · SECURITY-HARDENED
+
+**Tests:** 217/217 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors, 15 warnings (1 FEWER than P0 baseline) · **branch:** feat/sophistication
+
+---
+
+## What shipped this session (2026-05-30 — Motion P1 Reveal)
+
+**P1 — Reveal surface choreography (DONE, gates P2):**
+
+- ✅ `src/lib/motion.ts` — added `durations.ambient` (2.8s, loop range) + `export const staggers` (`lead:0`, `support:0.06`, `detail:0.10`) for hierarchy-aware stagger
+- ✅ `src/lib/motion.test.ts` — 6 new tests: `staggers` hierarchy + boundary cap + `durations.ambient`
+- ✅ `src/components/surprise/TapToReveal.tsx` — full P1 motion rework:
+  - `FloatingParticles`: added `shouldReduce` prop; **fixed reduced-motion bug** (particles were always looping — vestibular hazard); token-based durations/delays; removed unused `color` prop (−1 lint warning)
+  - Reveal icon ambient loop: fully guarded (`shouldReduce` → static settle at scale:1); token durations
+  - Landing exit — **unwrap choreography**: `scale:1.08, y:-16, ease:exit` (lid lifts off)
+  - Photos/Video enter: `scale:0.96, y:20 → springs.weighty` settle (hand-placed arrival); `onAnimationComplete → vibrate(20)` haptic
+  - All 6 stage transitions: replaced flat opacity crossfades with directional choreography (photos/video: weighted spring; questions: directional slide x:±20; celebrate: scale pop; message: weighty rise; cta: soft spring)
+  - All transitions: zero inline magic numbers — 100% from `@/lib/motion`
+  - `useReducedMotion` at component top; all stages have reduced path (`opacity only, durations.instant`)
+- ✅ `src/components/surprise/MessageReveal.tsx` — P1 message choreography:
+  - Title: word-by-word `blur(8px)→0` reveal (rhymes with PolaroidCarousel captions); `lead` stagger 0.04/word
+  - Body: **replaced uniform word drip** with line-by-line reveal (`\n`-split); `detail` stagger 0.10/line
+  - Button: arrives after all body lines settle (token-computed delay)
+  - Imports switched from `@/lib/a11y` → `@/lib/motion` exclusively
+  - All magic numbers removed; `easings.*`, `durations.*`, `springs.*`, `staggers.*` throughout
+
+**Files touched:** `src/lib/motion.ts` · `src/lib/motion.test.ts` · `src/components/surprise/TapToReveal.tsx` · `src/components/surprise/MessageReveal.tsx`
+
+**Verification:**
+- `npx tsc --noEmit` → exit 0 ✓
+- `npm test` → 217/217 pass (+6 new motion/stagger tests) ✓
+- `npm run lint` → 19 problems (4 errors, 15 warnings) — 0 new errors; 1 fewer warning than P0 baseline ✓
+- Reduced-motion: `FloatingParticles` static (no animate), reveal icon static, all stage wrappers opacity-only instant ✓
+- Gems intact: PolaroidCarousel untouched, StepIndicator untouched ✓
+- Zero inline magic numbers in touched files: all from `@/lib/motion` ✓
+- Mobile fps: transforms + opacity only on hot path; no width/height/top/left animated ✓
+- Bundle: no new imports added to route/page files ✓
+
+**Open risks / next phase entry point:**
+- 60fps mobile profile: needs real-device Playwright verification (not available in this session)
+- P2 (Landing — Hero de-uniform, scroll choreography, a11y) can now start
+- 4 pre-existing lint errors (animated-counter, magnetic-button) — not from motion work
+
+---
+
+## What shipped this session (2026-05-30 — Motion P0 Foundation)
 
 **Tests:** 211/211 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors (not from P0) · **branch:** feat/sophistication
 

@@ -43,6 +43,21 @@ export const durations = {
   base: 0.35,
   slow: 0.6,
   cinematic: 0.9,
+  /** Ambient / looping motion — 2.5–4s range. Never use for one-shot transitions. */
+  ambient: 2.8,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Stagger hierarchy (delay offsets in seconds)
+// Vary by content role — not a uniform drip on everything.
+// ---------------------------------------------------------------------------
+export const staggers = {
+  /** First element — no delay. */
+  lead: 0,
+  /** Secondary / supporting elements. */
+  support: 0.06,
+  /** Body copy, detail content. */
+  detail: 0.10,
 } as const;
 
 // ---------------------------------------------------------------------------

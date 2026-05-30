@@ -29,8 +29,8 @@ export default function MessageReveal({
   const bodyLines = message.split("\n").filter(Boolean);
   const safeBodyLines = bodyLines.length > 0 ? bodyLines : [message];
 
-  // Title completes at: titleWords.length * 0.04 + one word's duration
-  const titleEndDelay = titleWords.length * 0.04 + durations.quick;
+  // Title completes at: titleWords.length * per-word stagger + one word's duration
+  const titleEndDelay = titleWords.length * staggers.word + durations.quick;
   // Body lines start after title settles
   const bodyStartDelay = titleEndDelay + staggers.support;
 
@@ -65,7 +65,7 @@ export default function MessageReveal({
                 : {
                     duration: durations.quick,
                     ease: easings.entrance,
-                    delay: staggers.lead + i * 0.04,
+                    delay: staggers.lead + i * staggers.word,
                   }
               }
               style={{ display: "inline-block", marginRight: "0.25em" }}

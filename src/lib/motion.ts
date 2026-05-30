@@ -54,6 +54,8 @@ export const durations = {
 export const staggers = {
   /** First element — no delay. */
   lead: 0,
+  /** Per-word offset for word-by-word reveals (title blur cadence). */
+  word: 0.04,
   /** Secondary / supporting elements. */
   support: 0.06,
   /** Body copy, detail content. */

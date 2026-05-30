@@ -109,9 +109,9 @@ export default function RevealSettings({
         {revealType === "countdown" && (
           <motion.div
             key="countdown-date"
-            initial={{ opacity: 0, y: -6 }}
+            initial={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
+            exit={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
             transition={conditionalFieldTransition(shouldReduce)}
           >
             <Label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
@@ -148,9 +148,9 @@ export default function RevealSettings({
         {hasExpiry && (
           <motion.div
             key="expiry-date"
-            initial={{ opacity: 0, y: -6 }}
+            initial={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
+            exit={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
             transition={conditionalFieldTransition(shouldReduce)}
           >
             <Label className="text-[#2D2926] font-medium text-sm mb-1.5 block">

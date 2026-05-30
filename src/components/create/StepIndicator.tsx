@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { easings, getReducedMotionTransition } from "@/lib/motion";
 import { Check } from "lucide-react";
 
 interface StepIndicatorProps {
@@ -23,7 +24,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
           className="h-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42]"
           initial={false}
           animate={{ width: `${topBarPct}%` }}
-          transition={shouldReduce ? { duration: 0 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={getReducedMotionTransition(shouldReduce, { duration: 0.5, ease: easings.entrance })}
         />
       </div>
 
@@ -34,7 +35,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
             className="h-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42]"
             initial={false}
             animate={{ width: `${pct}%` }}
-            transition={shouldReduce ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            transition={getReducedMotionTransition(shouldReduce, { duration: 0.45, ease: easings.entrance })}
           />
         </div>
 

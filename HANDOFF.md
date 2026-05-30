@@ -1,4 +1,40 @@
-# TaDaaaa — Session Handoff (2026-05-25)
+# TaDaaaa — Session Handoff (2026-05-30)
+
+## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P0-DONE · SECURITY-HARDENED
+
+**Tests:** 211/211 pass · **tsc:** 0 errors · **lint:** 4 pre-existing errors (not from P0) · **branch:** feat/sophistication
+
+---
+
+## What shipped this session (2026-05-30 — Motion P0 Foundation)
+
+**P0 — Motion token foundation (DONE, blocks P1+):**
+
+- ✅ `src/lib/motion.ts` — typed easing tokens (`easings.*` for framer-motion, `cssEasings.*` for CSS style props), spring configs (`springs.soft` / `springs.weighty`), duration scale (instant .12 / quick .2 / base .35 / slow .6 / cinematic .9), `makeReducedMotionTransition` factory extending `getReducedMotionTransition`
+- ✅ `src/app/globals.css` — added 4 CSS vars inside `:root`: `--ease-entrance`, `--ease-exit`, `--ease-spring-soft`, `--ease-spring-bouncy`
+- ✅ `src/components/create/StepIndicator.tsx` — migrated to `easings.entrance` + `getReducedMotionTransition()`; zero visual change (same easing values, same durations)
+- ✅ `src/components/surprise/PolaroidCarousel.tsx` — migrated CSS `transition` string to `cssEasings.springBouncy`; zero visual change
+- ✅ `src/lib/motion.test.ts` — 40 new tests (token exports + reduced-motion paths)
+
+**Files touched:** `src/lib/motion.ts` (new) · `src/lib/motion.test.ts` (new) · `src/app/globals.css` · `src/components/create/StepIndicator.tsx` · `src/components/surprise/PolaroidCarousel.tsx`
+
+**Verification:**
+- `npx tsc --noEmit` → exit 0 ✓
+- `npm test` → 211/211 pass (was 171; +40 new motion tests) ✓
+- `npm run lint` → 4 errors (all pre-existing in animated-counter.tsx, error.tsx — not touched by P0) ✓
+- Reduced-motion: `getReducedMotionTransition` / `makeReducedMotionTransition` both tested with `shouldReduce true/false/null` ✓
+- Gems intact: PolaroidCarousel 3D spring preserved (same `cubic-bezier(0.4,2,0.3,1)` values); StepIndicator expo easing preserved (same `[0.22,1,0.36,1]` values) ✓
+- Mobile fps: no hot-path change; CSS strings identical to before ✓
+- No reveal-route bundle regression: no imports added to page/route files ✓
+
+**Open risks / next phase entry point:**
+- P1 (Reveal surface) can now start: all token references available in `@/lib/motion`
+- Duration mismatches to resolve in P1: StepIndicator uses 0.5/0.45 (no exact token); PolaroidCarousel CSS 0.8s; these are intentional for P0 zero-visual-change, will align when redesigning those animations in P1+
+- 4 pre-existing lint errors (animated-counter, error.tsx) — not from motion work, should be fixed in a cleanup pass
+
+---
+
+## Previous session state (2026-05-25)
 
 ## Status: LOCAL-READY · DEPLOY-PENDING · MODERNIZED · SECURITY-HARDENED · SEC-001/002/003 CLOSED · CFG-004/005/006 CLOSED
 

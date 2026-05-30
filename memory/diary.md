@@ -795,3 +795,25 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 - Public writes to RLS-protected tables → SECURITY DEFINER RPC + `createClient()`
 - `auth.admin.*` calls → `createAdminClient()` (raw service-role, no cookies, narrowly scoped)
 - `createServiceClient()` → cron routes + Stripe webhook only (cross-user, behind auth gate)
+
+---
+
+## 2026-05-30 — Motion P0 Foundation
+
+**What happened:** Executed P0 of the MOTION_MASTERPLAN. Pure foundation — no visual changes. Establishes one shared motion "hand" across all surfaces.
+
+**What was built:**
+- `src/lib/motion.ts` (new) — typed easing tokens (`easings.*` 4-tuples for framer-motion, `cssEasings.*` strings for CSS `transition` props), spring configs (`springs.soft` stiffness:260/damping:22, `springs.weighty` stiffness:140/damping:18/mass:1.1), duration scale (instant/quick/base/slow/cinematic), `makeReducedMotionTransition` factory (defaults reduced to `durations.instant` not raw `{duration:0}`)
+- `src/app/globals.css` — 4 CSS vars added to `:root`: `--ease-entrance`, `--ease-exit`, `--ease-spring-soft`, `--ease-spring-bouncy`
+- `src/components/create/StepIndicator.tsx` — replaced `[0.22,1,0.36,1]` literal with `easings.entrance`; replaced ternary reduced-motion with `getReducedMotionTransition()`. Zero visual change.
+- `src/components/surprise/PolaroidCarousel.tsx` — replaced `cubic-bezier(0.4,2,0.3,1)` CSS string literal with `cssEasings.springBouncy`; import switched from `@/lib/a11y` to `@/lib/motion`. Zero visual change.
+- `src/lib/motion.test.ts` (new) — 40 tests covering all token values + reduced-motion factory paths
+
+**Build status:** tsc 0 · 211/211 tests (was 171, +40) · lint 4 pre-existing errors not from P0 · branch `feat/sophistication`
+
+**Key gotchas:**
+- Two parallel token sets needed: `easings.*` (number arrays for framer-motion `ease` prop) vs `cssEasings.*` (strings for CSS `transition`). Can't use same value in both contexts.
+- `makeReducedMotionTransition` uses `durations.instant` (0.12) not `{duration:0}` as default reduced path — per masterplan "never ship a raw duration:0 scatter".
+- Duration mismatches: StepIndicator uses 0.5/0.45, PolaroidCarousel CSS uses 0.8s — none have exact token matches. Kept raw to preserve zero visual change. These will align in P1+ when those animations are redesigned.
+
+**Next:** P1 (Reveal surface) — unwrap, continuity, message reveal, particle + reduced-motion fixes. Entry point: `src/components/surprise/TapToReveal.tsx`.

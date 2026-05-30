@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { type Theme } from "@/lib/themes";
-import { getReducedMotionTransition } from "@/lib/a11y";
+import { getReducedMotionTransition, cssEasings } from "@/lib/motion";
 
 interface Photo {
   url: string;
@@ -332,7 +332,7 @@ export default function PolaroidCarousel({
                 cursor: onClick ? "pointer" : "default",
                 transition: shouldReduce
                   ? "opacity 0.3s ease"
-                  : "transform 0.8s cubic-bezier(0.4, 2, 0.3, 1), opacity 0.5s ease",
+                  : `transform 0.8s ${cssEasings.springBouncy}, opacity 0.5s ease`,
                 filter: "drop-shadow(0 18px 36px rgba(45,41,38,0.25))",
               }}
             >

@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getActiveTier } from "@/lib/tier";
-import { canUseDesignerArt, getTemplate } from "@/lib/designer-art";
+import { canUseDesignerArt, getTemplate, resolveStyle } from "@/lib/designer-art";
 import { signPhotoList } from "@/lib/sign-storage";
 import { STORAGE_BUCKET } from "@/lib/constants";
 
@@ -15,12 +15,14 @@ const COLLAGE_PHOTO_TTL = 60;
  * - With photos: renders a grid collage with template frame (up to 9 photos).
  * - No photos: falls back to D1 single-card layout.
  * Gate: 410 inactive/expired, 403 free, 200 PNG attachment.
+ * Accepts ?style=classic|bold|minimal (unknown → classic).
  */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
+  const style = resolveStyle(new URL(req.url).searchParams.get("style"));
   const supabase = createAdminClient();
 
   const { data: invite } = await supabase
@@ -48,7 +50,7 @@ export async function GET(
     return NextResponse.json({ error: "upgrade_required" }, { status: 403 });
   }
 
-  const t = getTemplate(invite.occasion_type);
+  const t = getTemplate(invite.occasion_type, style);
   const title = invite.title || t.label;
 
   // Load up to 9 photos (3×3 grid max).

@@ -18,7 +18,7 @@ import ShareButtons from "@/components/dashboard/ShareButtons";
 import DeleteConfirmModal from "@/components/dashboard/DeleteConfirmModal";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { DesignerArtButton } from "@/components/surprise/DesignerArtButton";
-import { canUseDesignerArt } from "@/lib/designer-art";
+import { canUseDesignerArt, type StyleVariant, STYLE_VARIANTS } from "@/lib/designer-art";
 
 interface InviteCardProps {
   invite: {
@@ -46,6 +46,7 @@ interface InviteCardProps {
 export default function InviteCard({ invite, creatorName, tier = "free", onDelete }: InviteCardProps) {
   const shouldReduce = useReducedMotion();
   const [deleting, setDeleting] = useState(false);
+  const [style, setStyle] = useState<StyleVariant>("classic");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [responsesOpen, setResponsesOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -242,11 +243,31 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
           </Button>
         </div>
 
+        {/* D5 style picker — paid only, free sees locked buttons below */}
+        {canUseDesignerArt(tier) && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <span className="text-[11px] text-[#9B8E87] shrink-0">Style:</span>
+            {STYLE_VARIANTS.map((v) => (
+              <button
+                key={v}
+                onClick={() => setStyle(v)}
+                className={`px-2 py-0.5 rounded-full text-[11px] font-medium border transition capitalize ${
+                  style === v
+                    ? "bg-[#C4686D] text-white border-[#C4686D]"
+                    : "bg-white text-[#6B5E57] border-[#D4CBC3] hover:border-[#C4686D]"
+                }`}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Designer art (D1) + Story export (D3) + Collage (D4) — paid: download, free: locked upsell */}
-        <div className="mt-2 flex flex-col gap-1.5 [&>a]:w-full">
-          <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="art" />
-          <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="story" />
-          <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="collage" />
+        <div className="mt-1.5 flex flex-col gap-1.5 [&>a]:w-full">
+          <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="art" style={style} />
+          <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="story" style={style} />
+          <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="collage" style={style} />
         </div>
 
         {/* Free-tier delete lock — countdown to deletable */}

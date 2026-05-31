@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Download, Lock } from "lucide-react";
+import type { StyleVariant } from "@/lib/designer-art";
 
 interface Props {
   slug: string;
@@ -10,36 +11,47 @@ interface Props {
   variant?: "full" | "compact";
   /** "art" = 1200×1500 invite card (D1 default); "story" = 1080×1920 vertical (D3); "collage" = photo grid (D4). */
   type?: "art" | "story" | "collage";
+  /** D5 style variant. Appended as ?style=<variant> (classic is the default and can be omitted). */
+  style?: StyleVariant;
 }
 
 const CONFIG = {
   art: {
-    href: (slug: string) => `/api/invite/${slug}/art`,
+    base: (slug: string) => `/api/invite/${slug}/art`,
     label: "Download designer invite",
     lockedLabel: "Unlock designer invites — go Pro",
   },
   story: {
-    href: (slug: string) => `/api/invite/${slug}/story`,
+    base: (slug: string) => `/api/invite/${slug}/story`,
     label: "Download story (1080×1920)",
     lockedLabel: "Unlock story export — go Pro",
   },
   collage: {
-    href: (slug: string) => `/api/invite/${slug}/collage`,
+    base: (slug: string) => `/api/invite/${slug}/collage`,
     label: "Download photo collage",
     lockedLabel: "Unlock photo collage — go Pro",
   },
 } as const;
 
+function buildHref(slug: string, type: "art" | "story" | "collage", style?: StyleVariant): string {
+  const base = CONFIG[type].base(slug);
+  // Omit style param when classic (the server default) to keep URLs clean.
+  if (!style || style === "classic") return base;
+  return `${base}?style=${style}`;
+}
+
 /**
- * Designer invite art / story control (D1 / D3).
+ * Designer invite art / story / collage control (D1 / D3 / D4).
  * Paid → download link to the server-rendered image route.
  * Free → locked tile linking to /pricing.
+ * Accepts a D5 style variant; appends ?style=<variant> to paid URLs.
  */
 export function DesignerArtButton({
   slug,
   canUse,
   variant = "full",
   type = "art",
+  style,
 }: Props) {
   const base =
     "inline-flex items-center justify-center gap-2 rounded-full font-medium transition";
@@ -49,7 +61,7 @@ export function DesignerArtButton({
   if (canUse) {
     return (
       <Link
-        href={cfg.href(slug)}
+        href={buildHref(slug, type, style)}
         download
         className={`${base} ${size} bg-[#C4686D] text-white hover:bg-[#a8555a]`}
       >

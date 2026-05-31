@@ -120,13 +120,23 @@ export default function AuthForm({ mode }: AuthFormProps) {
       const result = await signInWithGoogle();
       if (result && "error" in result && result.error) {
         toast.error(result.error);
+        setGoogleLoading(false);
       }
-      // On success the action redirects; we won't reach the finally
-      // on the same render. Safe to keep finally for the error case.
+      // On success the server action calls redirect() which throws NEXT_REDIRECT
+      // internally — the browser follows it automatically; we never reach here.
     } catch (err) {
+      // Re-throw Next.js redirect "errors" so the browser can follow them.
+      if (
+        err &&
+        typeof err === "object" &&
+        "digest" in err &&
+        typeof (err as { digest: unknown }).digest === "string" &&
+        (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+      ) {
+        throw err;
+      }
       console.error("[auth] Google sign-in failed:", err);
       toast.error("Google sign-in failed. Please try again.");
-    } finally {
       setGoogleLoading(false);
     }
   }

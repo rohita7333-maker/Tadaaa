@@ -173,17 +173,25 @@ export default function RSVPButton({ theme, title, photos = [], inviteId }: RSVP
         </AnimatePresence>
 
         <motion.div
-          className="fixed bottom-8 left-0 right-0 text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
+          className="fixed bottom-6 left-0 right-0 flex flex-col items-center gap-2"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 0.5 }}
         >
+          <p className="text-xs opacity-40" style={{ color: theme.colors.text }}>
+            Want to surprise someone you love?
+          </p>
           <Link
-            href="/"
-            className="text-xs opacity-30 hover:opacity-60 transition-opacity"
-            style={{ color: theme.colors.text }}
+            href="/auth/signup"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full border transition-all duration-300 hover:scale-105"
+            style={{
+              color: theme.colors.accent,
+              borderColor: `${theme.colors.accent}40`,
+              background: `${theme.colors.accent}10`,
+            }}
           >
-            Made with TaDaaaa ✨
+            <Heart className="w-3 h-3 fill-current" />
+            Create your own with TaDaaaa — free
           </Link>
         </motion.div>
       </div>

@@ -1,6 +1,7 @@
 import { type Metadata } from "next";
 import Link from "next/link";
 import { Heart, Sparkles, Gift, Camera, MessageCircleHeart } from "lucide-react";
+import Navbar from "@/components/landing/Navbar";
 
 export const metadata: Metadata = {
   title: "About — TaDaaaa",
@@ -33,6 +34,7 @@ const steps = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#FFF8F0]">
+      <Navbar />
       {/* Hero */}
       <section className="relative overflow-hidden px-6 pt-24 pb-16 text-center">
         <div className="absolute inset-0 bg-gradient-to-b from-[#C4686D]/5 to-transparent" />

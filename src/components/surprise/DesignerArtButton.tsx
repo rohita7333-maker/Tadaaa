@@ -8,8 +8,8 @@ interface Props {
   /** Owner tier allows designer art (plus/unlimited). */
   canUse: boolean;
   variant?: "full" | "compact";
-  /** "art" = 1200×1500 invite card (D1 default); "story" = 1080×1920 vertical (D3). */
-  type?: "art" | "story";
+  /** "art" = 1200×1500 invite card (D1 default); "story" = 1080×1920 vertical (D3); "collage" = photo grid (D4). */
+  type?: "art" | "story" | "collage";
 }
 
 const CONFIG = {
@@ -22,6 +22,11 @@ const CONFIG = {
     href: (slug: string) => `/api/invite/${slug}/story`,
     label: "Download story (1080×1920)",
     lockedLabel: "Unlock story export — go Pro",
+  },
+  collage: {
+    href: (slug: string) => `/api/invite/${slug}/collage`,
+    label: "Download photo collage",
+    lockedLabel: "Unlock photo collage — go Pro",
   },
 } as const;
 

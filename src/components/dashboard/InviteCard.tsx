@@ -242,10 +242,11 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
           </Button>
         </div>
 
-        {/* Designer invite art (D1) + Story export (D3) — paid: download, free: locked upsell */}
+        {/* Designer art (D1) + Story export (D3) + Collage (D4) — paid: download, free: locked upsell */}
         <div className="mt-2 flex flex-col gap-1.5 [&>a]:w-full">
           <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="art" />
           <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="story" />
+          <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" type="collage" />
         </div>
 
         {/* Free-tier delete lock — countdown to deletable */}

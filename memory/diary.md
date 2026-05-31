@@ -1022,3 +1022,30 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 **Migrations applied (Supabase MCP):** `rsvp_fix_status_and_add_name`, `answer_increment_response_count` + response_count backfill.
 
 **Verify:** tsc 0 errors · vitest 252/252 green. NOT committed (awaiting user).
+
+---
+
+## 2026-05-31 (pm) — Launch sweep + commit (CEO, feat/sophistication)
+
+**STRATEGY_APPROVED_BY_USER** — user GO on sequence: commit → deploy-wire → Canva.
+
+**Done:**
+- Committed loose tree (`17cff29`): metrics-unfreeze + optional RSVP names (P1-B) + creator-view exclusion (P2-A) + stat tooltips (P3-A) + free-limit UI (DeleteConfirmModal, FreeLimitBanner). Excluded graphify-out churn. tsc 0, 252 tests green.
+- Generated + set `CRON_SECRET` in .env.local (64-hex). Consumed by 4 cron routes: expire-invites (free-tier 28d clock), weekly-digest, monthly-email, purge-deleted. MUST also set in Vercel.
+
+**Canva verdict — PARKED (not a blocker):** investigated tile surface. All 14 themes already render rich per-theme `linear-gradient` backgrounds via `theme.colors.background` in ThemeSelector.tsx — create flow visually complete. `previewImage` field is dead (consumed nowhere) — harmless. Canva's only real value = downloadable paid-customer invite art (Option 1) = P2 growth feature, needs a download surface. No design work needed for launch.
+
+**Remaining launch blockers (all need USER 3rd-party keys, can't self-serve):**
+- P0 Stripe: keys are `sk_test_...`/`whsec_...`/`pk_test_...` placeholders → payments dead.
+- P0 Resend: empty → no invite/RSVP emails.
+- P0 Deploy: never connected to Vercel (LOCAL-READY).
+- P1 (fail-open, optional): Sentry, PostHog, Sightengine all empty → no error track / analytics / photo moderation.
+- P1 Anthropic: key real but $0 credits → AI drafter 503 (graceful).
+
+**Vercel gotcha:** vercel.json has 5 crons incl. sub-daily (every 6h, weekly) → requires Vercel Pro. Hobby = max limited daily crons. Trim or upgrade before deploy.
+
+**Next:** user drops keys → I wire Vercel env + deploy. Branch 61 ahead of main, never merged.
+
+**Post-sweep find (`d69f4d0`):** contribute feature (B2 collab-memory) fully dead in prod — 3 files (contribute/[slug]/page.tsx + contribute POST route + upload route) still selected retired `invites.status` → page 404 for all, APIs 500. Fixed: mirror invite-view.ts gate (select expires_at, drop status, expired = expires_at<now). tsc 0, 252 tests, build clean. Verified ai_drafts + invite_contributions tables EXIST in Supabase (no SQL gap). Zero TODO/FIXME in src. Build passes full 45-route gen.
+
+**Cron trim for Vercel Hobby:** vercel.json crons 5→2 (Hobby cap = 2 jobs, daily-only). KEPT: expire-invites (0 3 ***, free-tier 28d clock), purge-deleted (0 4 ***, hard-delete soft-deleted after grace). DEFERRED (routes intact, not auto-triggered): sweep-orphans (every 6h storage cleanup), monthly-email + weekly-digest (need Resend, unconfigured). Restore all 5 on Vercel Pro upgrade.

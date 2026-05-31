@@ -12,18 +12,6 @@
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/sweep-orphans",
-      "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/cron/monthly-email",
-      "schedule": "0 14 1 * *"
-    },
-    {
-      "path": "/api/cron/weekly-digest",
-      "schedule": "0 14 * * 1"
-    },
-    {
       "path": "/api/cron/purge-deleted",
       "schedule": "0 4 * * *"
     }

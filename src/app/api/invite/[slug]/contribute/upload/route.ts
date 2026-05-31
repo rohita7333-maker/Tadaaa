@@ -48,13 +48,13 @@ export async function POST(
   const supabase = createAdminClient();
   const { data: invite } = await supabase
     .from("invites")
-    .select("id, accept_contributions, is_active, status")
+    .select("id, accept_contributions, is_active, expires_at")
     .eq("slug", slug)
     .maybeSingle();
   if (!invite) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  if (!invite.is_active || invite.status === "expired") {
+  if (!invite.is_active || (invite.expires_at && new Date(invite.expires_at) < new Date())) {
     return NextResponse.json({ error: "inactive" }, { status: 410 });
   }
   if (!invite.accept_contributions) {

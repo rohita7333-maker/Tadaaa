@@ -19,14 +19,16 @@ export default async function ContributePage({ params }: Props) {
   const supabase = createAdminClient();
   const { data: invite } = await supabase
     .from("invites")
-    .select("id, title, accept_contributions, is_active, status")
+    .select("id, title, accept_contributions, is_active, expires_at")
     .eq("slug", slug)
     .maybeSingle();
 
   // 404 if the invite doesn't exist OR the owner hasn't opened it up for
   // contributions. The condition mirrors the API route so a forged link
-  // can't trick the form into showing.
-  if (!invite || !invite.accept_contributions || !invite.is_active || invite.status === "expired") {
+  // can't trick the form into showing. invites has no `status` column
+  // (split-brain schema retired) — gate on is_active + expires_at.
+  const isExpired = invite?.expires_at && new Date(invite.expires_at) < new Date();
+  if (!invite || !invite.accept_contributions || !invite.is_active || isExpired) {
     notFound();
   }
 

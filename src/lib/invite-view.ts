@@ -30,6 +30,7 @@ export async function logInviteViewBySlug(
     .from("invites")
     .select("id, is_active, creator_id, title, expires_at, status")
     .eq("slug", slug)
+    .is("deleted_at", null)
     .single();
 
   const isExpired =

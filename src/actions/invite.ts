@@ -9,6 +9,7 @@ import {
   SIGNED_URL_TTL_SECONDS,
 } from "@/lib/constants";
 import { getActiveTier, canCreateInvite, canUsePremiumTheme, getSignedUrlExpiry, monthlyInviteLimit } from "@/lib/tier";
+import { isExpired } from "@/lib/utils";
 import { signPhotoList, signStorageUrl, extractBucketPath } from "@/lib/sign-storage";
 import { getThemeById } from "@/lib/themes";
 import { trackServer } from "@/lib/analytics";
@@ -350,44 +351,49 @@ export async function finalizeInvite(
 
 export async function deleteInvite(inviteId: string) {
   const supabase = await createClient();
-  const adminClient = createAdminClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
   const { data: invite } = await supabase
     .from("invites")
-    .select("id, creator_id, video_storage_path")
+    .select("id, creator_id, video_storage_path, expires_at, status, is_active")
     .eq("id", inviteId)
     .single();
 
   if (!invite || invite.creator_id !== user.id) return { error: "Not found" };
 
-  const { data: photos } = await supabase
-    .from("invite_photos")
-    .select("storage_path")
-    .eq("invite_id", inviteId);
+  // Free-tier gate: delete only allowed after invite has expired.
+  // Storage purge is deferred to the purge-deleted cron (GDPR-safe 30-day window).
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("subscription_tier, subscription_expires_at")
+    .eq("id", user.id)
+    .single();
+  const activeTier = getActiveTier(profileData);
 
-  const toRemove: string[] = [];
-  if (photos) {
-    for (const p of photos) {
-      if (p.storage_path) toRemove.push(p.storage_path);
-    }
-  }
-  const videoPath = (invite as { video_storage_path?: string | null }).video_storage_path;
-  if (videoPath) toRemove.push(videoPath);
-
-  if (toRemove.length > 0) {
-    const { error: storageErr } = await adminClient.storage
-      .from(STORAGE_BUCKET)
-      .remove(toRemove);
-    if (storageErr) {
-      console.error("[deleteInvite] storage cleanup failed:", storageErr);
-      // Continue — DB delete is the authoritative user-facing action.
+  if (activeTier === "free") {
+    const expired =
+      (invite as { status?: string }).status === "expired" ||
+      isExpired((invite as { expires_at?: string | null }).expires_at);
+    if (!expired) {
+      return {
+        error:
+          "Free surprises can only be deleted after they expire (28 days after reveal). Upgrade to Plus or Unlimited to delete anytime. ✨",
+      };
     }
   }
 
-  await supabase.from("invites").delete().eq("id", inviteId);
+  // Soft delete: mark deleted_at + deactivate. Storage purged by cron after 30 days.
+  await supabase
+    .from("invites")
+    .update({
+      deleted_at: new Date().toISOString(),
+      is_active: false,
+      status: "deleted",
+    })
+    .eq("id", inviteId);
+
   revalidatePath("/dashboard");
   return { success: true };
 }
@@ -417,7 +423,7 @@ async function _getInviteBySlugImpl(slug: string) {
 
   if (error || !invite) return null;
 
-  // Refuse to surface invites that have been disabled or expired.
+  // Refuse to surface invites that have been disabled, expired, or soft-deleted.
   // Status-vs-is_active split-brain: check both. expires_at honoured even if
   // the cron has not yet run.
   const isExpired =
@@ -425,9 +431,11 @@ async function _getInviteBySlugImpl(slug: string) {
     new Date((invite as { expires_at: string }).expires_at) < new Date();
   const isDisabled =
     (invite as { is_active?: boolean }).is_active === false ||
-    (invite as { status?: string }).status === "expired";
+    (invite as { status?: string }).status === "expired" ||
+    (invite as { status?: string }).status === "deleted";
+  const isSoftDeleted = !!(invite as { deleted_at?: string | null }).deleted_at;
 
-  if (isExpired || isDisabled) return null;
+  if (isExpired || isDisabled || isSoftDeleted) return null;
 
   const photos = (
     invite.invite_photos as {

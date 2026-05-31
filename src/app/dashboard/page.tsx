@@ -30,6 +30,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     .from("invites")
     .select("*")
     .eq("creator_id", user.id)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (error) {

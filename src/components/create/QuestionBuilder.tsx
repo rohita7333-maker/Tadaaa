@@ -130,7 +130,10 @@ export default function QuestionBuilder({ questions, onQuestionsChange }: Questi
 
               {/* Require answer toggle */}
               <div className="flex items-center justify-between border-t border-[#D4CBC3]/40 pt-3">
-                <span className="text-xs text-[#6B5E57]">Require answer to continue</span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs text-[#6B5E57]">Require answer to continue</span>
+                  <span className="text-[10px] text-[#9B8E87]">If on, they can&apos;t skip — great for RSVPs</span>
+                </div>
                 <Switch
                   checked={q.requireAnswer}
                   onCheckedChange={(checked) => updateQuestion(i, { requireAnswer: checked })}

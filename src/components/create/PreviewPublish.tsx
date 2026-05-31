@@ -131,9 +131,16 @@ export default function PreviewPublish({
             </a>
           </div>
 
+          {tier === "free" && (
+            <p className="text-xs text-[#9B8E87] mt-5 px-4">
+              ⏳ This surprise stays live for 28 days after it&apos;s opened.{" "}
+              <a href="/pricing" className="text-[#C4686D] hover:underline">Upgrade</a> to keep it forever.
+            </p>
+          )}
+
           <a
             href="/dashboard"
-            className="block mt-5 text-[#6B5E57] hover:text-[#2D2926] text-sm text-center transition-colors"
+            className="block mt-3 text-[#6B5E57] hover:text-[#2D2926] text-sm text-center transition-colors"
           >
             ← Back to dashboard
           </a>
@@ -233,6 +240,17 @@ export default function PreviewPublish({
               <span className="text-[#2D2926] font-medium capitalize">{revealType}</span>
             </div>
           </div>
+
+          {/* Free-tier expiry notice */}
+          {tier === "free" && (
+            <div className="flex items-start gap-2 bg-[#FFF0E8] border border-[#D4CBC3]/50 rounded-xl px-4 py-3 mb-5 text-xs text-[#6B5E57]">
+              <span className="text-base leading-none mt-0.5">⏳</span>
+              <span>
+                Free surprises stay live for <strong className="text-[#2D2926]">28 days after they&apos;re opened</strong>. After that, the link expires.{" "}
+                <a href="/pricing" className="text-[#C4686D] font-medium hover:underline">Upgrade</a> to keep yours forever.
+              </span>
+            </div>
+          )}
 
           {/* Publish CTA — whileTap spring replaces CSS hover:scale */}
           <motion.div

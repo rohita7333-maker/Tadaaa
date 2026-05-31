@@ -225,3 +225,56 @@ DROP POLICY IF EXISTS "public-read-approved" ON invite_contributions;
 CREATE POLICY "public-read-approved" ON invite_contributions
   FOR SELECT
   USING (approved = TRUE);
+
+
+-- -----------------------------------------------------------------------------
+-- free_tier_expiry.sql — revealed_at, deleted_at cols + upgraded increment_view_count
+-- -----------------------------------------------------------------------------
+ALTER TABLE invites
+  ADD COLUMN IF NOT EXISTS revealed_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+
+CREATE INDEX IF NOT EXISTS idx_invites_revealed_at ON invites (revealed_at) WHERE revealed_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_invites_deleted_at ON invites (deleted_at) WHERE deleted_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_invites_deleted_old ON invites (deleted_at) WHERE deleted_at IS NOT NULL;
+
+DROP FUNCTION IF EXISTS increment_view_count(UUID);
+
+CREATE OR REPLACE FUNCTION increment_view_count(p_invite_id UUID)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_new_count  INTEGER;
+  v_creator_id UUID;
+  v_tier       TEXT;
+  v_expires_at TIMESTAMPTZ;
+BEGIN
+  UPDATE invites
+  SET view_count = COALESCE(view_count, 0) + 1
+  WHERE id = p_invite_id
+  RETURNING view_count, creator_id, expires_at
+  INTO v_new_count, v_creator_id, v_expires_at;
+
+  IF v_new_count = 1 AND v_creator_id IS NOT NULL THEN
+    SELECT COALESCE(subscription_tier, 'free')
+    INTO v_tier
+    FROM profiles
+    WHERE id = v_creator_id;
+
+    IF (v_tier NOT IN ('plus', 'unlimited')) AND v_expires_at IS NULL THEN
+      UPDATE invites
+      SET
+        revealed_at = NOW(),
+        expires_at  = NOW() + INTERVAL '28 days'
+      WHERE id = p_invite_id;
+    END IF;
+  END IF;
+
+  RETURN v_new_count;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION increment_view_count(UUID) TO anon, authenticated;

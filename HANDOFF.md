@@ -1,3 +1,26 @@
+# TaDaaaa — Session Handoff (2026-05-31)
+
+## Designer Invites (D1+D2) — BUILT + SHIPPED ✅
+
+**Scope (Fork 1):** D1 = paid-user downloadable designer invite art. D2 = paid-user upgraded designer share-card on link preview. Free users see SAME tile locked → upsell to `/pricing` (this IS the advertisement). Paid = tier `plus`/`unlimited` via `getActiveTier`.
+
+**Plan:** `docs/superpowers/plans/2026-05-31-designer-invites-d1-d2.md` (5 tasks, TDD).
+
+**CRITICAL ARCH DECISION:** deployed app does NOT call Canva MCP at runtime (MCP = agent dev-time tool only; Canva Connect REST would need OAuth + Canva Pro). Runtime art rendered server-side via `next/og` `ImageResponse` (Satori/JSX) — same engine already in `src/app/surprise/[slug]/opengraph-image.tsx` + 5 icon routes. Zero runtime Canva dependency. D1+D2 ship WITHOUT Canva Pro.
+
+**Commits (feat/sophistication):**
+- `eb8dd44` `src/lib/designer-art.ts` + test — `canUseDesignerArt(tier)` gate (mirrors `canUsePremiumTheme`) + 6 occasion `getTemplate` (gradient/accent/emoji).
+- `e773702` `src/app/api/invite/[slug]/art/route.tsx` + test — PNG download: 410 inactive/expired · 403 `upgrade_required` free · paid → 1200×1500 PNG attachment.
+- `aebd1f0` `DesignerArtButton.tsx` (download vs locked-upsell tile) wired into `InviteCard`; D2 palette swap in `opengraph-image.tsx` (owner tier drives designer vs default gradient).
+
+**Verify:** tsc 0 · vitest 260/260 (+8) · build clean. **Live QA (real DB):** missing-slug 410 ✓ · real free-owner invite 403 ✓ · OG 200 PNG 137KB ✓. Paid→200 = unit-test only (see gap).
+
+**⚠ BLOCKER for monetization (pre-existing, NOT this feature):** live `profiles` table lacks `subscription_tier` + `subscription_expires_at` columns, but dashboard/settings/video-generate/stripe-webhook all use them. Subscription migration never applied to Supabase `xrlmnlknymgakswsbawk`. → every user resolves "free", ALL paid gates deny, Stripe webhook write fails. **Follow-up:** `ALTER TABLE profiles ADD COLUMN subscription_tier text, ADD COLUMN subscription_expires_at timestamptz;` before any paid feature (incl. video gen) can work. Out of Fork-1 scope.
+
+**Deferred:** D3 story export / D4 collage / D5 template bank. PDF format, Canva Pro = later.
+
+---
+
 # TaDaaaa — Session Handoff (2026-05-30)
 
 ## Status: LOCAL-READY · DEPLOY-PENDING · MOTION-P5-DONE · ALL-PHASES-COMPLETE · SECURITY-HARDENED

@@ -2,6 +2,52 @@
 
 ---
 
+## 2026-05-31 — Bugfix: avatar still stale in Navbar after upload (client-state + revalidatePath)
+
+**Symptom:** After uploading a new profile photo on /settings, the top-right Navbar avatar keeps showing the old Google OAuth photo or initial fallback. Settings page preview also reverts on navigation.
+
+**Root causes found:**
+1. `AvatarUpload.tsx` — on successful upload, `preview` state was left as the optimistic `blob:` URL. Blob URLs expire, and on any remount the component re-initialised `preview` from the stale `currentUrl` prop (the signed URL baked at SSR time). So even though the DB was correctly updated and the storage path written, the client component never received the new signed URL.
+2. `account.ts` — `revalidatePath("/dashboard")` without a type invalidates only the page render cache, not the layout. The avatar fetch lives in `dashboard/layout.tsx`, so the layout needed `revalidatePath("/dashboard", "layout")` to force a fresh layout render on next visit.
+
+**Fixes:**
+- `src/app/settings/AvatarUpload.tsx`: on success, revoke the blob URL and set `preview` to `result.url` (the freshly signed storage URL returned by `uploadAvatar`). On error, revoke blob and revert to `currentUrl`. The blob is now always cleaned up on both paths.
+- `src/actions/account.ts`: `revalidatePath("/dashboard")` → `revalidatePath("/dashboard", "layout")` so the `DashboardLayout` (which fetches `profile.avatar_url` and calls `signedAvatarUrl`) is invalidated along with the page.
+
+**Confirmed already correct (no changes needed):**
+- `uploadAvatar` uses `.update().eq("id", user.id)` (not `.upsert()`), unique timestamped path, surfaced DB errors.
+- `signedAvatarUrl` has correct `https://` passthrough for legacy OAuth URLs.
+- `dashboard/layout.tsx` calls `signedAvatarUrl(profile?.avatar_url)` and passes it to Navbar.
+
+**TS:** 0 errors. **Tests:** 260/260 green.
+
+---
+
+## 2026-05-31 — Bugfix: uploaded avatar not showing in display
+
+**Symptom:** User can upload a profile photo but the new image never appears in the display (settings on reload + Navbar avatar).
+
+**Root cause:** `uploadAvatar` wrote to a STABLE path `avatars/<userId>.<ext>` with `upsert:true`. Same storage key every upload → Supabase CDN/browser cache served the OLD bytes (token in signed URL changes per render, but CDN caches by object PATH). New avatar uploaded but display stayed stale.
+
+**Fix (`src/actions/account.ts`):**
+- `uploadAvatar`: unique path per upload `avatars/<userId>-<Date.now()>.<ext>` (no upsert) → fresh URL every time, no stale cache. Capture prior `avatar_url` before swap, then best-effort `.remove([oldPath])` so old objects don't accumulate (skips legacy `http` rows).
+- `deleteAccount`: replaced fixed-ext purge loop (`avatars/<id>.{jpg,png,webp}`) with `storage.list("avatars", { search: user.id })` → removes every timestamped + legacy avatar for GDPR cleanup.
+
+**Untouched:** `AvatarUpload.tsx` — blob preview already shows the exact uploaded file immediately; the bug was server-side only.
+
+**REAL ROOT CAUSE (live DB confirmed):** stale-cache was secondary. Primary: `profiles.avatar_url` never updated — stayed at the OAuth Google URL (`https://lh3.googleusercontent.com/...`). `uploadAvatar` + `updateNotifications` used `supabase.upsert()` (anon client). `profiles` RLS exposes ONLY `UPDATE` (w) + `SELECT` (r) policies — NO INSERT policy. An upsert's `INSERT ... ON CONFLICT` arm is denied by RLS and the unchecked `await` swallowed it → write silently failed → `signedAvatarUrl` saw `https://` and returned the Google pic as-is → user saw old photo.
+
+**Fix 2 (`src/actions/account.ts`):**
+- `uploadAvatar`: `upsert` → `.update({avatar_url}).eq("id", user.id)` + check `{error}` (row always exists from signup trigger).
+- `updateNotifications`: same `upsert` → `update` fix (prefs were also silently never saving).
+- Storage object upload was always fine; only the DB pointer was stale.
+
+**Data backfill:** UPDATE profiles SET avatar_url=<uploaded webp path> for the test user (60643ed1…) so their already-uploaded photo shows without re-upload.
+
+**TS:** 0 errors. **Tests:** 252/252 green. Security unchanged. **NOT committed.**
+
+---
+
 ## 2026-05-31 — Dashboard card: "Opened {x} ago"
 
 **What:** Surface `revealed_at` on InviteCard so creators see when a surprise was first opened (when the 28-day free-tier clock started).
@@ -1045,6 +1091,35 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 **Vercel gotcha:** vercel.json has 5 crons incl. sub-daily (every 6h, weekly) → requires Vercel Pro. Hobby = max limited daily crons. Trim or upgrade before deploy.
 
 **Next:** user drops keys → I wire Vercel env + deploy. Branch 61 ahead of main, never merged.
+
+## 2026-05-31 (pm) — Designer Invites D1+D2 plan (CEO, Fork-1)
+
+**User ask:** put Canva designs IN app, paid-users only, advertise to free. Create plan, options-first, no direct changes. Start Fork 1.
+
+**Fork 1 scope locked:** D1 (downloadable designer invite art, paid) + D2 (paid designer share-card on link preview). D3/D4/D5 deferred.
+
+**KEY ARCH CALL (honesty):** app can't call Canva MCP at runtime — MCP is agent-only dev tool; Canva Connect REST = OAuth + Pro. Use `next/og` ImageResponse (Satori/JSX) — already the OG/icon engine in repo (`surprise/[slug]/opengraph-image.tsx` + 5 icon.tsx). Canva MCP = design-time reference comps ONLY, capped ~6 gen calls, STOP before quota/Pro spend. → D1+D2 ship with ZERO runtime Canva, no Pro needed.
+
+**Gate:** new `canUseDesignerArt(tier) = plus||unlimited`, mirrors existing `canUsePremiumTheme`/`canGenerateVideo` in src/lib/tier.ts. Enforced 3 layers: art route (403), reveal/dashboard UI (locked tile), OG image (default vs designer palette). Free locked tile → `/pricing` = the advertisement.
+
+**Plan doc:** `docs/superpowers/plans/2026-05-31-designer-invites-d1-d2.md` — 5 TDD tasks. New: designer-art.ts, art/route.tsx, DesignerArtButton.tsx. Modify: MessageReveal, InviteCard, opengraph-image.
+
+**Agents:** uiux-motion (templates + upsell UI, impeccable+ui-ux-pro-max) → principal-dev (route+gate) → qa-test.
+
+**Status: BUILT + SHIPPED (inline TDD, user GO). 3 commits on feat/sophistication:**
+- `eb8dd44` — `src/lib/designer-art.ts` + test (5): `canUseDesignerArt(tier)` + 6 occasion templates (label/gradient/accent/emoji), unknown+null → custom.
+- `e773702` — `src/app/api/invite/[slug]/art/route.tsx` + test (3): GET → load invite (410 inactive/expired) → owner profile → getActiveTier → canUseDesignerArt → 403 `upgrade_required` else 1200×1500 PNG `Content-Disposition: attachment`.
+- `aebd1f0` — `DesignerArtButton.tsx` (paid=download / free=locked `/pricing` upsell tile) wired into `InviteCard` (compact, full-width); D2 in `opengraph-image.tsx` (paid owner → designer gradient+accent, free → default palette; owner tier not viewer).
+
+**Verify:** tsc 0 errors · vitest 260/260 (26 files, +8 new) · build clean.
+
+**Live QA (dev :3000, real Supabase):**
+- nonexistent slug → **410** ✓
+- real active invite (`warm-embrace-k69tyvcpua`), free owner → **403 upgrade_required** ✓
+- OG image → **200 image/png 137KB** ✓
+- paid→200 PNG path: unit-test covered (mock). LIVE paid path UNTESTABLE — see infra gap ↓.
+
+**⚠ PRE-EXISTING INFRA GAP (not my code):** live `profiles` table has NO `subscription_tier` / `subscription_expires_at` columns. Yet dashboard/page, settings, video/generate route, stripe/webhook ALL read/write them. Subscription migration was never applied to this Supabase project (`xrlmnlknymgakswsbawk`). Effect: every profile resolves `getActiveTier → "free"` → all paid gates (video gen + my designer art) deny, Stripe webhook write will fail. My D1/D2 follow the exact existing pattern → consistent. Fix = ALTER profiles add both cols (out of Fork-1 scope; flagged for follow-up). Until applied, NO user can ever be paid in this DB.
 
 **Post-sweep find (`d69f4d0`):** contribute feature (B2 collab-memory) fully dead in prod — 3 files (contribute/[slug]/page.tsx + contribute POST route + upload route) still selected retired `invites.status` → page 404 for all, APIs 500. Fixed: mirror invite-view.ts gate (select expires_at, drop status, expired = expires_at<now). tsc 0, 252 tests, build clean. Verified ai_drafts + invite_contributions tables EXIST in Supabase (no SQL gap). Zero TODO/FIXME in src. Build passes full 45-route gen.
 

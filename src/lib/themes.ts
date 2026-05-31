@@ -345,6 +345,16 @@ export const occasions: Occasion[] = [
     ],
   },
   {
+    id: "fathers_day",
+    label: "Father's Day",
+    emoji: "👔",
+    prompts: [
+      "Happy Father's Day, Dad!",
+      "Lunch on me today, Dad?",
+      "Thanks for everything — let's celebrate you!",
+    ],
+  },
+  {
     id: "apology",
     label: "Apology",
     emoji: "🙏",

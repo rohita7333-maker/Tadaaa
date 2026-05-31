@@ -56,6 +56,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Hide the floating dev-mode indicator (the bottom-left "N" badge) so it
+  // never bleeds into screenshots / dogfooding sessions.
+  devIndicators: false,
   // Pin Turbopack root to this app dir so it doesn't walk up to the parent
   // /ClaudeCodeProject package-lock.json and try to resolve modules from there.
   turbopack: {

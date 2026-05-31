@@ -54,7 +54,25 @@ export async function POST(req: NextRequest) {
     if (msg.startsWith("refused:")) {
       return NextResponse.json({ error: "refused" }, { status: 422 });
     }
-    console.error("[ai/draft-invite]", msg);
+    // Distinguish "the AI provider itself is unavailable" (billing/credits,
+    // auth, provider outage, rate limit) from a genuine bug. These are config
+    // problems the user can't retry their way out of, so the client shows an
+    // honest "temporarily unavailable" message instead of "try again".
+    const status = (e as { status?: number } | null)?.status;
+    const lower = msg.toLowerCase();
+    const isProviderDown =
+      status === 401 ||
+      status === 403 ||
+      status === 429 ||
+      (status !== undefined && status >= 500) ||
+      lower.includes("credit balance") ||
+      lower.includes("billing") ||
+      lower.includes("quota") ||
+      lower.includes("overloaded");
+    console.error("[ai/draft-invite]", { status, msg });
+    if (isProviderDown) {
+      return NextResponse.json({ error: "unavailable" }, { status: 503 });
+    }
     return NextResponse.json({ error: "ai_failed" }, { status: 500 });
   }
 }

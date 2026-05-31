@@ -35,7 +35,7 @@ export function canCreateInvite(
   if (monthlyCount >= limit) {
     return {
       allowed: false,
-      reason: `Monthly limit reached. Free plan allows ${limit} surprises per month. Upgrade for more!`,
+      reason: `You've made ${limit} surprise${(limit as number) === 1 ? '' : 's'} this month — that's the free plan limit. Upgrade to keep the joy going! ✨`,
     };
   }
   return { allowed: true };

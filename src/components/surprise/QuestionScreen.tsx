@@ -7,10 +7,15 @@ import FloatingPhotos from "./FloatingPhotos";
 import { playSound } from "@/lib/sounds";
 import { toast } from "sonner";
 
+type AnswerResult =
+  | { ok: true }
+  | { ok: false; status: number | null }; // null = network error (fetch threw)
+
 async function postAnswerWithRetry(
   body: { questionId: string; answer: boolean; inviteId: string },
   attempts = 3
-): Promise<boolean> {
+): Promise<AnswerResult> {
+  let lastStatus: number | null = null;
   for (let i = 0; i < attempts; i++) {
     try {
       const res = await fetch("/api/invite/answer", {
@@ -18,15 +23,26 @@ async function postAnswerWithRetry(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (res.ok) return true;
+      if (res.ok) return { ok: true };
+      lastStatus = res.status;
       // 4xx (except 429) — won't get better with retry.
-      if (res.status >= 400 && res.status < 500 && res.status !== 429) return false;
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        return { ok: false, status: res.status };
+      }
     } catch {
-      // network — retry
+      // network error — retry; keep lastStatus null to signal no HTTP response
+      lastStatus = null;
     }
     await new Promise((r) => setTimeout(r, 400 * (i + 1)));
   }
-  return false;
+  return { ok: false, status: lastStatus };
+}
+
+function getAnswerErrorMessage(status: number | null): string {
+  if (status === null) return "No connection — we'll keep trying in the background 📡";
+  if (status === 410 || status === 422) return "This invite has closed — answers are no longer being accepted";
+  if (status === 429) return "Slow down a little — try again in a moment";
+  return "Hmm, something went wrong saving your answer. Tap again? 💕";
 }
 
 interface Question {
@@ -115,11 +131,12 @@ export default function QuestionScreen({
     setTappedButton(answer ? "yes" : "no");
     setSubmitting(true);
 
-    const ok = await postAnswerWithRetry({ questionId: current.id, answer, inviteId });
+    const result = await postAnswerWithRetry({ questionId: current.id, answer, inviteId });
 
-    if (!ok) {
+    if (!result.ok) {
+      const msg = getAnswerErrorMessage(result.status);
       if (current.require_answer) {
-        toast.error("Couldn't save — check your connection and try again");
+        toast.error(msg);
         setTappedButton(null);
         setSubmitting(false);
         return;

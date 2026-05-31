@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/dashboard/Navbar";
+import { signedAvatarUrl } from "@/actions/account";
 
 export default async function DashboardLayout({
   children,
@@ -38,7 +39,7 @@ export default async function DashboardLayout({
       <Navbar
         userEmail={user.email}
         userInitial={initial}
-        avatarUrl={profile?.avatar_url}
+        avatarUrl={await signedAvatarUrl(profile?.avatar_url)}
         subscriptionTier={profile?.subscription_tier ?? "free"}
         inviteCount={inviteCount ?? 0}
         greetingName={greetingName}

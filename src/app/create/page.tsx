@@ -333,6 +333,7 @@ export default function CreatePage() {
                     selected={occasionType}
                     onSelect={setOccasionType}
                     onPromptSelect={(prompt) => setTitle(prompt)}
+                    selectedPrompt={title}
                   />
                   <ThemeSelector
                     selectedTheme={selectedTheme}
@@ -421,6 +422,21 @@ export default function CreatePage() {
             >
               {step === 3 ? "Preview" : "Next"}
               <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        )}
+
+        {/* Preview step keeps a way back to edit before publishing — publish
+            itself lives inside PreviewPublish, so we only surface Back here. */}
+        {step === 4 && (
+          <div className="flex items-center justify-start mt-8">
+            <Button
+              onClick={goBack}
+              variant="outline"
+              className="h-12 px-6 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0]"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to edit
             </Button>
           </div>
         )}

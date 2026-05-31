@@ -93,7 +93,7 @@ export async function createInviteShell(formData: FormData) {
     };
   }
 
-  const VALID_OCCASIONS = ["date", "birthday", "festival", "mothers_day", "apology", "custom"] as const;
+  const VALID_OCCASIONS = ["date", "birthday", "festival", "mothers_day", "fathers_day", "apology", "custom"] as const;
   const rawOccasion = (formData.get("occasionType") as string) || "custom";
   const occasionType = VALID_OCCASIONS.includes(rawOccasion as typeof VALID_OCCASIONS[number]) ? rawOccasion : "custom";
 

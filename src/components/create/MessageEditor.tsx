@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { MAX_MESSAGE_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
+import EmojiPicker from "./EmojiPicker";
 
 interface MessageEditorProps {
   title: string;
@@ -12,6 +13,28 @@ interface MessageEditorProps {
   messageError?: string;
 }
 
+// Insert `insert` at the field's caret (or end), clamp to `max`, and restore
+// the caret just after the inserted text so typing can continue naturally.
+function insertAtCaret(
+  el: HTMLInputElement | HTMLTextAreaElement | null,
+  current: string,
+  insert: string,
+  max: number,
+  commit: (v: string) => void
+) {
+  const start = el?.selectionStart ?? current.length;
+  const end = el?.selectionEnd ?? current.length;
+  const next = (current.slice(0, start) + insert + current.slice(end)).slice(0, max);
+  commit(next);
+  // Caret restore must wait for React to re-render the new value.
+  requestAnimationFrame(() => {
+    if (!el) return;
+    const caret = Math.min(start + insert.length, max);
+    el.focus();
+    el.setSelectionRange(caret, caret);
+  });
+}
+
 export default function MessageEditor({
   title,
   message,
@@ -20,6 +43,9 @@ export default function MessageEditor({
   titleError,
   messageError,
 }: MessageEditorProps) {
+  const titleRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+
   return (
     <div className="space-y-5">
       {/* Title — floating label */}
@@ -27,12 +53,13 @@ export default function MessageEditor({
         <div className="relative">
           <input
             id="msg-title"
+            ref={titleRef}
             value={title}
             onChange={(e) => onTitleChange(e.target.value.slice(0, MAX_TITLE_LENGTH))}
             placeholder=" "
             aria-label="Title"
             aria-invalid={!!titleError}
-            className="peer w-full h-14 rounded-xl border border-[#D4CBC3] bg-white px-3 pt-5 pb-1.5 text-[#2D2926] placeholder:text-transparent focus:border-[#C4686D] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/20 transition-colors"
+            className="peer w-full h-14 rounded-xl border border-[#D4CBC3] bg-white px-3 pt-5 pb-1.5 pr-20 text-[#2D2926] placeholder:text-transparent focus:border-[#C4686D] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/20 transition-colors"
           />
           <label
             htmlFor="msg-title"
@@ -40,6 +67,14 @@ export default function MessageEditor({
           >
             Title
           </label>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <EmojiPicker
+              label="Insert emoji into title"
+              onPick={(emoji) =>
+                insertAtCaret(titleRef.current, title, emoji, MAX_TITLE_LENGTH, onTitleChange)
+              }
+            />
+          </div>
           <span className="absolute right-3 bottom-1.5 text-[10px] text-[#6B5E57]">
             {title.length}/{MAX_TITLE_LENGTH}
           </span>
@@ -52,6 +87,7 @@ export default function MessageEditor({
         <div className="relative">
           <textarea
             id="msg-message"
+            ref={messageRef}
             value={message}
             onChange={(e) =>
               onMessageChange(e.target.value.slice(0, MAX_MESSAGE_LENGTH))
@@ -67,6 +103,20 @@ export default function MessageEditor({
           >
             Message
           </label>
+          <div className="absolute right-2 top-2.5">
+            <EmojiPicker
+              label="Insert emoji into message"
+              onPick={(emoji) =>
+                insertAtCaret(
+                  messageRef.current,
+                  message,
+                  emoji,
+                  MAX_MESSAGE_LENGTH,
+                  onMessageChange
+                )
+              }
+            />
+          </div>
           <span
             className={`absolute right-3 bottom-2 text-[10px] ${
               message.length > MAX_MESSAGE_LENGTH * 0.9 ? "text-[#C4686D]" : "text-[#6B5E57]"

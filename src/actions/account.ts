@@ -7,6 +7,26 @@ import { after } from "next/server";
 import { STORAGE_BUCKET } from "@/lib/constants";
 import { rateLimit } from "@/lib/rate-limit";
 import { logAudit, getRequestMeta } from "@/lib/audit";
+import { signStorageUrl } from "@/lib/sign-storage";
+
+// Avatars live in the private invite-photos bucket under avatars/<userId>.<ext>.
+// We store the bare storage PATH in profiles.avatar_url and sign it on read
+// (mirrors the invite-photo pattern) so a private bucket can still serve them.
+const AVATAR_URL_TTL = 60 * 60 * 24 * 7; // 7 days — re-signed on every page load.
+
+/**
+ * Resolve a profiles.avatar_url value to a displayable URL.
+ * - bare storage path (e.g. "avatars/<id>.jpg") → freshly signed URL
+ * - already-absolute http(s) URL (legacy rows) → returned as-is
+ * - null/empty → null
+ */
+export async function signedAvatarUrl(
+  value: string | null | undefined
+): Promise<string | null> {
+  if (!value) return null;
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  return signStorageUrl(STORAGE_BUCKET, value, AVATAR_URL_TTL);
+}
 
 export async function getProfile() {
   const supabase = await createClient();
@@ -50,7 +70,7 @@ export async function uploadAvatar(formData: FormData) {
   const path = `avatars/${user.id}.${ext}`;
 
   const { error: uploadError } = await adminClient.storage
-    .from("moment-photos")
+    .from(STORAGE_BUCKET)
     .upload(path, file, { contentType: file.type, upsert: true });
 
   if (uploadError) {
@@ -58,20 +78,17 @@ export async function uploadAvatar(formData: FormData) {
     return { error: "Upload failed. Please try again." };
   }
 
-  const { data: urlData } = adminClient.storage
-    .from("moment-photos")
-    .getPublicUrl(path);
-
-  const avatarUrl = urlData.publicUrl + `?t=${Date.now()}`;
-
+  // Store the bare storage path; read sites sign it via signedAvatarUrl().
   await supabase.from("profiles").upsert({
     id: user.id,
-    avatar_url: avatarUrl,
+    avatar_url: path,
   });
 
   revalidatePath("/settings");
   revalidatePath("/dashboard");
-  return { success: true, url: avatarUrl };
+
+  const signedUrl = await signedAvatarUrl(path);
+  return { success: true, url: signedUrl };
 }
 
 export async function updateNotifications(formData: FormData): Promise<void> {

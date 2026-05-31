@@ -34,8 +34,12 @@ export function AIDraftButton({ onDraft }: { onDraft: (d: Draft) => void }) {
         toast.error("Input wasn't suitable for a surprise invite.");
         return;
       }
+      if (r.status === 503) {
+        toast.error("AI drafting is taking a breather — write your message by hand for now.");
+        return;
+      }
       if (!r.ok) {
-        toast.error("Couldn't generate a draft — try again.");
+        toast.error("Draft hit a snag — give it another go 🪄");
         return;
       }
       const { draft } = await r.json();

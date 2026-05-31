@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getProfile, updateNotifications } from "@/actions/account";
+import { getProfile, updateNotifications, signedAvatarUrl } from "@/actions/account";
 import DeleteAccountButton from "./DeleteAccountButton";
 import AvatarUpload from "./AvatarUpload";
 import Link from "next/link";
@@ -18,6 +18,7 @@ export default async function SettingsPage() {
   if (!user) redirect("/auth/signin");
 
   const profile = await getProfile();
+  const avatarUrl = await signedAvatarUrl(profile?.avatar_url);
 
   const initial =
     (user.user_metadata?.full_name as string | undefined)?.[0]?.toUpperCase() ||
@@ -99,7 +100,7 @@ export default async function SettingsPage() {
           </div>
           <div className="space-y-4">
             <div className="bg-[#FFF8F0] rounded-2xl p-4">
-              <AvatarUpload currentUrl={profile?.avatar_url} userInitial={initial} />
+              <AvatarUpload currentUrl={avatarUrl} userInitial={initial} />
             </div>
             <div className="bg-[#FFF8F0] rounded-2xl p-4">
               <p className="text-xs text-[#6B5E57] uppercase tracking-wider mb-1 font-medium">Email</p>

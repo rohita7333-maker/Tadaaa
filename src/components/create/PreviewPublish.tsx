@@ -152,52 +152,69 @@ export default function PreviewPublish({
 
           {/* Phone preview */}
           <div className="flex justify-center mb-8">
-            <div className="relative w-[200px] h-[400px] bg-[#1a1a1a] rounded-[32px] shadow-[0_24px_60px_rgba(45,41,38,0.2)] overflow-hidden border-4 border-[#2D2926]/20">
+            <div className="relative w-[230px]">
+              {/* Side power button */}
+              <div className="absolute -right-[3px] top-[80px] w-[3px] h-10 bg-[#c0c0c0] rounded-r-sm" />
+              {/* Volume buttons (left) */}
+              <div className="absolute -left-[3px] top-[70px] w-[3px] h-6 bg-[#c0c0c0] rounded-l-sm" />
+              <div className="absolute -left-[3px] top-[102px] w-[3px] h-6 bg-[#c0c0c0] rounded-l-sm" />
+              {/* Device shell — titanium-ish gradient */}
               <div
-                className="w-full h-full flex flex-col items-center justify-center relative"
-                style={{ background: themeData?.colors.background }}
+                className="rounded-[44px] p-2 shadow-[0_32px_80px_rgba(45,41,38,0.28)]"
+                style={{
+                  background: "linear-gradient(to bottom, #e8e8e8, #d0d0d0, #b8b8b8)",
+                }}
               >
-                {firstPhoto ? (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={firstPhoto.preview}
-                      alt="Preview"
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <div
-                      className="absolute inset-0"
-                      style={{ background: themeData?.colors.overlay }}
-                    />
-                  </>
-                ) : null}
-                <div className="relative z-10 text-center px-4">
-                  <span className="text-4xl mb-3 block">
-                    {themeData?.revealIcon === "envelope"
-                      ? "✉️"
-                      : themeData?.revealIcon === "gift"
-                      ? "🎁"
-                      : themeData?.revealIcon === "heart"
-                      ? "❤️"
-                      : themeData?.revealIcon === "star"
-                      ? "⭐"
-                      : "🎈"}
-                  </span>
-                  <p
-                    className="text-sm font-medium mb-1 leading-tight"
-                    style={{ color: themeData?.colors.text || "#fff" }}
-                  >
-                    {title || "Your surprise title"}
-                  </p>
-                  <p
-                    className="text-xs opacity-70"
-                    style={{ color: themeData?.colors.text || "#fff" }}
-                  >
-                    {revealType === "tap" ? "Tap to open ✨" : "Countdown reveal ⏱"}
-                  </p>
+                {/* Inner screen */}
+                <div className="relative rounded-[36px] overflow-hidden aspect-[9/19]"
+                  style={{ background: themeData?.colors.background }}
+                >
+                  {/* Dynamic island */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-10" />
+
+                  {firstPhoto ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={firstPhoto.preview}
+                        alt="Preview"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      {/* CSS gradient scrim — photo shows through but text stays legible */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+                    </>
+                  ) : null}
+
+                  <div className="relative z-10 text-center px-4 absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl mb-3 block">
+                      {themeData?.revealIcon === "envelope"
+                        ? "✉️"
+                        : themeData?.revealIcon === "gift"
+                        ? "🎁"
+                        : themeData?.revealIcon === "heart"
+                        ? "❤️"
+                        : themeData?.revealIcon === "star"
+                        ? "⭐"
+                        : "🎈"}
+                    </span>
+                    <p
+                      className="text-sm font-medium mb-1 leading-tight"
+                      style={{ color: themeData?.colors.text || "#fff" }}
+                    >
+                      {title || "Your surprise title"}
+                    </p>
+                    <p
+                      className="text-xs opacity-70"
+                      style={{ color: themeData?.colors.text || "#fff" }}
+                    >
+                      {revealType === "tap" ? "Tap to open ✨" : "Countdown reveal ⏱"}
+                    </p>
+                  </div>
+
+                  {/* Home indicator bar */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 bg-white/40 rounded-full z-10" />
                 </div>
               </div>
-              <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-[#2D2926]/20 rounded-full" />
             </div>
           </div>
 

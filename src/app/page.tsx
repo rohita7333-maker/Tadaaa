@@ -5,6 +5,7 @@ import Footer from "@/components/landing/Footer";
 import Navbar from "@/components/landing/Navbar";
 import LandingShell from "@/components/landing/LandingShell";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, Heart, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,6 +22,15 @@ async function getLandingStats() {
 }
 
 export default async function LandingPage() {
+  // Logged-in users clicking the logo (e.g. from /pricing) should land on their
+  // dashboard, not the marketing page with a misleading "Sign in" CTA. Session
+  // is intact here — the landing Navbar is just auth-unaware.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) redirect("/dashboard");
+
   const { surprises } = await getLandingStats();
   return (
     <LandingShell>

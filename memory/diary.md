@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-05-31 — Dashboard card: "Opened {x} ago"
+
+**What:** Surface `revealed_at` on InviteCard so creators see when a surprise was first opened (when the 28-day free-tier clock started).
+
+**Files:**
+- `src/app/dashboard/page.tsx` — added `revealed_at: invite.revealed_at ?? null` to InviteList map (query already `select("*")`, no extra fetch).
+- `src/components/dashboard/InviteList.tsx` — `revealed_at?: string | null` on Invite type.
+- `src/components/dashboard/InviteCard.tsx` — same field on `invite` interface; render `· Opened {formatDistanceToNow}` accent line beside created_at, only when `revealed_at` set. Tooltip explains the 28-day clock anchor.
+
+**Why:** Lock-timer countdown felt arbitrary; now anchored to a visible reveal event. Free tier only stamps `revealed_at`; paid = NULL → label auto-hides, no tier branching.
+
+**TS:** 0 errors. **Tests:** 252/252 green. Reduced-motion: static text, n/a.
+
+**Also still uncommitted (this session, awaiting explicit commit):** delete-feature batch (DeleteConfirmModal, FreeLimitBanner, greyed/locked delete w/ countdown, `status`-column bug fix in invite.ts) + pricing logo auth fix (page.tsx redirect authed `/`→/dashboard).
+
+**Next:** Commit when user asks. Deploy to Vercel (Stripe+Resend pending).
+
 ## 2026-05-30 — Motion P5: Hardening (FINAL PHASE — ALL PHASES COMPLETE)
 
 **What happened:** Executed P5 hardening. Fixed all 4 baseline lint errors (0 errors achieved). Added ambient duration + named easing tokens + spatial offset to motion.ts. Wired Hero.tsx to tokens. Added `useReducedMotion` to CookieConsent. Updated tests (+5 token contracts). Branch is CEO sign-off ready.
@@ -947,3 +964,61 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 **Gates passed:** tsc 0 · vitest 220/220 (+3 new tests) · lint 0 new errors · reduced-motion on all 4 landing components · gems untouched · no uniform fade-up remaining.
 
 **Next:** P3 — Create wizard (step transitions, tactile inputs, publish payoff). Entry: `src/components/create/`.
+
+---
+
+## 2026-05-30 — Bug Sprint: 12 Dogfood Fixes (ALL COMPLETE)
+
+**Trigger:** User dogfooded `feat/sophistication` and filed 12 bugs. Plan approved, executed in clusters.
+
+**Root causes found (key ones):**
+- #1 avatar upload: wrong bucket name (`moment-photos` → `invite-photos`) + `getPublicUrl` on private bucket → now uses `signedAvatarUrl` via `sign-storage`
+- #2 AI draft: Anthropic account has no credits (HTTP 400 "credit balance") — code now classifies billing/quota/5xx as 503 and shows honest copy; user must add credits
+- #11 stray "N": Next.js dev indicator — fixed via `devIndicators: false` in `next.config.ts`
+- #12 RSVP: `postAnswerWithRetry` discarded HTTP status → all errors looked like network; fixed to discriminated union + context-aware toasts
+
+**Files changed:**
+- `next.config.ts` — devIndicators off
+- `src/actions/account.ts` — STORAGE_BUCKET + signedAvatarUrl
+- `src/actions/invite.ts` — add fathers_day to VALID_OCCASIONS
+- `src/app/api/ai/draft-invite/route.ts` — provider-down classification (503 vs 500)
+- `src/app/create/page.tsx` — Back button at step 4, selectedPrompt wired
+- `src/app/dashboard/layout.tsx` + `src/app/settings/page.tsx` — signedAvatarUrl
+- `src/components/create/AIDraftButton.tsx` — 503 branch + warm copy
+- `src/components/create/EmojiPicker.tsx` — NEW: curated emoji picker, a11y, motion pop
+- `src/components/create/MessageEditor.tsx` — emoji picker wired, cursor insertion
+- `src/components/create/OccasionSelector.tsx` — selected-chip highlight, inline custom-fill
+- `src/components/create/PreviewPublish.tsx` — modern slim-bezel phone mockup
+- `src/components/surprise/QuestionScreen.tsx` — AnswerResult union, getAnswerErrorMessage
+- `src/components/ui/sonner.tsx` — rounded-2xl white cards, warm palette
+- `src/lib/themes.ts` — Father's Day occasion
+- `src/lib/tier.ts` — warm upgrade copy
+
+**Commit:** `89a96d2` on `feat/sophistication`
+
+**TS:** 0 errors. QA agent at `tadaaaa/.claude/agents/tadaaaa-qa-test.md` extended with 13-item regression checklist.
+
+**Next:** Deploy to Vercel (Stripe+Resend still pending config). AI draft needs Anthropic credits.
+
+---
+
+## 2026-05-31 — Frozen metrics fix + RSVP names + stat tooltips (feat/sophistication)
+
+**Context:** User reported "the number is not increasing of views Rsvps and responses". Diagnosed 3 schema-drift bugs (no `status` column on `invites`), then shipped 3 approved features (P1→B, P2→A, P3→A). CEO sequencing: bugs first, bundled.
+
+**Bugs (all schema-drift class — `invites.status` column retired but still referenced):**
+- Bug1 Views frozen: `src/lib/invite-view.ts` selected nonexistent `status` → PostgREST errors → `.single()` null → 404 → `increment_view_count` never ran. Fix: dropped `status` from select + check; gate on `is_active` + `expires_at` only.
+- Bug2 RSVPs frozen: `record_rsvp` RPC body had `OR v_invite.status='expired'` → raised exception → route 500. Fix: `CREATE OR REPLACE` without status clause (migration `rsvp_fix_status_and_add_name`).
+- Bug3 Responses frozen: `record_answer` inserted into `invite_answers` but never bumped `invites.response_count`. Fix: added `UPDATE invites SET response_count+1` (migration `answer_increment_response_count`) + backfilled historical counts (4 invites: 1,15,2,2).
+
+**Features:**
+- P2-A (creator-view exclusion): `invite-view.ts` now `auth.getUser()` → if `user.id === creator_id` return early. Stops creator previews inflating views AND prematurely stamping `revealed_at` (28-day free clock).
+- P1-B (optional RSVP name): `invite_rsvps.name` column added; `record_rsvp` takes `p_name DEFAULT NULL` (NULLIF/trim/cap 80). UI: optional name input in `RSVPButton.tsx` → threaded through `postRsvp` → `POST /api/invite/rsvp` → RPC. Display: `getInviteInsights` selects `name`; `ResponsesModal` shows name + initial avatar, falls back to "Guest N". Privacy note updated.
+- P3-A (stat tooltips): `title` attrs on InviteCard stats row (views/RSVPs/responses) + reworded dashboard stat-strip hints to explain each metric.
+
+**Also (prior, this session):** `revealed_at` "Opened {x} ago" on InviteCard (page.tsx map + InviteList type + InviteCard render).
+
+**Files:** `src/lib/invite-view.ts`, `src/app/api/invite/rsvp/route.ts`, `src/components/surprise/RSVPButton.tsx`, `src/actions/questions.ts`, `src/components/dashboard/ResponsesModal.tsx`, `src/components/dashboard/InviteCard.tsx`, `src/app/dashboard/page.tsx`, `src/components/dashboard/InviteList.tsx`.
+**Migrations applied (Supabase MCP):** `rsvp_fix_status_and_add_name`, `answer_increment_response_count` + response_count backfill.
+
+**Verify:** tsc 0 errors · vitest 252/252 green. NOT committed (awaiting user).

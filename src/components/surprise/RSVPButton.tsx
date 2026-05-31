@@ -33,13 +33,18 @@ function getVisitorToken(): string {
   }
 }
 
-async function postRsvp(inviteId: string, visitorToken: string, attempts = 3): Promise<boolean> {
+async function postRsvp(
+  inviteId: string,
+  visitorToken: string,
+  name?: string,
+  attempts = 3
+): Promise<boolean> {
   for (let i = 0; i < attempts; i++) {
     try {
       const res = await fetch("/api/invite/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inviteId, visitorToken }),
+        body: JSON.stringify({ inviteId, visitorToken, name }),
       });
       if (res.ok) return true;
       if (res.status >= 400 && res.status < 500 && res.status !== 429) return false;
@@ -53,6 +58,7 @@ async function postRsvp(inviteId: string, visitorToken: string, attempts = 3): P
 
 export default function RSVPButton({ theme, title, photos = [], inviteId }: RSVPButtonProps) {
   const [tapped, setTapped] = useState(false);
+  const [name, setName] = useState("");
   const firedRef = useRef(false);
   void title;
 
@@ -96,7 +102,8 @@ export default function RSVPButton({ theme, title, photos = [], inviteId }: RSVP
 
     if (inviteId) {
       const token = getVisitorToken();
-      void postRsvp(inviteId, token);
+      const trimmed = name.trim();
+      void postRsvp(inviteId, token, trimmed || undefined);
     }
   }
 
@@ -159,6 +166,19 @@ export default function RSVPButton({ theme, title, photos = [], inviteId }: RSVP
               >
                 Tap below to confirm you&apos;re in
               </p>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={80}
+                placeholder="Your name (optional)"
+                aria-label="Your name (optional)"
+                className="w-56 max-w-full mx-auto mb-5 block h-11 px-4 rounded-full text-center text-sm bg-white/70 backdrop-blur-sm border outline-none transition-all duration-300 focus:bg-white focus:scale-[1.02]"
+                style={{
+                  color: theme.colors.text,
+                  borderColor: `${theme.colors.accent}40`,
+                }}
+              />
               <motion.button
                 onClick={handleTap}
                 className="h-14 px-10 rounded-full text-white text-base font-medium shadow-lg pulse-glow"

@@ -357,7 +357,7 @@ export async function deleteInvite(inviteId: string) {
 
   const { data: invite } = await supabase
     .from("invites")
-    .select("id, creator_id, video_storage_path, expires_at, status, is_active")
+    .select("id, creator_id, video_storage_path, expires_at, is_active")
     .eq("id", inviteId)
     .single();
 
@@ -374,7 +374,7 @@ export async function deleteInvite(inviteId: string) {
 
   if (activeTier === "free") {
     const expired =
-      (invite as { status?: string }).status === "expired" ||
+      (invite as { is_active?: boolean }).is_active === false ||
       isExpired((invite as { expires_at?: string | null }).expires_at);
     if (!expired) {
       return {
@@ -390,7 +390,6 @@ export async function deleteInvite(inviteId: string) {
     .update({
       deleted_at: new Date().toISOString(),
       is_active: false,
-      status: "deleted",
     })
     .eq("id", inviteId);
 
@@ -424,15 +423,12 @@ async function _getInviteBySlugImpl(slug: string) {
   if (error || !invite) return null;
 
   // Refuse to surface invites that have been disabled, expired, or soft-deleted.
-  // Status-vs-is_active split-brain: check both. expires_at honoured even if
-  // the cron has not yet run.
+  // No `status` column exists — is_active + expires_at + deleted_at are the
+  // source of truth. expires_at honoured even if the expire cron has not run.
   const isExpired =
     (invite as { expires_at?: string | null }).expires_at &&
     new Date((invite as { expires_at: string }).expires_at) < new Date();
-  const isDisabled =
-    (invite as { is_active?: boolean }).is_active === false ||
-    (invite as { status?: string }).status === "expired" ||
-    (invite as { status?: string }).status === "deleted";
+  const isDisabled = (invite as { is_active?: boolean }).is_active === false;
   const isSoftDeleted = !!(invite as { deleted_at?: string | null }).deleted_at;
 
   if (isExpired || isDisabled || isSoftDeleted) return null;

@@ -67,7 +67,7 @@ export async function getInviteResponses(
 }
 
 export interface InviteInsights {
-  rsvps: { responded_at: string; user_agent: string | null }[];
+  rsvps: { responded_at: string; user_agent: string | null; name: string | null }[];
   viewCount: number;
   rsvpCount: number;
 }
@@ -96,7 +96,7 @@ export async function getInviteInsights(
   // RLS "owner-read" on invite_rsvps scopes to auth.uid() via invites join.
   const { data: rsvpRows } = await supabase
     .from("invite_rsvps")
-    .select("responded_at, user_agent")
+    .select("responded_at, user_agent, name")
     .eq("invite_id", inviteId)
     .order("responded_at", { ascending: false })
     .limit(200);
@@ -104,6 +104,7 @@ export async function getInviteInsights(
   const rsvps = (rsvpRows ?? []).map((r) => ({
     responded_at: r.responded_at as string,
     user_agent: (r.user_agent as string | null) ?? null,
+    name: (r.name as string | null) ?? null,
   }));
 
   return {

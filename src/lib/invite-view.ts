@@ -26,9 +26,12 @@ export async function logInviteViewBySlug(
   // Anon client — invites table has public SELECT policy for active invites.
   const supabase = await createClient();
 
+  // invites has no `status` column (split-brain schema retired) — gate on
+  // is_active + expires_at only. Selecting a missing column errors the query
+  // and silently 404s, which froze the view counter.
   const { data: invite } = await supabase
     .from("invites")
-    .select("id, is_active, creator_id, title, expires_at, status")
+    .select("id, is_active, creator_id, title, expires_at")
     .eq("slug", slug)
     .is("deleted_at", null)
     .single();
@@ -36,13 +39,18 @@ export async function logInviteViewBySlug(
   const isExpired =
     invite?.expires_at && new Date(invite.expires_at) < new Date();
 
-  if (
-    !invite ||
-    !invite.is_active ||
-    invite.status === "expired" ||
-    isExpired
-  ) {
+  if (!invite || !invite.is_active || isExpired) {
     return { ok: false, status: 404 };
+  }
+
+  // Don't count the creator's own previews. A creator opening their own link
+  // would otherwise inflate views AND stamp revealed_at (starting the 28-day
+  // free-tier clock) before any recipient ever sees the surprise.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user?.id === invite.creator_id) {
+    return { ok: true };
   }
 
   // increment_view_count has SECURITY DEFINER + GRANT to anon — no service-role needed.

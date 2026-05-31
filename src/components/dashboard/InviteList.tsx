@@ -19,11 +19,13 @@ type Invite = {
   created_at: string;
   reveal_type: "tap" | "countdown";
   accept_contributions?: boolean;
+  revealed_at?: string | null;
 };
 
 interface InviteListProps {
   invites: Invite[];
   creatorName?: string;
+  tier?: "free" | "plus" | "unlimited";
 }
 
 // Container orchestrates stagger; children inherit the delay automatically.
@@ -82,7 +84,7 @@ const STATIC_SHADOW =
 const HOVER_SHADOW =
   "0 4px 8px rgba(45,41,38,0.06), 0 16px 40px rgba(45,41,38,0.14), 0 40px 80px rgba(45,41,38,0.10)";
 
-export default function InviteList({ invites, creatorName }: InviteListProps) {
+export default function InviteList({ invites, creatorName, tier = "free" }: InviteListProps) {
   const shouldReduce = useReducedMotion();
   const router = useRouter();
   // Track cards being removed for optimistic exit animation.
@@ -127,6 +129,7 @@ export default function InviteList({ invites, creatorName }: InviteListProps) {
               <InviteCard
                 invite={invite}
                 creatorName={creatorName}
+                tier={tier}
                 onDelete={() => handleDelete(invite.id)}
               />
             </motion.div>

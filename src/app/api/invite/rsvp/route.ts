@@ -9,8 +9,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  const body = (await request.json()) as { inviteId?: string; visitorToken?: string };
-  const { inviteId, visitorToken } = body;
+  const body = (await request.json()) as {
+    inviteId?: string;
+    visitorToken?: string;
+    name?: string;
+  };
+  const { inviteId, visitorToken, name } = body;
 
   if (!inviteId || !visitorToken || typeof visitorToken !== "string") {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -18,6 +22,9 @@ export async function POST(request: NextRequest) {
 
   const visitorHash = createHash("sha256").update(visitorToken).digest("hex");
   const ua = (request.headers.get("user-agent") ?? "").slice(0, 255);
+  // Trim + cap defensively; record_rsvp also NULLIFs empty + caps at 80.
+  const cleanName =
+    typeof name === "string" && name.trim() ? name.trim().slice(0, 80) : null;
 
   // record_rsvp has SECURITY DEFINER + GRANT to anon — validates invite and upserts atomically.
   const supabase = await createClient();
@@ -25,6 +32,7 @@ export async function POST(request: NextRequest) {
     p_invite_id: inviteId,
     p_visitor_hash: visitorHash,
     p_user_agent: ua,
+    p_name: cleanName,
   });
 
   if (error) {

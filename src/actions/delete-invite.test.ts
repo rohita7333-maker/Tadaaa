@@ -123,7 +123,6 @@ describe("deleteInvite — soft delete behaviour", () => {
     expect(result).toEqual({ success: true });
     expect(capturedUpdatePayload).not.toBeNull();
     expect(capturedUpdatePayload!.is_active).toBe(false);
-    expect(capturedUpdatePayload!.status).toBe("deleted");
     expect(typeof capturedUpdatePayload!.deleted_at).toBe("string");
     // Must NOT hard-delete
     expect(mockDeleteFn).not.toHaveBeenCalled();
@@ -170,11 +169,10 @@ describe("deleteInvite — soft delete behaviour", () => {
 
     expect(result).toEqual({ success: true });
     expect(capturedUpdatePayload!.deleted_at).toBeTruthy();
-    expect(capturedUpdatePayload!.status).toBe("deleted");
     expect(mockDeleteFn).not.toHaveBeenCalled();
   });
 
-  it("allows free tier to delete when status=expired even if expires_at not past", async () => {
+  it("allows free tier to delete when is_active=false even if expires_at not past", async () => {
     // Cron may have set status=expired before expires_at ticks over
     mockInviteRow = { id: "inv-6", creator_id: "user-test", expires_at: FUTURE_DATE, status: "expired", is_active: false, video_storage_path: null };
     mockProfileRow = { subscription_tier: "free", subscription_expires_at: null };

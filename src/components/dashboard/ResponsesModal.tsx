@@ -179,10 +179,10 @@ function ActivityTab({ insights }: { insights: InviteInsights | null }) {
                 className="flex items-center justify-between bg-[#FFF8F0] rounded-xl px-4 py-2.5 border border-[#D4CBC3]/30"
               >
                 <span className="flex items-center gap-2.5 text-sm text-[#2D2926]">
-                  <span className="w-7 h-7 rounded-full bg-[#FFE7D9] flex items-center justify-center text-xs font-bold text-[#B33A45]">
-                    {i + 1}
+                  <span className="w-7 h-7 rounded-full bg-[#FFE7D9] flex items-center justify-center text-xs font-bold text-[#B33A45] uppercase">
+                    {r.name ? r.name.charAt(0) : i + 1}
                   </span>
-                  <span className="font-medium">Guest {i + 1}</span>
+                  <span className="font-medium">{r.name || `Guest ${i + 1}`}</span>
                 </span>
                 <span className="text-xs text-[#6B5E57]">
                   {formatDistanceToNow(new Date(r.responded_at), { addSuffix: true })}
@@ -203,8 +203,8 @@ function ActivityTab({ insights }: { insights: InviteInsights | null }) {
         <Shield className="w-4 h-4 text-[#6B5E57] mt-0.5 flex-shrink-0" />
         <p className="text-xs text-[#6B5E57] leading-relaxed">
           <span className="font-semibold text-[#2D2926]">Privacy by design.</span>{" "}
-          Views and RSVPs are anonymous — we don&apos;t collect or expose visitor identities,
-          so you see counts and timestamps only. Recipients can RSVP without signing in.
+          Views and RSVPs are anonymous — recipients can RSVP without signing in. Names
+          show only when a guest chooses to add one; otherwise you see counts and timestamps.
         </p>
       </div>
     </div>

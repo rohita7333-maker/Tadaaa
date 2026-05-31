@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Trash2, ExternalLink, MessageCircleQuestion, Share2, Heart, MessageCircle } from "lucide-react";
+import { Eye, Trash2, ExternalLink, MessageCircleQuestion, Share2, Heart, MessageCircle, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -15,6 +15,7 @@ import { deleteInvite } from "@/actions/invite";
 import { APP_URL } from "@/lib/constants";
 import ResponsesModal from "@/components/dashboard/ResponsesModal";
 import ShareButtons from "@/components/dashboard/ShareButtons";
+import DeleteConfirmModal from "@/components/dashboard/DeleteConfirmModal";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 
 interface InviteCardProps {
@@ -31,29 +32,43 @@ interface InviteCardProps {
     created_at: string;
     reveal_type: "tap" | "countdown";
     accept_contributions?: boolean;
+    revealed_at?: string | null;
   };
   creatorName?: string;
+  /** Viewer's active tier — gates whether a live surprise can be deleted. */
+  tier?: "free" | "plus" | "unlimited";
   /** Called after successful delete so parent can animate removal. */
   onDelete?: () => void;
 }
 
-export default function InviteCard({ invite, creatorName, onDelete }: InviteCardProps) {
+export default function InviteCard({ invite, creatorName, tier = "free", onDelete }: InviteCardProps) {
   const shouldReduce = useReducedMotion();
   const [deleting, setDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [responsesOpen, setResponsesOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const theme = getThemeById(invite.theme);
   const expired = isExpired(invite.expires_at);
   const link = `${APP_URL}/surprise/${invite.slug}`;
 
-  async function handleDelete() {
-    if (!confirm("Delete this surprise? This cannot be undone.")) return;
+  // Free tier can only delete once a surprise has expired (28 days post-reveal)
+  // or been deactivated. Paid tiers delete anytime. Mirrors the server gate in
+  // deleteInvite() so the UI never offers an action the action would reject.
+  const isPaid = tier === "plus" || tier === "unlimited";
+  const deleteLocked = !isPaid && !(expired || !invite.is_active);
+  // Revealed (free) surprises carry an expires_at we can count down to.
+  const countdownTo =
+    deleteLocked && invite.expires_at && !expired ? invite.expires_at : null;
+
+  async function doDelete() {
     setDeleting(true);
     const result = await deleteInvite(invite.id);
     if (result?.error) {
       toast.error(result.error);
       setDeleting(false);
+      setConfirmOpen(false);
     } else {
+      setConfirmOpen(false);
       onDelete?.();
     }
   }
@@ -129,19 +144,28 @@ export default function InviteCard({ invite, creatorName, onDelete }: InviteCard
         {/* Stats */}
         <div className="mb-1 bg-[#FFF8F0] rounded-xl px-3 py-2">
           <div className="flex items-center gap-3 text-sm text-[#6B5E57]">
-            <span className="flex items-center gap-1.5">
+            <span
+              className="flex items-center gap-1.5"
+              title="How many times this surprise page was opened (creator previews don't count)"
+            >
               <Eye className="w-3.5 h-3.5 text-[#C4686D]" />
               <span className="font-semibold text-[#2D2926]">{formatViewCount(invite.view_count)}</span>
               <span className="text-xs">views</span>
             </span>
             <div className="w-px h-3.5 bg-[#D4CBC3]" />
-            <span className="flex items-center gap-1.5" title="RSVPs">
+            <span
+              className="flex items-center gap-1.5"
+              title="Guests who tapped “I'm in!” to confirm they're coming"
+            >
               <Heart className="w-3.5 h-3.5 text-[#C4686D]" />
               <span className="font-semibold text-[#2D2926]">{invite.rsvp_count ?? 0}</span>
               <span className="text-xs">RSVPs</span>
             </span>
             <div className="w-px h-3.5 bg-[#D4CBC3]" />
-            <span className="flex items-center gap-1.5">
+            <span
+              className="flex items-center gap-1.5"
+              title="Answers guests gave to the yes/no questions you added"
+            >
               <MessageCircle className="w-3.5 h-3.5 text-[#C9A96E]" />
               <span className="font-semibold text-[#2D2926]">{invite.response_count ?? 0}</span>
               <span className="text-xs">responses</span>
@@ -149,6 +173,14 @@ export default function InviteCard({ invite, creatorName, onDelete }: InviteCard
           </div>
           <p className="text-[11px] text-[#9B8E87] mt-1.5">
             {formatDistanceToNow(new Date(invite.created_at), { addSuffix: true })}
+            {invite.revealed_at && (
+              <span title="When this surprise was first opened — the 28-day clock starts here">
+                {" · "}
+                <span className="text-[#C4686D] font-medium">
+                  Opened {formatDistanceToNow(new Date(invite.revealed_at), { addSuffix: true })}
+                </span>
+              </span>
+            )}
           </p>
         </div>
         <div className="mb-3" />
@@ -186,15 +218,55 @@ export default function InviteCard({ invite, creatorName, onDelete }: InviteCard
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
           <Button
-            onClick={handleDelete}
-            disabled={deleting}
+            onClick={() => (deleteLocked ? undefined : setConfirmOpen(true))}
+            disabled={deleting || deleteLocked}
+            aria-disabled={deleteLocked}
             variant="outline"
             size="sm"
-            className="h-9 w-9 rounded-full border-[#D4CBC3] text-[#C4686D] hover:bg-[#FFF0EE] p-0 transition-all duration-300"
+            title={
+              deleteLocked
+                ? countdownTo
+                  ? `Free surprises can be deleted after they expire — ${formatDistanceToNow(new Date(countdownTo))} left`
+                  : "Free surprises can be deleted once they've expired (28 days after they're opened)"
+                : "Delete surprise"
+            }
+            className={
+              deleteLocked
+                ? "h-9 w-9 rounded-full border-[#D4CBC3]/60 text-[#C0B5AD] bg-[#F7F2EC] p-0 cursor-not-allowed"
+                : "h-9 w-9 rounded-full border-[#D4CBC3] text-[#C4686D] hover:bg-[#FFF0EE] p-0 transition-all duration-300"
+            }
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            {deleteLocked ? <Lock className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
           </Button>
         </div>
+
+        {/* Free-tier delete lock — countdown to deletable */}
+        {deleteLocked && (
+          <p className="mt-2.5 flex items-center gap-1.5 text-[11px] text-[#9B8E87]">
+            <Lock className="w-3 h-3 shrink-0" />
+            {countdownTo ? (
+              <span>
+                Deletable in{" "}
+                <span className="font-medium text-[#6B5E57]">
+                  {formatDistanceToNow(new Date(countdownTo))}
+                </span>{" "}
+                · or{" "}
+                <Link href="/pricing" className="text-[#C4686D] hover:underline">
+                  upgrade
+                </Link>{" "}
+                to delete now
+              </span>
+            ) : (
+              <span>
+                Deletable 28 days after it&apos;s opened ·{" "}
+                <Link href="/pricing" className="text-[#C4686D] hover:underline">
+                  upgrade
+                </Link>{" "}
+                to delete anytime
+              </span>
+            )}
+          </p>
+        )}
 
         {/* Inline share panel */}
         <AnimatePresence>
@@ -227,6 +299,14 @@ export default function InviteCard({ invite, creatorName, onDelete }: InviteCard
         inviteId={invite.id}
         open={responsesOpen}
         onClose={() => setResponsesOpen(false)}
+      />
+
+      <DeleteConfirmModal
+        open={confirmOpen}
+        title={invite.title}
+        deleting={deleting}
+        onConfirm={doDelete}
+        onClose={() => !deleting && setConfirmOpen(false)}
       />
     </SpotlightCard>
   );

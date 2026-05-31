@@ -6,8 +6,10 @@ import { Plus, Sparkles, Eye, Gift, TrendingUp, MessageCircle, Heart } from "luc
 import InviteList from "@/components/dashboard/InviteList";
 import OccasionFilter from "@/components/dashboard/OccasionFilter";
 import OnboardingModal from "@/components/dashboard/OnboardingModal";
+import FreeLimitBanner from "@/components/dashboard/FreeLimitBanner";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import CommandPalette from "@/components/dashboard/CommandPalette";
+import { getActiveTier, monthlyInviteLimit } from "@/lib/tier";
 
 interface Props {
   searchParams: Promise<{ occasion?: string; sort?: string; status?: string }>;
@@ -26,6 +28,14 @@ export default async function DashboardPage({ searchParams }: Props) {
   const creatorName =
     (user.user_metadata?.full_name as string | undefined)?.trim() || undefined;
 
+  // Active tier drives the delete gate + free-tier upsell banner.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("subscription_tier, subscription_expires_at")
+    .eq("id", user.id)
+    .single();
+  const tier = getActiveTier(profile ?? null);
+
   const { data: invites, error } = await supabase
     .from("invites")
     .select("*")
@@ -38,6 +48,21 @@ export default async function DashboardPage({ searchParams }: Props) {
   }
 
   const all = invites || [];
+
+  // Free-tier monthly usage — mirrors the createInvite gate (is_active invites
+  // created since the 1st of this month). Drives the upsell banner.
+  const freeLimit = monthlyInviteLimit(tier);
+  let limitReached = false;
+  let usedThisMonth = 0;
+  if (freeLimit !== null) {
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    usedThisMonth = all.filter(
+      (inv) => inv.is_active && new Date(inv.created_at) >= monthStart
+    ).length;
+    limitReached = usedThisMonth >= freeLimit;
+  }
 
   // Aggregate RSVP counts per invite (one query, group client-side).
   const inviteIds = all.map((inv) => inv.id);
@@ -71,11 +96,11 @@ export default async function DashboardPage({ searchParams }: Props) {
   const activeCount = all.filter((inv) => inv.is_active).length;
 
   const stats: { label: string; value: number; icon: typeof Gift; color: string; href: string; hint: string }[] = [
-    { label: "Total Surprises", value: all.length, icon: Gift, color: "#C4686D", href: "/dashboard", hint: "All your surprises" },
-    { label: "Total Views", value: totalViews, icon: Eye, color: "#C9A96E", href: "/dashboard?sort=views", hint: "Sort by most viewed" },
-    { label: "RSVPs", value: totalRsvps, icon: Heart, color: "#C4686D", href: "/dashboard?sort=rsvps", hint: "Sort by most RSVPs" },
-    { label: "Responses", value: totalResponses, icon: MessageCircle, color: "#6B8F71", href: "/dashboard?sort=responses", hint: "Sort by responses" },
-    { label: "Active", value: activeCount, icon: TrendingUp, color: "#B07CC6", href: "/dashboard?status=active", hint: "Filter to active surprises" },
+    { label: "Total Surprises", value: all.length, icon: Gift, color: "#C4686D", href: "/dashboard", hint: "Every surprise you've created" },
+    { label: "Total Views", value: totalViews, icon: Eye, color: "#C9A96E", href: "/dashboard?sort=views", hint: "Times your surprise pages were opened (your own previews don't count) · click to sort" },
+    { label: "RSVPs", value: totalRsvps, icon: Heart, color: "#C4686D", href: "/dashboard?sort=rsvps", hint: "Guests who tapped “I'm in!” to confirm · click to sort" },
+    { label: "Responses", value: totalResponses, icon: MessageCircle, color: "#6B8F71", href: "/dashboard?sort=responses", hint: "Answers to the yes/no questions you added · click to sort" },
+    { label: "Active", value: activeCount, icon: TrendingUp, color: "#B07CC6", href: "/dashboard?status=active", hint: "Surprises that are live right now · click to filter" },
   ];
 
   const occasionsInUse = Array.from(new Set(all.map((inv) => inv.occasion_type).filter(Boolean))) as string[];
@@ -84,6 +109,11 @@ export default async function DashboardPage({ searchParams }: Props) {
     <div>
       <CommandPalette occasionsInUse={occasionsInUse} />
       <OnboardingModal forceShow={all.length === 0} />
+
+      {/* Free-tier upsell — only once the monthly limit is hit */}
+      {limitReached && freeLimit !== null && (
+        <FreeLimitBanner used={usedThisMonth} limit={freeLimit} />
+      )}
       {/* Page header */}
       <div className="flex items-start justify-between mb-8">
         <div>
@@ -174,6 +204,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       {list.length > 0 && (
         <InviteList
           creatorName={creatorName}
+          tier={tier}
           invites={list.map((invite) => ({
             id: invite.id,
             slug: invite.slug,
@@ -187,6 +218,7 @@ export default async function DashboardPage({ searchParams }: Props) {
             created_at: invite.created_at,
             reveal_type: invite.reveal_type,
             accept_contributions: invite.accept_contributions ?? false,
+            revealed_at: invite.revealed_at ?? null,
           }))}
         />
       )}

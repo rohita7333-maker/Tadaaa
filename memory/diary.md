@@ -2,6 +2,35 @@
 
 ---
 
+## 2026-05-31 — Designer Monetization D3+D4+D5 — BUILT + COMMITTED
+
+**Branch:** feat/sophistication
+
+**Step 1 — Verify subscription columns:** confirmed `profiles.subscription_tier` + `subscription_expires_at` already live on DB `xrlmnlknymgakswsbawk`. No migration needed.
+
+**Step 2 — D3 Story Export (commit 85331e8):**
+- `src/app/api/invite/[slug]/story/route.tsx` — 1080×1920 vertical PNG, same 410/403/200 gate as D1.
+- `src/app/api/invite/[slug]/story/route.test.ts` — 3 tests (403 free / 410 inactive / 200 paid).
+- `DesignerArtButton.tsx` extended with `type` prop ("art"|"story"); CONFIG map drives href/labels.
+- `InviteCard.tsx` — art + story buttons stacked.
+
+**Step 3 — D4 Photo Collage (commit be1c911):**
+- `src/app/api/invite/[slug]/collage/route.tsx` — loads `invite_photos` rows, signs URLs via `signPhotoList`, renders 3-col grid (9 max); no-photo fallback = D1 single card. 1200×1500 PNG attachment.
+- `src/app/api/invite/[slug]/collage/route.test.ts` — 4 tests (403/410/200 with photos/200 no-photos fallback). Mocks `signPhotoList` from `@/lib/sign-storage`.
+- `DesignerArtButton.tsx` extended with "collage" type.
+- `InviteCard.tsx` — art + story + collage buttons stacked.
+
+**Step 4 — D5 Template Bank (commit fb1b4b0):**
+- `src/lib/designer-art.ts` — `TEMPLATE_BANK` per-occasion×per-style (classic/bold/minimal), `resolveStyle()`, `isValidStyle()`, `STYLE_VARIANTS`. `getTemplate(occasion, style?)` API — backwards compatible (style defaults to "classic").
+- `src/lib/designer-art.test.ts` — extended with 11 new variant/resolveStyle/isValidStyle tests.
+- art/story/collage routes accept `?style=` query; unknown → "classic" via `resolveStyle()`.
+- `DesignerArtButton.tsx` — `style` prop appended as `?style=<variant>` (omitted when "classic").
+- `InviteCard.tsx` — paid owners see 3-button style picker (classic/bold/minimal); free owners see locked buttons, no picker shown.
+
+**Final state:** tsc 0 · vitest 278/278 (+18 new) · lint 0 errors · branch feat/sophistication · no dirty tree changes staged.
+
+---
+
 ## 2026-05-31 — Bugfix: avatar still stale in Navbar after upload (client-state + revalidatePath)
 
 **Symptom:** After uploading a new profile photo on /settings, the top-right Navbar avatar keeps showing the old Google OAuth photo or initial fallback. Settings page preview also reverts on navigation.

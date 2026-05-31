@@ -1,4 +1,41 @@
-# TaDaaaa — Session Handoff (2026-05-31)
+# TaDaaaa — Session Handoff (2026-05-31 — D3/D4/D5)
+
+## Designer Art Monetization D3+D4+D5 — BUILT + COMMITTED ✅
+
+**Branch:** feat/sophistication
+
+| Step | Feature | Commit | Status |
+|------|---------|--------|--------|
+| 1 | Verify subscription columns | n/a | Columns confirmed live on DB, no migration run |
+| 2 | D3 Story Export 1080×1920 | 85331e8 | tsc 0 · tests 263/263 |
+| 3 | D4 Photo Collage | be1c911 | tsc 0 · tests 267/267 |
+| 4 | D5 Style Variants + picker UI | fb1b4b0 | tsc 0 · tests 278/278 |
+
+**Files created/modified:**
+- `src/app/api/invite/[slug]/story/route.tsx` + `route.test.ts` (D3)
+- `src/app/api/invite/[slug]/collage/route.tsx` + `route.test.ts` (D4)
+- `src/lib/designer-art.ts` — added TEMPLATE_BANK, resolveStyle, isValidStyle, STYLE_VARIANTS (D5)
+- `src/lib/designer-art.test.ts` — extended (+11 tests)
+- `src/components/surprise/DesignerArtButton.tsx` — type prop + style prop + buildHref
+- `src/components/dashboard/InviteCard.tsx` — all 3 download buttons + style picker for paid users
+- `src/app/api/invite/[slug]/art/route.tsx` — ?style= support
+- `src/app/api/invite/[slug]/story/route.tsx` — ?style= support
+- `src/app/api/invite/[slug]/collage/route.tsx` — ?style= support
+
+**Architecture decisions:**
+- All routes mirror same 410/403/200 gate from D1 (`art/route.tsx`).
+- Collage uses `invite_photos` table + `signPhotoList` (TTL=60s for Satori render only).
+- No-photos fallback = D1 card (not 404/error).
+- `?style=` unknown → "classic" via `resolveStyle()` (allowlist, never crashes).
+- Style picker hidden from free users (no `STYLE_VARIANTS` import leak to free-tier).
+
+**Lint:** 0 errors · 10 warnings (all pre-existing or Satori `<img>` which is intentional).
+
+**Next entry point:** QA on live dev server — free user should see all 3 buttons locked/pricing. Paid test profile (plus) should download: art 1200×1500 ✓ story 1080×1920 ✓ collage ✓; all 3 styles produce visually distinct PNGs.
+
+---
+
+# TaDaaaa — Session Handoff (2026-05-31 — D1+D2)
 
 ## Designer Invites (D1+D2) — BUILT + SHIPPED ✅
 

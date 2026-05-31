@@ -11,14 +11,11 @@ interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   children: React.ReactNode;
   /** Override class */
   className?: string;
-  asChild?: boolean;
 }
 
 /**
  * Magnetic button — cursor-follow translate with spring physics.
  * On touch devices + reduced-motion: collapses to standard button (no pull).
- *
- * Wraps native button. To wrap a Link or Slot, use asChild=true with a child element.
  *
  * Default styling: brand rose pill with shadow. Override entirely via className if needed.
  */
@@ -26,7 +23,6 @@ export function MagneticButton({
   children,
   className,
   pullStrength = 8,
-  asChild = false,
   ...props
 }: MagneticButtonProps) {
   const shouldReduce = useReducedMotion();

@@ -45,11 +45,8 @@ export function AnimatedCounter({
   const hasRun = useRef(false);
 
   useEffect(() => {
-    if (!inView) return;
-    if (shouldReduce) {
-      setDisplay(value);
-      return;
-    }
+    // Reduced-motion path: derived below via renderedDisplay — no setState needed.
+    if (!inView || shouldReduce) return;
     if (triggerOnce && hasRun.current) return;
     hasRun.current = true;
 
@@ -61,10 +58,12 @@ export function AnimatedCounter({
     return () => controls.stop();
   }, [inView, value, from, duration, shouldReduce, triggerOnce]);
 
+  // SSR-safe: shouldReduce is null server-side → falls through to display (= from).
+  const renderedDisplay = shouldReduce && inView ? value : display;
   const Tag = inline ? "span" : "div";
   return (
     <Tag ref={ref} className={cn("tabular-nums", className)}>
-      {format(display)}
+      {format(renderedDisplay)}
     </Tag>
   );
 }

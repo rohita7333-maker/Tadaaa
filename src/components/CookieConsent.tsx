@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { makeReducedMotionTransition, durations } from "@/lib/motion";
 import Link from "next/link";
 
 const STORAGE_KEY = "tadaaaa.cookies";
@@ -11,6 +12,7 @@ export function CookieConsent() {
   // localStorage and conditionally open. Two-render pattern avoids
   // hydration mismatch.
   const [show, setShow] = useState(false);
+  const shouldReduce = useReducedMotion();
 
   useEffect(() => {
     try {
@@ -43,10 +45,10 @@ export function CookieConsent() {
           role="dialog"
           aria-labelledby="cookie-consent-title"
           className="fixed bottom-4 inset-x-4 md:left-auto md:right-4 md:max-w-md z-50"
-          initial={{ y: 24, opacity: 0 }}
+          initial={shouldReduce ? { opacity: 0 } : { y: 24, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 24, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 280, damping: 26 }}
+          exit={shouldReduce ? { opacity: 0 } : { y: 24, opacity: 0 }}
+          transition={makeReducedMotionTransition(shouldReduce, { type: "spring", stiffness: 280, damping: 26 }, { duration: durations.instant })}
         >
           <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-[#D4CBC3]/60 shadow-[0_20px_60px_rgba(45,41,38,0.18)] p-5">
             <p

@@ -45,6 +45,26 @@ export const durations = {
   cinematic: 0.9,
   /** Ambient / looping motion — 2.5–4s range. Never use for one-shot transitions. */
   ambient: 2.8,
+  /** Floating card loop durations — matched to Hero ambient cards. */
+  floatA: 3.0,
+  floatB: 4.0,
+  floatC: 3.5,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Named easings — framer-motion string values (not bezier arrays or CSS strings)
+// ---------------------------------------------------------------------------
+export const namedEasings = {
+  /** Standard sinusoidal easing for ambient loops. */
+  ambient: "easeInOut" as const,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Spatial offset constants (pixels) — only values reused across 3+ surfaces
+// ---------------------------------------------------------------------------
+export const offsets = {
+  /** Small y-shift for panel/row enter-exit (VideoGenerator, RevealSettings, InviteList). */
+  subtle: 6,
 } as const;
 
 // ---------------------------------------------------------------------------

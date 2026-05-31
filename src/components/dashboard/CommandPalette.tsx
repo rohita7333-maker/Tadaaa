@@ -49,11 +49,16 @@ export default function CommandPalette({ occasionsInUse }: Props) {
 
   useEffect(() => {
     if (open) {
-      setQuery("");
-      setActiveIdx(0);
-      // Defer focus until after dialog mount animation
+      // Defer state resets to next frame to avoid synchronous setState-in-effect.
+      const raf = requestAnimationFrame(() => {
+        setQuery("");
+        setActiveIdx(0);
+      });
       const t = setTimeout(() => inputRef.current?.focus(), 50);
-      return () => clearTimeout(t);
+      return () => {
+        cancelAnimationFrame(raf);
+        clearTimeout(t);
+      };
     }
   }, [open]);
 
@@ -114,7 +119,8 @@ export default function CommandPalette({ occasionsInUse }: Props) {
   }, [commands, query]);
 
   useEffect(() => {
-    setActiveIdx(0);
+    const raf = requestAnimationFrame(() => setActiveIdx(0));
+    return () => cancelAnimationFrame(raf);
   }, [query]);
 
   async function execute(cmd: Cmd) {

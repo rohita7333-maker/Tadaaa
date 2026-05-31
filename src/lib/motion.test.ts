@@ -3,6 +3,8 @@ import {
   easings,
   cssEasings,
   durations,
+  namedEasings,
+  offsets,
   springs,
   staggers,
   makeReducedMotionTransition,
@@ -37,8 +39,8 @@ describe("cssEasings", () => {
 });
 
 describe("durations", () => {
-  it("has 6 named steps (instant/quick/base/slow/cinematic/ambient)", () => {
-    expect(Object.keys(durations)).toHaveLength(6);
+  it("has 9 named steps (instant/quick/base/slow/cinematic/ambient/floatA/floatB/floatC)", () => {
+    expect(Object.keys(durations)).toHaveLength(9);
   });
   it("instant is 0.12", () => expect(durations.instant).toBe(0.12));
   it("quick is 0.2", () => expect(durations.quick).toBe(0.2));
@@ -46,6 +48,21 @@ describe("durations", () => {
   it("slow is 0.6", () => expect(durations.slow).toBe(0.6));
   it("cinematic is 0.9", () => expect(durations.cinematic).toBe(0.9));
   it("ambient is 2.8 (loop range, 2.5–4s)", () => expect(durations.ambient).toBe(2.8));
+  it("floatA is 3.0 (Hero card float, i=0)", () => expect(durations.floatA).toBe(3.0));
+  it("floatB is 4.0 (Hero reaction badge, longer cycle)", () => expect(durations.floatB).toBe(4.0));
+  it("floatC is 3.5 (Hero card float i=1 / reaction badge 2)", () => expect(durations.floatC).toBe(3.5));
+});
+
+describe("namedEasings", () => {
+  it("ambient is 'easeInOut' for framer-motion transition ease", () => {
+    expect(namedEasings.ambient).toBe("easeInOut");
+  });
+});
+
+describe("offsets", () => {
+  it("subtle is 6px (small y-shift for panel/row enter-exit)", () => {
+    expect(offsets.subtle).toBe(6);
+  });
 });
 
 describe("springs", () => {

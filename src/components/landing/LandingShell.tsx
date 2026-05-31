@@ -22,11 +22,9 @@ export default function LandingShell({ children }: { children: React.ReactNode }
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setShowIntro(true);
       } else {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIntroComplete(true);
       }
     } catch {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIntroComplete(true);
     }
   }, []);

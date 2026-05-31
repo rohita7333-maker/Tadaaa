@@ -118,13 +118,10 @@ export default function CreatePage() {
       try {
         sessionStorage.setItem("tadaaaa.unlockedPremium", JSON.stringify(next));
       } catch {}
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUnlockedPremium(next);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedTheme(ret.theme);
       toast.success("Premium theme unlocked! Finish your surprise to apply it.");
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (stored.length > 0) setUnlockedPremium(stored);
       if (ret.status === "cancelled") {
         toast.info("Checkout cancelled. You can pick a free theme instead.");

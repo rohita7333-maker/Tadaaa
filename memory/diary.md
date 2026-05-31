@@ -2,6 +2,25 @@
 
 ---
 
+## 2026-05-30 — Motion P5: Hardening (FINAL PHASE — ALL PHASES COMPLETE)
+
+**What happened:** Executed P5 hardening. Fixed all 4 baseline lint errors (0 errors achieved). Added ambient duration + named easing tokens + spatial offset to motion.ts. Wired Hero.tsx to tokens. Added `useReducedMotion` to CookieConsent. Updated tests (+5 token contracts). Branch is CEO sign-off ready.
+
+**What changed:**
+- `animated-counter.tsx` — lint error fixed: derived `renderedDisplay` from `shouldReduce && inView ? value : display` in render instead of calling `setDisplay(value)` synchronously in effect. SSR-safe.
+- `SettingsAnimated.tsx` — lint error fixed: `wasPending` state → `wasPendingRef` ref. No more synchronous setState in effect. Effect dep simplified to `[pending]`.
+- `CommandPalette.tsx` — 2 lint errors fixed: `setQuery("")` + `setActiveIdx(0)` wrapped in `requestAnimationFrame` in open-effect; `setActiveIdx(0)` wrapped in RAF in query-effect.
+- `magnetic-button.tsx` — warning fixed: removed dead `asChild?: boolean` prop that was never wired to Slot.
+- `create/page.tsx`, `LandingShell.tsx` — 5 stale eslint-disable comments removed (rule no longer fires on conditional setState inside if-blocks).
+- `src/lib/motion.ts` — added: `durations.floatA/floatB/floatC`, `namedEasings.ambient`, `offsets.subtle`.
+- `Hero.tsx` — ambient card/badge loops now use `durations.floatA/floatB/floatC` + `namedEasings.ambient`. Zero inline magic numbers in motion paths.
+- `CookieConsent.tsx` — added `useReducedMotion()` + `makeReducedMotionTransition`. Was the only remaining animated component without reduced-motion guard.
+- `motion.test.ts` — 5 new token tests: `durations` count (6→9), `floatA/B/C` values, `namedEasings.ambient`, `offsets.subtle`.
+
+**Gate state:** tsc 0 · vitest 243/243 · lint 0 errors 9 warnings (pre-existing only, 0 new). Motion program P0–P5 complete.
+
+---
+
 ## 2026-05-30 — Motion P4: Dashboard Surface
 
 **What happened:** Implemented P4 of MOTION_MASTERPLAN — full motion layer on the dashboard. Audited all dashboard components, found: (1) cards with zero entrance animation, (2) imperative JS hover (`onMouseEnter` style mutations, no spring, no reduced-motion), (3) OnboardingModal with no `useReducedMotion` at all, (4) AnimatedCounter with inline easing and SSR hydration mismatch risk. Fixed all.

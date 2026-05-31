@@ -10,6 +10,7 @@ import { ShimmerText } from "@/components/ui/shimmer-text";
 import {
   easings,
   durations,
+  namedEasings,
   staggers,
   springs,
   makeReducedMotionTransition,
@@ -317,10 +318,10 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
                 {...(!reducedMotion && {
                   animate: { y: [0, -8, 0] },
                   transition: {
-                    duration: 3 + i * 0.5,
+                    duration: [durations.floatA, durations.floatC, durations.floatB][i] ?? durations.floatA,
                     repeat: Infinity,
                     delay: card.delay,
-                    ease: "easeInOut",
+                    ease: namedEasings.ambient,
                   },
                 })}
               >
@@ -345,7 +346,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
                 <motion.div
                   className="absolute hidden md:flex top-4 right-0 bg-white rounded-2xl shadow-lg px-3 py-2 items-center gap-2 z-20"
                   animate={{ y: [-4, 4, -4] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: durations.floatB, repeat: Infinity, ease: namedEasings.ambient }}
                 >
                   <span className="text-base">😭</span>
                   <span className="text-xs font-medium text-[#2D2926]">She&apos;s crying!</span>
@@ -353,7 +354,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
                 <motion.div
                   className="absolute hidden md:flex bottom-8 left-0 bg-white rounded-2xl shadow-lg px-3 py-2 items-center gap-2 z-20"
                   animate={{ y: [4, -4, 4] }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: durations.floatC, repeat: Infinity, ease: namedEasings.ambient }}
                 >
                   <span className="text-base">🎊</span>
                   <span className="text-xs font-medium text-[#2D2926]">He said YES!</span>

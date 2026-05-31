@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useFormStatus } from "react-dom";
 import { CheckCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getReducedMotionTransition } from "@/lib/a11y";
 
 interface SectionProps {
@@ -89,22 +89,20 @@ export function SavePreferencesButton() {
   const shouldReduce = useReducedMotion();
   const { pending } = useFormStatus();
   const [justSaved, setJustSaved] = useState(false);
-  const [wasPending, setWasPending] = useState(false);
+  const wasPendingRef = useRef(false);
 
   useEffect(() => {
     if (pending) {
-      setWasPending(true);
+      wasPendingRef.current = true;
       return;
     }
-    if (wasPending) {
+    if (wasPendingRef.current) {
+      wasPendingRef.current = false;
       setJustSaved(true);
-      const t = window.setTimeout(() => {
-        setJustSaved(false);
-        setWasPending(false);
-      }, 1500);
+      const t = window.setTimeout(() => setJustSaved(false), 1500);
       return () => window.clearTimeout(t);
     }
-  }, [pending, wasPending]);
+  }, [pending]);
 
   return (
     <button

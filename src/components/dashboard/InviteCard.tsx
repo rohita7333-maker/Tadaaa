@@ -17,6 +17,8 @@ import ResponsesModal from "@/components/dashboard/ResponsesModal";
 import ShareButtons from "@/components/dashboard/ShareButtons";
 import DeleteConfirmModal from "@/components/dashboard/DeleteConfirmModal";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
+import { DesignerArtButton } from "@/components/surprise/DesignerArtButton";
+import { canUseDesignerArt } from "@/lib/designer-art";
 
 interface InviteCardProps {
   invite: {
@@ -238,6 +240,11 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
           >
             {deleteLocked ? <Lock className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
           </Button>
+        </div>
+
+        {/* Designer invite art (D1) — paid: download, free: locked upsell */}
+        <div className="mt-2 [&>a]:w-full">
+          <DesignerArtButton slug={invite.slug} canUse={canUseDesignerArt(tier)} variant="compact" />
         </div>
 
         {/* Free-tier delete lock — countdown to deletable */}

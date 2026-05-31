@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getActiveTier } from "@/lib/tier";
+import { canUseDesignerArt, getTemplate } from "@/lib/designer-art";
 
 export const alt = "Someone made a surprise for you!";
 export const size = { width: 1200, height: 630 };
@@ -33,7 +35,7 @@ export default async function InviteOGImage({
   const supabase = createAdminClient();
   const { data: invite } = await supabase
     .from("invites")
-    .select("title, occasion_type, theme")
+    .select("title, occasion_type, theme, creator_id")
     .eq("slug", slug)
     .eq("is_active", true)
     .single();
@@ -42,13 +44,30 @@ export default async function InviteOGImage({
   const emoji = occasionEmojis[occasion] || "💌";
   const label = invite?.title || occasionLabels[occasion] || "A Surprise For You";
 
+  // D2: paid owners get an occasion-tuned designer share-card; free owners
+  // keep the default palette. Owner tier, not viewer tier, drives this.
+  let paid = false;
+  if (invite?.creator_id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("subscription_tier, subscription_expires_at")
+      .eq("id", invite.creator_id)
+      .maybeSingle();
+    paid = canUseDesignerArt(getActiveTier(profile ?? null));
+  }
+  const tpl = getTemplate(occasion);
+  const cardBackground = paid
+    ? tpl.background
+    : "linear-gradient(135deg, #FFF8F0 0%, #F5E6E0 100%)";
+  const titleColor = paid ? tpl.accent : "#2D2926";
+
   return new ImageResponse(
     (
       <div
         style={{
           width: 1200,
           height: 630,
-          background: "linear-gradient(135deg, #FFF8F0 0%, #F5E6E0 100%)",
+          background: cardBackground,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -78,7 +97,7 @@ export default async function InviteOGImage({
           style={{
             fontSize: 48,
             fontWeight: 700,
-            color: "#2D2926",
+            color: titleColor,
             textAlign: "center",
             maxWidth: 800,
             lineHeight: 1.2,

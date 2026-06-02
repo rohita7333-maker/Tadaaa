@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { canUseDesignerArt, getTemplate, resolveStyle, isValidStyle } from "./designer-art";
+import { canUseDesignerArt, getTemplate, resolveStyle, isValidStyle, occasionEyebrow } from "./designer-art";
 
 describe("canUseDesignerArt", () => {
   it("blocks free tier", () => {
@@ -71,4 +71,16 @@ describe("isValidStyle", () => {
     expect(isValidStyle(null)).toBe(false);
     expect(isValidStyle(undefined)).toBe(false);
   });
+});
+
+describe("occasionEyebrow", () => {
+  it("maps birthday", () => expect(occasionEyebrow("birthday")).toBe("BIRTHDAY"));
+  it("maps mothers_day", () => expect(occasionEyebrow("mothers_day")).toBe("MOTHER'S DAY"));
+  it("maps date", () => expect(occasionEyebrow("date")).toBe("AN INVITATION"));
+  it("maps festival", () => expect(occasionEyebrow("festival")).toBe("CELEBRATION"));
+  it("maps apology", () => expect(occasionEyebrow("apology")).toBe("FROM THE HEART"));
+  it("maps custom", () => expect(occasionEyebrow("custom")).toBe("A SURPRISE"));
+  it("unknown → A SURPRISE", () => expect(occasionEyebrow("wedding")).toBe("A SURPRISE"));
+  it("null → A SURPRISE", () => expect(occasionEyebrow(null)).toBe("A SURPRISE"));
+  it("undefined → A SURPRISE", () => expect(occasionEyebrow(undefined)).toBe("A SURPRISE"));
 });

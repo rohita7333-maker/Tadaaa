@@ -2,7 +2,14 @@ import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getActiveTier } from "@/lib/tier";
-import { canUseDesignerArt, getTemplate, resolveStyle } from "@/lib/designer-art";
+import {
+  canUseDesignerArt,
+  getTemplate,
+  resolveStyle,
+  occasionEyebrow,
+} from "@/lib/designer-art";
+import { buildDesignerCard } from "@/lib/designer-art-render";
+import { getOgFonts } from "@/lib/og-fonts";
 
 /**
  * D3 — Story Export
@@ -45,43 +52,22 @@ export async function GET(
 
   const t = getTemplate(invite.occasion_type, style);
   const title = invite.title || t.label;
+  const eyebrow = occasionEyebrow(invite.occasion_type);
+  const fonts = await getOgFonts();
 
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: 1080,
-          height: 1920,
-          background: t.background,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "system-ui, sans-serif",
-        }}
-      >
-        <div style={{ fontSize: 240, lineHeight: 1 }}>{t.emoji}</div>
-        <div
-          style={{
-            fontSize: 96,
-            fontWeight: 700,
-            color: t.accent,
-            marginTop: 60,
-            textAlign: "center",
-            padding: "0 80px",
-            display: "flex",
-          }}
-        >
-          {title}
-        </div>
-        <div style={{ fontSize: 40, color: "#6B5E57", marginTop: 40, position: "absolute", bottom: 80 }}>
-          made with TaDaaaa
-        </div>
-      </div>
-    ),
+    buildDesignerCard({
+      template: t,
+      title,
+      occasionLabel: eyebrow,
+      width: 1080,
+      height: 1920,
+      style,
+    }),
     {
       width: 1080,
       height: 1920,
+      fonts,
       headers: {
         "Content-Disposition": `attachment; filename="${slug}-story.png"`,
       },

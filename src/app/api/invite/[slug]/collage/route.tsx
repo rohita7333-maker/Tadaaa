@@ -13,6 +13,11 @@ import { getOgFonts } from "@/lib/og-fonts";
 import { signPhotoList } from "@/lib/sign-storage";
 import { STORAGE_BUCKET } from "@/lib/constants";
 import { styleToMode } from "@/lib/designer-art-render";
+import {
+  getCollageTemplate,
+  type CollageSlot,
+  type CollageTemplate,
+} from "@/lib/collage-templates";
 
 /** Short TTL is fine — the signed URLs are only used during the Satori render. */
 const COLLAGE_PHOTO_TTL = 60;
@@ -21,19 +26,196 @@ const WIDTH = 1200;
 const HEIGHT = 1500;
 
 /**
+ * Diamond decoration rendered as a rotated square (Satori-safe).
+ * Replaces the ✦ glyph which is absent from the loaded fonts.
+ */
+function DiamondIcon({ color = "#3a2e2a" }: { color?: string }) {
+  return (
+    <span
+      style={{
+        width: 8,
+        height: 8,
+        background: color,
+        opacity: 0.5,
+        transform: "rotate(45deg)",
+        display: "flex",
+      }}
+    />
+  );
+}
+
+/**
+ * Renders the polaroid-scrapbook (or any CollageTemplate) layout.
+ * Photos are assigned: hero slot gets signedPhotos[0]; remaining slots
+ * (in slot-array order, skipping hero) get signedPhotos[1..].
+ * Slots with no photo assigned are not rendered.
+ */
+function renderTemplateCollage(
+  template: CollageTemplate,
+  signedPhotos: Array<{ url: string }>,
+  caption: string
+) {
+  const { width, height, background, slots, heroSlotIndex } = template;
+  const heroIdx = heroSlotIndex ?? 0;
+
+  // Build photo assignment: heroIdx → photos[0]; others in order → photos[1..]
+  const photoMap = new Map<number, string>();
+  if (signedPhotos.length > 0) {
+    photoMap.set(heroIdx, signedPhotos[0].url);
+  }
+  let nonHeroPhotoIdx = 1;
+  for (let i = 0; i < slots.length; i++) {
+    if (i === heroIdx) continue;
+    if (nonHeroPhotoIdx < signedPhotos.length) {
+      photoMap.set(i, signedPhotos[nonHeroPhotoIdx].url);
+      nonHeroPhotoIdx++;
+    }
+  }
+
+  // Sort slots by z so lower z renders first (background).
+  const sortedIndices = slots
+    .map((_, i) => i)
+    .sort((a, b) => (slots[a].z ?? 1) - (slots[b].z ?? 1));
+
+  function renderSlot(slotIdx: number) {
+    const slot: CollageSlot = slots[slotIdx];
+    const photoUrl = photoMap.get(slotIdx);
+    if (!photoUrl) return null;
+
+    const {
+      xPct,
+      yPct,
+      wPct,
+      hPct,
+      rotateDeg,
+      frame,
+      captionStrip,
+      radius = 4,
+    } = slot;
+
+    const left = Math.round((xPct / 100) * width);
+    const top = Math.round((yPct / 100) * height);
+    const slotW = Math.round((wPct / 100) * width);
+    const slotH = Math.round((hPct / 100) * height);
+
+    const strip = captionStrip ?? 0;
+    const imgW = slotW - frame * 2;
+    const imgH = slotH - frame - (frame + strip);
+
+    const isHero = slotIdx === heroIdx;
+
+    return (
+      <div
+        key={slotIdx}
+        style={{
+          position: "absolute",
+          left,
+          top,
+          width: slotW,
+          height: slotH,
+          transform: `rotate(${rotateDeg}deg)`,
+          background: "#fff",
+          padding: frame,
+          paddingBottom: frame + strip,
+          borderRadius: radius,
+          boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={photoUrl}
+          alt=""
+          width={imgW}
+          height={imgH}
+          style={{
+            width: imgW,
+            height: imgH,
+            objectFit: "cover",
+            borderRadius: 2,
+          }}
+        />
+        {isHero && strip > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: imgW,
+              height: strip,
+              fontFamily: "Fraunces, Georgia, serif",
+              fontWeight: 600,
+              fontSize: 34,
+              color: "#3a2e2a",
+              textAlign: "center",
+            }}
+          >
+            {caption}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        width,
+        height,
+        background,
+        position: "relative",
+        overflow: "hidden",
+        display: "flex",
+      }}
+    >
+      {sortedIndices.map((idx) => renderSlot(idx))}
+
+      {/* Footer */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 28,
+          left: 0,
+          right: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          fontFamily: "Inter, system-ui, sans-serif",
+          fontWeight: 400,
+          fontSize: 24,
+          color: "#5a4a42",
+          opacity: 0.55,
+        }}
+      >
+        <DiamondIcon color="#5a4a42" />
+        <span style={{ display: "flex" }}>made with TaDaaaa</span>
+      </div>
+    </div>
+  );
+}
+
+/**
  * D4 — Photo Collage Art
  * Paid-gated (plus/unlimited). 1200×1500 PNG.
- * - With photos: renders a framed grid collage inside the new editorial/modern bg treatment.
+ * - With photos + valid ?template=<id>: renders the data-driven template layout.
+ * - With photos, no template: renders a framed grid collage.
  * - No photos: falls back to D1 single-card editorial layout.
  * Gate: 410 inactive/expired, 403 free, 200 PNG attachment.
  * Accepts ?style=classic|bold|minimal (unknown → classic).
+ * Accepts ?template=<id> (unknown → grid fallback).
  */
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const style = resolveStyle(new URL(req.url).searchParams.get("style"));
+  const searchParams = new URL(req.url).searchParams;
+  const style = resolveStyle(searchParams.get("style"));
+  const templateId = searchParams.get("template");
+  const collageTemplate = getCollageTemplate(templateId);
+
   const supabase = createAdminClient();
 
   const { data: invite } = await supabase
@@ -66,7 +248,7 @@ export async function GET(
   const eyebrow = occasionEyebrow(invite.occasion_type);
   const fonts = await getOgFonts();
 
-  // Load up to 9 photos (3×3 grid max).
+  // Load up to 9 photos (3×3 grid max, or up to 8 slots for template).
   const { data: photoRows } = await supabase
     .from("invite_photos")
     .select("storage_path, caption, rotation_deg, sort_order")
@@ -88,6 +270,10 @@ export async function GET(
         })
       : [];
 
+  const responseHeaders = {
+    "Content-Disposition": `attachment; filename="${slug}-collage.png"`,
+  };
+
   // If no photos available, render D1 single-card fallback.
   if (signedPhotos.length === 0) {
     return new ImageResponse(
@@ -103,9 +289,25 @@ export async function GET(
         width: WIDTH,
         height: HEIGHT,
         fonts,
-        headers: {
-          "Content-Disposition": `attachment; filename="${slug}-collage.png"`,
-        },
+        headers: responseHeaders,
+      }
+    );
+  }
+
+  // Template render path — data-driven layout.
+  if (collageTemplate) {
+    const heroCaption =
+      (invite.title && invite.title.trim()) ||
+      collageTemplate.heroCaption ||
+      "Happy Birthday!";
+
+    return new ImageResponse(
+      renderTemplateCollage(collageTemplate, signedPhotos, heroCaption),
+      {
+        width: collageTemplate.width,
+        height: collageTemplate.height,
+        fonts,
+        headers: responseHeaders,
       }
     );
   }
@@ -372,7 +574,7 @@ export async function GET(
             opacity: 0.45,
           }}
         >
-          <span style={{ fontSize: 12, display: "flex" }}>✦</span>
+          <DiamondIcon color={accentColor} />
           <span style={{ display: "flex" }}>made with TaDaaaa</span>
         </div>
       </div>
@@ -381,9 +583,7 @@ export async function GET(
       width: WIDTH,
       height: HEIGHT,
       fonts,
-      headers: {
-        "Content-Disposition": `attachment; filename="${slug}-collage.png"`,
-      },
+      headers: responseHeaders,
     }
   );
 }

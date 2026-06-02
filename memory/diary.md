@@ -1153,3 +1153,14 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 **Post-sweep find (`d69f4d0`):** contribute feature (B2 collab-memory) fully dead in prod — 3 files (contribute/[slug]/page.tsx + contribute POST route + upload route) still selected retired `invites.status` → page 404 for all, APIs 500. Fixed: mirror invite-view.ts gate (select expires_at, drop status, expired = expires_at<now). tsc 0, 252 tests, build clean. Verified ai_drafts + invite_contributions tables EXIST in Supabase (no SQL gap). Zero TODO/FIXME in src. Build passes full 45-route gen.
 
 **Cron trim for Vercel Hobby:** vercel.json crons 5→2 (Hobby cap = 2 jobs, daily-only). KEPT: expire-invites (0 3 ***, free-tier 28d clock), purge-deleted (0 4 ***, hard-delete soft-deleted after grace). DEFERRED (routes intact, not auto-triggered): sweep-orphans (every 6h storage cleanup), monthly-email + weekly-digest (need Resend, unconfigured). Restore all 5 on Vercel Pro upgrade.
+
+---
+
+**2026-06-01 — Designer-art template REDESIGN (premium look).** User: templates "pale/basic, like a 4yr old did it." Rebuilt PNG render engine:
+- NEW `src/lib/og-fonts.ts` — module-cached loader, Fraunces 600 + Inter 400/700 as ttf from jsDelivr fontsource (Satori needs ttf/otf NOT woff2). CDN-fail-safe → empty array fallback so route never 500s.
+- NEW `src/lib/designer-art-render.tsx` — shared `buildDesignerCard()`, 3 style-aware modes: classic→editorial (framed glass card, Fraunces serif title, eyebrow, ghost-emoji watermark, radial glow, vignette, deep gradient), bold→modern (huge Inter uppercase, big emoji, circle geometry, accent bar), minimal→quiet (near-white card on blush).
+- `designer-art.ts` — deepened all palettes (richer multi-stop gradients), added `occasionEyebrow()` + optional `glow`/`bgDeep` fields (backwards-compat).
+- art/story/collage routes wired to buildDesignerCard + getOgFonts.
+- **BUG fixed:** footer/divider `✦` glyph absent from Fraunces/Inter → Satori tofu box ("I"/"ll"). Replaced all 4 `✦` with drawn rotated-square diamond divs (no font dep). 
+- Gate: tsc 0, 290 vitest green (29 files). Live-verified 200 PNGs on warm-embrace-k69tyvcpua (plus owner), 3 modes eyeballed — clean footer, premium look.
+- NOTE: owner rohitalchemist777@gmail.com (60643ed1) still MANUALLY set tier='plus' (Stripe did not set it) — kept for user manual testing.

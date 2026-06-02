@@ -1,0 +1,5 @@
+video files: ['/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/sounds/reveal.mp3', '/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/sounds/celebrate.mp3', '/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/sounds/pop.mp3']
+  warning: could not transcribe /Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/sounds/reveal.mp3: Video transcription requires faster-whisper. Run: pip install 'graphifyy[video]'
+  warning: could not transcribe /Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/sounds/celebrate.mp3: Video transcription requires faster-whisper. Run: pip install 'graphifyy[video]'
+  warning: could not transcribe /Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/sounds/pop.mp3: Video transcription requires faster-whisper. Run: pip install 'graphifyy[video]'
+[]

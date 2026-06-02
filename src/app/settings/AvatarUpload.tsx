@@ -33,8 +33,18 @@ export default function AvatarUpload({
     const result = await uploadAvatar(fd);
     if (result.error) {
       toast.error(result.error);
+      // Revert optimistic blob preview back to the last known good URL.
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
       setPreview(currentUrl ?? null);
     } else {
+      // Replace the blob URL with the real signed storage URL so the avatar
+      // stays correct after the blob expires or the component remounts.
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+      setPreview(result.url ?? null);
       toast.success("Profile photo updated!");
     }
     setUploading(false);

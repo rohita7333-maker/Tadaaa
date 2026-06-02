@@ -278,3 +278,16 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION increment_view_count(UUID) TO anon, authenticated;
+
+-- =============================================================================
+-- subscription_tier.sql -- monetization columns (paid gates + Stripe webhook)
+-- Without these, every profile resolves to 'free' and the webhook cannot
+-- persist a purchase. RLS unchanged; service-role webhook bypasses RLS.
+-- =============================================================================
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS subscription_tier TEXT NOT NULL DEFAULT 'free',
+  ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMPTZ;
+
+CREATE INDEX IF NOT EXISTS profiles_subscription_tier_idx
+  ON profiles (subscription_tier)
+  WHERE subscription_tier <> 'free';

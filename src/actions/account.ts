@@ -67,11 +67,21 @@ export async function uploadAvatar(formData: FormData) {
   }
 
   const ext = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
-  const path = `avatars/${user.id}.${ext}`;
+  // Unique filename per upload. A stable path + upsert reused the same storage
+  // key, so the CDN/browser kept serving the OLD cached image — the new avatar
+  // "uploaded" but never appeared in the display. A fresh path = a fresh URL.
+  const path = `avatars/${user.id}-${Date.now()}.${ext}`;
+
+  // Capture the previous path BEFORE swapping so we can purge it after.
+  const { data: prev } = await supabase
+    .from("profiles")
+    .select("avatar_url")
+    .eq("id", user.id)
+    .single();
 
   const { error: uploadError } = await adminClient.storage
     .from(STORAGE_BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: true });
+    .upload(path, file, { contentType: file.type });
 
   if (uploadError) {
     console.error("Avatar upload failed:", uploadError);
@@ -79,13 +89,29 @@ export async function uploadAvatar(formData: FormData) {
   }
 
   // Store the bare storage path; read sites sign it via signedAvatarUrl().
-  await supabase.from("profiles").upsert({
-    id: user.id,
-    avatar_url: path,
-  });
+  // UPDATE (not upsert): the row exists from signup, and RLS exposes only an
+  // UPDATE policy — an upsert's INSERT arm is denied by RLS and fails silently,
+  // leaving avatar_url pointing at the stale OAuth photo.
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({ avatar_url: path })
+    .eq("id", user.id);
+
+  if (profileError) {
+    console.error("Avatar profile update failed:", profileError);
+    return { error: "Upload failed. Please try again." };
+  }
+
+  // Best-effort purge of the prior object so old avatars don't accumulate.
+  const oldPath = prev?.avatar_url;
+  if (oldPath && oldPath !== path && !oldPath.startsWith("http")) {
+    await adminClient.storage.from(STORAGE_BUCKET).remove([oldPath]);
+  }
 
   revalidatePath("/settings");
-  revalidatePath("/dashboard");
+  // "layout" type ensures the dashboard layout (which fetches avatar_url and
+  // passes it to Navbar) is re-rendered on the next visit, not just the page.
+  revalidatePath("/dashboard", "layout");
 
   const signedUrl = await signedAvatarUrl(path);
   return { success: true, url: signedUrl };
@@ -99,13 +125,14 @@ export async function updateNotifications(formData: FormData): Promise<void> {
   if (!user) return;
 
   const updates = {
-    id: user.id,
     notify_on_view: formData.get("notify_on_view") === "on",
     notify_on_answer: formData.get("notify_on_answer") === "on",
     notify_occasions: formData.get("notify_occasions") === "on",
   };
 
-  await supabase.from("profiles").upsert(updates);
+  // UPDATE (not upsert): row exists from signup; RLS only allows UPDATE, so an
+  // upsert's INSERT arm is denied and prefs would silently never save.
+  await supabase.from("profiles").update(updates).eq("id", user.id);
   revalidatePath("/settings");
 }
 
@@ -142,9 +169,13 @@ export async function deleteAccount() {
     }
   }
 
-  // Avatar lives under avatars/<userId>.<ext> — try all known extensions.
-  for (const ext of ["jpg", "png", "webp"]) {
-    toRemove.push(`avatars/${user.id}.${ext}`);
+  // Avatars live under avatars/<userId>-<ts>.<ext>. List & purge every match
+  // (older rows may use the legacy avatars/<userId>.<ext> path — search covers both).
+  const { data: avatarFiles } = await adminClient.storage
+    .from(STORAGE_BUCKET)
+    .list("avatars", { search: user.id });
+  for (const f of avatarFiles ?? []) {
+    toRemove.push(`avatars/${f.name}`);
   }
 
   if (toRemove.length > 0) {

@@ -212,14 +212,14 @@ function buildEditorialCard({
           />
           <div
             style={{
-              fontSize: 14,
-              color: isQuiet ? t.accent : accentColor,
+              width: 9,
+              height: 9,
+              background: isQuiet ? t.accent : accentColor,
               opacity: 0.55,
+              transform: "rotate(45deg)",
               display: "flex",
             }}
-          >
-            ✦
-          </div>
+          />
           <div
             style={{
               width: 60,
@@ -271,14 +271,14 @@ function buildEditorialCard({
           />
           <div
             style={{
-              fontSize: 11,
-              color: isQuiet ? t.accent : accentColor,
+              width: 7,
+              height: 7,
+              background: isQuiet ? t.accent : accentColor,
               opacity: 0.40,
+              transform: "rotate(45deg)",
               display: "flex",
             }}
-          >
-            ✦
-          </div>
+          />
           <div
             style={{
               width: 40,
@@ -307,7 +307,15 @@ function buildEditorialCard({
           opacity: 0.45,
         }}
       >
-        <span style={{ fontSize: 14, display: "flex" }}>✦</span>
+        <span
+          style={{
+            width: 9,
+            height: 9,
+            background: isQuiet ? t.accent : accentColor,
+            transform: "rotate(45deg)",
+            display: "flex",
+          }}
+        />
         <span style={{ display: "flex" }}>made with TaDaaaa</span>
       </div>
     </div>
@@ -467,7 +475,15 @@ function buildModernCard({
             opacity: 0.55,
           }}
         >
-          <span style={{ fontSize: 12, display: "flex" }}>✦</span>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              background: t.accent,
+              transform: "rotate(45deg)",
+              display: "flex",
+            }}
+          />
           <span style={{ display: "flex" }}>made with TaDaaaa</span>
         </div>
       </div>

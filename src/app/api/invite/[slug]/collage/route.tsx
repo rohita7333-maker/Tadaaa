@@ -11,6 +11,7 @@ import {
 import { buildDesignerCard } from "@/lib/designer-art-render";
 import { getOgFonts } from "@/lib/og-fonts";
 import { signPhotoList } from "@/lib/sign-storage";
+import { fetchPhotoAsJpegDataUri } from "@/lib/satori-image";
 import { STORAGE_BUCKET } from "@/lib/constants";
 import { styleToMode } from "@/lib/designer-art-render";
 import {
@@ -144,11 +145,15 @@ function renderTemplateCollage(
               justifyContent: "center",
               width: imgW,
               height: strip,
+              padding: "0 12px",
               fontFamily: "Fraunces, Georgia, serif",
               fontWeight: 600,
-              fontSize: 34,
+              fontSize: caption.length > 22 ? 24 : 34,
               color: "#3a2e2a",
               textAlign: "center",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
             {caption}
@@ -263,12 +268,25 @@ export async function GET(
     sort_order: (r.sort_order ?? 0) as number,
   }));
 
-  const signedPhotos =
+  const signedRaw =
     rawPhotos.length > 0
       ? await signPhotoList(STORAGE_BUCKET, rawPhotos, COLLAGE_PHOTO_TTL, {
           inviteSlug: slug,
         })
       : [];
+
+  // Satori only decodes PNG/JPEG/GIF/SVG — transcode every photo to a JPEG
+  // data URI so webp/heic uploads don't render as blank frames. Photos that
+  // fail to fetch/decode are dropped (never shown as broken images).
+  const converted = await Promise.all(
+    signedRaw.map(async (p) => {
+      const dataUri = await fetchPhotoAsJpegDataUri(p.url);
+      return dataUri ? { ...p, url: dataUri } : null;
+    })
+  );
+  const signedPhotos = converted.filter(
+    (p): p is (typeof signedRaw)[number] => p !== null
+  );
 
   const responseHeaders = {
     "Content-Disposition": `attachment; filename="${slug}-collage.png"`,

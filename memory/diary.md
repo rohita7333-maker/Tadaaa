@@ -1164,3 +1164,13 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 - **BUG fixed:** footer/divider `✦` glyph absent from Fraunces/Inter → Satori tofu box ("I"/"ll"). Replaced all 4 `✦` with drawn rotated-square diamond divs (no font dep). 
 - Gate: tsc 0, 290 vitest green (29 files). Live-verified 200 PNGs on warm-embrace-k69tyvcpua (plus owner), 3 modes eyeballed — clean footer, premium look.
 - NOTE: owner rohitalchemist777@gmail.com (60643ed1) still MANUALLY set tier='plus' (Stripe did not set it) — kept for user manual testing.
+
+---
+
+**2026-06-14 — Sign-in / dashboard latency fix (`e3d44c0`, feat/sophistication).** User: "why does login take so long." Investigated via debugger agent → 5 ranked causes. Fixed top 3 (principal-dev charter, smallest-diff):
+- **Fix 1** `src/lib/supabase/middleware.ts` — moved `isProtected` check BEFORE `auth.getUser()`; early-return `NextResponse.next()` on public paths. Was running a Supabase auth-server round-trip on EVERY request (incl. landing/signin). Now only protected paths (/dashboard,/create,/settings) pay it. Security: unchanged — public paths were never gated; protected gating intact. Tradeoff: token auto-refresh no longer happens while browsing public pages (client + protected paths still refresh) — acceptable.
+- **Fix 2** `dashboard/layout.tsx` — profile + invite-count now `Promise.all` (were sequential awaits).
+- **Fix 3** NEW `src/lib/dashboard-data.ts` — `getDashboardUser` + `getDashboardProfile` wrapped in React `cache()`. Layout+page previously each did own getUser + profile select (2x+2x per request) → now 1x each. Unified the two differing profile selects into one (`subscription_tier, subscription_expires_at, avatar_url`).
+- Fix 4 (rate-limit RPC before signInWithPassword) = by-design gate, left. Fix 5 (callback first-login admin calls) = first-login only, deferred.
+- Gate: tsc 0 · 301 vitest green (31 files) · lint clean.
+- **QA (tadaaaa-qa-test charter, real browser :3000):** A landing fast/no auth roundtrip ✓ · B signin form renders ✓ · C /dashboard logged-out → redirect /auth/signin (gating holds) ✓ · D bad-creds → auth POST 200, ~2-3s, single POST, toast shows, NO hang ✓ · E no 500s/dupes ✓. Nit (LOW): local-env signin shows "fetch failed" (supabase unreachable from local server action) — recheck copy on staging.

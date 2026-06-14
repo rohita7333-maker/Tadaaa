@@ -10,6 +10,7 @@ import FreeLimitBanner from "@/components/dashboard/FreeLimitBanner";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import CommandPalette from "@/components/dashboard/CommandPalette";
 import { getActiveTier, monthlyInviteLimit } from "@/lib/tier";
+import { getDashboardUser, getDashboardProfile } from "@/lib/dashboard-data";
 
 interface Props {
   searchParams: Promise<{ occasion?: string; sort?: string; status?: string }>;
@@ -18,22 +19,18 @@ interface Props {
 export default async function DashboardPage({ searchParams }: Props) {
   const { occasion, sort, status: statusFilter } = await searchParams;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getDashboardUser();
 
   if (!user) redirect("/auth/signin");
 
   const creatorName =
     (user.user_metadata?.full_name as string | undefined)?.trim() || undefined;
 
+  const supabase = await createClient();
+
   // Active tier drives the delete gate + free-tier upsell banner.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("subscription_tier, subscription_expires_at")
-    .eq("id", user.id)
-    .single();
+  // Cached fetch — already loaded by the dashboard layout this request.
+  const profile = await getDashboardProfile(user.id);
   const tier = getActiveTier(profile ?? null);
 
   const { data: invites, error } = await supabase

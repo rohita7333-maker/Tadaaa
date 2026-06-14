@@ -10,6 +10,15 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
+  // Skip auth round-trip on public paths — only protected paths need gating.
+  const protectedPaths = ["/dashboard", "/create", "/settings"];
+  const isProtected = protectedPaths.some((p) =>
+    request.nextUrl.pathname.startsWith(p)
+  );
+  if (!isProtected) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -37,12 +46,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const protectedPaths = ["/dashboard", "/create", "/settings"];
-  const isProtected = protectedPaths.some((p) =>
-    request.nextUrl.pathname.startsWith(p)
-  );
-
-  if (!user && isProtected) {
+  if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/signin";
     return NextResponse.redirect(url);

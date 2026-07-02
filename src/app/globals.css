@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-dm-sans);
-  --font-heading: var(--font-playfair);
+  --font-heading: var(--font-bricolage);
   --font-handwritten: var(--font-caveat);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -95,6 +95,18 @@
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
   --ease-spring-soft: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-spring-bouncy: cubic-bezier(0.4, 2, 0.3, 1);
+
+  /* Mockup geometry + gradient tokens (tadaaaa-app-animated_1.html / brief §3) */
+  --r: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --sh: 0 8px 30px rgba(45, 41, 38, 0.08);
+  --sh-lg: 0 24px 60px rgba(45, 41, 38, 0.16);
+  --grad: linear-gradient(135deg, #C4686D 0%, #9B3D42 100%);
+  --grad-gold: linear-gradient(135deg, #E8D5A8 0%, #C9A96E 100%);
+  /* Reveal/curtain choreography easings */
+  --ease-curtain: cubic-bezier(0.77, 0, 0.18, 1);
+  --ease-polaroid: cubic-bezier(0.2, 1.2, 0.3, 1);
 }
 
 @layer base {
@@ -109,7 +121,10 @@
     font-family: var(--font-dm-sans), system-ui, sans-serif;
   }
   h1, h2, h3 {
-    font-family: var(--font-playfair), Georgia, serif;
+    font-family: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
   }
 }
 
@@ -293,6 +308,175 @@
   animation: shimmerText 3.5s linear infinite;
 }
 
+/* ============================================================
+   Phase 0 — Mockup atoms (ported verbatim from tadaaaa-app-animated_1.html)
+   ============================================================ */
+
+/* Pill buttons — mockup .btn / .btn-pri / .btn-sec */
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14.5px;
+  border-radius: 30px;
+  padding: 13px 24px;
+  border: none;
+  cursor: pointer;
+  transition: 0.18s;
+  white-space: nowrap;
+}
+.btn-pri {
+  background: var(--grad);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(196, 104, 109, 0.34);
+}
+.btn-pri:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(196, 104, 109, 0.44);
+}
+.btn-pri:active {
+  transform: translateY(0);
+}
+.btn-sec {
+  background: #fff;
+  color: var(--charcoal, #2D2926);
+  border: 1px solid var(--light-gray, #D4CBC3);
+  box-shadow: var(--sh);
+}
+.btn-sec:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sh-lg);
+}
+
+/* Chip — mockup .chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 30px;
+  background: #fff;
+  border: 1px solid var(--light-gray, #D4CBC3);
+  color: var(--warm-gray, #6B5E57);
+}
+
+/* Ambient falling ribbons — mockup .ribbons */
+.ribbons {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+.ribbons i {
+  position: absolute;
+  top: -8vh;
+  display: block;
+  border-radius: 2px;
+  opacity: 0.78;
+  animation: ribbonfall linear infinite;
+}
+@keyframes ribbonfall {
+  0% { transform: translateY(-8vh) rotate(0deg); }
+  100% { transform: translateY(112vh) rotate(620deg); }
+}
+
+/* Hero SVG cartoon cards — mockup .heroart / .occard + named keyframes */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  50% { transform: translateY(-12px) rotate(var(--rot, 0deg)); }
+}
+@keyframes sway-body {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+@keyframes wave-arm {
+  0%, 100% { transform: rotate(8deg); }
+  50% { transform: rotate(-22deg); }
+}
+@keyframes offer-arm {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-8deg); }
+}
+@keyframes flame-flick {
+  0%, 100% { transform: scaleY(1) translateY(0); opacity: 1; }
+  50% { transform: scaleY(0.7) translateY(2px); opacity: 0.6; }
+}
+@keyframes blink-eyes {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes pop-heart {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-30px) scale(1.1); }
+}
+@keyframes clink {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(2deg); }
+}
+@keyframes clink2 {
+  0%, 100% { transform: rotate(6deg); }
+  50% { transform: rotate(-2deg); }
+}
+@keyframes confetti-fall {
+  0% { opacity: 0; transform: translateY(-6px) rotate(0); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(40px) rotate(220deg); }
+}
+.heroart {
+  position: relative;
+  min-height: 360px;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.occard {
+  position: relative;
+  width: 152px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 9px;
+  box-shadow: var(--sh);
+  border: 1px solid var(--light-gray, #D4CBC3);
+  animation: floaty 6s ease-in-out infinite;
+}
+.occard:nth-child(1) { --rot: -6deg; transform: rotate(-6deg); animation-delay: 0s; z-index: 2; }
+.occard:nth-child(2) { --rot: 3deg; transform: rotate(3deg); animation-delay: 0.7s; margin-top: -26px; z-index: 3; }
+.occard:nth-child(3) { --rot: 7deg; transform: rotate(7deg); animation-delay: 1.4s; z-index: 1; }
+.occard .stage { aspect-ratio: 1; border-radius: 10px; position: relative; overflow: hidden; }
+.occard .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bg-bday { background: radial-gradient(120% 100% at 50% 0%, #FFF1DA, #F7D9B0 70%, #E8A5A8); }
+.bg-mom { background: radial-gradient(120% 100% at 50% 10%, #FCE7E9, #F0B9BC 70%, #C4686D); }
+.bg-anniv { background: radial-gradient(120% 100% at 50% 0%, #FBF0D2, #EBD6A6 65%, #C9A96E); }
+.occard .cap {
+  font-family: var(--font-caveat), cursive;
+  font-size: 16px;
+  color: var(--charcoal, #2D2926);
+  text-align: center;
+  margin-top: 6px;
+}
+@media (max-width: 520px) {
+  .occard { width: 122px; }
+  .occard:nth-child(2) { margin-top: -16px; }
+}
+.an-body { transform-origin: 50% 90%; animation: sway-body 3s ease-in-out infinite; }
+.an-wave { transform-origin: 78% 52%; animation: wave-arm 1.4s ease-in-out infinite; }
+.an-offer { transform-origin: 60% 55%; animation: offer-arm 2.4s ease-in-out infinite; }
+.an-flame { transform-origin: 50% 100%; animation: flame-flick 1.1s ease-in-out infinite; }
+.an-blink { transform-origin: 50% 50%; animation: blink-eyes 4s ease-in-out infinite; }
+.an-heart { animation: pop-heart 2.6s ease-in infinite; }
+.an-clink-l { transform-origin: 80% 90%; animation: clink 1.8s ease-in-out infinite; }
+.an-clink-r { transform-origin: 20% 90%; animation: clink2 1.8s ease-in-out infinite; }
+.an-confetti { animation: confetti-fall 2.2s ease-in infinite; }
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .ken-burns,
@@ -301,7 +485,18 @@
   .animate-fade-in-up,
   .animate-shimmer,
   .shimmer-text-gradient,
-  .confetti-piece {
+  .confetti-piece,
+  .ribbons i,
+  .occard,
+  .an-body,
+  .an-wave,
+  .an-offer,
+  .an-flame,
+  .an-blink,
+  .an-heart,
+  .an-clink-l,
+  .an-clink-r,
+  .an-confetti {
     animation: none;
   }
   * {

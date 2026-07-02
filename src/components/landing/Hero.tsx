@@ -2,26 +2,19 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Heart, Sparkles, Star, Play } from "lucide-react";
+import { ArrowRight, Sparkles, Star, Play } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import { ShimmerText } from "@/components/ui/shimmer-text";
+import { OccasionCards } from "@/components/landing/OccasionCards";
 import {
   easings,
   durations,
-  namedEasings,
   staggers,
   springs,
   makeReducedMotionTransition,
 } from "@/lib/motion";
-
-const floatingCards = [
-  { emoji: "🎂", title: "Birthday Surprise", rotate: "-8deg", x: "-60%", y: "-20%", delay: 0 },
-  { emoji: "💍", title: "She said YES!", rotate: "6deg", x: "55%", y: "-10%", delay: 0.2 },
-  { emoji: "🌸", title: "Mother's Day", rotate: "-4deg", x: "-55%", y: "30%", delay: 0.4 },
-  { emoji: "🎉", title: "Anniversary", rotate: "9deg", x: "52%", y: "35%", delay: 0.6 },
-];
 
 // Timing ladder (seconds) — all derived from tokens
 const T = {
@@ -256,9 +249,9 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
             </motion.div>
           </div>
 
-          {/* Right — floating invite cards (spring settle, ambient loops guarded) */}
+          {/* Right — three animated SVG occasion cards (spring settle; loops are CSS, guarded) */}
           <motion.div
-            className="relative flex items-center justify-center"
+            className="relative flex flex-col items-center justify-center gap-5"
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={makeReducedMotionTransition(reducedMotion, {
@@ -266,101 +259,14 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               delay: T.ctaStart,
             })}
           >
-            {/* Center card */}
+            <OccasionCards />
             <Link
               href="/surprise/test"
-              className="relative w-72 h-96 bg-white rounded-3xl shadow-[0_24px_80px_rgba(196,104,109,0.18),0_8px_24px_rgba(45,41,38,0.1)] overflow-hidden border border-[#E8A5A8]/30 z-10 block hover:shadow-[0_32px_100px_rgba(196,104,109,0.25),0_12px_32px_rgba(45,41,38,0.12)] hover:-translate-y-2 transition-all duration-500 ring-1 ring-[#C4686D]/5"
+              className="btn-pill inline-flex items-center gap-1.5 text-sm font-semibold text-[#C4686D] bg-white border border-[#E8A5A8]/40 shadow-sm hover:border-[#C4686D]/40 transition-all"
             >
-              <div
-                className="h-48 flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #FFF0E8 0%, #F5E6E0 100%)" }}
-              >
-                {/* Heart ambient pulse — guarded */}
-                {!reducedMotion ? (
-                  <motion.div
-                    animate={{ scale: [1, 1.08, 1] }}
-                    transition={{ duration: durations.ambient, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Heart className="w-20 h-20 fill-[#C4686D] text-[#C4686D]" />
-                  </motion.div>
-                ) : (
-                  <Heart className="w-20 h-20 fill-[#C4686D] text-[#C4686D]" />
-                )}
-              </div>
-              <div className="p-6">
-                <p className="font-heading text-lg text-[#2D2926] mb-1">Someone made this for you</p>
-                <p className="text-[#6B5E57] text-sm">A special message is waiting...</p>
-                <div className="mt-5">
-                  <div className="h-10 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] flex items-center justify-center text-white text-sm font-semibold pulse-glow">
-                    Try the demo ✨
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-[#C9A96E] text-[#C9A96E]" />
-                  ))}
-                  <span className="text-xs text-[#6B5E57] ml-1">142 views</span>
-                </div>
-              </div>
+              <Star className="w-3.5 h-3.5 fill-[#C9A96E] text-[#C9A96E]" />
+              Try the live demo
             </Link>
-
-            {/* Floating polaroid cards — ambient loops guarded */}
-            {floatingCards.map((card, i) => (
-              <motion.div
-                key={i}
-                className="absolute hidden md:block bg-white p-2.5 pb-7 shadow-[0_8px_32px_rgba(45,41,38,0.12),0_2px_8px_rgba(45,41,38,0.06)]"
-                style={{
-                  transform: `rotate(${card.rotate}) translateX(${card.x}) translateY(${card.y})`,
-                  borderRadius: "6px",
-                  width: "108px",
-                  zIndex: 5,
-                }}
-                {...(!reducedMotion && {
-                  animate: { y: [0, -8, 0] },
-                  transition: {
-                    duration: [durations.floatA, durations.floatC, durations.floatB][i] ?? durations.floatA,
-                    repeat: Infinity,
-                    delay: card.delay,
-                    ease: namedEasings.ambient,
-                  },
-                })}
-              >
-                <div
-                  className="w-full aspect-square rounded-sm flex items-center justify-center text-2xl"
-                  style={{ background: "linear-gradient(135deg, #FFF0E8 0%, #F5EDE3 100%)" }}
-                >
-                  {card.emoji}
-                </div>
-                <p
-                  className="text-center text-[#4a4a4a] mt-1.5 leading-tight"
-                  style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "11px" }}
-                >
-                  {card.title}
-                </p>
-              </motion.div>
-            ))}
-
-            {/* Floating reaction badges — ambient guarded */}
-            {!reducedMotion && (
-              <>
-                <motion.div
-                  className="absolute hidden md:flex top-4 right-0 bg-white rounded-2xl shadow-lg px-3 py-2 items-center gap-2 z-20"
-                  animate={{ y: [-4, 4, -4] }}
-                  transition={{ duration: durations.floatB, repeat: Infinity, ease: namedEasings.ambient }}
-                >
-                  <span className="text-base">😭</span>
-                  <span className="text-xs font-medium text-[#2D2926]">She&apos;s crying!</span>
-                </motion.div>
-                <motion.div
-                  className="absolute hidden md:flex bottom-8 left-0 bg-white rounded-2xl shadow-lg px-3 py-2 items-center gap-2 z-20"
-                  animate={{ y: [4, -4, 4] }}
-                  transition={{ duration: durations.floatC, repeat: Infinity, ease: namedEasings.ambient }}
-                >
-                  <span className="text-base">🎊</span>
-                  <span className="text-xs font-medium text-[#2D2926]">He said YES!</span>
-                </motion.div>
-              </>
-            )}
           </motion.div>
         </div>
       </div>

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="leftCurtain" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#C2185B" />
+      <stop offset="100%" style="stop-color:#FF3D8B" />
+    </linearGradient>
+    <linearGradient id="rightCurtain" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF3D8B" />
+      <stop offset="100%" style="stop-color:#C2185B" />
+    </linearGradient>
+    <linearGradient id="spotlightGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.35" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:0" />
+    </linearGradient>
+    <linearGradient id="stageGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF8C42" />
+      <stop offset="50%" style="stop-color:#FFD700" />
+      <stop offset="100%" style="stop-color:#FF8C42" />
+    </linearGradient>
+    <radialGradient id="glowCenter" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFF9E6;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#FFD700;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#FF8C42;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Stage floor -->
+  <rect x="0" y="162" width="200" height="38" rx="0" fill="url(#stageGold)" opacity="0.3"/>
+
+  <!-- Spotlight cone from top -->
+  <polygon points="100,0 40,200 160,200" fill="url(#spotlightGrad)" />
+
+  <!-- Glow in center stage -->
+  <ellipse cx="100" cy="130" rx="48" ry="40" fill="url(#glowCenter)" opacity="0.7" />
+
+  <!-- Left curtain (swept open) -->
+  <path d="M0,0 C20,10 15,60 30,90 C40,110 36,140 20,162 L0,162 Z"
+        fill="url(#leftCurtain)" />
+  <!-- Left curtain drape fold -->
+  <path d="M30,0 C42,18 38,55 50,85 C58,108 54,138 42,162 L20,162 C36,140 40,110 30,90 C15,60 20,10 0,0 Z"
+        fill="#E91E8C" opacity="0.6" />
+  <!-- Left curtain tieback knot -->
+  <ellipse cx="44" cy="108" rx="11" ry="8" fill="#FF3D8B" />
+  <ellipse cx="44" cy="108" rx="6" ry="5" fill="#FFD700" />
+
+  <!-- Right curtain (swept open) -->
+  <path d="M200,0 C180,10 185,60 170,90 C160,110 164,140 180,162 L200,162 Z"
+        fill="url(#rightCurtain)" />
+  <!-- Right curtain drape fold -->
+  <path d="M170,0 C158,18 162,55 150,85 C142,108 146,138 158,162 L180,162 C164,140 160,110 170,90 C185,60 180,10 200,0 Z"
+        fill="#E91E8C" opacity="0.6" />
+  <!-- Right curtain tieback knot -->
+  <ellipse cx="156" cy="108" rx="11" ry="8" fill="#FF3D8B" />
+  <ellipse cx="156" cy="108" rx="6" ry="5" fill="#FFD700" />
+
+  <!-- "!" in spotlight glow center -->
+  <rect x="94" y="95" width="12" height="30" rx="6" fill="#FF8C42" />
+  <circle cx="100" cy="140" r="7" fill="#FF8C42" />
+
+  <!-- Sparkles scattered in opening -->
+  <g transform="translate(100,60)" fill="#FFD700">
+    <path d="M0,-12 L2.5,-2.5 L12,0 L2.5,2.5 L0,12 L-2.5,2.5 L-12,0 L-2.5,-2.5 Z" />
+  </g>
+  <g transform="translate(76,82)" fill="#FFD700" opacity="0.8">
+    <path d="M0,-7 L1.5,-1.5 L7,0 L1.5,1.5 L0,7 L-1.5,1.5 L-7,0 L-1.5,-1.5 Z" />
+  </g>
+  <g transform="translate(124,78)" fill="#FF8C42" opacity="0.8">
+    <path d="M0,-7 L1.5,-1.5 L7,0 L1.5,1.5 L0,7 L-1.5,1.5 L-7,0 L-1.5,-1.5 Z" />
+  </g>
+
+  <!-- Valance / pelmet bar at top -->
+  <rect x="0" y="0" width="200" height="14" rx="0" fill="#880E4F" />
+  <!-- Valance scallop trim -->
+  <path d="M0,14 Q10,24 20,14 Q30,24 40,14 Q50,24 60,14 Q70,24 80,14 Q90,24 100,14 Q110,24 120,14 Q130,24 140,14 Q150,24 160,14 Q170,24 180,14 Q190,24 200,14"
+        fill="none" stroke="#FFD700" stroke-width="3" />
+</svg>

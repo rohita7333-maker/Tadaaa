@@ -59,6 +59,7 @@ export function MagneticButton({
       onTouchStart={onTouchStart}
       whileTap={shouldReduce ? undefined : { scale: 0.97 }}
       className={cn(
+        "btn-pri",
         "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-medium",
         "bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white",
         "shadow-[0_8px_24px_rgba(196,104,109,0.35)] hover:shadow-[0_12px_32px_rgba(196,104,109,0.5)]",

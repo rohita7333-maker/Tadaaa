@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="burstGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700" />
+      <stop offset="50%" style="stop-color:#FF8C42" />
+      <stop offset="100%" style="stop-color:#FF3D8B" />
+    </linearGradient>
+    <linearGradient id="innerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B" />
+      <stop offset="100%" style="stop-color:#FF8C42" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer starburst: 8 rays (4 long, 4 short alternating) -->
+  <path d="
+    M100,10
+    L108,42 L132,20 L118,50
+    L155,38 L134,62
+    L190,76 L154,84
+    L175,115 L142,104
+    L148,142 L118,120
+    L114,158 L100,130
+    L86,158 L82,120
+    L52,142 L58,104
+    L25,115 L46,84
+    L10,76 L46,62
+    L25,38 L62,50
+    L68,20 L92,42
+    Z"
+    fill="url(#burstGrad)"
+  />
+
+  <!-- Inner circle -->
+  <circle cx="100" cy="100" r="46" fill="url(#innerGrad)" />
+
+  <!-- Exclamation mark in white -->
+  <!-- stem -->
+  <rect x="94" y="72" width="12" height="36" rx="6" fill="white" />
+  <!-- dot -->
+  <circle cx="100" cy="124" r="7" fill="white" />
+
+  <!-- Confetti dots scattered around burst -->
+  <circle cx="30"  cy="45"  r="5" fill="#FFD700" opacity="0.9" />
+  <circle cx="168" cy="35"  r="4" fill="#FF3D8B" opacity="0.9" />
+  <circle cx="175" cy="160" r="5" fill="#FFD700" opacity="0.8" />
+  <circle cx="25"  cy="155" r="4" fill="#FF8C42" opacity="0.8" />
+  <circle cx="155" cy="175" r="3" fill="#FF3D8B" opacity="0.7" />
+  <circle cx="42"  cy="170" r="3" fill="#FFD700" opacity="0.7" />
+
+  <!-- Small 4-point sparkle stars in corners -->
+  <g transform="translate(28,28)" fill="#FFD700" opacity="0.85">
+    <path d="M0,-9 L2,-2 L9,0 L2,2 L0,9 L-2,2 L-9,0 L-2,-2 Z" />
+  </g>
+  <g transform="translate(172,28)" fill="#FF3D8B" opacity="0.85">
+    <path d="M0,-9 L2,-2 L9,0 L2,2 L0,9 L-2,2 L-9,0 L-2,-2 Z" />
+  </g>
+  <g transform="translate(172,172)" fill="#FFD700" opacity="0.75">
+    <path d="M0,-6 L1.5,-1.5 L6,0 L1.5,1.5 L0,6 L-1.5,1.5 L-6,0 L-1.5,-1.5 Z" />
+  </g>
+</svg>

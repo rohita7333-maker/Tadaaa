@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, DM_Sans, Caveat } from "next/font/google";
+import { Bricolage_Grotesque, DM_Sans, Caveat } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/CookieConsent";
+import { Ribbons } from "@/components/fx/Ribbons";
+import { ConfettiCanvas } from "@/components/fx/ConfettiCanvas";
 import "./globals.css";
 
-const playfair = Playfair_Display({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-playfair",
+  weight: ["600", "700", "800"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
@@ -56,8 +58,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${playfair.variable} ${dmSans.variable} ${caveat.variable}`}>
+    <html lang="en" className={`${bricolage.variable} ${dmSans.variable} ${caveat.variable}`}>
       <body className="antialiased">
+        <Ribbons />
+        <ConfettiCanvas />
         {children}
         <CookieConsent />
         <Toaster richColors position="top-center" />

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="520" height="160">
+  <defs>
+    <linearGradient id="gradA" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#FF8C42;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sparkleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700" />
+      <stop offset="100%" style="stop-color:#FF8C42" />
+    </linearGradient>
+  </defs>
+
+  <!-- "TaDaaaa" wordmark: custom rounded letterforms -->
+  <!-- T -->
+  <g fill="url(#gradA)">
+    <!-- T crossbar -->
+    <rect x="18" y="38" width="56" height="16" rx="8" />
+    <!-- T stem -->
+    <rect x="38" y="38" width="16" height="80" rx="8" />
+
+    <!-- a (lowercase, first) -->
+    <!-- bowl -->
+    <path d="M100 72 C100 54 120 48 134 52 C148 56 154 68 154 80 L154 118 L140 118 L140 112 C134 118 126 120 118 118 C106 116 100 108 100 98 C100 86 110 80 126 80 L140 80 C140 72 134 66 126 66 C118 66 114 70 112 74 Z M126 90 C118 90 114 94 114 98 C114 102 118 106 126 106 C134 106 140 100 140 94 L140 90 Z" />
+
+    <!-- D (uppercase) -->
+    <path d="M172 38 L192 38 C218 38 234 56 234 78 C234 100 218 118 192 118 L172 118 Z M188 54 L188 102 C206 102 218 92 218 78 C218 64 206 54 188 54 Z" />
+
+    <!-- a (second a — starts rising slightly, baseline +0) -->
+    <path d="M252 72 C252 54 272 48 286 52 C300 56 306 68 306 80 L306 118 L292 118 L292 112 C286 118 278 120 270 118 C258 116 252 108 252 98 C252 86 262 80 278 80 L292 80 C292 72 286 66 278 66 C270 66 266 70 264 74 Z M278 90 C270 90 266 94 266 98 C266 102 270 106 278 106 C286 106 292 100 292 94 L292 90 Z" />
+
+    <!-- a (third a — rising, translate up 8px, scale 1.04) -->
+    <g transform="translate(50, -8) scale(1.04) translate(-50, 8)">
+      <path d="M314 72 C314 54 334 48 348 52 C362 56 368 68 368 80 L368 118 L354 118 L354 112 C348 118 340 120 332 118 C320 116 314 108 314 98 C314 86 324 80 340 80 L354 80 C354 72 348 66 340 66 C332 66 328 70 326 74 Z M340 90 C332 90 328 94 328 98 C328 102 332 106 340 106 C348 106 354 100 354 94 L354 90 Z" />
+    </g>
+
+    <!-- a (fourth a — rising more, translate up 18px, scale 1.09, gold-tipped) -->
+    <g transform="translate(390, -18) scale(1.09) translate(-390, 18)">
+      <path d="M374 72 C374 54 394 48 408 52 C422 56 428 68 428 80 L428 118 L414 118 L414 112 C408 118 400 120 392 118 C380 116 374 108 374 98 C374 86 384 80 400 80 L414 80 C414 72 408 66 400 66 C392 66 388 70 386 74 Z M400 90 C392 90 388 94 388 98 C388 102 392 106 400 106 C408 106 414 100 414 94 L414 90 Z" fill="#FFD700"/>
+    </g>
+  </g>
+
+  <!-- Sparkle burst after the final a -->
+  <!-- 4-point star sparkle -->
+  <g transform="translate(468, 26)" fill="url(#sparkleGrad)">
+    <path d="M0,-18 L3,-3 L18,0 L3,3 L0,18 L-3,3 L-18,0 L-3,-3 Z" />
+  </g>
+  <!-- Small dot sparkles trailing off -->
+  <circle cx="492" cy="18" r="4" fill="#FFD700" opacity="0.8"/>
+  <circle cx="504" cy="32" r="2.5" fill="#FF8C42" opacity="0.7"/>
+  <circle cx="510" cy="12" r="1.8" fill="#FFD700" opacity="0.6"/>
+</svg>

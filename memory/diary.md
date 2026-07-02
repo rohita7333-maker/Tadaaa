@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-07-01 — Count-Bucketed Collage Templates — BUILT + VERIFIED (uncommitted)
+
+**Branch:** feat/sophistication
+
+Collage download now picks a layout matching the photo count (no empty holes) and
+bakes the occasion as a wish to the recipient.
+
+- `src/lib/collage-templates.ts` — count-bucketed registry (counts 1..9 + polaroid-scrapbook);
+  `CollageSlot.caption`, `CollageTemplate.photoCount`, `getCollageTemplatesForCount`,
+  `pickCollageTemplateForCount(n, rng)`; shared 1080×1350 cream board + bottom caption band.
+- `src/lib/designer-art.ts` — `occasionWish()` (birthday/mothers_day/festival/apology/default).
+- `route.tsx` — `renderTemplateCollage` skips caption slots (hero→photos[0]); caption cell =
+  white card + #C4686D diamond + Fraunces wish; selection random-picks by count when no ?template.
+- Canva MCP can't export slot geometry → geometry hand-coded (Satori); 21 Canva IDs informed
+  aesthetic + buckets only. DB `collage_templates` table deferred.
+- Verify: `vitest run` 321 pass, `tsc --noEmit` clean, PNG render proof counts 2/4/6/9 correct.
+- See `project_tadaaaa_collage_templates.md`.
+
+---
+
 ## 2026-05-31 — Designer Monetization D3+D4+D5 — BUILT + COMMITTED
 
 **Branch:** feat/sophistication
@@ -1174,3 +1194,23 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 - Fix 4 (rate-limit RPC before signInWithPassword) = by-design gate, left. Fix 5 (callback first-login admin calls) = first-login only, deferred.
 - Gate: tsc 0 · 301 vitest green (31 files) · lint clean.
 - **QA (tadaaaa-qa-test charter, real browser :3000):** A landing fast/no auth roundtrip ✓ · B signin form renders ✓ · C /dashboard logged-out → redirect /auth/signin (gating holds) ✓ · D bad-creds → auth POST 200, ~2-3s, single POST, toast shows, NO hang ✓ · E no 500s/dupes ✓. Nit (LOW): local-env signin shows "fetch failed" (supabase unreachable from local server action) — recheck copy on staging.
+
+---
+
+**2026-06-28 — Full app re-skin to match `tadaaaa-app-animated_1.html` mockup (8 phases, autonomous).** Re-skin doctrine held: presentational only, backend untouched, routes unchanged (`/surprise/[slug]`), no new deps, original SVG art, no animation degraded, reveal not behind auth.
+- Phase 0: Bricolage Grotesque heading (swapped Playfair), DM Sans, Caveat; token atoms in globals.css.
+- Phase 1: `src/components/fx/Ribbons.tsx` (26 ambient falling ribbons) + `src/components/fx/ConfettiCanvas.tsx` (canvas confetti, popCelebrate on any `.btn-pri` click app-wide); both reduced-motion guarded; mounted in `layout.tsx`.
+- Phase 2: `src/components/landing/OccasionCards.tsx` — 3 pure-CSS animated SVG cards (birthday/mom/anniversary), captions "happy birthday!"/"love you, mom"/"5 years 🥂". Hero right column replaced (removed floatingCards/reaction badges/center demo card) with OccasionCards + "Try the live demo" pill → `/surprise/test`. globals.css bg-bday/bg-mom/bg-anniv radial gradients.
+- Phase 5: `src/lib/themes.ts` all 14 themes Playfair→Bricolage. `theme.fonts` confirmed DEAD DATA (no consumers grep'd) — change for truthfulness only.
+- Phase 6: MagneticButton got `btn-pri` class so global confetti fires on every primary CTA. TapToReveal left INTACT — already implements all 10 reveal beats token-driven w/ motion guards; not rewritten.
+- **QA bug fixed:** CSP `img-src` blocked demo reveal images — `picsum.photos` 302-redirects to `fastly.picsum.photos`; added `https://*.picsum.photos` to img-src in `next.config.ts`. Real invites unaffected (Supabase storage already allowed). Affects only `/surprise/test` demo fixture.
+- Gate (final): tsc exit 0 · 301/301 vitest (31 files) · `npm run build` exit 0 · real browser (:3000) 0 console errors on /, /create, /surprise/test (after CSP fix demo images load clean).
+- User-side TODO unchanged from deploy-state: Vercel env (Stripe/Resend/CRON_SECRET + copy Anthropic/Supabase), Stripe live products+webhook, Resend domain verify, domain buy (unwrapme.app / saytada.app), connect Vercel + deploy. Code ship-ready.
+
+---
+
+**2026-07-01 (pm) — Collage-through-Canva investigation → ship IN-CODE (Option D).** User picked "Option 1" (canva-virtuoso drives Canva MCP live). Empirically mapped Canva free-plan surface: upload-asset-from-url OK (needs direct 200 URLs), generate-design photo_collage OK (BUT injects STOCK photos + non-deterministic layout), create-from-candidate OK, export png OK; autofill/brand-templates = Pro-only. Proved live pipeline end-to-end (/tmp/canva-proof.png) — stock contamination confirmed. CRITICAL: MCP tools run in agent convo, NOT server runtime; in-product live Canva needs Canva Connect OAuth dev-app creds (user-only). Verdict: free-plan live Canva inferior (stock + non-determinism + latency/quota + creds) vs deterministic in-code Satori path using only user photos. User delegated ("im not sure can you suggest the best way") -> shipped in-code.
+- Fixed hero polaroid caption box-model bug in route.tsx renderTemplateCollage: removed paddingBottom:frame+strip, added flexShrink:0 to <img> + caption <div>, lineHeight:1 to strip -> caption centered cleanly in polaroid strip w/ clean frame border (verified via throwaway next/og proof PNG).
+- Gate: tsc exit 0 - 321/321 vitest (31 files) green.
+- Full Canva matrix + fix math + decision in memory/project_tadaaaa_collage_templates.md.
+- Left on user's end (collage): nothing required to ship. Optional future: Canva Connect OAuth app + Canva Pro for deterministic live-Canva autofill; Supabase collage_templates table for DB-driven mapping. Separately, uncommitted 2026-06-28 redesign files still on feat/sophistication (globals.css, Hero.tsx, layout.tsx, magnetic-button.tsx, themes.ts, next.config.ts) — not part of this collage commit.

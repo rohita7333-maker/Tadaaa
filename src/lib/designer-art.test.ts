@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { canUseDesignerArt, getTemplate, resolveStyle, isValidStyle, occasionEyebrow } from "./designer-art";
+import { canUseDesignerArt, getTemplate, resolveStyle, isValidStyle, occasionEyebrow, occasionWish } from "./designer-art";
 
 describe("canUseDesignerArt", () => {
   it("blocks free tier", () => {
@@ -83,4 +83,21 @@ describe("occasionEyebrow", () => {
   it("unknown → A SURPRISE", () => expect(occasionEyebrow("wedding")).toBe("A SURPRISE"));
   it("null → A SURPRISE", () => expect(occasionEyebrow(null)).toBe("A SURPRISE"));
   it("undefined → A SURPRISE", () => expect(occasionEyebrow(undefined)).toBe("A SURPRISE"));
+});
+
+describe("occasionWish", () => {
+  it("maps birthday to a birthday wish", () =>
+    expect(occasionWish("birthday")).toBe("Happy Birthday!"));
+  it("maps mothers_day", () =>
+    expect(occasionWish("mothers_day")).toBe("Happy Mother's Day!"));
+  it("maps date", () => expect(occasionWish("date")).toBe("You're Invited!"));
+  it("maps festival", () => expect(occasionWish("festival")).toBe("Let's Celebrate!"));
+  it("maps apology", () => expect(occasionWish("apology")).toBe("I'm Sorry"));
+  it("maps custom", () => expect(occasionWish("custom")).toBe("You're Invited!"));
+  it("unknown → You're Invited!", () =>
+    expect(occasionWish("wedding")).toBe("You're Invited!"));
+  it("null → You're Invited!", () =>
+    expect(occasionWish(null)).toBe("You're Invited!"));
+  it("undefined → You're Invited!", () =>
+    expect(occasionWish(undefined)).toBe("You're Invited!"));
 });

@@ -7,6 +7,7 @@ import {
   getTemplate,
   resolveStyle,
   occasionEyebrow,
+  occasionWish,
 } from "@/lib/designer-art";
 import { buildDesignerCard } from "@/lib/designer-art-render";
 import { getOgFonts } from "@/lib/og-fonts";
@@ -16,6 +17,7 @@ import { STORAGE_BUCKET } from "@/lib/constants";
 import { styleToMode } from "@/lib/designer-art-render";
 import {
   getCollageTemplate,
+  pickCollageTemplateForCount,
   type CollageSlot,
   type CollageTemplate,
 } from "@/lib/collage-templates";
@@ -59,19 +61,20 @@ function renderTemplateCollage(
   const { width, height, background, slots, heroSlotIndex } = template;
   const heroIdx = heroSlotIndex ?? 0;
 
-  // Build photo assignment: heroIdx → photos[0]; others in order → photos[1..]
+  // Photo slots only (caption slots never receive a photo). Hero first, then
+  // the remaining photo slots in array order → photos[0..].
+  const photoSlotIndices = slots
+    .map((s, i) => ({ s, i }))
+    .filter((x) => !x.s.caption)
+    .map((x) => x.i);
+  const order = photoSlotIndices.includes(heroIdx)
+    ? [heroIdx, ...photoSlotIndices.filter((i) => i !== heroIdx)]
+    : photoSlotIndices;
+
   const photoMap = new Map<number, string>();
-  if (signedPhotos.length > 0) {
-    photoMap.set(heroIdx, signedPhotos[0].url);
-  }
-  let nonHeroPhotoIdx = 1;
-  for (let i = 0; i < slots.length; i++) {
-    if (i === heroIdx) continue;
-    if (nonHeroPhotoIdx < signedPhotos.length) {
-      photoMap.set(i, signedPhotos[nonHeroPhotoIdx].url);
-      nonHeroPhotoIdx++;
-    }
-  }
+  order.forEach((slotIdx, k) => {
+    if (k < signedPhotos.length) photoMap.set(slotIdx, signedPhotos[k].url);
+  });
 
   // Sort slots by z so lower z renders first (background).
   const sortedIndices = slots
@@ -80,8 +83,6 @@ function renderTemplateCollage(
 
   function renderSlot(slotIdx: number) {
     const slot: CollageSlot = slots[slotIdx];
-    const photoUrl = photoMap.get(slotIdx);
-    if (!photoUrl) return null;
 
     const {
       xPct,
@@ -98,6 +99,58 @@ function renderTemplateCollage(
     const top = Math.round((yPct / 100) * height);
     const slotW = Math.round((wPct / 100) * width);
     const slotH = Math.round((hPct / 100) * height);
+
+    // Caption cell — text-only tile that wishes the recipient.
+    if (slot.caption) {
+      const capSize = caption.length > 20 ? 44 : caption.length > 12 ? 56 : 68;
+      return (
+        <div
+          key={slotIdx}
+          style={{
+            position: "absolute",
+            left,
+            top,
+            width: slotW,
+            height: slotH,
+            background: "#ffffff",
+            borderRadius: radius,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 14,
+              height: 14,
+              background: "#C4686D",
+              transform: "rotate(45deg)",
+              marginBottom: 12,
+              display: "flex",
+            }}
+          />
+          <div
+            style={{
+              fontFamily: "Fraunces, Georgia, serif",
+              fontWeight: 600,
+              fontSize: capSize,
+              lineHeight: 1,
+              color: "#3a2e2a",
+              textAlign: "center",
+              padding: "0 24px",
+              display: "flex",
+            }}
+          >
+            {caption}
+          </div>
+        </div>
+      );
+    }
+
+    const photoUrl = photoMap.get(slotIdx);
+    if (!photoUrl) return null;
 
     const strip = captionStrip ?? 0;
     const imgW = slotW - frame * 2;
@@ -117,7 +170,6 @@ function renderTemplateCollage(
           transform: `rotate(${rotateDeg}deg)`,
           background: "#fff",
           padding: frame,
-          paddingBottom: frame + strip,
           borderRadius: radius,
           boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
           display: "flex",
@@ -135,6 +187,7 @@ function renderTemplateCollage(
             height: imgH,
             objectFit: "cover",
             borderRadius: 2,
+            flexShrink: 0,
           }}
         />
         {isHero && strip > 0 && (
@@ -145,10 +198,12 @@ function renderTemplateCollage(
               justifyContent: "center",
               width: imgW,
               height: strip,
+              flexShrink: 0,
               padding: "0 12px",
               fontFamily: "Fraunces, Georgia, serif",
               fontWeight: 600,
               fontSize: caption.length > 22 ? 24 : 34,
+              lineHeight: 1,
               color: "#3a2e2a",
               textAlign: "center",
               whiteSpace: "nowrap",
@@ -312,18 +367,20 @@ export async function GET(
     );
   }
 
-  // Template render path — data-driven layout.
-  if (collageTemplate) {
-    const heroCaption =
-      (invite.title && invite.title.trim()) ||
-      collageTemplate.heroCaption ||
-      "Happy Birthday!";
+  // Template render path — explicit ?template=<id>, else random-pick a
+  // count-bucketed layout matching the number of photos (no empty holes).
+  const selectedTemplate =
+    collageTemplate ?? pickCollageTemplateForCount(signedPhotos.length);
+
+  if (selectedTemplate) {
+    // Caption wishes the recipient with the invite's occasion.
+    const caption = occasionWish(invite.occasion_type);
 
     return new ImageResponse(
-      renderTemplateCollage(collageTemplate, signedPhotos, heroCaption),
+      renderTemplateCollage(selectedTemplate, signedPhotos, caption),
       {
-        width: collageTemplate.width,
-        height: collageTemplate.height,
+        width: selectedTemplate.width,
+        height: selectedTemplate.height,
         fonts,
         headers: responseHeaders,
       }

@@ -58,6 +58,28 @@ export function occasionEyebrow(occasion: string | null | undefined): string {
 }
 
 /**
+ * Returns a warm greeting that wishes the recipient, keyed by occasion.
+ * Used as the caption text baked into the photo-collage download.
+ * Unknown/missing → the neutral invite wish.
+ */
+export function occasionWish(occasion: string | null | undefined): string {
+  switch (occasion) {
+    case "birthday":
+      return "Happy Birthday!";
+    case "mothers_day":
+      return "Happy Mother's Day!";
+    case "festival":
+      return "Let's Celebrate!";
+    case "apology":
+      return "I'm Sorry";
+    case "date":
+    case "custom":
+    default:
+      return "You're Invited!";
+  }
+}
+
+/**
  * Per-occasion, per-style template bank.
  * classic — rich, saturated editorial palette.
  * bold — high-contrast, punchy diagonal.

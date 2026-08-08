@@ -17,6 +17,15 @@ import { supabase } from "./supabase";
 import type { Tables, TablesInsert } from "./database.types";
 import { generateSlug } from "./slug";
 import { visitorHash, userAgent } from "./device";
+import { eventsSchema, type StoryEventInput } from "./schemas";
+import {
+  ACTIVITY_FEED_CAP,
+  type InviteMeta,
+  type QuestionMeta,
+  type RawAnswerRow,
+  type RawRsvpRow,
+  type RawViewRow,
+} from "./activity-feed";
 
 export type Invite = Tables<"invites">;
 export type InvitePhoto = Tables<"invite_photos">;
@@ -89,9 +98,15 @@ export interface NewInviteInput {
   theme: string;
   message: string;
   occasionType: string;
-  revealType: "tap" | "countdown";
+  revealType: "tap" | "countdown" | "scroll_story";
   countdownDate?: string | null;
   expiresAt?: string | null;
+  /**
+   * Scroll Story timeline plaques. Stored verbatim as camelCase JSON in the
+   * invites.events jsonb column (same shape the web app writes). Omit or pass
+   * [] for non-scroll_story reveals.
+   */
+  events?: StoryEventInput[];
   acceptContributions: boolean;
   enableDodgeNo: boolean;
   isPaid: boolean;
@@ -105,6 +120,18 @@ export async function createInviteRow(input: NewInviteInput): Promise<{
   const userId = await getCurrentUserId();
   if (!userId) throw new Error("You must be signed in to create a surprise.");
 
+  // Defense-in-depth: mobile writes straight to the DB under RLS with no server
+  // revalidation, so the events payload is validated here too (not just at the
+  // publish gate). Scroll Story keeps its plaques; every other reveal stores [].
+  let events: StoryEventInput[] = [];
+  if (input.revealType === "scroll_story" && input.events && input.events.length > 0) {
+    const parsed = eventsSchema.safeParse(input.events);
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Invalid scroll story plan.");
+    }
+    events = parsed.data;
+  }
+
   // Retry on the rare slug collision (UNIQUE constraint).
   for (let attempt = 0; attempt < 5; attempt++) {
     const slug = generateSlug();
@@ -116,12 +143,16 @@ export async function createInviteRow(input: NewInviteInput): Promise<{
       message: input.message,
       occasion_type: input.occasionType,
       reveal_type: input.revealType,
-      countdown_date: input.revealType === "countdown" ? input.countdownDate ?? null : null,
+      countdown_date:
+        input.revealType === "countdown" || input.revealType === "scroll_story"
+          ? input.countdownDate ?? null
+          : null,
       expires_at: input.expiresAt ?? null,
       accept_contributions: input.acceptContributions,
       enable_dodge_no: input.enableDodgeNo,
       is_paid: input.isPaid,
       is_active: true,
+      events,
     };
     const { data, error } = await supabase
       .from("invites")
@@ -295,6 +326,85 @@ export async function getRsvps(inviteId: string): Promise<Tables<"invite_rsvps">
     .eq("invite_id", inviteId)
     .order("responded_at", { ascending: false });
   return data ?? [];
+}
+
+export interface ActivityRows {
+  invites: InviteMeta[];
+  views: RawViewRow[];
+  rsvps: RawRsvpRow[];
+  answers: RawAnswerRow[];
+  questions: QuestionMeta[];
+}
+
+/**
+ * Everything the Activity feed needs, in creator-scoped reads.
+ *
+ * The invite list is fetched by `creator_id` and every child query is
+ * constrained to those ids; the owner-read RLS policies on invite_views /
+ * invite_rsvps / invite_answers are the second lock. Answers only reach an
+ * invite through their question, so questions are fetched first and used as
+ * the bridge (and as the ownership filter) in `buildActivityFeed`.
+ */
+export async function getActivityRows(userId: string): Promise<ActivityRows> {
+  const { data: inviteRows } = await supabase
+    .from("invites")
+    .select("id, title, slug")
+    .eq("creator_id", userId)
+    .is("deleted_at", null);
+
+  const invites: InviteMeta[] = (inviteRows ?? []).map((inv) => ({
+    id: inv.id,
+    title: inv.title ?? "Untitled surprise",
+    slug: inv.slug,
+  }));
+  const inviteIds = invites.map((inv) => inv.id);
+
+  if (inviteIds.length === 0) {
+    return { invites, views: [], rsvps: [], answers: [], questions: [] };
+  }
+
+  const [viewsRes, rsvpsRes, questionsRes] = await Promise.all([
+    supabase
+      .from("invite_views")
+      .select("id, invite_id, viewed_at")
+      .in("invite_id", inviteIds)
+      .order("viewed_at", { ascending: false })
+      .limit(ACTIVITY_FEED_CAP),
+    supabase
+      .from("invite_rsvps")
+      .select("id, invite_id, responded_at, name")
+      .in("invite_id", inviteIds)
+      .order("responded_at", { ascending: false })
+      .limit(ACTIVITY_FEED_CAP),
+    supabase
+      .from("invite_questions")
+      .select("id, invite_id, question_text")
+      .in("invite_id", inviteIds),
+  ]);
+
+  const questions: QuestionMeta[] = (questionsRes.data ?? []).map((q) => ({
+    id: q.id,
+    invite_id: q.invite_id,
+    question_text: q.question_text ?? "",
+  }));
+
+  const questionIds = questions.map((q) => q.id);
+  const answersRes = questionIds.length
+    ? await supabase
+        .from("invite_answers")
+        .select("id, question_id, answer, answered_at")
+        .in("question_id", questionIds)
+        .order("answered_at", { ascending: false })
+        .limit(ACTIVITY_FEED_CAP)
+    : { data: [] as RawAnswerRow[] };
+
+  return {
+    invites,
+    views: viewsRes.data ?? [],
+    rsvps: rsvpsRes.data ?? [],
+    answers: answersRes.data ?? [],
+    questions,
+  };
 }
 
 export async function getContributions(

@@ -17,6 +17,7 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import { Caveat_700Bold } from "@expo-google-fonts/caveat";
 import { AuthProvider, useAuth } from "@/providers/AuthProvider";
+import { registerAndSavePushToken } from "@/lib/push-notifications";
 import { colors } from "@/theme/tokens";
 
 SplashScreen.preventAutoHideAsync();
@@ -46,12 +47,19 @@ function useProtectedRoute() {
 }
 
 function RootNavigator() {
-  const { initializing } = useAuth();
+  const { initializing, user } = useAuth();
   useProtectedRoute();
 
   useEffect(() => {
     if (!initializing) SplashScreen.hideAsync();
   }, [initializing]);
+
+  // Best-effort push registration once signed in. Never blocks navigation —
+  // see push-notifications.ts for why this silently no-ops until
+  // sql/push_tokens.sql is applied and an EAS project id is configured.
+  useEffect(() => {
+    if (user) void registerAndSavePushToken();
+  }, [user]);
 
   if (initializing) return null;
 
@@ -62,6 +70,7 @@ function RootNavigator() {
       <Stack.Screen name="surprise/[slug]" options={{ animation: "fade" }} />
       <Stack.Screen name="create" options={{ presentation: "modal" }} />
       <Stack.Screen name="invite/[id]" options={{ presentation: "card" }} />
+      <Stack.Screen name="templates" options={{ presentation: "card" }} />
     </Stack>
   );
 }

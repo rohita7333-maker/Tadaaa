@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Sparkles } from "lucide-react-native";
+import { LayoutGrid, Sparkles } from "lucide-react-native";
 import { Button, Card, Txt, colors, gradients, radii, spacing } from "@/components/ui";
 import { InviteRow } from "@/components/InviteRow";
 import { useAuth } from "@/providers/AuthProvider";
@@ -78,9 +78,45 @@ export default function Home() {
           <Button title="Start creating" variant="dark" small onPress={() => router.push("/create")} style={{ alignSelf: "flex-start", marginTop: 4 }} />
         </LinearGradient>
 
+        <Pressable
+          onPress={() => router.push("/templates")}
+          accessibilityRole="button"
+          accessibilityLabel="Start from a template"
+          style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+        >
+          <Card style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: radii.md,
+                backgroundColor: colors.goldChipBg,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <LayoutGrid size={20} color={colors.goldChipText} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Txt style={{ fontFamily: "DMSans_700Bold", fontSize: 14, color: colors.charcoal }}>
+                Start from a template
+              </Txt>
+              <Txt variant="body" muted style={{ fontSize: 11.5 }}>
+                Occasion, theme, and reveal — already picked for you
+              </Txt>
+            </View>
+          </Card>
+        </Pressable>
+
+        {/* Total views drills into the Activity feed — the number is the hook,
+            the feed is the "who". */}
         <View style={{ flexDirection: "row", gap: spacing.md }}>
           <Stat value={String(invites.length)} label="Surprises" />
-          <Stat value={String(totalViews)} label="Total views" />
+          <Stat
+            value={String(totalViews)}
+            label="Total views"
+            onPress={() => router.push("/activity")}
+          />
           <Stat
             value={limit == null ? "∞" : `${monthCount}/${limit}`}
             label="This month"
@@ -106,11 +142,32 @@ export default function Home() {
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
+function Stat({
+  value,
+  label,
+  onPress,
+}: {
+  value: string;
+  label: string;
+  onPress?: () => void;
+}) {
+  const card = (
     <Card style={{ flex: 1, padding: 12, gap: 2 }}>
       <Txt style={{ fontFamily: "Bricolage_800ExtraBold", fontSize: 22, color: colors.charcoal }}>{value}</Txt>
       <Txt variant="body" muted style={{ fontSize: 10.5 }}>{label}</Txt>
     </Card>
+  );
+
+  if (!onPress) return card;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${label}, ${value}. See activity`}
+      style={({ pressed }) => [{ flex: 1, transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+    >
+      {card}
+    </Pressable>
   );
 }

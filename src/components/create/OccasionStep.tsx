@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Alert, Pressable, View } from "react-native";
-import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { Lock, PenLine, Sparkles, X } from "lucide-react-native";
+import { PenLine, Sparkles, X } from "lucide-react-native";
 import { Field, Txt, colors, fonts, radii, spacing } from "@/components/ui";
 import { occasions, themes, gradientStops, type Theme } from "@/lib/themes";
 import { aiDraftInvite, hasBackend, type AIDraft, type AITone } from "@/lib/api";
@@ -44,7 +43,6 @@ export default function OccasionStep({
   premiumUnlocked,
   onDraftApplied,
 }: Props) {
-  const router = useRouter();
   const selectedOcc = occasions.find((o) => o.id === occasionType);
   const hasChips = (selectedOcc?.prompts.length ?? 0) > 0;
   const isCustom = selectedOcc?.id === "custom";
@@ -167,20 +165,8 @@ export default function OccasionStep({
             return (
               <Pressable
                 key={theme.id}
-                onPress={() => {
-                  if (isUnlocked) {
-                    onThemeChange(theme.id);
-                  } else {
-                    Alert.alert(
-                      "Premium theme",
-                      `Unlock "${theme.name}" and every premium theme with Unlimited.`,
-                      [
-                        { text: "Not now", style: "cancel" },
-                        { text: "See plans", onPress: () => router.push("/pricing") },
-                      ]
-                    );
-                  }
-                }}
+                // Selection is free — entitlement is settled once, at publish.
+                onPress={() => onThemeChange(theme.id)}
                 style={({ pressed }) => ({
                   width: "47%",
                   borderRadius: radii.lg,
@@ -217,9 +203,9 @@ export default function OccasionStep({
                           paddingVertical: 2,
                         }}
                       >
-                        <Lock size={9} color={colors.goldChipText} />
+                        <Sparkles size={9} color={colors.goldChipText} />
                         <Txt style={{ fontFamily: fonts.bodyMedium, fontSize: 9, color: colors.goldChipText }}>
-                          ${theme.price.toFixed(2)}
+                          Premium
                         </Txt>
                       </View>
                     )}

@@ -366,6 +366,7 @@ export type Database = {
           creator_id: string
           deleted_at: string | null
           enable_dodge_no: boolean | null
+          events: Json
           expires_at: string | null
           id: string
           is_active: boolean | null
@@ -392,6 +393,7 @@ export type Database = {
           creator_id: string
           deleted_at?: string | null
           enable_dodge_no?: boolean | null
+          events?: Json
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -418,6 +420,7 @@ export type Database = {
           creator_id?: string
           deleted_at?: string | null
           enable_dodge_no?: boolean | null
+          events?: Json
           expires_at?: string | null
           id?: string
           is_active?: boolean | null

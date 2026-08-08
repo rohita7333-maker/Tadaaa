@@ -28,7 +28,9 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Confetti, Ribbons } from "@/components/reveal/Particles";
 import { getInviteForReveal, recordAnswer, recordRsvp, recordView, type RevealData } from "@/lib/db";
 import { fetchRevealPhotos } from "@/lib/api";
-import { getThemeById, gradientStops, themes } from "@/lib/themes";
+import { getOccasionById, getThemeById, gradientStops, themes } from "@/lib/themes";
+import ScrollStoryReveal from "@/components/reveal/scrollstory/ScrollStoryReveal";
+import { inviteToStoryConfig } from "@/lib/scroll-story/from-invite";
 
 export default function SurpriseReveal() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -106,6 +108,44 @@ export default function SurpriseReveal() {
           The link may have expired or been closed by its creator.
         </Txt>
       </LinearGradient>
+    );
+  }
+
+  if (data.invite.reveal_type === "scroll_story") {
+    const storyConfig = {
+      ...inviteToStoryConfig(
+        {
+          slug: data.invite.slug,
+          title: data.invite.title,
+          message: data.invite.message,
+          countdown_date: data.invite.countdown_date,
+          is_paid: data.invite.is_paid ?? undefined,
+          photos: [],
+          // `events` jsonb exists on the live row but not yet in the generated
+          // types; read it untyped and let toStoryEvents validate it.
+          events: data.invite.events,
+        },
+        { occasionLabel: getOccasionById(data.invite.occasion_type)?.label }
+      ),
+      // Signed photo URLs resolve asynchronously (mobile-only extra step vs.
+      // web) — mapped separately so photos without a resolved URL still
+      // render as themed placeholders with their caption, instead of being
+      // dropped or shown with a broken/empty src.
+      photos: data.photos.map((p) => ({
+        src: photoUrls[p.id],
+        caption: p.caption ?? undefined,
+        rotationDeg: p.rotation_deg ?? undefined,
+      })),
+    };
+    return (
+      <View style={{ flex: 1 }}>
+        {canGoBack && (
+          <View style={{ position: "absolute", top: insets.top, left: 0, right: 0, zIndex: 50 }} pointerEvents="box-none">
+            <ScreenHeader variant="back" onDark />
+          </View>
+        )}
+        <ScrollStoryReveal config={storyConfig} inviteId={data.invite.id} />
+      </View>
     );
   }
 

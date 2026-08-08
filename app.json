@@ -71,7 +71,9 @@
           "imageWidth": 120
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-audio",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

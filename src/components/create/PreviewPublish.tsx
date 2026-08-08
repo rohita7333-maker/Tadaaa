@@ -12,7 +12,7 @@ interface Props {
   title: string;
   message: string;
   themeId: string;
-  revealType: "tap" | "countdown";
+  revealType: "tap" | "countdown" | "scroll_story";
   photoCount: number;
   questionCount: number;
   tier: string;
@@ -183,7 +183,16 @@ export default function PreviewPublish({
         <SummaryRow label="Theme" value={theme?.name ?? "—"} />
         <SummaryRow label="Photos" value={String(photoCount)} />
         <SummaryRow label="Questions" value={String(questionCount)} />
-        <SummaryRow label="Reveal" value={revealType === "tap" ? "Tap to reveal" : "Countdown"} />
+        <SummaryRow
+          label="Reveal"
+          value={
+            revealType === "tap"
+              ? "Tap to reveal"
+              : revealType === "countdown"
+                ? "Countdown"
+                : "Scroll story"
+          }
+        />
       </View>
 
       {tier === "free" && (

@@ -1,15 +1,15 @@
 import { Pressable, Switch, View } from "react-native";
-import { Clock, Hand } from "lucide-react-native";
+import { Clock, Hand, Moon } from "lucide-react-native";
 import { Txt, colors, fonts, radii, spacing } from "@/components/ui";
 
 interface Props {
-  revealType: "tap" | "countdown";
+  revealType: "tap" | "countdown" | "scroll_story";
   countdownDate: string; // ISO or ""
   expiresAt: string; // ISO or ""
   hasExpiry: boolean;
   acceptContributions: boolean;
   enableDodgeNo: boolean;
-  onRevealTypeChange: (v: "tap" | "countdown") => void;
+  onRevealTypeChange: (v: "tap" | "countdown" | "scroll_story") => void;
   onCountdownDateChange: (v: string) => void;
   onExpiresAtChange: (v: string) => void;
   onHasExpiryChange: (v: boolean) => void;
@@ -115,43 +115,91 @@ export default function RevealSettings({
     <View style={{ gap: spacing.lg }}>
       <View style={{ gap: spacing.sm }}>
         <Txt variant="label">Reveal mechanic</Txt>
-        <View style={{ flexDirection: "row", gap: spacing.sm }}>
+        <View style={{ gap: spacing.sm }}>
           {(
             [
-              { key: "tap", label: "Tap to Reveal", sub: "They tap to open", Icon: Hand },
-              { key: "countdown", label: "Countdown", sub: "Build anticipation", Icon: Clock },
+              { key: "tap", label: "Tap to Reveal", sub: "They tap to open", Icon: Hand, isNew: false },
+              { key: "countdown", label: "Countdown", sub: "Build anticipation", Icon: Clock, isNew: false },
+              {
+                key: "scroll_story",
+                label: "Scroll Story",
+                sub: "The moment unfolds as they scroll",
+                Icon: Moon,
+                isNew: true,
+              },
             ] as const
-          ).map(({ key, label, sub, Icon }) => {
+          ).map(({ key, label, sub, Icon, isNew }) => {
             const selected = revealType === key;
             return (
               <Pressable
                 key={key}
                 onPress={() => onRevealTypeChange(key)}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                accessibilityLabel={`${label}. ${sub}`}
                 style={({ pressed }) => ({
-                  flex: 1,
+                  flexDirection: "row",
                   alignItems: "center",
-                  gap: 6,
+                  gap: spacing.md,
                   padding: spacing.md,
                   borderRadius: radii.lg,
                   borderWidth: 2,
                   borderColor: selected ? colors.rose : colors.lightGray,
                   backgroundColor: selected ? colors.roseChipBg : colors.white,
-                  transform: [{ scale: pressed ? 0.97 : 1 }],
+                  transform: [{ scale: pressed ? 0.98 : 1 }],
                 })}
               >
-                <Icon size={22} color={selected ? colors.rose : colors.warmGray} />
-                <Txt
+                <View
                   style={{
-                    fontFamily: fonts.bodyMedium,
-                    fontSize: 13,
-                    color: selected ? colors.roseDeep : colors.charcoal,
+                    width: 40,
+                    height: 40,
+                    borderRadius: radii.md,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: selected ? colors.white : colors.cream,
                   }}
                 >
-                  {label}
-                </Txt>
-                <Txt variant="body" muted style={{ fontSize: 10.5 }}>
-                  {sub}
-                </Txt>
+                  <Icon size={20} color={selected ? colors.rose : colors.warmGray} />
+                </View>
+                <View style={{ flex: 1, gap: 1 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Txt
+                      style={{
+                        fontFamily: fonts.bodyMedium,
+                        fontSize: 13.5,
+                        color: selected ? colors.roseDeep : colors.charcoal,
+                      }}
+                    >
+                      {label}
+                    </Txt>
+                    {isNew && (
+                      <View
+                        style={{
+                          backgroundColor: colors.goldChipBg,
+                          borderColor: colors.goldChipBorder,
+                          borderWidth: 1,
+                          borderRadius: radii.pill,
+                          paddingHorizontal: 6,
+                          paddingVertical: 1,
+                        }}
+                      >
+                        <Txt
+                          style={{
+                            fontFamily: fonts.bodyBold,
+                            fontSize: 8.5,
+                            letterSpacing: 0.4,
+                            color: colors.goldChipText,
+                          }}
+                        >
+                          NEW
+                        </Txt>
+                      </View>
+                    )}
+                  </View>
+                  <Txt variant="body" muted style={{ fontSize: 11 }}>
+                    {sub}
+                  </Txt>
+                </View>
               </Pressable>
             );
           })}

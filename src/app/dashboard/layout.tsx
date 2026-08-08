@@ -40,6 +40,7 @@ export default async function DashboardLayout({
         subscriptionTier={profile?.subscription_tier ?? "free"}
         inviteCount={inviteCount ?? 0}
         greetingName={greetingName}
+        activeRoute="dashboard"
       />
       <div className="max-w-6xl mx-auto px-6 py-8">{children}</div>
     </div>

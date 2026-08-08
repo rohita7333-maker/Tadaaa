@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Plus, Sparkles, Eye, Gift, TrendingUp, MessageCircle, Heart } from "lucide-react";
+import { Plus, Sparkles, Eye, Gift, TrendingUp, MessageCircle, Heart, LayoutTemplate, ArrowRight, Activity } from "lucide-react";
 import InviteList from "@/components/dashboard/InviteList";
 import OccasionFilter from "@/components/dashboard/OccasionFilter";
 import OnboardingModal from "@/components/dashboard/OnboardingModal";
@@ -92,13 +92,33 @@ export default async function DashboardPage({ searchParams }: Props) {
   const totalRsvps = Object.values(rsvpMap).reduce((s, n) => s + n, 0);
   const activeCount = all.filter((inv) => inv.is_active).length;
 
+  // The three engagement tiles drill into the Activity feed — the aggregate
+  // number answers "how many", the feed answers "who". Sorting by the same
+  // metrics moved to the explicit sort row below the filters.
   const stats: { label: string; value: number; icon: typeof Gift; color: string; href: string; hint: string }[] = [
     { label: "Total Surprises", value: all.length, icon: Gift, color: "#C4686D", href: "/dashboard", hint: "Every surprise you've created" },
-    { label: "Total Views", value: totalViews, icon: Eye, color: "#C9A96E", href: "/dashboard?sort=views", hint: "Times your surprise pages were opened (your own previews don't count) · click to sort" },
-    { label: "RSVPs", value: totalRsvps, icon: Heart, color: "#C4686D", href: "/dashboard?sort=rsvps", hint: "Guests who tapped “I'm in!” to confirm · click to sort" },
-    { label: "Responses", value: totalResponses, icon: MessageCircle, color: "#6B8F71", href: "/dashboard?sort=responses", hint: "Answers to the yes/no questions you added · click to sort" },
+    { label: "Total Views", value: totalViews, icon: Eye, color: "#C9A96E", href: "/dashboard/activity?focus=views", hint: "Times your surprise pages were opened (your own previews don't count) · click to see who" },
+    { label: "RSVPs", value: totalRsvps, icon: Heart, color: "#C4686D", href: "/dashboard/activity?focus=rsvps", hint: "Guests who tapped “I'm in!” to confirm · click to see who" },
+    { label: "Responses", value: totalResponses, icon: MessageCircle, color: "#6B8F71", href: "/dashboard/activity?focus=answers", hint: "Answers to the yes/no questions you added · click to see them" },
     { label: "Active", value: activeCount, icon: TrendingUp, color: "#B07CC6", href: "/dashboard?status=active", hint: "Surprises that are live right now · click to filter" },
   ];
+
+  // Sort controls — preserved from the old stat-tile links so the ?sort= params
+  // keep an entry point now that the tiles drill into Activity instead.
+  const sortOptions: { key: string; label: string }[] = [
+    { key: "", label: "Newest" },
+    { key: "views", label: "Most viewed" },
+    { key: "rsvps", label: "Most RSVPs" },
+    { key: "responses", label: "Most answers" },
+  ];
+  function sortHref(key: string): string {
+    const params = new URLSearchParams();
+    if (occasion) params.set("occasion", occasion);
+    if (statusFilter) params.set("status", statusFilter);
+    if (key) params.set("sort", key);
+    const qs = params.toString();
+    return qs ? `/dashboard?${qs}` : "/dashboard";
+  }
 
   const occasionsInUse = Array.from(new Set(all.map((inv) => inv.occasion_type).filter(Boolean))) as string[];
 
@@ -130,6 +150,26 @@ export default async function DashboardPage({ searchParams }: Props) {
         </Link>
       </div>
 
+      {/* Start-from-a-template CTA — mirrors the stat card styling */}
+      <Link
+        href="/templates"
+        className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-[#D4CBC3]/30 shadow-[0_2px_12px_rgba(45,41,38,0.04)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,41,38,0.10)] hover:border-[#C4686D]/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 mb-8"
+      >
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: "#B07CC615" }}
+        >
+          <LayoutTemplate className="w-4 h-4" style={{ color: "#B07CC6" }} />
+        </div>
+        <div className="flex-1">
+          <p className="font-medium text-[#2D2926] text-sm">Start from a template</p>
+          <p className="text-[#6B5E57] text-xs mt-0.5">
+            Occasion, theme and reveal picked for you — just add your words
+          </p>
+        </div>
+        <ArrowRight className="w-4 h-4 text-[#6B5E57] flex-shrink-0" />
+      </Link>
+
       {/* Stats strip — clickable filters/sorts */}
       {all.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
@@ -157,11 +197,45 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* Occasion filter */}
+      {/* Activity drilldown — the "who" behind the numbers above */}
+      {all.length > 0 && (
+        <Link
+          href="/dashboard/activity"
+          className="inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors mb-8 -mt-4 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 rounded-lg"
+        >
+          <Activity className="w-3.5 h-3.5" />
+          See all activity
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      )}
+
+      {/* Occasion filter + sort */}
       {all.length > 0 && (
         <Suspense>
           <OccasionFilter current={occasion ?? null} />
         </Suspense>
+      )}
+      {all.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <span className="text-xs text-[#9B8E87] mr-1">Sort</span>
+          {sortOptions.map((opt) => {
+            const active = (sort ?? "") === opt.key;
+            return (
+              <Link
+                key={opt.key || "newest"}
+                href={sortHref(opt.key)}
+                aria-current={active ? "true" : undefined}
+                className={`h-8 inline-flex items-center px-3 rounded-full text-xs font-medium border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 ${
+                  active
+                    ? "bg-[#FFF0EE] border-[#C4686D] text-[#C4686D]"
+                    : "bg-white border-[#D4CBC3]/60 text-[#6B5E57] hover:border-[#C4686D]/40 hover:text-[#2D2926]"
+                }`}
+              >
+                {opt.label}
+              </Link>
+            );
+          })}
+        </div>
       )}
 
       {/* Empty state — no invites at all */}

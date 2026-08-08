@@ -2,7 +2,7 @@
 
 import { cache } from "react";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { createInviteSchema, inviteQuestionsSchema } from "@/lib/schemas";
+import { createInviteSchema, inviteQuestionsSchema, eventsSchema } from "@/lib/schemas";
 import { generateInviteSlug } from "@/lib/utils";
 import {
   STORAGE_BUCKET,
@@ -16,6 +16,9 @@ import { trackServer } from "@/lib/analytics";
 import { scanImage } from "@/lib/moderation";
 import { logAudit } from "@/lib/audit";
 import { validateGiftForUser } from "@/lib/gift-redemption";
+import { verifyThemeUnlockSession } from "@/lib/theme-unlock";
+import { rateLimit } from "@/lib/rate-limit";
+import type Stripe from "stripe";
 
 const MAX_PHOTOS = 8;
 import { revalidatePath } from "next/cache";
@@ -87,11 +90,94 @@ export async function createInviteShell(formData: FormData) {
   if (!themeMeta) {
     return { error: "Unknown theme" };
   }
+  // Set once the premium theme was paid for with a verified Stripe session —
+  // stamped onto the invite row so the webhook and this action agree on which
+  // surprise the purchase belongs to.
+  let paidThemeSessionId: string | null = null;
+
   if (themeMeta.isPremium && !canUsePremiumTheme(activeTier, false)) {
-    return {
+    const upgradeError = {
       error:
         "Premium theme requires upgrade. Buy this theme on the pricing page or upgrade to Unlimited.",
     };
+
+    // A free user who just completed the $4.99 one-off checkout returns with the
+    // Checkout Session id. Stripe is the source of truth: retrieve the session,
+    // verify it was paid by THIS user for THIS theme, and make sure the purchase
+    // has not already been spent on another surprise.
+    const stripeSessionId =
+      ((formData.get("stripeSessionId") as string | null) ?? "").trim();
+    if (!stripeSessionId) return upgradeError;
+
+    // Each retrieve is an outbound Stripe API call driven by a user-supplied
+    // id. Cap it per user so a scripted client cannot use this action as a
+    // free session-id oracle or burn the Stripe rate budget.
+    if (!(await rateLimit(`theme-verify:${user.id}`, 5, 60_000))) {
+      return { error: "Too many attempts. Please wait a moment and try again." };
+    }
+
+    // Imported lazily: the Stripe client constructs at module load and needs
+    // STRIPE_SECRET_KEY, which only this rare branch actually requires.
+    let session: Stripe.Checkout.Session;
+    try {
+      const { stripe } = await import("@/lib/stripe");
+      session = await stripe.checkout.sessions.retrieve(stripeSessionId);
+    } catch {
+      return upgradeError;
+    }
+
+    const verdict = verifyThemeUnlockSession(session, {
+      userId: user.id,
+      themeId: theme,
+    });
+    if (!verdict.valid) return { error: verdict.reason ?? upgradeError.error };
+
+    // Anti-replay: one purchase, one surprise.
+    //
+    // Deliberately NOT filtered by deleted_at. Soft-deleted rows keep their
+    // stripe_session_id, and sql/invite_session_unique.sql makes that column
+    // unique — skipping them here would turn the clear "already used" message
+    // into an opaque insert failure. Instead every stale holder, deleted or
+    // not, goes through the release path below.
+    const { data: alreadyUsed } = await adminClient
+      .from("invites")
+      .select("id, creator_id, is_active, deleted_at")
+      .eq("stripe_session_id", stripeSessionId)
+      .limit(1)
+      .maybeSingle();
+
+    if (alreadyUsed) {
+      // The buyer's own never-activated shell is an abandoned publish attempt
+      // (shell insert succeeded, photo upload then failed and left no cleanup —
+      // create/page.tsx bails without deleting it). A soft-deleted row is the
+      // same story after the user tidied it away. Either way the purchase was
+      // never actually spent on a live surprise, so let this attempt have it.
+      // Anything else — another account's row, or one that really did go live
+      // — is a genuine replay and stays blocked.
+      const isOwn = (alreadyUsed as { creator_id?: string }).creator_id === user.id;
+      const neverWentLive =
+        (alreadyUsed as { is_active?: boolean }).is_active === false ||
+        !!(alreadyUsed as { deleted_at?: string | null }).deleted_at;
+
+      if (!isOwn || !neverWentLive) {
+        return { error: "This purchase was already used for another surprise." };
+      }
+
+      // Release the session from the stale row so this attempt can claim it
+      // (and so the unique index has room). The creator_id + is_active guards
+      // make the update a no-op if a concurrent finalize activated it first.
+      const { error: releaseError } = await adminClient
+        .from("invites")
+        .update({ stripe_session_id: null, is_paid: false })
+        .eq("id", (alreadyUsed as { id: string }).id)
+        .eq("creator_id", user.id)
+        .eq("is_active", false);
+      if (releaseError) {
+        return { error: "This purchase was already used for another surprise." };
+      }
+    }
+
+    paidThemeSessionId = stripeSessionId;
   }
 
   const VALID_OCCASIONS = ["date", "birthday", "festival", "mothers_day", "fathers_day", "apology", "custom"] as const;
@@ -117,8 +203,55 @@ export async function createInviteShell(formData: FormData) {
   const acceptContributions =
     formData.get("acceptContributions") === "true";
 
-  // Insert invite
-  const { data: invite, error: insertError } = await supabase
+  // Scroll Story timeline plaques — persisted to the invites.events jsonb
+  // column. Only scroll_story reveals carry events; every other mechanic
+  // stores '[]'. The JSON is validated with the same eventsSchema the client
+  // uses (label/title required, detail/mapsQuery optional, max 4). Note the
+  // stored shape keeps camelCase keys (label, title, detail, mapsQuery) —
+  // from-invite.ts reads them verbatim. Invalid JSON is rejected outright,
+  // mirroring the questions-parse error style below.
+  let events: unknown[] = [];
+  if (revealType === "scroll_story") {
+    const eventsJson = formData.get("events") as string | null;
+    if (eventsJson && eventsJson.length < 10_000) {
+      let parsedRaw: unknown;
+      try {
+        parsedRaw = JSON.parse(eventsJson);
+      } catch {
+        return { error: "Invalid events data. Please try again." };
+      }
+      // Drop rows the user added but left fully blank, then validate the rest.
+      const nonEmpty = Array.isArray(parsedRaw)
+        ? parsedRaw.filter(
+            (e) =>
+              e &&
+              typeof e === "object" &&
+              Object.values(e).some((v) => typeof v === "string" && v.trim() !== "")
+          )
+        : parsedRaw;
+      const parsed = eventsSchema.safeParse(nonEmpty);
+      if (!parsed.success) {
+        const idx = typeof parsed.error.issues[0]?.path?.[0] === "number"
+          ? ` ${(parsed.error.issues[0].path[0] as number) + 1}`
+          : "";
+        return { error: `Please fill in plaque${idx} — every plaque needs a label and a title, or remove it.` };
+      }
+      events = parsed.data;
+    }
+  }
+
+  // Insert invite.
+  //
+  // Stamped (is_paid: true) inserts go through the service-role client on
+  // purpose: sql/premium_enforcement.sql adds a BEFORE INSERT/UPDATE trigger
+  // that silently forces is_paid=false for the client-facing `authenticated`
+  // and `anon` roles, closing the anon-key forgery hole the mobile app's
+  // direct-to-DB writes would otherwise leave open. Service role is exempt, so
+  // this server-verified path keeps working. creator_id is set explicitly
+  // below, so bypassing the RLS with_check changes nothing today — behaviour is
+  // identical before and after that migration is applied.
+  const insertClient = paidThemeSessionId ? adminClient : supabase;
+  const { data: invite, error: insertError } = await insertClient
     .from("invites")
     .insert({
       creator_id: user.id,
@@ -131,7 +264,11 @@ export async function createInviteShell(formData: FormData) {
       expires_at: expiresAt || null,
       occasion_type: occasionType,
       accept_contributions: acceptContributions,
+      events,
       is_active: false,
+      ...(paidThemeSessionId
+        ? { stripe_session_id: paidThemeSessionId, is_paid: true }
+        : {}),
     })
     .select("id")
     .single();
@@ -524,5 +661,21 @@ async function _getInviteBySlugImpl(slug: string) {
       .map((res) => res.value);
   }
 
-  return { ...invite, photos: signedPhotos, questions, videoUrl, contributions };
+  // Creator display name — powers the Scroll Story "from <sender>" line.
+  // Fetched separately (there is no invites→profiles FK join in this schema)
+  // and PII-minimal: full_name only, never email. A missing/blank name simply
+  // omits the sender line downstream, so failures degrade gracefully.
+  let creatorName: string | null = null;
+  const creatorId = (invite as { creator_id?: string }).creator_id;
+  if (creatorId) {
+    const { data: creatorProfile } = await adminClient
+      .from("profiles")
+      .select("full_name")
+      .eq("id", creatorId)
+      .maybeSingle();
+    const rawName = (creatorProfile as { full_name?: string | null } | null)?.full_name;
+    creatorName = rawName?.trim() || null;
+  }
+
+  return { ...invite, photos: signedPhotos, questions, videoUrl, contributions, creatorName };
 }

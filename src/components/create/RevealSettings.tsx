@@ -1,19 +1,20 @@
 "use client";
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Clock, Hand } from "lucide-react";
+import { Clock, Hand, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { springs, durations, easings, makeReducedMotionTransition } from "@/lib/motion";
+import type { RevealStyle } from "@/lib/templates";
 
 interface RevealSettingsProps {
-  revealType: "tap" | "countdown";
+  revealType: RevealStyle;
   countdownDate: string;
   expiresAt: string;
   hasExpiry: boolean;
   acceptContributions: boolean;
-  onRevealTypeChange: (v: "tap" | "countdown") => void;
+  onRevealTypeChange: (v: RevealStyle) => void;
   onCountdownDateChange: (v: string) => void;
   onExpiresAtChange: (v: string) => void;
   onHasExpiryChange: (v: boolean) => void;
@@ -47,7 +48,7 @@ export default function RevealSettings({
         <Label className="text-[#2D2926] font-medium text-sm mb-3 block">
           Reveal mechanic
         </Label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <motion.button
             type="button"
             onClick={() => onRevealTypeChange("tap")}
@@ -101,12 +102,44 @@ export default function RevealSettings({
               <p className="text-[#6B5E57] text-xs mt-0.5">Build anticipation</p>
             </div>
           </motion.button>
+
+          <motion.button
+            type="button"
+            onClick={() => onRevealTypeChange("scroll_story")}
+            initial={false}
+            animate={{ scale: revealType === "scroll_story" ? 1.02 : 1 }}
+            whileTap={shouldReduce ? {} : { scale: 0.96 }}
+            transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
+            className={cn(
+              "relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
+              revealType === "scroll_story"
+                ? "border-[#C4686D] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(196,104,109,0.1)]"
+                : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
+            )}
+          >
+            <span className="absolute right-2 top-2 rounded-full bg-[#C4686D] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+              New
+            </span>
+            <Moon
+              className={`w-6 h-6 ${revealType === "scroll_story" ? "text-[#C4686D]" : "text-[#6B5E57]"}`}
+            />
+            <div>
+              <p
+                className={`font-medium text-sm ${revealType === "scroll_story" ? "text-[#C4686D]" : "text-[#2D2926]"}`}
+              >
+                Scroll Story
+              </p>
+              <p className="text-[#6B5E57] text-xs mt-0.5">A cinematic scroll</p>
+            </div>
+          </motion.button>
         </div>
       </div>
 
-      {/* Countdown date picker — slides in when selected */}
+      {/* Reveal date picker — slides in for countdown AND scroll story.
+          Countdown gates the whole reveal on the date; scroll story uses it
+          to power the finale countdown at the end of the cinematic scroll. */}
       <AnimatePresence>
-        {revealType === "countdown" && (
+        {(revealType === "countdown" || revealType === "scroll_story") && (
           <motion.div
             key="countdown-date"
             initial={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
@@ -115,7 +148,7 @@ export default function RevealSettings({
             transition={conditionalFieldTransition(shouldReduce)}
           >
             <Label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
-              Reveal date & time
+              Reveal date &amp; time
             </Label>
             <input
               type="datetime-local"
@@ -124,6 +157,11 @@ export default function RevealSettings({
               onChange={(e) => onCountdownDateChange(e.target.value)}
               className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] text-sm bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
             />
+            {revealType === "scroll_story" && (
+              <p className="text-[#6B5E57] text-xs mt-1.5">
+                The big day — powers the finale countdown ✨
+              </p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

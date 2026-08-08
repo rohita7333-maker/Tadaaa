@@ -127,7 +127,10 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       subscription_type: "plus",
     },
-    success_url: `${APP_URL}/create?theme=${themeId}&payment=success`,
+    // session_id lets the publish path verify the purchase server-side
+    // (createInviteShell → verifyThemeUnlockSession) instead of trusting the
+    // client's claim that it paid.
+    success_url: `${APP_URL}/create?theme=${themeId}&payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${APP_URL}/create?payment=cancelled`,
   });
 

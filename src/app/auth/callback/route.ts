@@ -2,28 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 import { welcomeEmail } from "@/lib/email/templates";
-
-// Allowlist of safe next-path prefixes. Anything outside this list falls back
-// to /dashboard. Prevents open-redirect via `?next=https://evil.com`.
-const ALLOWED_NEXT_PREFIXES = [
-  "/dashboard",
-  "/create",
-  "/settings",
-  "/pricing",
-  "/auth/reset-password",
-  "/about",
-];
-
-function safeNext(raw: string | null): string {
-  if (!raw) return "/dashboard";
-  // Must be a same-origin path, not a protocol-relative URL.
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
-  // Strip any embedded scheme or `\` Windows hack.
-  if (/[\\:]/.test(raw)) return "/dashboard";
-  return ALLOWED_NEXT_PREFIXES.some((p) => raw === p || raw.startsWith(`${p}/`) || raw.startsWith(`${p}?`))
-    ? raw
-    : "/dashboard";
-}
+import { safeNext } from "@/lib/auth-redirect";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);

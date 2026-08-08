@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Check, ExternalLink } from "lucide-react";
+import { Check, ExternalLink, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getThemeById } from "@/lib/themes";
-import { APP_URL } from "@/lib/constants";
+import { canPublishTheme } from "@/lib/publish-gate";
+import { APP_URL, PREMIUM_THEME_PRICE } from "@/lib/constants";
 import { springs, durations, makeReducedMotionTransition } from "@/lib/motion";
 import type { PhotoFile } from "./PhotoUploader";
+import { REVEAL_STYLE_LABELS, type RevealStyle } from "@/lib/templates";
 import ShareButtons from "@/components/dashboard/ShareButtons";
 import VideoGenerator from "./VideoGenerator";
 
@@ -15,10 +17,14 @@ interface PreviewPublishProps {
   title: string;
   message: string;
   theme: string;
-  revealType: "tap" | "countdown";
+  revealType: RevealStyle;
   photos: PhotoFile[];
   tier?: string;
   acceptContributions?: boolean;
+  /** Selected theme was unlocked by a one-off checkout earlier this session. */
+  sessionUnlocked?: boolean;
+  /** Starts the $4.99 one-off checkout for the selected premium theme. */
+  onUnlockTheme?: () => void;
   onPublish: () => Promise<{ slug: string; inviteId: string } | null>;
 }
 
@@ -30,6 +36,8 @@ export default function PreviewPublish({
   photos,
   tier = "free",
   acceptContributions = false,
+  sessionUnlocked = false,
+  onUnlockTheme,
   onPublish,
 }: PreviewPublishProps) {
   const [publishing, setPublishing] = useState(false);
@@ -40,6 +48,14 @@ export default function PreviewPublish({
   const themeData = getThemeById(theme);
   const firstPhoto = photos[0];
   const link = publishedSlug ? `${APP_URL}/surprise/${publishedSlug}` : "";
+
+  // The wizard's only price moment. Everything upstream is free to choose;
+  // entitlement is settled here, once, right before publishing.
+  const gate = canPublishTheme({
+    isPremium: !!themeData?.isPremium,
+    sessionUnlocked,
+    tier,
+  });
 
   async function handlePublish() {
     setPublishing(true);
@@ -214,7 +230,11 @@ export default function PreviewPublish({
                       className="text-xs opacity-70"
                       style={{ color: themeData?.colors.text || "#fff" }}
                     >
-                      {revealType === "tap" ? "Tap to open ✨" : "Countdown reveal ⏱"}
+                      {revealType === "tap"
+                        ? "Tap to open ✨"
+                        : revealType === "scroll_story"
+                          ? "Scroll story 🌙"
+                          : "Countdown reveal ⏱"}
                     </p>
                   </div>
 
@@ -237,7 +257,7 @@ export default function PreviewPublish({
             </div>
             <div className="flex justify-between">
               <span className="text-[#6B5E57]">Reveal</span>
-              <span className="text-[#2D2926] font-medium capitalize">{revealType}</span>
+              <span className="text-[#2D2926] font-medium">{REVEAL_STYLE_LABELS[revealType]}</span>
             </div>
           </div>
 
@@ -252,33 +272,91 @@ export default function PreviewPublish({
             </div>
           )}
 
-          {/* Publish CTA — whileTap spring replaces CSS hover:scale */}
-          <motion.div
-            whileTap={shouldReduce ? {} : { scale: 0.97 }}
-            transition={springs.soft}
-            className="w-full"
-          >
-            <Button
-              onClick={handlePublish}
-              disabled={publishing}
-              className="w-full h-14 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white text-base font-medium transition-colors shadow-lg pulse-glow"
-            >
-              {publishing ? (
-                <span className="flex items-center gap-2">
-                  <motion.span
-                    animate={shouldReduce ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.7, 1] }}
-                    transition={{ repeat: Infinity, duration: durations.base }}
-                    style={{ display: "inline-flex" }}
+          {/* Premium gate — the one place a price appears in the wizard.
+              Cross-fades with the publish CTA so an entitlement change
+              (e.g. unlocking a theme mid-step) never pops in raw. */}
+          <AnimatePresence mode="wait" initial={false}>
+            {!gate.allowed ? (
+              <motion.div
+                key="gate"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
+                className="rounded-2xl border border-[#C9A96E]/40 bg-gradient-to-br from-[#FFF8F0] to-[#FDF1E3] p-5"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="shrink-0 grid place-items-center w-10 h-10 rounded-xl bg-white/70 border border-[#C9A96E]/25">
+                    <Sparkles className="w-5 h-5 text-[#C9A96E]" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-heading text-lg text-[#2D2926] leading-tight">
+                      Premium surprise — ${PREMIUM_THEME_PRICE.toFixed(2)}
+                    </p>
+                    <p className="mt-1 text-sm text-[#6B5E57] leading-snug">
+                      <span className="font-medium text-[#2D2926]">
+                        {themeData?.name}
+                      </span>{" "}
+                      is a premium theme. Unlock it once, or get every premium
+                      theme with Unlimited.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={onUnlockTheme}
+                    disabled={!onUnlockTheme}
+                    className="flex-1 h-12 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-medium transition-colors shadow-md"
                   >
-                    ✨
-                  </motion.span>
-                  Publishing…
-                </span>
-              ) : (
-                <>✨ Publish Your Surprise</>
-              )}
-            </Button>
-          </motion.div>
+                    Unlock for ${PREMIUM_THEME_PRICE.toFixed(2)}
+                  </Button>
+                  <a
+                    href="/pricing"
+                    className="flex-1 inline-flex items-center justify-center h-12 rounded-full border border-[#C9A96E]/50 text-[#8A6F35] hover:bg-[#C9A96E]/10 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
+                  >
+                    Go Unlimited
+                  </a>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="cta"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
+              >
+                {/* Publish CTA — whileTap spring replaces CSS hover:scale */}
+                <motion.div
+                  whileTap={shouldReduce ? {} : { scale: 0.97 }}
+                  transition={springs.soft}
+                  className="w-full"
+                >
+                  <Button
+                    onClick={handlePublish}
+                    disabled={publishing}
+                    className="w-full h-14 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white text-base font-medium transition-colors shadow-lg pulse-glow"
+                  >
+                    {publishing ? (
+                      <span className="flex items-center gap-2">
+                        <motion.span
+                          animate={shouldReduce ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.7, 1] }}
+                          transition={{ repeat: Infinity, duration: durations.base }}
+                          style={{ display: "inline-flex" }}
+                        >
+                          ✨
+                        </motion.span>
+                        Publishing…
+                      </span>
+                    ) : (
+                      <>✨ Publish Your Surprise</>
+                    )}
+                  </Button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>

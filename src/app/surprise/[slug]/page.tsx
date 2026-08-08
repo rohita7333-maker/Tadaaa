@@ -3,10 +3,12 @@ import { headers } from "next/headers";
 import { getInviteBySlug } from "@/actions/invite";
 import { logInviteViewBySlug } from "@/lib/invite-view";
 import { getIp } from "@/lib/rate-limit";
-import { getThemeById } from "@/lib/themes";
+import { getThemeById, occasions } from "@/lib/themes";
 import { isExpired } from "@/lib/utils";
 import TapToReveal from "@/components/surprise/TapToReveal";
 import CountdownReveal from "@/components/surprise/CountdownReveal";
+import ScrollStoryReveal from "@/components/surprise/scrollstory/ScrollStoryReveal";
+import { inviteToStoryConfig } from "@/lib/scroll-story/from-invite";
 import ReportButton from "@/components/surprise/ReportButton";
 import Link from "next/link";
 import { Heart } from "lucide-react";
@@ -132,6 +134,33 @@ export default async function SurprisePage({ params }: Props) {
     hdrs.get("user-agent") ?? "",
     getIp(hdrs)
   );
+
+  // Scroll Story reveal — Phase 2. Built from the shared adapter so the
+  // cinematic scroll renders from live invite data (photos, message, sender,
+  // occasion, countdown). RSVP flows through ScrollStoryReveal's inviteId path.
+  const occasionLabel = occasions.find((o) => o.id === invite.occasion_type)?.label;
+  const senderName = (invite as { creatorName?: string | null }).creatorName ?? undefined;
+
+  if (invite.reveal_type === "scroll_story") {
+    const storyConfig = inviteToStoryConfig(
+      {
+        slug: invite.slug,
+        title: invite.title,
+        message: invite.message,
+        countdown_date: invite.countdown_date ?? null,
+        is_paid: (invite as { is_paid?: boolean }).is_paid,
+        photos,
+        events: (invite as { events?: unknown }).events,
+      },
+      { senderName, occasionLabel }
+    );
+    return (
+      <div className="fixed inset-0 overflow-y-auto">
+        <ReportButton inviteId={invite.id} />
+        <ScrollStoryReveal config={storyConfig} inviteId={invite.id} />
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 overflow-hidden">

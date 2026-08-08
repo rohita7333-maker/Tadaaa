@@ -3,6 +3,8 @@
 import { getThemeById } from "@/lib/themes";
 import TapToReveal from "@/components/surprise/TapToReveal";
 import CountdownReveal from "@/components/surprise/CountdownReveal";
+import ScrollStoryReveal from "@/components/surprise/scrollstory/ScrollStoryReveal";
+import { demoConfig } from "@/lib/scroll-story/config";
 import { useState } from "react";
 
 const MOCK_QUESTIONS = [
@@ -17,16 +19,32 @@ const MOCK_PHOTOS = [
 ];
 
 const THEMES = ["warm-embrace", "golden-hour", "midnight-romance", "garden-party", "velvet-night", "cotton-candy"];
-const MODES = ["tap", "countdown"] as const;
+const MODES = ["tap", "countdown", "scroll"] as const;
 
 export default function TestSurprisePage() {
   const [themeId, setThemeId] = useState("warm-embrace");
-  const [mode, setMode] = useState<"tap" | "countdown">("tap");
+  const [mode, setMode] = useState<(typeof MODES)[number]>("tap");
   const [started, setStarted] = useState(false);
   // Stamped at the moment the user presses Start — keeps Date.now() out of render.
   const [countdownDate, setCountdownDate] = useState("");
 
   const theme = getThemeById(themeId)!;
+
+  // Scroll story needs window scrolling (parallax), so it renders as a
+  // normal document flow instead of inside a fixed viewport.
+  if (started && mode === "scroll") {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setStarted(false)}
+          className="fixed top-3 left-3 z-50 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full"
+        >
+          ← back to picker
+        </button>
+        <ScrollStoryReveal config={demoConfig} />
+      </div>
+    );
+  }
 
   if (started) {
     return (
@@ -103,7 +121,7 @@ export default function TestSurprisePage() {
                     : "border-[#D4CBC3] text-[#6B5E57]"
                 }`}
               >
-                {m === "tap" ? "👆 Tap to reveal" : "⏱ Countdown (30s)"}
+                {m === "tap" ? "👆 Tap to reveal" : m === "countdown" ? "⏱ Countdown (30s)" : "📜 Scroll story"}
               </button>
             ))}
           </div>

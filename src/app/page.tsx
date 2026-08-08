@@ -1,4 +1,5 @@
 import Hero from "@/components/landing/Hero";
+import TemplateShowcase from "@/components/landing/TemplateShowcase";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Testimonials from "@/components/landing/Testimonials";
 import Footer from "@/components/landing/Footer";
@@ -36,6 +37,7 @@ export default async function LandingPage() {
     <LandingShell>
       <Navbar />
       <Hero surpriseCount={surprises} />
+      <TemplateShowcase />
       <HowItWorks />
       <Testimonials />
 

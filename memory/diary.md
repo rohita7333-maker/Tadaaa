@@ -1214,3 +1214,12 @@ Patched to destructure `onMouseEnter/Leave/Move` from props and compose with int
 - Gate: tsc exit 0 - 321/321 vitest (31 files) green.
 - Full Canva matrix + fix math + decision in memory/project_tadaaaa_collage_templates.md.
 - Left on user's end (collage): nothing required to ship. Optional future: Canva Connect OAuth app + Canva Pro for deterministic live-Canva autofill; Supabase collage_templates table for DB-driven mapping. Separately, uncommitted 2026-06-28 redesign files still on feat/sophistication (globals.css, Hero.tsx, layout.tsx, magnetic-button.tsx, themes.ts, next.config.ts) — not part of this collage commit.
+
+## 2026-08-02 (autonomous overnight) — Coherence overhaul W1→W6 COMPLETE
+- W1 finished by prior session's surviving background agent (lesson: agents outlive dead sessions — check transcript mtime before re-dispatching). Chip collapse + single price gate both repos.
+- W1.5: P0 money path closed — $4.99 checkout now server-verified (theme-unlock.ts + session_id round-trip + anti-replay + is_paid stamp).
+- W2∥W3 wave: activity feed + named RSVP ("Priya is in" E2E loop verified) ∥ filter rail + /surprise/demo curated invite + occasion fix. Each agent needed one resume (stall / API drop) — resume preserved context, zero rework.
+- W4 polish: TemplateCard premium gold contrast fix took /templates a11y 0.96→1.00 (Lighthouse-verified); focus rings, hitSlop, 2 missing cross-fades.
+- W5 hardening: gift purchase flow was dead (no recipient email posted) — rewired existing GiftCTA; signin next= threading root-fixed; disposable-email block; next 16.2.12; push code staged.
+- W6: adversarial review 0 CRIT/3 HIGH → all HIGHs fixed in code or SQL-staged; middleware two-tier (signed-out wizard live); H1 lockout reclaim path; webhook fallback removed.
+- Final: web tsc 0 · 460/460 · build 0; mobile tsc 0 · 90/90 · export 0. ALL UNCOMMITTED (standing hold). 3 migrations staged NOT applied (invite_session_unique, premium_enforcement, push_tokens) + rsvp_name ledger. Stripe E2E blocked on placeholder secret key.

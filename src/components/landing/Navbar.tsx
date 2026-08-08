@@ -45,6 +45,12 @@ export default function Navbar() {
             How it works
           </Link>
           <Link
+            href="/templates"
+            className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium transition-colors"
+          >
+            Templates
+          </Link>
+          <Link
             href="/pricing"
             className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium transition-colors"
           >
@@ -104,6 +110,12 @@ export default function Navbar() {
                 className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium py-2"
               >
                 How it works
+              </Link>
+              <Link
+                href="/templates"
+                className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium py-2"
+              >
+                Templates
               </Link>
               <Link
                 href="/pricing"

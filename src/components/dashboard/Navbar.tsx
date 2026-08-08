@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/actions/auth";
+import { resolveProductNav, type ProductRoute } from "./nav-items";
 
 interface NavbarProps {
   userEmail?: string;
@@ -18,6 +19,8 @@ interface NavbarProps {
   subscriptionTier?: string;
   inviteCount?: number;
   greetingName?: string;
+  /** Which product surface is being viewed — highlights the matching nav item. */
+  activeRoute?: ProductRoute;
 }
 
 export default function Navbar({
@@ -27,6 +30,7 @@ export default function Navbar({
   subscriptionTier = "free",
   inviteCount = 0,
   greetingName,
+  activeRoute,
 }: NavbarProps) {
   const router = useRouter();
   const tierBadge =
@@ -36,6 +40,8 @@ export default function Navbar({
       ? { label: "Plus", cls: "bg-rose-100 text-rose-700" }
       : null;
 
+  const navItems = resolveProductNav(activeRoute);
+
   const hour = new Date().getHours();
   const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
   const firstName = greetingName?.split(" ")[0];
@@ -43,12 +49,37 @@ export default function Navbar({
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-[#D4CBC3]/40 px-6 py-3.5 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center group-hover:scale-105 transition-transform">
-            <Heart className="w-4 h-4 fill-white text-white" />
+        <div className="flex items-center gap-6">
+          <Link href="/dashboard" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Heart className="w-4 h-4 fill-white text-white" />
+            </div>
+            <span className="font-heading text-lg text-[#2D2926]">TaDaaaa</span>
+          </Link>
+          {/* Product nav. Hidden under sm so the logo + greeting + avatar row
+              never overflows a 375px viewport; the logo still returns home. */}
+          <div className="hidden sm:flex items-center gap-5">
+            {navItems.map((item) =>
+              item.isActive ? (
+                <span
+                  key={item.key}
+                  aria-current="page"
+                  className="relative text-[#2D2926] text-sm font-semibold after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[#C4686D] after:content-['']"
+                >
+                  {item.label}
+                </span>
+              ) : (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
           </div>
-          <span className="font-heading text-lg text-[#2D2926]">TaDaaaa</span>
-        </Link>
+        </div>
 
         {/* Middle: greeting + streak/counter */}
         <div className="hidden md:flex flex-1 items-center justify-center gap-3 px-6">
@@ -76,7 +107,7 @@ export default function Navbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Account menu"
-              className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center text-white text-sm font-bold hover:opacity-90 transition-opacity outline-none overflow-hidden"
+              className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center text-white text-sm font-bold hover:opacity-90 transition-opacity outline-none overflow-hidden focus-visible:ring-2 focus-visible:ring-[#C4686D] focus-visible:ring-offset-2"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" className="w-full h-full object-cover" />

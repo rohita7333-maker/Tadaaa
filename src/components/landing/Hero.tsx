@@ -261,7 +261,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
           >
             <OccasionCards />
             <Link
-              href="/surprise/test"
+              href="/surprise/demo"
               className="btn-pill inline-flex items-center gap-1.5 text-sm font-semibold text-[#C4686D] bg-white border border-[#E8A5A8]/40 shadow-sm hover:border-[#C4686D]/40 transition-all"
             >
               <Star className="w-3.5 h-3.5 fill-[#C9A96E] text-[#C9A96E]" />

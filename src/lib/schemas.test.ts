@@ -5,6 +5,7 @@ import {
   magicLinkSchema,
   createInviteSchema,
   inviteQuestionsSchema,
+  eventsSchema,
 } from "./schemas";
 
 describe("signUpSchema", () => {
@@ -36,6 +37,36 @@ describe("signUpSchema", () => {
         password: "longenoughpw",
       }).success
     ).toBe(false);
+  });
+
+  it("rejects disposable email domains", () => {
+    const result = signUpSchema.safeParse({
+      fullName: "Alice",
+      email: "alice@mailinator.com",
+      password: "longenoughpw",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects disposable email domains case-insensitively", () => {
+    const result = signUpSchema.safeParse({
+      fullName: "Alice",
+      email: "alice@MAILINATOR.COM",
+      password: "longenoughpw",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts a non-disposable domain that merely contains a disposable substring", () => {
+    // guards against a naive .includes() check false-positiving on domains
+    // like "notmailinator.com" or subdomains of legitimate providers
+    expect(
+      signUpSchema.safeParse({
+        fullName: "Alice",
+        email: "alice@notmailinator.com",
+        password: "longenoughpw",
+      }).success
+    ).toBe(true);
   });
 });
 
@@ -126,5 +157,75 @@ describe("inviteQuestionsSchema", () => {
       enableDodge: false,
     }));
     expect(inviteQuestionsSchema.safeParse(arr).success).toBe(false);
+  });
+});
+
+describe("eventsSchema", () => {
+  it("accepts a valid event array (label + title, optional detail + mapsQuery)", () => {
+    expect(
+      eventsSchema.safeParse([
+        {
+          label: "When",
+          title: "Saturday, October 24",
+          detail: "golden hour",
+          mapsQuery: "Sunset Terrace, Hyderabad",
+        },
+        { label: "Where", title: "The rooftop" },
+      ]).success
+    ).toBe(true);
+  });
+
+  it("accepts an empty array", () => {
+    expect(eventsSchema.safeParse([]).success).toBe(true);
+  });
+
+  it("rejects more than 4 events", () => {
+    const arr = Array.from({ length: 5 }, (_, i) => ({
+      label: "When",
+      title: `Event ${i}`,
+    }));
+    expect(eventsSchema.safeParse(arr).success).toBe(false);
+  });
+
+  it("rejects an empty label", () => {
+    expect(
+      eventsSchema.safeParse([{ label: "", title: "The plan" }]).success
+    ).toBe(false);
+  });
+
+  it("rejects an empty title", () => {
+    expect(
+      eventsSchema.safeParse([{ label: "When", title: "" }]).success
+    ).toBe(false);
+  });
+
+  it("rejects an oversize label (>30 chars)", () => {
+    expect(
+      eventsSchema.safeParse([{ label: "x".repeat(31), title: "The plan" }])
+        .success
+    ).toBe(false);
+  });
+
+  it("rejects an oversize title (>80 chars)", () => {
+    expect(
+      eventsSchema.safeParse([{ label: "When", title: "x".repeat(81) }])
+        .success
+    ).toBe(false);
+  });
+
+  it("rejects an oversize detail (>120 chars)", () => {
+    expect(
+      eventsSchema.safeParse([
+        { label: "When", title: "The plan", detail: "x".repeat(121) },
+      ]).success
+    ).toBe(false);
+  });
+
+  it("rejects an oversize mapsQuery (>120 chars)", () => {
+    expect(
+      eventsSchema.safeParse([
+        { label: "When", title: "The plan", mapsQuery: "x".repeat(121) },
+      ]).success
+    ).toBe(false);
   });
 });

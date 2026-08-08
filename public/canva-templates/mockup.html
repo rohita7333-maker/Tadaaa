@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#e9e4dc; display:flex; align-items:center; justify-content:center; }
+  .frame {
+    width:1080px; height:1080px; background:#ffffff;
+    padding:28px; display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+    gap:18px;
+  }
+  .cell { overflow:hidden; border-radius:6px; background:#d9d2c8; position:relative; }
+  .cell img { width:100%; height:100%; object-fit:cover; display:block; }
+  .caption {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:#ffffff; color:#2c2622; text-align:center; line-height:1.05;
+    font-family:'Caveat',cursive; font-weight:700;
+  }
+  .caption .heart { font-size:30px; color:#C4686D; margin-bottom:6px; }
+  .caption .t { font-size:46px; letter-spacing:.5px; }
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="cell"><img src="https://picsum.photos/seed/tada1/500/500" /></div>
+    <div class="cell"><img src="https://picsum.photos/seed/tada2/500/500" /></div>
+    <div class="cell"><img src="https://picsum.photos/seed/tada3/500/500" /></div>
+    <div class="cell"><img src="https://picsum.photos/seed/tada4/500/500" /></div>
+    <div class="cell caption"><span class="heart">&#9829;</span><span class="t">You're<br/>Invited!</span></div>
+    <div class="cell"><img src="https://picsum.photos/seed/tada6/500/500" /></div>
+    <div class="cell"><img src="https://picsum.photos/seed/tada7/500/500" /></div>
+    <div class="cell"><img src="https://picsum.photos/seed/tada8/500/500" /></div>
+    <div class="cell"><img src="https://picsum.photos/seed/tada9/500/500" /></div>
+  </div>
+</body>
+</html>

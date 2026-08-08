@@ -8,6 +8,7 @@ import { APP_URL } from "@/lib/constants";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { headers } from "next/headers";
 import { logAudit, getRequestMeta } from "@/lib/audit";
+import { safeNext } from "@/lib/auth-redirect";
 
 async function ipKey(prefix: string): Promise<string> {
   const h = await headers();
@@ -103,7 +104,8 @@ export async function signIn(formData: FormData) {
     });
   });
 
-  redirect("/dashboard");
+  const next = safeNext(formData.get("next") as string | null);
+  redirect(next);
 }
 
 export async function signInWithMagicLink(formData: FormData) {
@@ -118,6 +120,13 @@ export async function signInWithMagicLink(formData: FormData) {
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { email } = parsed.data;
 
+  // Preserve wherever the user was headed (e.g. /create?template=X) through
+  // the email round-trip — /auth/callback re-validates this via safeNext.
+  const rawNext = formData.get("next") as string | null;
+  const callbackUrl = rawNext
+    ? `${APP_URL}/auth/callback?next=${encodeURIComponent(rawNext)}`
+    : `${APP_URL}/auth/callback`;
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -125,7 +134,7 @@ export async function signInWithMagicLink(formData: FormData) {
       // Magic-link is sign-in only; new users must use /auth/signup so they
       // pass the Terms-of-Service gate. Prevents silent auto-registration.
       shouldCreateUser: false,
-      emailRedirectTo: `${APP_URL}/auth/callback`,
+      emailRedirectTo: callbackUrl,
     },
   });
 
@@ -156,12 +165,15 @@ export async function signInWithMagicLink(formData: FormData) {
   return { success: "Check your email for a sign-in link!" };
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(next?: string) {
   const supabase = await createClient();
+  const redirectTo = next
+    ? `${APP_URL}/auth/callback?next=${encodeURIComponent(next)}`
+    : `${APP_URL}/auth/callback`;
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${APP_URL}/auth/callback`,
+      redirectTo,
     },
   });
 

@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@500;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#e9e4dc; font-family:'Inter',sans-serif; padding:40px; }
+  .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:40px; max-width:1400px; margin:0 auto; }
+  .item { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .tag { font-size:15px; font-weight:600; color:#6b5f54; letter-spacing:.3px; }
+  .board {
+    width:400px; height:400px; background:#ffffff; padding:16px;
+    display:grid; gap:10px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,.08);
+  }
+  .cell { overflow:hidden; border-radius:6px; background:#e2dbd0; position:relative; }
+  .cell img { width:100%; height:100%; object-fit:cover; display:block; }
+  .cap {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:#fff; color:#2c2622; text-align:center; line-height:1;
+    font-family:'Caveat',cursive; font-weight:700;
+  }
+  .cap .h { color:#C4686D; margin-bottom:4px; }
+  /* layouts */
+  .g1 { grid-template-columns:1fr; grid-template-rows:1fr auto; }
+  .g1 .cap { padding:10px 0; }
+  .g1 .cap .t { font-size:30px; }
+
+  .g2 { grid-template-columns:1fr 1fr; grid-template-rows:1fr auto; }
+  .g2 .cap { grid-column:1/3; padding:8px 0; }
+  .g2 .cap .t { font-size:28px; }
+
+  .g3 { grid-template-columns:2fr 1fr; grid-template-rows:1fr 1fr auto; }
+  .g3 .big { grid-row:1/3; }
+  .g3 .cap { grid-column:1/3; padding:8px 0; }
+  .g3 .cap .t { font-size:28px; }
+
+  .g4 { grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
+  .g4 .cap .t { font-size:24px; }
+
+  .g6 { grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr; }
+  .g6 .cap .t { font-size:20px; }
+
+  .g9 { grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr 1fr; }
+  .g9 .cap .t { font-size:22px; }
+  .g9 .cap .h { font-size:16px; }
+</style>
+</head>
+<body>
+  <div class="gallery">
+
+    <div class="item"><span class="tag">1 photo</span>
+      <div class="board g1">
+        <div class="cell"><img src="https://picsum.photos/seed/a1/600/600"/></div>
+        <div class="cap"><span class="h">&#9829;</span><span class="t">You're Invited!</span></div>
+      </div>
+    </div>
+
+    <div class="item"><span class="tag">2 photos</span>
+      <div class="board g2">
+        <div class="cell"><img src="https://picsum.photos/seed/b1/500/500"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/b2/500/500"/></div>
+        <div class="cap"><span class="h">&#9829;</span><span class="t">You're Invited!</span></div>
+      </div>
+    </div>
+
+    <div class="item"><span class="tag">3 photos</span>
+      <div class="board g3">
+        <div class="cell big"><img src="https://picsum.photos/seed/c1/600/700"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/c2/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/c3/400/400"/></div>
+        <div class="cap"><span class="h">&#9829;</span><span class="t">You're Invited!</span></div>
+      </div>
+    </div>
+
+    <div class="item"><span class="tag">4 photos</span>
+      <div class="board g4">
+        <div class="cell"><img src="https://picsum.photos/seed/d1/500/500"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/d2/500/500"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/d3/500/500"/></div>
+        <div class="cap"><span class="h">&#9829;</span><span class="t">You're<br/>Invited!</span></div>
+      </div>
+    </div>
+
+    <div class="item"><span class="tag">6 photos</span>
+      <div class="board g6">
+        <div class="cell"><img src="https://picsum.photos/seed/e1/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/e2/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/e3/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/e4/400/400"/></div>
+        <div class="cap"><span class="h">&#9829;</span><span class="t">Invited!</span></div>
+        <div class="cell"><img src="https://picsum.photos/seed/e6/400/400"/></div>
+      </div>
+    </div>
+
+    <div class="item"><span class="tag">9 photos (Canva grid)</span>
+      <div class="board g9">
+        <div class="cell"><img src="https://picsum.photos/seed/f1/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/f2/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/f3/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/f4/400/400"/></div>
+        <div class="cap"><span class="h">&#9829;</span><span class="t">You're<br/>Invited!</span></div>
+        <div class="cell"><img src="https://picsum.photos/seed/f6/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/f7/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/f8/400/400"/></div>
+        <div class="cell"><img src="https://picsum.photos/seed/f9/400/400"/></div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

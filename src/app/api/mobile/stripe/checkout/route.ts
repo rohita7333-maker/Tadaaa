@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       metadata: { theme_id: themeId, user_id: user.id, subscription_type: "plus" },
-      success_url: `${APP_URL}/create?theme=${themeId}&payment=success`,
+      success_url: `${APP_URL}/create?theme=${themeId}&payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${APP_URL}/create?payment=cancelled`,
     });
     return NextResponse.json({ url: session.url });

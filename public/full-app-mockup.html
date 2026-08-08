@@ -1,0 +1,803 @@
+<title>TaDaaaa — Full App Mockup (every screen, working flows)</title>
+<style>
+:root{
+  --cream:#FFF8F0;--cream-dark:#F5EDE3;--rose:#C4686D;--rose-light:#E8A5A8;--rose-deep:#9B3D42;
+  --gold:#C9A96E;--gold-light:#E8D5A8;--charcoal:#2D2926;--warm-gray:#6B5E57;--light-gray:#D4CBC3;
+  --sans:system-ui,-apple-system,"Segoe UI",sans-serif;--head:Georgia,"Times New Roman",serif;
+  --hand:"Segoe Script","Bradley Hand",cursive;
+  --grad:linear-gradient(135deg,#C4686D,#9B3D42);
+  --sh:0 8px 30px rgba(45,41,38,.08);--sh-lg:0 24px 60px rgba(45,41,38,.16);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body,.page{font-family:var(--sans);background:var(--cream);color:var(--charcoal);line-height:1.5;overflow-x:clip}
+h1,h2,h3,h4{font-family:var(--head);font-weight:600;line-height:1.1}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none;cursor:pointer}
+
+/* ===== mockup shell ===== */
+.appbar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(45,41,38,.96);backdrop-filter:blur(10px);display:flex;gap:4px;overflow-x:auto;padding:8px 10px;scrollbar-width:none}
+.appbar::-webkit-scrollbar{display:none}
+.appbar button{flex:none;font-size:11px;font-weight:700;color:#FFF8F0;background:transparent;border:1px solid rgba(255,248,240,.25);border-radius:20px;padding:7px 13px;white-space:nowrap}
+.appbar button.on{background:var(--grad);border-color:transparent}
+.ribbon{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--gold-light);color:var(--charcoal);font-size:11px;font-weight:600;text-align:center;padding:4px 8px}
+.scr{display:none;min-height:100vh;padding-top:26px;padding-bottom:64px}
+.scr.on{display:block}
+
+/* ===== shared chrome ===== */
+.mnav{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:14px 22px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--head);font-weight:700;font-size:17px}
+.brand i{width:28px;height:28px;border-radius:9px;background:var(--grad);display:grid;place-items:center;font-style:normal;font-size:14px}
+.mnav .links{display:flex;gap:16px;font-size:13px;font-weight:600;color:var(--warm-gray)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13.5px;border-radius:30px;padding:11px 20px;border:none;transition:transform .18s var(--ease)}
+.btn:hover{transform:translateY(-2px)}
+.btn-pri{background:var(--grad);color:#fff;box-shadow:0 8px 22px rgba(196,104,109,.35)}
+.btn-out{background:#fff;color:var(--charcoal);border:1.5px solid var(--light-gray)}
+.anav{background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:1px solid rgba(212,203,195,.5);padding:10px 22px;position:sticky;top:26px;z-index:50}
+.anav .in{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.anav .cluster{display:flex;gap:14px;font-size:13px;font-weight:600;color:var(--warm-gray);align-items:center}
+.anav .cluster .act{color:var(--charcoal);position:relative}
+.anav .cluster .act::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2.5px;border-radius:2px;background:var(--rose)}
+.anav .greet{font-size:12.5px;color:var(--warm-gray)}
+.anav .greet b{color:var(--charcoal)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800}
+.tierb{font-size:10px;font-weight:800;background:#FFF0EE;color:var(--rose-deep);border-radius:20px;padding:3px 9px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+.kicker{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.hand{font-family:var(--hand);color:var(--rose)}
+
+/* ===== landing ===== */
+.hero{text-align:center;padding:64px 22px 30px}
+.hero h1{font-size:clamp(34px,5.4vw,54px);max-width:16ch;margin:10px auto}
+.hero h1 em{font-style:italic;color:var(--rose)}
+.hero p{color:var(--warm-gray);max-width:480px;margin:10px auto 22px}
+.fanstage{position:relative;height:250px;margin:26px auto 0;max-width:900px;perspective:1200px;perspective-origin:50% 44%;user-select:none}
+.fancard{position:absolute;left:50%;top:4%;width:126px;aspect-ratio:3/4.25;margin-left:-63px;border-radius:14px;overflow:hidden;box-shadow:var(--sh-lg);transition:transform .7s var(--ease),opacity .7s,filter .7s;cursor:grab;background:var(--cream-dark)}
+.fancard .art{position:absolute;inset:0;display:grid;place-items:center;font-size:36px}
+.fancard .lb{position:absolute;left:0;right:0;bottom:0;padding:22px 9px 8px;background:linear-gradient(180deg,transparent,rgba(45,41,38,.6));color:#fff;text-align:left}
+.fancard .lb .t{font-family:var(--head);font-size:12.5px}
+.fancard .lb .s{font-family:var(--hand);font-size:11.5px;opacity:.9}
+.fandots{display:flex;gap:6px;justify-content:center;margin-top:12px}
+.fandots button{width:8px;height:8px;border-radius:50%;border:none;background:var(--light-gray);padding:0}
+.fandots button.on{background:var(--rose);transform:scale(1.3)}
+.sc-cake{background:radial-gradient(120% 90% at 30% 15%,#FFE2B0,#E8A5A8 55%,#9B3D42)}
+.sc-ring{background:radial-gradient(110% 90% at 70% 20%,#FBF0D2,#E8D5A8 50%,#B9923F)}
+.sc-bloom{background:radial-gradient(120% 100% at 40% 25%,#FCE7E9,#E8A5A8 60%,#C4686D)}
+.sc-trip{background:linear-gradient(160deg,#F6D9A8,#E59C7E 45%,#7A6E8A)}
+.sc-night{background:linear-gradient(160deg,#5b4f48,#2D2926)}
+.sc-baby{background:radial-gradient(120% 95% at 35% 20%,#FDF3E4,#F5EDE3 45%,#C9A96E)}
+.landgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;max-width:900px;margin:30px auto 0;padding:0 22px}
+.howband{background:var(--cream-dark);border-radius:26px;max-width:1000px;margin:44px auto;padding:34px 26px;text-align:center}
+.hsteps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:22px;text-align:left}
+.hstep{background:#fff;border:1px solid var(--light-gray);border-radius:16px;padding:16px}
+.hstep .n{font-family:var(--hand);color:var(--gold);font-size:20px;font-weight:700}
+.hstep h4{font-size:15px;margin:3px 0 4px}
+.hstep p{font-size:12px;color:var(--warm-gray)}
+
+/* ===== template cards ===== */
+.tcard{background:#fff;border:1px solid var(--light-gray);border-radius:16px;overflow:hidden;box-shadow:var(--sh);transition:transform .3s var(--ease);cursor:pointer}
+.tcard:hover{transform:translateY(-5px)}
+.tcard .cov{aspect-ratio:3/2.9;display:grid;place-items:center;font-size:34px;position:relative}
+.tcard .st{position:absolute;top:8px;left:8px;font-size:8.5px;font-weight:800;text-transform:uppercase;background:rgba(255,255,255,.9);border-radius:14px;padding:3px 8px}
+.tcard .m{padding:10px 12px;display:flex;justify-content:space-between;align-items:start;gap:8px}
+.tcard .m .n{font-family:var(--head);font-size:14px}
+.tcard .m .o{font-family:var(--hand);font-size:12px;color:var(--rose-deep)}
+.tcard .m .p{font-size:9.5px;font-weight:800;color:var(--gold);text-transform:uppercase}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0}
+.chips button{font-size:12px;font-weight:600;padding:7px 14px;border-radius:30px;background:#fff;border:1.5px solid var(--light-gray);color:var(--warm-gray)}
+.chips button.on{background:var(--charcoal);border-color:var(--charcoal);color:#fff}
+
+/* ===== dashboard ===== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:20px 0}
+.stat{background:#fff;border:1px solid var(--light-gray);border-radius:16px;padding:16px;cursor:pointer;transition:transform .2s var(--ease)}
+.stat:hover{transform:translateY(-3px)}
+.stat b{display:block;font-family:var(--head);font-size:26px}
+.stat span{font-size:12px;color:var(--warm-gray)}
+.stat u{display:block;text-decoration:none;font-size:10.5px;color:var(--rose);font-weight:700;margin-top:4px}
+.panel{background:#fff;border:1px solid var(--light-gray);border-radius:18px;padding:18px;box-shadow:var(--sh)}
+.feed .f{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--cream-dark);font-size:13px}
+.feed .f:last-child{border:none}
+.feed .f i{flex:none;width:26px;height:26px;border-radius:50%;background:var(--rose-light);color:#fff;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800}
+.feed .f small{margin-left:auto;color:var(--light-gray);font-size:11px}
+.invrow{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--light-gray);border-radius:16px;padding:12px 14px;margin-top:12px}
+.invrow .cov{flex:none;width:52px;height:52px;border-radius:12px;display:grid;place-items:center;font-size:22px}
+.invrow .meta{flex:1;min-width:0}
+.invrow .meta b{font-family:var(--head);font-size:15px;display:block}
+.invrow .meta span{font-size:11.5px;color:var(--warm-gray)}
+.invrow .acts{display:flex;gap:8px}
+.mini{font-size:11px;font-weight:700;border:1.5px solid var(--light-gray);background:#fff;border-radius:20px;padding:6px 12px}
+.mini.pri{background:var(--grad);color:#fff;border:none}
+
+/* ===== wizard ===== */
+.wizhead{display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px;font-size:12.5px;color:var(--warm-gray)}
+.wizhead a{color:var(--rose);font-weight:700}
+.steps{display:flex;gap:6px;margin:8px 0 20px}
+.steps i{flex:1;height:4px;border-radius:3px;background:var(--light-gray)}
+.steps i.done{background:var(--rose-light)}.steps i.cur{background:var(--rose)}
+.tchip{display:flex;align-items:center;gap:12px;background:linear-gradient(160deg,#FDF6E8,#E8D5A8);border:1px solid rgba(201,169,110,.55);border-radius:18px;padding:14px 16px;margin-bottom:14px}
+.tchip .em{font-size:26px}
+.tchip .tx b{font-family:var(--head);font-size:15px;display:block}
+.tchip .tx span{font-size:11.5px;color:var(--warm-gray)}
+.tchip .badge{margin-left:auto;font-size:9px;font-weight:800;text-transform:uppercase;color:var(--gold);background:#fff;border-radius:14px;padding:3px 9px}
+.tchip button{font-size:11px;font-weight:700;color:var(--rose);background:none;border:none;text-decoration:underline}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--warm-gray);margin-bottom:5px}
+.field input,.field textarea{width:100%;border:1.5px solid var(--light-gray);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fff}
+.field .hint{font-family:var(--hand);font-size:12.5px;color:var(--rose);margin-top:3px}
+.revcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.revc{background:#fff;border:2px solid var(--light-gray);border-radius:16px;padding:12px;cursor:pointer;position:relative}
+.revc.on{border-color:var(--rose);box-shadow:0 10px 26px rgba(196,104,109,.2)}
+.revc .pv{height:54px;border-radius:10px;display:grid;place-items:center;font-size:20px;margin-bottom:8px}
+.pv-tap{background:radial-gradient(120% 100% at 50% 30%,#FCE7E9,#E8A5A8 60%,#C4686D)}
+.pv-cd{background:linear-gradient(160deg,#5b4f48,#2D2926);color:var(--gold-light);font-family:var(--head);font-size:13px}
+.pv-ss{background:linear-gradient(180deg,#6B5E57,#9B3D42 40%,#E8A5A8 75%,#E8D5A8)}
+.revc b{font-size:13px}
+.revc p{font-size:10.5px;color:var(--warm-gray)}
+.revc .new{position:absolute;top:-8px;left:12px;font-size:8px;font-weight:800;background:var(--grad);color:#fff;border-radius:12px;padding:2px 8px;text-transform:uppercase}
+.plaq-ed{background:var(--cream);border:1px dashed var(--gold);border-radius:14px;padding:12px;margin-top:10px}
+.plaq-ed .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.plaq-ed input{border:1.5px solid var(--light-gray);border-radius:10px;padding:8px 10px;font-size:12px;width:100%}
+.gate{background:var(--charcoal);color:var(--cream);border-radius:18px;padding:18px;text-align:center}
+.gate h4{color:var(--gold-light);font-size:17px}
+.gate p{font-size:12.5px;opacity:.8;margin:6px 0 12px}
+.pubok{background:linear-gradient(160deg,#FDF6E8,#E8D5A8);border-radius:18px;padding:20px;text-align:center}
+.linkbox{display:flex;gap:8px;margin-top:10px}
+.linkbox input{flex:1;border:1.5px solid var(--gold);border-radius:12px;padding:9px 12px;font-size:12px;background:#fff}
+
+/* ===== reveals ===== */
+.storywrap{max-width:430px;margin:0 auto;border-radius:24px;overflow:hidden;box-shadow:var(--sh-lg);position:relative;height:74vh;min-height:480px}
+.storyscroll{height:100%;overflow-y:auto;scrollbar-width:none}
+.storyscroll::-webkit-scrollbar{display:none}
+.scn{padding:26px 20px;display:flex;flex-direction:column;justify-content:center;text-align:center;position:relative}
+.s1{min-height:120%;min-height:520px;background:radial-gradient(120% 60% at 50% 108%,rgba(232,213,168,.75),transparent 55%),linear-gradient(180deg,#3E3733,#6B5E57 22%,#9B3D42 48%,#C4686D 66%,#E8A5A8 82%,#E8D5A8)}
+.s1 .for{font-family:var(--hand);color:var(--gold-light);font-size:18px}
+.s1 .nm{font-family:var(--head);color:var(--cream);font-size:46px;line-height:1;margin:4px 0}
+.s1 .oc{font-size:10px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--rose-light)}
+.s1 .hint{margin-top:34px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,248,240,.75)}
+.lan{position:absolute;width:24px;height:32px;border-radius:8px;background:radial-gradient(60% 45% at 50% 62%,#FFF3D6,#E8D5A8 55%,#C9A96E);box-shadow:0 0 18px 5px rgba(232,213,168,.45)}
+.s2{min-height:240px;background:linear-gradient(180deg,#E8D5A8,#F5EDE3 45%,#FFF8F0)}
+.s2 .h{font-family:var(--hand);color:var(--rose);font-size:17px}
+.s2 .b{font-family:var(--head);font-style:italic;font-size:16px;margin-top:8px;max-width:280px;align-self:center}
+.s3{min-height:260px;background:linear-gradient(180deg,#FFF8F0,#F5EDE3)}
+.plaque{background:linear-gradient(160deg,#FDF6E8,#F1E4C4 70%,#E8D5A8);border:1px solid rgba(201,169,110,.55);border-radius:22px;padding:16px;max-width:230px;margin:10px auto 0}
+.plaque .l{font-size:8.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--rose-deep)}
+.plaque .bg{font-family:var(--head);font-size:15px;margin-top:3px}
+.plaque .d{font-family:var(--head);font-style:italic;font-size:12px;color:var(--warm-gray)}
+.plaque a{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;color:var(--rose);border-bottom:1.5px solid var(--rose-light)}
+.s4{min-height:250px;background:linear-gradient(180deg,#F5EDE3,#EFDFD2 60%,#E8A5A8 150%)}
+.polas{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.pola{background:#fff;padding:6px 6px 16px;border-radius:4px;box-shadow:var(--sh);width:74px}
+.pola:nth-child(1){rotate:-6deg}.pola:nth-child(2){rotate:5deg}.pola:nth-child(3){rotate:-3deg}
+.pola .ph{aspect-ratio:1;display:grid;place-items:center;font-size:26px;border-radius:2px}
+.pola .cp{font-family:var(--hand);font-size:10px;margin-top:4px}
+.s5{min-height:260px;background:linear-gradient(180deg,#EFD0CB,#D08A8C 22%,#C4686D 55%,#9B3D42 130%);color:var(--cream)}
+.s5 .h{font-family:var(--hand);color:var(--gold-light);font-size:17px}
+.s5 h4{font-family:var(--head);font-style:italic;font-size:30px;margin:4px 0 8px;color:var(--cream)}
+.s5 input{border:none;border-radius:20px;padding:9px 14px;font-size:12px;width:200px;margin:0 auto 10px;display:block;text-align:center}
+.s5 .wa{background:#fff;color:var(--charcoal);font-weight:800;font-size:12.5px;border:none;border-radius:24px;padding:11px 20px}
+.s5 .done{font-family:var(--hand);color:var(--gold-light);font-size:16px;margin-top:8px;display:none}
+.s6{min-height:320px;background:radial-gradient(100% 40% at 50% 0%,rgba(155,61,66,.5),transparent 60%),linear-gradient(180deg,#9B3D42,#3E3330 26%,#231F1D 55%,#181513);color:var(--cream)}
+.count{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.count .u{background:rgba(255,248,240,.07);border:1px solid rgba(232,213,168,.25);border-radius:12px;padding:10px 8px;min-width:52px}
+.count .u b{font-family:var(--head);color:var(--gold-light);font-size:22px;font-variant-numeric:tabular-nums;display:block}
+.count .u span{font-size:8px;letter-spacing:.14em;text-transform:uppercase;opacity:.6}
+.s6 .yy{font-family:var(--head);font-size:32px;margin-top:14px}
+.madep{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:7px;align-items:center;background:rgba(255,255,255,.92);border-radius:26px;padding:6px 7px 6px 12px;font-size:10px;font-weight:700;color:var(--warm-gray);box-shadow:var(--sh-lg);white-space:nowrap}
+.madep b{background:var(--grad);color:#fff;border-radius:18px;padding:5px 10px}
+.musict{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);border:1px solid var(--light-gray);font-size:14px;z-index:5}
+/* tap reveal */
+.tapstage{max-width:430px;margin:0 auto;border-radius:24px;overflow:hidden;box-shadow:var(--sh-lg);min-height:480px;background:radial-gradient(120% 100% at 50% 20%,#FCE7E9,#E8A5A8 60%,#C4686D);display:grid;place-items:center;text-align:center;padding:30px;position:relative}
+.tapgift{font-size:64px;cursor:pointer;transition:transform .3s var(--ease);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.tapopen{display:none}
+.tapopen h3{font-family:var(--head);font-size:26px;color:var(--rose-deep)}
+.tapopen .msg{font-family:var(--head);font-style:italic;margin:10px 0}
+.qbox{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:var(--sh)}
+.qbox b{font-size:14px}
+.qbtns{display:flex;gap:10px;justify-content:center;margin-top:10px}
+.qyes{background:var(--grad);color:#fff;border:none;border-radius:20px;padding:9px 22px;font-weight:800}
+.qno{background:#fff;border:1.5px solid var(--light-gray);border-radius:20px;padding:9px 18px;font-weight:700;position:relative;transition:transform .2s}
+/* countdown reveal */
+.cdstage{max-width:430px;margin:0 auto;border-radius:24px;overflow:hidden;box-shadow:var(--sh-lg);min-height:480px;background:linear-gradient(160deg,#3E3733,#2D2926);display:grid;place-items:center;text-align:center;color:var(--cream);padding:30px}
+
+/* pricing */
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:20px}
+.tier{background:#fff;border:1.5px solid var(--light-gray);border-radius:18px;padding:20px;position:relative}
+.tier.hot{border-color:var(--rose);box-shadow:0 14px 34px rgba(196,104,109,.18)}
+.tier .hotb{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:9px;font-weight:800;border-radius:14px;padding:3px 10px;text-transform:uppercase}
+.tier h4{font-size:16px}
+.tier .pr{font-family:var(--head);font-size:26px;color:var(--rose-deep);margin:6px 0}
+.tier .pr small{font-size:11px;color:var(--warm-gray);font-family:var(--sans)}
+.tier ul{list-style:none;font-size:12px;color:var(--warm-gray);display:grid;gap:5px;margin:10px 0}
+.tier ul li::before{content:"✓ ";color:var(--gold);font-weight:800}
+/* settings */
+.setrow{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--cream-dark);font-size:13.5px}
+.tog{width:38px;height:22px;border-radius:14px;background:var(--rose);position:relative}
+.tog::after{content:"";position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+.tog.off{background:var(--light-gray)}
+.tog.off::after{right:auto;left:3px}
+/* mobile strip */
+.phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;max-width:900px;margin:20px auto}
+.ph{background:#17130F;border-radius:26px;padding:6px}
+.ph .scr2{border-radius:20px;overflow:hidden;background:var(--cream);height:340px;display:flex;flex-direction:column;font-size:10px}
+.ph .nb{background:var(--grad);color:#fff;padding:14px 10px 7px;font-weight:700;font-size:10px;display:flex;gap:6px;align-items:center}
+.ph .bd2{flex:1;padding:9px;color:var(--warm-gray);overflow:hidden}
+.ph .bd2 h5{font-family:var(--head);font-size:12px;color:var(--charcoal);margin-bottom:4px}
+.ph .tabs{display:flex;justify-content:space-around;background:#fff;border-top:1px solid var(--light-gray);padding:5px 3px 8px;font-size:7.5px;font-weight:700;color:var(--warm-gray)}
+.ph .tabs .fab{width:26px;height:26px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:13px;margin-top:-14px;border:2px solid #fff}
+.cap{text-align:center;margin-top:8px}
+.cap .t{font-family:var(--hand);font-size:14px;color:var(--rose)}
+.cap .s{font-size:10px;color:var(--warm-gray)}
+.modal{position:fixed;inset:0;background:rgba(45,41,38,.5);z-index:150;display:none;place-items:center;padding:20px}
+.modal.on{display:grid}
+.modal .card{background:#fff;border-radius:20px;max-width:440px;width:100%;padding:20px;max-height:80vh;overflow:auto}
+.tabsrow{display:flex;gap:8px;margin:12px 0}
+.tabsrow button{font-size:12px;font-weight:700;border:none;background:var(--cream-dark);border-radius:18px;padding:7px 14px}
+.tabsrow button.on{background:var(--charcoal);color:#fff}
+.note{font-size:11px;color:var(--warm-gray);background:var(--cream-dark);border-radius:12px;padding:8px 12px;margin-top:14px}
+input:focus,textarea:focus,button:focus-visible{outline:3px solid var(--rose);outline-offset:2px}
+</style>
+
+<div class="ribbon">🎭 INTERACTIVE MOCKUP — every screen of TaDaaaa, flows wired (sign in → create → publish → reveal → RSVP updates the dashboard). Not the real app; no data saved.</div>
+
+<!-- ================= LANDING ================= -->
+<div class="scr on page" id="scr-landing">
+  <nav class="mnav">
+    <span class="brand"><i>🎉</i>TaDaaaa</span>
+    <span class="links"><a onclick="go('scr-templates-pub')">Templates</a><a onclick="go('scr-pricing')">Pricing</a></span>
+    <span><a class="btn btn-out" style="padding:8px 16px;font-size:12px" onclick="go('scr-signin')">Sign in</a>
+    <a class="btn btn-pri" style="padding:8px 16px;font-size:12px" onclick="go('scr-signin')">Sign up free</a></span>
+  </nav>
+  <header class="hero">
+    <span class="hand" style="font-size:20px">psst… they have no idea</span>
+    <h1>Turn moments into <em>magic</em></h1>
+    <p>Create a surprise reveal page, send one link, collect the happy tears. 10k+ surprises · 3 min to create.</p>
+    <a class="btn btn-pri" onclick="go('scr-signin')">Create a surprise — free</a>
+    <a class="btn btn-out" onclick="go('scr-reveal-scroll')">Watch a live reveal</a>
+    <div class="fanstage" id="fan"></div>
+    <div class="fandots" id="fandots"></div>
+  </header>
+  <div class="landgrid" id="landgrid"></div>
+  <div class="howband">
+    <span class="hand" style="font-size:18px">easy, promise</span>
+    <h2 style="font-size:26px">Four steps to a happy cry</h2>
+    <div class="hsteps">
+      <div class="hstep"><div class="n">1.</div><h4>Pick the occasion</h4><p>Birthday, date, festival — each template sets the scene.</p></div>
+      <div class="hstep"><div class="n">2.</div><h4>Make it yours</h4><p>Their name, your words, your photos. Under 3 minutes.</p></div>
+      <div class="hstep"><div class="n">3.</div><h4>Choose the reveal</h4><p>Tap, countdown, or a scroll story.</p></div>
+      <div class="hstep"><div class="n">4.</div><h4>Send one link</h4><p>They open it anywhere. You see every reaction.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SIGN IN ================= -->
+<div class="scr page" id="scr-signin">
+  <div style="max-width:400px;margin:60px auto;padding:0 22px">
+    <div style="text-align:center;margin-bottom:18px"><span class="brand" style="justify-content:center"><i>🎉</i>TaDaaaa</span></div>
+    <div class="panel">
+      <h2 style="font-size:22px;text-align:center">Welcome back</h2>
+      <p style="text-align:center;font-size:12.5px;color:var(--warm-gray);margin:4px 0 16px">Sign in to continue creating magic</p>
+      <button class="btn btn-out" style="width:100%;margin-bottom:10px">🇬 Continue with Google</button>
+      <div style="text-align:center;font-size:11px;color:var(--light-gray);margin:8px 0">or</div>
+      <div class="field"><label>Email</label><input value="tada.tester@example.com"/></div>
+      <div class="field"><label>Password</label><input type="password" value="••••••••••"/></div>
+      <button class="btn btn-pri" style="width:100%" onclick="go('scr-dash')">Sign in</button>
+      <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--rose);font-weight:600">Sign in with email link instead</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div class="scr page" id="scr-dash">
+  <div class="anav"><div class="in">
+    <span class="brand"><i>🎉</i>TaDaaaa</span>
+    <span class="cluster"><span class="act">Dashboard</span><a onclick="go('scr-templates')">Templates</a><a onclick="startBlank()">Create</a></span>
+    <span class="greet">Good evening, <b>Tada</b> · <span id="craftedN">1</span> surprises crafted</span>
+    <span style="display:flex;gap:8px;align-items:center"><span class="tierb">Free</span><span class="avatar" title="tada.tester@example.com — Settings · Sign out" onclick="go('scr-settings')">T</span></span>
+  </div></div>
+  <div class="wrap" style="padding-top:20px">
+    <h2 style="font-size:24px">Your surprises</h2>
+    <div class="stats">
+      <div class="stat" onclick="openModal('views')"><b id="stViews">12</b><span>Total views</span><u>see who ›</u></div>
+      <div class="stat" onclick="openModal('rsvps')"><b id="stRsvps">1</b><span>RSVPs</span><u>see who ›</u></div>
+      <div class="stat" onclick="openModal('resp')"><b id="stResp">3</b><span>Responses</span><u>see all ›</u></div>
+      <div class="stat"><b>1</b><span>Active</span><u>&nbsp;</u></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start">
+      <div>
+        <div class="panel" style="background:linear-gradient(160deg,#FDF6E8,#E8D5A8);cursor:pointer" onclick="go('scr-templates')">
+          <b style="font-family:var(--head);font-size:16px">🗂 Start from a template</b>
+          <div style="font-size:12px;color:var(--warm-gray)">Occasion, theme and reveal picked for you — just add your words. →</div>
+        </div>
+        <div class="invrow">
+          <div class="cov sc-cake">🎂</div>
+          <div class="meta"><b>Maya turns thirty</b><span>Scroll story · active · <span id="invViews">12</span> views · <span id="invRsvps">1</span> RSVP</span></div>
+          <div class="acts"><button class="mini" onclick="openModal('rsvps')">Responses</button><button class="mini pri" onclick="go('scr-reveal-scroll')">Open ↗</button></div>
+        </div>
+      </div>
+      <div class="panel">
+        <b style="font-family:var(--head);font-size:15px">Recent activity</b>
+        <div class="feed" id="feed">
+          <div class="f"><i>P</i> Priya said yes! 🎉 <small>2h</small></div>
+          <div class="f"><i>?</i> Someone viewed Maya's surprise <small>6h</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TEMPLATES (AUTHED) ================= -->
+<div class="scr page" id="scr-templates">
+  <div class="anav"><div class="in">
+    <span class="brand"><i>🎉</i>TaDaaaa</span>
+    <span class="cluster"><a onclick="go('scr-dash')">Dashboard</a><span class="act">Templates</span><a onclick="startBlank()">Create</a></span>
+    <span class="greet">Good evening, <b>Tada</b></span>
+    <span class="avatar" onclick="go('scr-settings')">T</span>
+  </div></div>
+  <div class="wrap" style="padding-top:22px;text-align:center">
+    <span class="hand" style="font-size:18px">psst… they have no idea</span>
+    <h2 style="font-size:30px">Reveal templates for <em style="color:var(--rose)">every occasion</em></h2>
+    <div class="chips" style="justify-content:center" id="tchips"></div>
+    <div class="landgrid" id="tgrid" style="margin-top:6px;padding:0"></div>
+    <div class="note" style="display:inline-block">Signed-in view: no pricing panel, no how-it-works — just the shop. Tap any card → wizard opens pre-filled.</div>
+  </div>
+</div>
+
+<!-- ================= TEMPLATES (PUBLIC quick view) ================= -->
+<div class="scr page" id="scr-templates-pub">
+  <nav class="mnav">
+    <span class="brand"><i>🎉</i>TaDaaaa</span>
+    <span class="links"><a class="hand">Templates</a><a onclick="go('scr-pricing')">Pricing</a></span>
+    <a class="btn btn-pri" style="padding:8px 16px;font-size:12px" onclick="go('scr-signin')">Sign up free</a>
+  </nav>
+  <div class="wrap" style="text-align:center;padding-top:10px">
+    <h2 style="font-size:28px">Same page, signed-out</h2>
+    <p style="font-size:13px;color:var(--warm-gray)">Visitors get marketing chrome + how-it-works + pricing panel below the grid. Cards → sign-up.</p>
+    <div class="landgrid" id="tgridpub" style="padding:0;margin-top:16px"></div>
+    <div class="howband" style="margin-top:26px"><h3 style="font-size:20px">Four steps to a happy cry</h3><p style="font-size:12px;color:var(--warm-gray)">(marketing sections shown only to signed-out visitors)</p></div>
+  </div>
+</div>
+
+<!-- ================= CREATE WIZARD ================= -->
+<div class="scr page" id="scr-create">
+  <div class="anav"><div class="in">
+    <span class="brand"><i>🎉</i>TaDaaaa</span>
+    <span class="cluster"><a onclick="go('scr-dash')">Dashboard</a><a onclick="go('scr-templates')">Templates</a><span class="act">Create</span></span>
+    <span class="greet">Good evening, <b>Tada</b></span>
+    <span class="avatar" onclick="go('scr-settings')">T</span>
+  </div></div>
+  <div class="wrap" style="max-width:640px;padding-top:14px">
+    <div class="wizhead"><a onclick="go('scr-dash')">← Dashboard</a><span>Step <span id="stepN">1</span> of 4</span></div>
+    <div class="steps"><i id="sd1" class="cur"></i><i id="sd2"></i><i id="sd3"></i><i id="sd4"></i></div>
+
+    <!-- STEP 1 -->
+    <div id="wstep1">
+      <div id="tmodeChip" class="tchip" style="display:none">
+        <span class="em" id="tcEm">🎂</span>
+        <span class="tx"><b id="tcName">Cake O'Clock</b><span id="tcMeta">Birthday · Golden Hour · Countdown</span></span>
+        <span class="badge" id="tcTier">Premium</span>
+        <button onclick="leaveTemplateMode()">change</button>
+      </div>
+      <div id="manualPick">
+        <h3 style="font-size:19px;margin-bottom:4px">What's the occasion?</h3>
+        <div class="chips"><button class="on">🎂 Birthday Wish</button><button>🌹 Date Invite</button><button>✨ Festival</button><button>💐 Mother's Day</button><button>🙏 Apology</button><button>💌 Custom</button></div>
+        <h3 style="font-size:19px;margin:14px 0 4px">Choose a theme</h3>
+        <div class="chips"><button class="on">🎁 Golden Hour</button><button>✉️ Warm Embrace</button><button>❤️ Midnight Romance</button><button>⭐ Velvet Night <span style="font-size:9px;color:var(--gold)">★ PREMIUM</span></button><button>🎈 Garden Party <span style="font-size:9px;color:var(--gold)">★ PREMIUM</span></button></div>
+        <div class="note">No prices here anymore — premium = badge only. The single price moment lives at Publish.</div>
+      </div>
+      <button class="btn btn-pri" style="margin-top:16px" onclick="wstep(2)">Next</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="wstep2" style="display:none">
+      <div class="field"><label>Who's it for? (title)</label><input id="fTitle" value="Maya turns thirty"/></div>
+      <div class="field"><label>Your message</label><textarea rows="3" id="fMsg">Ten years of birthdays together, and you still have no idea what's coming. Keep scrolling, birthday girl.</textarea><div class="hint">or let AI draft it ✨</div></div>
+      <div class="field"><label>Photos</label><div style="border:1.5px dashed var(--light-gray);border-radius:12px;padding:16px;text-align:center;font-size:12px;color:var(--warm-gray)">📸 Drop photos here or browse (max 8) — moderated automatically on publish</div></div>
+      <h3 style="font-size:16px;margin:14px 0 8px">How should it unfold?</h3>
+      <div class="revcards">
+        <div class="revc" onclick="pickRev(this,'tap')"><div class="pv pv-tap">🎁</div><b>Tap to reveal</b><p>They tap, it bursts open.</p></div>
+        <div class="revc" onclick="pickRev(this,'cd')"><div class="pv pv-cd">02:14:36</div><b>Countdown</b><p>Timer to the big day.</p></div>
+        <div class="revc on" onclick="pickRev(this,'ss')"><span class="new">New</span><div class="pv pv-ss">🌙</div><b>Scroll Story</b><p>A day-to-night film.</p></div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>The big day — powers the finale countdown ✨</label><input type="datetime-local" value="2026-10-24T17:30"/></div>
+      <div class="plaq-ed" id="plaqEd">
+        <b style="font-size:12.5px">Plan plaques (scroll story) · <span id="plaqN">1</span>/4</b>
+        <div class="row"><input value="When" placeholder="Label"/><input value="Saturday, Oct 24 · 5:30 PM" placeholder="Title"/></div>
+        <div class="row"><input value="golden hour, sharp" placeholder="Detail"/><input value="Sunset Terrace, Jubilee Hills" placeholder="Maps location"/></div>
+        <button class="mini" style="margin-top:8px" onclick="addPlaque()">+ Add plaque</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-out" onclick="wstep(1)">Back</button><button class="btn btn-pri" onclick="wstep(3)">Next</button></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="wstep3" style="display:none">
+      <h3 style="font-size:18px">Ask a playful question?</h3>
+      <div class="qbox"><b>Will you come? 🥺</b>
+        <div style="font-size:11px;color:var(--warm-gray);margin-top:4px">Yes = "Count me in!" · No = dodges the cursor 😈 (dodge enabled)</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-out" onclick="wstep(2)">Back</button><button class="btn btn-pri" onclick="wstep(4)">Preview</button></div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div id="wstep4" style="display:none">
+      <h3 style="font-size:18px;margin-bottom:8px">Ready to publish</h3>
+      <div class="invrow" style="margin-top:0"><div class="cov sc-cake">🎂</div><div class="meta"><b id="pvTitle">Maya turns thirty</b><span id="pvMeta">Golden Hour · Scroll story · 1 plaque · 1 question</span></div></div>
+      <div class="gate" id="gateCard" style="display:none;margin-top:14px">
+        <h4>Premium surprise — $4.99</h4>
+        <p>This theme is premium. Unlock this one surprise, or go Unlimited for every theme, forever.</p>
+        <button class="btn btn-pri" onclick="unlockSim()">Unlock for $4.99</button>
+        <button class="btn btn-out" style="margin-left:8px" onclick="go('scr-pricing')">Go Unlimited</button>
+      </div>
+      <div id="pubBtnWrap" style="margin-top:14px"><button class="btn btn-pri" style="width:100%" onclick="publishSim()">✨ Publish Your Surprise</button></div>
+      <div class="pubok" id="pubOk" style="display:none;margin-top:14px">
+        <b style="font-family:var(--head);font-size:18px">🎉 Published!</b>
+        <div class="linkbox"><input readonly value="tadaaaa.app/surprise/maya-turns-thirty-x7k2"/><button class="mini pri">Copy</button></div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+          <button class="btn btn-pri" onclick="go('scr-reveal-scroll')">Open the reveal ↗</button>
+          <button class="btn btn-out" onclick="go('scr-dash')">Back to dashboard</button>
+        </div>
+        <div class="note" style="text-align:left">Real pipeline on publish: shell insert → signed photo upload → AI moderation → finalize → link live. Creator's own opens are never counted.</div>
+      </div>
+      <div style="margin-top:12px"><button class="btn btn-out" onclick="wstep(3)">Back to edit</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SCROLL STORY REVEAL ================= -->
+<div class="scr page" id="scr-reveal-scroll">
+  <div class="wrap" style="padding-top:14px;max-width:520px;text-align:center">
+    <span class="kicker">Reveal style #3 · Scroll Story (recipient view — scroll inside)</span>
+  </div>
+  <div class="storywrap" style="margin-top:10px">
+    <button class="musict" onclick="this.textContent=this.textContent==='🎵'?'⏸':'🎵'">🎵</button>
+    <div class="storyscroll">
+      <div class="scn s1">
+        <span class="lan" style="left:12%;top:12%"></span><span class="lan" style="left:74%;top:8%;scale:.7"></span><span class="lan" style="left:56%;top:28%;scale:1.2"></span><span class="lan" style="left:24%;top:40%;scale:.6"></span>
+        <div class="for">a surprise for</div><div class="nm">Maya</div><div class="oc">Birthday Wish</div>
+        <div class="hint">scroll slowly ↓</div>
+      </div>
+      <div class="scn s2"><div class="h">from Dev, with love —</div><div class="b">Ten years of birthdays together, and you still have no idea what's coming.</div></div>
+      <div class="scn s3"><div class="hand" style="font-size:15px">here's the plan ✨</div><h4 style="font-size:20px">Your golden hour</h4>
+        <div class="plaque"><div class="l">When</div><div class="bg">Saturday, Oct 24 · 5:30 PM</div><div class="d">golden hour, sharp</div><a>See the route →</a></div></div>
+      <div class="scn s4"><div class="hand" style="font-size:15px">a few of my favourites</div><h4 style="font-size:19px">Us, so far</h4>
+        <div class="polas"><div class="pola"><div class="ph sc-cake">🎂</div><div class="cp">your 25th</div></div><div class="pola"><div class="ph sc-trip">✈️</div><div class="cp">lisbon</div></div><div class="pola"><div class="ph sc-bloom">🌸</div><div class="cp">picnic crew</div></div></div></div>
+      <div class="scn s5"><div class="h">don't leave me hanging…</div><h4>please rsvp</h4>
+        <input id="rsvpName" placeholder="Who's saying yes? (your name)"/>
+        <button class="wa" id="rsvpBtn" onclick="doRsvp()">🎉 Count me in!</button>
+        <div class="done" id="rsvpDone">Recorded! Dev just found out 🎉</div></div>
+      <div class="scn s6"><div class="hand" style="color:var(--gold-light);font-size:15px">the countdown begins</div>
+        <div class="count"><div class="u"><b id="cdD">83</b><span>days</span></div><div class="u"><b id="cdH">07</b><span>hrs</span></div><div class="u"><b id="cdM">42</b><span>min</span></div><div class="u"><b id="cdS">10</b><span>sec</span></div></div>
+        <div class="yy">Yaaay! 🎉</div><div class="hand" style="color:var(--rose-light)">see you there</div>
+        <div style="margin-top:20px;font-size:9px;opacity:.5">made with TaDaaaa · © 2026</div></div>
+    </div>
+    <div class="madep"><span>Made with 🎁 TaDaaaa</span><b onclick="go('scr-templates-pub')">Create yours</b></div>
+  </div>
+  <div class="wrap" style="max-width:520px"><div class="note">RSVP with a name → lands in the creator's dashboard feed (try it, then check Dashboard). Watermark pill = free tier only. Other reveal styles → app bar below.</div></div>
+</div>
+
+<!-- ================= TAP REVEAL ================= -->
+<div class="scr page" id="scr-reveal-tap">
+  <div class="wrap" style="padding-top:14px;max-width:520px;text-align:center"><span class="kicker">Reveal style #1 · Tap to Reveal</span></div>
+  <div class="tapstage" style="margin-top:10px">
+    <div id="tapLocked"><div class="tapgift" onclick="tapOpen()">🎁</div><div style="font-family:var(--head);font-size:18px;color:#fff;margin-top:8px">Tap to reveal your surprise</div></div>
+    <div class="tapopen" id="tapOpened">
+      <h3>Maya turns thirty 🎉</h3>
+      <div class="msg">Ten years of birthdays together…</div>
+      <div class="polas"><div class="pola"><div class="ph sc-cake">🎂</div></div><div class="pola"><div class="ph sc-bloom">🌸</div></div></div>
+      <div class="qbox"><b>Will you come? 🥺</b>
+        <div class="qbtns"><button class="qyes" onclick="this.textContent='Recorded! 🎉'">Count me in!</button><button class="qno" onmouseenter="dodge(this)">No 😅</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap" style="max-width:520px"><div class="note">Confetti burst + ribbons on open (animated in real app). The "No" button dodges your cursor — try hovering it.</div></div>
+</div>
+
+<!-- ================= COUNTDOWN REVEAL ================= -->
+<div class="scr page" id="scr-reveal-count">
+  <div class="wrap" style="padding-top:14px;max-width:520px;text-align:center"><span class="kicker">Reveal style #2 · Countdown</span></div>
+  <div class="cdstage" style="margin-top:10px">
+    <div>
+      <div class="hand" style="color:var(--gold-light);font-size:17px">something's coming…</div>
+      <div class="count" style="margin-top:14px"><div class="u"><b>02</b><span>days</span></div><div class="u"><b>14</b><span>hrs</span></div><div class="u"><b>36</b><span>min</span></div><div class="u"><b id="cds2">18</b><span>sec</span></div></div>
+      <p style="font-size:12px;opacity:.7;margin-top:12px">When the timer hits zero, the surprise opens itself — message, photos, questions, RSVP.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PRICING ================= -->
+<div class="scr page" id="scr-pricing">
+  <div class="anav"><div class="in">
+    <span class="brand"><i>🎉</i>TaDaaaa</span>
+    <span class="cluster"><a onclick="go('scr-dash')">Dashboard</a><a onclick="go('scr-templates')">Templates</a><a onclick="startBlank()">Create</a></span>
+    <span class="greet">Good evening, <b>Tada</b></span><span class="avatar" onclick="go('scr-settings')">T</span>
+  </div></div>
+  <div class="wrap" style="padding-top:22px;text-align:center">
+    <span class="kicker">Simple, honest pricing</span>
+    <h2 style="font-size:28px">Free to start. No credit card.</h2>
+    <div class="tiers" style="text-align:left">
+      <div class="tier"><h4>Free</h4><div class="pr">$0 <small>/forever</small></div><ul><li>2 surprises / month</li><li>8 photos</li><li>3 free themes</li><li>Questions + dodge</li></ul><button class="btn btn-out" style="width:100%">Current plan</button></div>
+      <div class="tier hot"><span class="hotb">Most loved</span><h4>Premium surprise</h4><div class="pr">$4.99 <small>/surprise</small></div><ul><li>One cinematic reveal</li><li>All premium themes</li><li>30-day links</li><li>All extras</li></ul><button class="btn btn-pri" style="width:100%">Make it premium</button></div>
+      <div class="tier"><h4>Unlimited</h4><div class="pr">$1.99 <small>/mo · or $19.99/yr</small></div><ul><li>Unlimited surprises</li><li>Every theme forever</li><li>Priority support</li></ul><button class="btn btn-out" style="width:100%">Go Unlimited</button></div>
+      <div class="tier"><h4>Gift TaDaaaa</h4><div class="pr">$5 <small>/one invite</small></div><ul><li>Gift a surprise credit</li><li>90-day redemption</li></ul><button class="btn btn-out" style="width:100%">Gift it</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SETTINGS ================= -->
+<div class="scr page" id="scr-settings">
+  <div class="anav"><div class="in">
+    <span class="brand"><i>🎉</i>TaDaaaa</span>
+    <span class="cluster"><a onclick="go('scr-dash')">Dashboard</a><a onclick="go('scr-templates')">Templates</a><a onclick="startBlank()">Create</a></span>
+    <span class="greet">Good evening, <b>Tada</b></span><span class="avatar">T</span>
+  </div></div>
+  <div class="wrap" style="max-width:560px;padding-top:22px">
+    <h2 style="font-size:24px;margin-bottom:12px">Settings</h2>
+    <div class="panel">
+      <div class="setrow"><span><b>Profile</b><br/><small style="color:var(--warm-gray)">Tada Tester · tada.tester@example.com</small></span><button class="mini">Edit</button></div>
+      <div class="setrow"><span>Email me when someone views</span><span class="tog"></span></div>
+      <div class="setrow"><span>Email me on answers &amp; RSVPs</span><span class="tog"></span></div>
+      <div class="setrow"><span>Occasion reminders</span><span class="tog off"></span></div>
+      <div class="setrow"><span>Export my data (GDPR)</span><button class="mini">Download</button></div>
+      <div class="setrow"><span style="color:var(--rose-deep)">Delete account</span><button class="mini">…</button></div>
+      <div class="setrow" style="border:none"><span>Sign out</span><button class="mini" onclick="go('scr-landing')">Sign out</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= GIFT ================= -->
+<div class="scr page" id="scr-gift">
+  <div class="wrap" style="max-width:480px;padding-top:40px;text-align:center">
+    <span class="kicker">Gift redemption</span>
+    <div class="panel" style="margin-top:14px">
+      <div style="font-size:40px">🎁</div>
+      <h2 style="font-size:20px;margin:6px 0">Aman gifted you a TaDaaaa!</h2>
+      <p style="font-size:13px;color:var(--warm-gray)">"Make someone's day like I just made yours." · Expires in 87 days</p>
+      <button class="btn btn-pri" style="margin-top:12px" onclick="go('scr-create');enterTemplateMode('🎂','Cake O\'Clock','Birthday · Golden Hour · Countdown','Free (gifted)')">Redeem → create a surprise</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MOBILE ================= -->
+<div class="scr page" id="scr-mobile">
+  <div class="wrap" style="text-align:center;padding-top:16px">
+    <span class="kicker">Mobile app (Expo) — same product, native chrome</span>
+    <div class="phones" style="margin-top:16px">
+      <div><div class="ph"><div class="scr2">
+        <div class="nb">🎉 Good evening, Tada</div>
+        <div class="bd2"><h5>Home</h5>
+          <div class="stats" style="grid-template-columns:repeat(3,1fr);gap:5px;margin:6px 0"><div class="stat" style="padding:7px"><b style="font-size:14px">12</b><span style="font-size:8px">views</span></div><div class="stat" style="padding:7px"><b style="font-size:14px">1</b><span style="font-size:8px">RSVPs</span></div><div class="stat" style="padding:7px"><b style="font-size:14px">3</b><span style="font-size:8px">answers</span></div></div>
+          <div style="background:linear-gradient(160deg,#FDF6E8,#E8D5A8);border-radius:10px;padding:8px;font-size:9px"><b>🗂 Start from a template</b></div>
+        </div>
+        <div class="tabs"><span style="color:var(--rose)">🏠 Home</span><span>💌 Invites</span><span class="fab">+</span><span>⚡ Activity</span><span>☺ Profile</span></div>
+      </div></div><div class="cap"><div class="t">home + stats</div></div></div>
+      <div><div class="ph"><div class="scr2">
+        <div class="nb">‹ Templates</div>
+        <div class="bd2"><h5>Browse</h5>
+          <div class="chips" style="margin:4px 0"><button class="on" style="font-size:8px;padding:4px 8px">All</button><button style="font-size:8px;padding:4px 8px">Birthday</button><button style="font-size:8px;padding:4px 8px">Free</button></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px"><div class="tcard"><div class="cov sc-cake" style="font-size:20px">🎂</div></div><div class="tcard"><div class="cov sc-ring" style="font-size:20px">💍</div></div><div class="tcard"><div class="cov sc-night" style="font-size:20px">🥂</div></div><div class="tcard"><div class="cov sc-bloom" style="font-size:20px">🌸</div></div></div>
+        </div>
+        <div class="tabs"><span>🏠 Home</span><span>💌 Invites</span><span class="fab">+</span><span>⚡ Activity</span><span>☺ Profile</span></div>
+      </div></div><div class="cap"><div class="t">templates</div></div></div>
+      <div><div class="ph"><div class="scr2">
+        <div class="nb">✕ New surprise · Step 1 of 4</div>
+        <div class="bd2"><h5>Template mode</h5>
+          <div class="tchip" style="padding:8px 10px;margin-bottom:8px"><span class="em" style="font-size:16px">🎂</span><span class="tx"><b style="font-size:10px">Cake O'Clock</b><span style="font-size:8px">Birthday · Golden Hour</span></span><button style="font-size:8px">change</button></div>
+          <div style="background:var(--cream);border:1px solid var(--light-gray);border-radius:8px;padding:7px;font-size:8.5px"><b>Who's it for?</b> Straight to words &amp; photos — no re-choosing.</div>
+        </div>
+        <div class="tabs"><span>🏠 Home</span><span>💌 Invites</span><span class="fab">+</span><span>⚡ Activity</span><span>☺ Profile</span></div>
+      </div></div><div class="cap"><div class="t">wizard collapsed</div></div></div>
+      <div><div class="ph"><div class="scr2">
+        <div class="nb" style="background:linear-gradient(180deg,#3E3733,#9B3D42)">🌙 Maya's surprise</div>
+        <div class="bd2" style="background:linear-gradient(180deg,#9B3D42,#E8A5A8);color:#fff;text-align:center"><h5 style="color:#FFF8F0;font-size:16px;margin-top:20px">Maya</h5><div style="font-size:8px;letter-spacing:.2em">TURNS THIRTY</div><div style="margin-top:22px;font-size:8px;opacity:.8">scroll ↓ · haptics per scene · chime toggle</div></div>
+        <div class="tabs" style="background:#181513;border:none"><span style="color:#E8D5A8;width:100%;text-align:center">Reanimated scroll story · RSVP records to shared DB</span></div>
+      </div></div><div class="cap"><div class="t">native reveal</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= RESPONSES MODAL ================= -->
+<div class="modal" id="modal">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b style="font-family:var(--head);font-size:17px">Maya turns thirty — responses</b><button class="mini" onclick="closeModal()">✕</button></div>
+    <div class="tabsrow"><button class="on" id="mtab-rsvps" onclick="mtab('rsvps')">RSVPs</button><button id="mtab-resp" onclick="mtab('resp')">Answers</button><button id="mtab-views" onclick="mtab('views')">Views</button></div>
+    <div class="feed" id="mfeed"></div>
+  </div>
+</div>
+
+<!-- ================= APP BAR ================= -->
+<nav class="appbar" id="appbar">
+  <button data-s="scr-landing" class="on">🏠 Landing</button>
+  <button data-s="scr-signin">🔑 Sign in</button>
+  <button data-s="scr-dash">📊 Dashboard</button>
+  <button data-s="scr-templates">🗂 Templates</button>
+  <button data-s="scr-templates-pub">🗂 (signed-out)</button>
+  <button data-s="scr-create">✨ Create</button>
+  <button data-s="scr-reveal-scroll">🌙 Scroll Story</button>
+  <button data-s="scr-reveal-tap">🎁 Tap Reveal</button>
+  <button data-s="scr-reveal-count">⏱ Countdown</button>
+  <button data-s="scr-pricing">💳 Pricing</button>
+  <button data-s="scr-settings">⚙️ Settings</button>
+  <button data-s="scr-gift">🎁 Gift</button>
+  <button data-s="scr-mobile">📱 Mobile</button>
+</nav>
+
+<script>
+(function(){
+  /* ---------- state ---------- */
+  var S = { views:12, rsvps:1, resp:3, crafted:1,
+    rsvpList:[{n:"Priya",t:"2h ago"}],
+    respList:[{n:"Priya",t:"answered “Will you come?” — Yes · 2h"}],
+    premiumSelected:false, unlocked:false, revType:'ss' };
+
+  /* ---------- router ---------- */
+  window.go = function(id){
+    document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on');});
+    var el = document.getElementById(id); if(el){el.classList.add('on');}
+    document.querySelectorAll('#appbar button').forEach(function(b){b.classList.toggle('on', b.dataset.s===id);});
+    window.scrollTo(0,0);
+    syncDash();
+  };
+  document.getElementById('appbar').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(b) go(b.dataset.s);
+  });
+
+  /* ---------- templates data ---------- */
+  var T=[
+    {n:"Golden Hour",o:"Birthday",sc:"sc-cake",em:"🎂",st:"Scroll story",p:"Premium"},
+    {n:"The Big Ask",o:"Date Invite",sc:"sc-ring",em:"💍",st:"Scroll story",p:"Premium"},
+    {n:"Still Us",o:"Anniversary",sc:"sc-bloom",em:"🌸",st:"Tap reveal",p:"Free"},
+    {n:"After Dark",o:"Birthday",sc:"sc-night",em:"🥂",st:"Countdown",p:"Free"},
+    {n:"Cake O'Clock",o:"Birthday",sc:"sc-cake",em:"🕛",st:"Countdown",p:"Premium"},
+    {n:"Tiny Wonder",o:"Baby",sc:"sc-baby",em:"🍼",st:"Tap reveal",p:"Free"},
+    {n:"Diya Nights",o:"Festival",sc:"sc-trip",em:"🪔",st:"Scroll story",p:"Premium"},
+    {n:"Warm Sorry",o:"Apology",sc:"sc-bloom",em:"🙏",st:"Tap reveal",p:"Free"}
+  ];
+  function card(t, authed){
+    var d=document.createElement('div'); d.className='tcard';
+    d.innerHTML='<div class="cov '+t.sc+'"><span class="st">'+t.st+'</span>'+t.em+'</div>'+
+      '<div class="m"><span><span class="n">'+t.n+'</span><br/><span class="o">'+t.o+'</span></span><span class="p">'+t.p+'</span></div>';
+    d.onclick=function(){ if(authed){ enterTemplateMode(t.em,t.n,t.o+' · Golden Hour · '+t.st,t.p); go('scr-create'); } else { go('scr-signin'); } };
+    return d;
+  }
+  var lg=document.getElementById('landgrid'); T.slice(0,4).forEach(function(t){lg.appendChild(card(t,false));});
+  var tg=document.getElementById('tgrid'); T.forEach(function(t){tg.appendChild(card(t,true));});
+  var tp=document.getElementById('tgridpub'); T.slice(0,4).forEach(function(t){tp.appendChild(card(t,false));});
+  var ch=document.getElementById('tchips');
+  ['All','Birthday','Date Invite','Festival','Baby','Apology','· Free','· Premium'].forEach(function(c,i){
+    var b=document.createElement('button'); b.textContent=c; if(i===0)b.classList.add('on');
+    b.onclick=function(){ ch.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+      tg.innerHTML=''; T.filter(function(t){ return c==='All'||t.o===c||(c==='· Free'&&t.p==='Free')||(c==='· Premium'&&t.p==='Premium'); }).forEach(function(t){tg.appendChild(card(t,true));}); };
+    ch.appendChild(b);
+  });
+
+  /* ---------- coverflow fan ---------- */
+  var fan=document.getElementById('fan'), dots=document.getElementById('fandots'), center=0, timer=null;
+  T.slice(0,7).forEach(function(t,i){
+    var c=document.createElement('div'); c.className='fancard';
+    c.innerHTML='<div class="art '+t.sc+'">'+t.em+'</div><div class="lb"><div class="t">'+t.n+'</div><div class="s">'+t.o+'</div></div>';
+    fan.appendChild(c);
+    var d=document.createElement('button'); d.onclick=function(){center=i;layout();};
+    dots.appendChild(d);
+  });
+  function layout(){
+    var cards=[].slice.call(fan.children), n=cards.length;
+    cards.forEach(function(c,i){
+      var off=i-center; if(off>n/2)off-=n; if(off<-n/2)off+=n;
+      var a=Math.abs(off);
+      c.style.transform='translateX('+(off*Math.min(95,fan.offsetWidth/5.6))+'px) translateZ('+(-a*60)+'px) rotateY('+Math.max(-52,Math.min(52,off*-26))+'deg) scale('+Math.max(.62,1-a*.13)+')';
+      c.style.zIndex=50-a; c.style.opacity=a>3?0:1; c.style.filter=a?'brightness('+(1-a*.09)+')':'none';
+    });
+    [].slice.call(dots.children).forEach(function(d,i){d.classList.toggle('on',i===center);});
+  }
+  function auto(){ clearInterval(timer); timer=setInterval(function(){center=(center+1)%7;layout();},3500); }
+  fan.addEventListener('mouseenter',function(){clearInterval(timer);});
+  fan.addEventListener('mouseleave',auto);
+  addEventListener('resize',layout); layout(); auto();
+
+  /* ---------- wizard ---------- */
+  window.enterTemplateMode=function(em,name,meta,tier){
+    document.getElementById('tmodeChip').style.display='flex';
+    document.getElementById('manualPick').style.display='none';
+    document.getElementById('tcEm').textContent=em;
+    document.getElementById('tcName').textContent=name;
+    document.getElementById('tcMeta').textContent=meta;
+    document.getElementById('tcTier').textContent=tier;
+    S.premiumSelected = /premium/i.test(tier);
+    wstep(1);
+  };
+  window.leaveTemplateMode=function(){
+    document.getElementById('tmodeChip').style.display='none';
+    document.getElementById('manualPick').style.display='block';
+  };
+  window.startBlank=function(){ leaveTemplateMode(); S.premiumSelected=false; wstep(1); go('scr-create'); };
+  window.wstep=function(n){
+    [1,2,3,4].forEach(function(i){
+      document.getElementById('wstep'+i).style.display=(i===n)?'block':'none';
+      var d=document.getElementById('sd'+i); d.className=i<n?'done':(i===n?'cur':'');
+    });
+    document.getElementById('stepN').textContent=n;
+    if(n===4){
+      var gated=S.premiumSelected&&!S.unlocked;
+      document.getElementById('gateCard').style.display=gated?'block':'none';
+      document.getElementById('pubBtnWrap').style.display=gated?'none':'block';
+      document.getElementById('pubOk').style.display='none';
+      document.getElementById('pvTitle').textContent=document.getElementById('fTitle').value||'Untitled';
+    }
+    var scr=document.getElementById('scr-create'); if(!scr.classList.contains('on')) go('scr-create');
+  };
+  window.pickRev=function(el,type){
+    el.parentElement.querySelectorAll('.revc').forEach(function(r){r.classList.remove('on');});
+    el.classList.add('on'); S.revType=type;
+    document.getElementById('plaqEd').style.display=(type==='ss')?'block':'none';
+  };
+  window.addPlaque=function(){
+    var n=document.getElementById('plaqN'), v=parseInt(n.textContent,10);
+    if(v<4){ n.textContent=v+1;
+      var ed=document.getElementById('plaqEd');
+      var row=document.createElement('div'); row.className='row';
+      row.innerHTML='<input placeholder="Label (e.g. Where)"/><input placeholder="Title"/>';
+      ed.insertBefore(row, ed.lastElementChild);
+    }
+  };
+  window.unlockSim=function(){
+    S.unlocked=true;
+    alert('Stripe checkout (simulated) → payment success → back to this step, unlocked. Draft preserved.');
+    wstep(4);
+  };
+  window.publishSim=function(){
+    document.getElementById('pubBtnWrap').style.display='none';
+    document.getElementById('pubOk').style.display='block';
+    S.crafted++; syncDash();
+  };
+
+  /* ---------- reveal interactions ---------- */
+  window.doRsvp=function(){
+    var name=(document.getElementById('rsvpName').value||'Someone').trim()||'Someone';
+    S.rsvps++; S.views++;
+    S.rsvpList.unshift({n:name,t:'just now'});
+    document.getElementById('rsvpBtn').style.display='none';
+    document.getElementById('rsvpName').style.display='none';
+    document.getElementById('rsvpDone').style.display='block';
+    var f=document.getElementById('feed');
+    var d=document.createElement('div'); d.className='f';
+    d.innerHTML='<i>'+name.charAt(0).toUpperCase()+'</i> '+name+' said yes! 🎉 <small>just now</small>';
+    f.insertBefore(d,f.firstChild);
+    syncDash();
+  };
+  window.tapOpen=function(){
+    document.getElementById('tapLocked').style.display='none';
+    document.getElementById('tapOpened').style.display='block';
+  };
+  window.dodge=function(b){
+    b.style.transform='translate('+(Math.random()*120-60)+'px,'+(Math.random()*60-30)+'px)';
+  };
+
+  /* ---------- dashboard sync + modal ---------- */
+  function syncDash(){
+    document.getElementById('stViews').textContent=S.views;
+    document.getElementById('stRsvps').textContent=S.rsvps;
+    document.getElementById('stResp').textContent=S.resp;
+    document.getElementById('invViews').textContent=S.views;
+    document.getElementById('invRsvps').textContent=S.rsvps;
+    document.getElementById('craftedN').textContent=S.crafted;
+  }
+  window.openModal=function(tab){ document.getElementById('modal').classList.add('on'); mtab(tab); };
+  window.closeModal=function(){ document.getElementById('modal').classList.remove('on'); };
+  window.mtab=function(t){
+    ['rsvps','resp','views'].forEach(function(x){document.getElementById('mtab-'+x).classList.toggle('on',x===t);});
+    var f=document.getElementById('mfeed'); f.innerHTML='';
+    var rows = t==='rsvps' ? S.rsvpList.map(function(r){return '<i>'+r.n.charAt(0)+'</i> '+r.n+' — Count me in! 🎉 <small>'+r.t+'</small>';})
+      : t==='resp' ? S.respList.map(function(r){return '<i>'+r.n.charAt(0)+'</i> '+r.n+' '+r.t.replace(r.n+' ','')+' <small></small>';}).concat(['<i>A</i> Aman answered — Yes <small>5h</small>','<i>?</i> Guest 3 answered — Yes <small>1d</small>'])
+      : ['<i>?</i> Anonymous view (link opened) <small>6h</small>','<i>?</i> Anonymous view <small>1d</small>','<i>P</i> Priya (before her RSVP) <small>2h</small>'];
+    rows.forEach(function(h){var d=document.createElement('div');d.className='f';d.innerHTML=h;f.appendChild(d);});
+  };
+
+  /* ---------- countdown ticks ---------- */
+  var s=10,s2=18;
+  setInterval(function(){
+    s=(s+59)%60; document.getElementById('cdS').textContent=String(s).padStart(2,'0');
+    s2=(s2+59)%60; var e=document.getElementById('cds2'); if(e)e.textContent=String(s2).padStart(2,'0');
+  },1000);
+  syncDash();
+})();
+</script>

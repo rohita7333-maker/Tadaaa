@@ -15,6 +15,9 @@ export default function Footer() {
             <Link href="/#how-it-works" className="hover:text-[#C4686D] transition-colors">
               How it works
             </Link>
+            <Link href="/templates" className="hover:text-[#C4686D] transition-colors">
+              Templates
+            </Link>
             <Link href="/pricing" className="hover:text-[#C4686D] transition-colors">
               Pricing
             </Link>

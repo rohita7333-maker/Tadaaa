@@ -136,9 +136,14 @@ export async function POST(request: NextRequest) {
       }
 
       if (subscriptionType === "plus" && themeId) {
-        // Mark the invite matched by stripe_session_id if we already pre-stamped it,
-        // OR the most recent unpaid invite with this theme. Idempotency above
-        // prevents replay re-querying.
+        // Match on the pre-stamped session id only. createInviteShell writes
+        // stripe_session_id at publish time after verifying the session with
+        // Stripe, so the correct invite is always identifiable this way.
+        //
+        // The old "else most recent unpaid invite with this theme" fallback is
+        // deliberately gone: it consumed the session against an unrelated,
+        // pre-existing draft, after which the buyer's real publish hit the
+        // anti-replay guard and could never spend the purchase.
         const { data: existing } = await supabase
           .from("invites")
           .select("id")
@@ -146,26 +151,17 @@ export async function POST(request: NextRequest) {
           .limit(1)
           .maybeSingle();
 
-        let inviteId = existing?.id as string | undefined;
-
-        if (!inviteId) {
-          const { data: invite } = await supabase
-            .from("invites")
-            .select("id")
-            .eq("creator_id", userId)
-            .eq("theme", themeId)
-            .eq("is_paid", false)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          inviteId = invite?.id;
-        }
-
-        if (inviteId) {
+        if (existing?.id) {
           await supabase
             .from("invites")
-            .update({ is_paid: true, stripe_session_id: session.id })
-            .eq("id", inviteId);
+            .update({ is_paid: true })
+            .eq("id", existing.id);
+        } else {
+          // Normal race: payment settled before the user finished publishing.
+          // createInviteShell stamps is_paid itself, so nothing is lost.
+          console.warn(
+            `[stripe] paid session ${session.id} has no invite yet — publish will claim it`
+          );
         }
       }
     }

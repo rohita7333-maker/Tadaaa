@@ -6,54 +6,13 @@ import { type Theme } from "@/lib/themes";
 import { Heart } from "lucide-react";
 import Link from "next/link";
 import FloatingPhotos from "./FloatingPhotos";
+import { getVisitorToken, postRsvp } from "@/lib/rsvp-client";
 
 interface RSVPButtonProps {
   theme: Theme;
   title: string;
   photos?: { url: string; caption?: string; rotation_deg?: number }[];
   inviteId?: string;
-}
-
-const VISITOR_TOKEN_KEY = "tadaaaa.visitor_token";
-
-function getVisitorToken(): string {
-  if (typeof window === "undefined") return "";
-  try {
-    let token = window.localStorage.getItem(VISITOR_TOKEN_KEY);
-    if (!token) {
-      token =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      window.localStorage.setItem(VISITOR_TOKEN_KEY, token);
-    }
-    return token;
-  } catch {
-    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  }
-}
-
-async function postRsvp(
-  inviteId: string,
-  visitorToken: string,
-  name?: string,
-  attempts = 3
-): Promise<boolean> {
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetch("/api/invite/rsvp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inviteId, visitorToken, name }),
-      });
-      if (res.ok) return true;
-      if (res.status >= 400 && res.status < 500 && res.status !== 429) return false;
-    } catch {
-      // network — retry
-    }
-    await new Promise((r) => setTimeout(r, 400 * (i + 1)));
-  }
-  return false;
 }
 
 export default function RSVPButton({ theme, title, photos = [], inviteId }: RSVPButtonProps) {

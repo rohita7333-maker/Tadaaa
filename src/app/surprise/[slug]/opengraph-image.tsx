@@ -35,7 +35,7 @@ export default async function InviteOGImage({
   const supabase = createAdminClient();
   const { data: invite } = await supabase
     .from("invites")
-    .select("title, occasion_type, theme, creator_id")
+    .select("title, occasion_type, theme, creator_id, reveal_type")
     .eq("slug", slug)
     .eq("is_active", true)
     .single();
@@ -56,10 +56,17 @@ export default async function InviteOGImage({
     paid = canUseDesignerArt(getActiveTier(profile ?? null));
   }
   const tpl = getTemplate(occasion);
-  const cardBackground = paid
-    ? tpl.background
-    : "linear-gradient(135deg, #FFF8F0 0%, #F5E6E0 100%)";
-  const titleColor = paid ? tpl.accent : "#2D2926";
+
+  // Scroll Story reveals get a dusk-gradient card that echoes the cinematic
+  // scroll's palette (charcoal → rose → blush). Tap/countdown cards are left
+  // byte-identical: their background + title color are unchanged.
+  const isScrollStory = invite?.reveal_type === "scroll_story";
+  const cardBackground = isScrollStory
+    ? "linear-gradient(135deg, #3E3733 0%, #9B3D42 55%, #E8A5A8 100%)"
+    : paid
+      ? tpl.background
+      : "linear-gradient(135deg, #FFF8F0 0%, #F5E6E0 100%)";
+  const titleColor = isScrollStory ? "#FFF6F2" : paid ? tpl.accent : "#2D2926";
 
   return new ImageResponse(
     (
@@ -111,7 +118,7 @@ export default async function InviteOGImage({
         <div
           style={{
             fontSize: 24,
-            color: "#6B5E57",
+            color: isScrollStory ? "rgba(255,246,242,0.82)" : "#6B5E57",
             textAlign: "center",
           }}
         >

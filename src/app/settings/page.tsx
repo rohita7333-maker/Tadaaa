@@ -4,7 +4,8 @@ import { getProfile, updateNotifications, signedAvatarUrl } from "@/actions/acco
 import DeleteAccountButton from "./DeleteAccountButton";
 import AvatarUpload from "./AvatarUpload";
 import Link from "next/link";
-import { ArrowLeft, User, Bell, ShieldAlert, Crown, Lock, Download, Sparkles } from "lucide-react";
+import DashboardNavServer from "@/components/dashboard/DashboardNavServer";
+import { User, Bell, ShieldAlert, Crown, Lock, Download, Sparkles } from "lucide-react";
 import ChangePasswordForm from "./ChangePasswordForm";
 import { SavePreferencesButton, SettingsSection, ToggleRow } from "./SettingsAnimated";
 
@@ -42,7 +43,11 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#FFF8F0]">
+    <div className="min-h-screen bg-[#FFF8F0]">
+      {/* Same authenticated bar as every other product surface — it carries the
+          logo and Dashboard link, so the page needs no separate back link. */}
+      <DashboardNavServer activeRoute="settings" />
+      <div className="relative overflow-hidden">
       {/* Decorative bloom */}
       <div
         aria-hidden="true"
@@ -62,14 +67,6 @@ export default async function SettingsPage() {
       />
 
       <div className="relative max-w-xl mx-auto px-6 py-10">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors mb-8 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          Back to dashboard
-        </Link>
-
         {/* Hero */}
         <SettingsSection index={0}>
           <div className="mb-10">
@@ -208,6 +205,7 @@ export default async function SettingsPage() {
           </p>
           <DeleteAccountButton />
         </SettingsSection>
+      </div>
       </div>
     </div>
   );

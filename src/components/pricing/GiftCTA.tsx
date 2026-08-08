@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Gift, X, Loader2 } from "lucide-react";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 interface GiftCTAProps {
   label: string;
@@ -48,10 +49,10 @@ export default function GiftCTA({ label, className }: GiftCTAProps) {
 
   return (
     <>
-      <button onClick={() => setShowModal(true)} className={className}>
+      <MagneticButton type="button" onClick={() => setShowModal(true)} className={className}>
         <Gift className="w-4 h-4 mr-2 inline-block" />
         {label}
-      </button>
+      </MagneticButton>
 
       {showModal && (
         <div

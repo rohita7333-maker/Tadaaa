@@ -1,22 +1,25 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Lock } from "lucide-react";
-import { themes, type Theme } from "@/lib/themes";
+import { Sparkles } from "lucide-react";
+import { themes } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { springs, makeReducedMotionTransition } from "@/lib/motion";
 
 interface ThemeSelectorProps {
   selectedTheme: string;
   onSelect: (themeId: string) => void;
-  onPremiumClick: (theme: Theme) => void;
   unlockedPremiumThemes?: string[];
 }
 
+/**
+ * Selection is free — entitlement is settled once, at publish. Premium themes
+ * carry a "Premium" badge here and no price: the only $ moment in the wizard
+ * is the publish gate.
+ */
 export default function ThemeSelector({
   selectedTheme,
   onSelect,
-  onPremiumClick,
   unlockedPremiumThemes,
 }: ThemeSelectorProps) {
   const shouldReduce = useReducedMotion();
@@ -39,13 +42,7 @@ export default function ThemeSelector({
           return (
             <motion.button
               key={theme.id}
-              onClick={() => {
-                if (isUnlocked) {
-                  onSelect(theme.id);
-                } else {
-                  onPremiumClick(theme);
-                }
-              }}
+              onClick={() => onSelect(theme.id)}
               initial={false}
               animate={{ scale: isSelected ? 1.02 : 1 }}
               whileTap={shouldReduce ? {} : { scale: 0.96 }}
@@ -88,9 +85,9 @@ export default function ThemeSelector({
                     </p>
                   </div>
                   {theme.isPremium && !isUnlocked && (
-                    <div className="shrink-0 flex items-center gap-0.5 bg-[#C9A96E]/10 text-[#C9A96E] text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-[#C9A96E]/20">
-                      <Lock className="w-2.5 h-2.5" />
-                      $4.99
+                    <div className="shrink-0 flex items-center gap-0.5 bg-[#C9A96E]/10 text-[#8A6F35] text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-[#C9A96E]/20">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      Premium
                     </div>
                   )}
                   {isUnlocked && theme.isPremium && (
@@ -104,15 +101,6 @@ export default function ThemeSelector({
               {/* Selected ring */}
               {isSelected && (
                 <div className="absolute inset-0 border-2 border-[#C4686D] rounded-2xl pointer-events-none" />
-              )}
-
-              {/* Locked overlay */}
-              {!isUnlocked && (
-                <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-[#2D2926]/80 text-white text-xs px-3 py-1.5 rounded-full">
-                    Unlock for $4.99
-                  </div>
-                </div>
               )}
             </motion.button>
           );

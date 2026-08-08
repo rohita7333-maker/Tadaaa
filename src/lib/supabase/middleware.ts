@@ -10,12 +10,20 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  // Skip auth round-trip on public paths — only protected paths need gating.
-  const protectedPaths = ["/dashboard", "/create", "/settings"];
-  const isProtected = protectedPaths.some((p) =>
-    request.nextUrl.pathname.startsWith(p)
-  );
-  if (!isProtected) {
+  // Skip the auth round-trip on public paths. Two tiers below:
+  //   protectedPaths — signed-out visitors are redirected to sign-in.
+  //   sessionPaths   — the session is refreshed but nobody is turned away.
+  // /create is in the second tier on purpose: the wizard is reachable
+  // signed-out by design (see create/layout.tsx) and demands auth at publish /
+  // premium unlock instead, so a visitor can try the product before making an
+  // account — but a signed-in visitor still needs a fresh session so the
+  // layout renders the authenticated chrome and the tier lookup works.
+  const protectedPaths = ["/dashboard", "/settings"];
+  const sessionPaths = ["/create"];
+  const path = request.nextUrl.pathname;
+  const isProtected = protectedPaths.some((p) => path.startsWith(p));
+  const needsSession = isProtected || sessionPaths.some((p) => path.startsWith(p));
+  if (!needsSession) {
     return NextResponse.next({ request });
   }
 
@@ -46,9 +54,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
+    const next = `${request.nextUrl.pathname}${request.nextUrl.search}`;
     url.pathname = "/auth/signin";
+    url.search = next === "/" ? "" : `next=${encodeURIComponent(next)}`;
     return NextResponse.redirect(url);
   }
 

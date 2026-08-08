@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { easings, durations, makeReducedMotionTransition } from "@/lib/motion";
-import { ArrowLeft, ArrowRight, Heart } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import StepIndicator from "@/components/create/StepIndicator";
@@ -12,10 +12,13 @@ import ThemeSelector from "@/components/create/ThemeSelector";
 import PhotoUploader, { type PhotoFile } from "@/components/create/PhotoUploader";
 import MessageEditor from "@/components/create/MessageEditor";
 import RevealSettings from "@/components/create/RevealSettings";
+import EventsEditor, { type StoryEventDraft } from "@/components/create/EventsEditor";
 import QuestionBuilder, { type Question } from "@/components/create/QuestionBuilder";
 import PreviewPublish from "@/components/create/PreviewPublish";
+import TemplateSummaryChip from "@/components/create/TemplateSummaryChip";
 import { AIDraftButton } from "@/components/create/AIDraftButton";
-import { type Theme } from "@/lib/themes";
+import { getThemeById } from "@/lib/themes";
+import { getTemplate, type RevealStyle, type Template } from "@/lib/templates";
 import { type Draft } from "@/lib/ai/draft";
 import { createInviteShell, finalizeInvite } from "@/actions/invite";
 import { toast } from "sonner";
@@ -51,18 +54,87 @@ function readUnlockedPremium(): string[] {
   }
 }
 
-function readCheckoutReturn(): { theme: string | null; status: "success" | "cancelled" | null } {
-  if (typeof window === "undefined") return { theme: null, status: null };
+function readCheckoutReturn(): {
+  theme: string | null;
+  status: "success" | "cancelled" | null;
+  sessionId: string | null;
+} {
+  if (typeof window === "undefined") return { theme: null, status: null, sessionId: null };
   const params = new URLSearchParams(window.location.search);
   const status = params.get("payment");
-  if (status === "success") return { theme: params.get("theme"), status: "success" };
-  if (status === "cancelled") return { theme: null, status: "cancelled" };
-  return { theme: null, status: null };
+  if (status === "success") {
+    return {
+      theme: params.get("theme"),
+      status: "success",
+      sessionId: params.get("session_id"),
+    };
+  }
+  if (status === "cancelled") return { theme: null, status: "cancelled", sessionId: null };
+  return { theme: null, status: null, sessionId: null };
 }
 
 function readGiftId(): string | null {
   if (typeof window === "undefined") return null;
   return new URLSearchParams(window.location.search).get("gift");
+}
+
+/**
+ * Wizard draft persisted across the Stripe round-trip. The publish gate sends
+ * the user off-site to checkout and Stripe returns to /create fresh, so without
+ * this everything typed so far is lost. Photos are `File` objects and cannot be
+ * serialized — they are re-added after the return (the restore lands on step 2
+ * and says so).
+ */
+interface CreateDraft {
+  occasionType: string;
+  selectedTheme: string;
+  revealType: RevealStyle;
+  title: string;
+  message: string;
+  countdownDate: string;
+  expiresAt: string;
+  hasExpiry: boolean;
+  acceptContributions: boolean;
+  questions: Question[];
+  events: StoryEventDraft[];
+  templateId: string | null;
+  /** Stripe Checkout Session id proving the premium theme was paid for. */
+  stripeSessionId: string | null;
+}
+
+const DRAFT_KEY = "tadaaaa.createDraft";
+
+function writeDraft(draft: CreateDraft) {
+  try {
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch {}
+}
+
+function readDraft(): CreateDraft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed as CreateDraft;
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft() {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY);
+  } catch {}
+}
+
+function readTemplateParam(): Template | null {
+  if (typeof window === "undefined") return null;
+  const id = new URLSearchParams(window.location.search).get("template");
+  if (!id) return null;
+  // Unknown template ids are ignored — the wizard just starts fresh.
+  return getTemplate(id) ?? null;
 }
 
 export default function CreatePage() {
@@ -77,9 +149,69 @@ export default function CreatePage() {
   const [unlockedPremium, setUnlockedPremium] = useState<string[]>([]);
   const [giftId, setGiftId] = useState<string | null>(null);
 
+  // Proof of the $4.99 one-off theme purchase, handed back by Stripe on return
+  // and passed to createInviteShell so the server can verify it with Stripe.
+  const [stripeSessionId, setStripeSessionId] = useState<string | null>(null);
+
   // Step 2 — Theme, photos, message, reveal
   const [selectedTheme, setSelectedTheme] = useState<string>("warm-embrace");
 
+  // Reveal mechanic. Declared above the mount effect (like occasionType below)
+  // because the ?template=<id> hydration sets it from the preset.
+  const [revealType, setRevealType] = useState<RevealStyle>("tap");
+
+  // Step 1 — Occasion. Declared above the mount effect because the
+  // ?template=<id> hydration below sets it.
+  const [occasionType, setOccasionType] = useState("custom");
+
+  // Non-null while the wizard is driven by a template preset: step 1 collapses
+  // to a summary chip instead of re-asking what the template already decided.
+  // "Change" clears it and reveals the pickers, prefilled.
+  const [templateMode, setTemplateMode] = useState<Template | null>(null);
+
+  const [photos, setPhotos] = useState<PhotoFile[]>([]);
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [countdownDate, setCountdownDate] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
+  const [hasExpiry, setHasExpiry] = useState(false);
+  const [acceptContributions, setAcceptContributions] = useState(false);
+  const [titleError, setTitleError] = useState("");
+  const [messageError, setMessageError] = useState("");
+
+  // Scroll Story timeline plaques ("The plan" scene). Only serialized when the
+  // reveal mechanic is scroll_story; empty is fine (PlanScene falls back to a
+  // single countdown plaque).
+  const [events, setEvents] = useState<StoryEventDraft[]>([]);
+
+  // Step 3 — Questions
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  /**
+   * Re-apply a persisted draft to the wizard and consume it. The theme is left
+   * to the caller — a checkout return owns it. Photos are `File` handles and
+   * cannot survive a round-trip, so we land on step 2 where they're re-added.
+   * Declared above the mount effect that calls it.
+   */
+  function restoreDraft(draft: CreateDraft) {
+    setOccasionType(draft.occasionType);
+    setRevealType(draft.revealType);
+    setTitle(draft.title);
+    setMessage(draft.message);
+    setCountdownDate(draft.countdownDate);
+    setExpiresAt(draft.expiresAt);
+    setHasExpiry(draft.hasExpiry);
+    setAcceptContributions(draft.acceptContributions);
+    setQuestions(draft.questions ?? []);
+    setEvents(draft.events ?? []);
+    const draftTemplate = draft.templateId ? getTemplate(draft.templateId) : null;
+    if (draftTemplate) setTemplateMode(draftTemplate);
+    clearDraft();
+    setStep(2);
+  }
+
+  // Mount-time hydration: tier, gift id, checkout return, draft restore and
+  // ?template= preset. Declared after every piece of wizard state it writes.
   useEffect(() => {
     async function fetchTier() {
       const supabase = createClient();
@@ -113,7 +245,19 @@ export default function CreatePage() {
     // External-state sync from sessionStorage + URL. setState-in-effect is
     // required to match SSR (empty array, default theme) on the first paint.
     const ret = readCheckoutReturn();
+    let draftRestored = false;
     if (ret.status === "success" && ret.theme) {
+      // Restore everything the wizard held before the checkout redirect, so
+      // the user comes back to their surprise instead of a blank wizard.
+      const draft = readDraft();
+      // Prefer the id Stripe just put on the URL; fall back to the draft copy
+      // so an in-wizard reload doesn't drop the proof of purchase.
+      setStripeSessionId(ret.sessionId ?? draft?.stripeSessionId ?? null);
+      if (draft) {
+        restoreDraft(draft);
+        draftRestored = true;
+        toast.info("Your surprise is back — just re-add your photos.");
+      }
       const next = Array.from(new Set([...stored, ret.theme]));
       try {
         sessionStorage.setItem("tadaaaa.unlockedPremium", JSON.stringify(next));
@@ -123,27 +267,44 @@ export default function CreatePage() {
       toast.success("Premium theme unlocked! Finish your surprise to apply it.");
     } else {
       if (stored.length > 0) setUnlockedPremium(stored);
+      // Same restore for the other round-trips that leave and re-enter the
+      // wizard: signing in at the publish gate, or cancelling checkout. Only
+      // the checkout-success path owns the theme, so the draft's theme applies
+      // here.
+      const draft = readDraft();
+      if (draft) {
+        setStripeSessionId(draft.stripeSessionId ?? null);
+        restoreDraft(draft);
+        if (draft.selectedTheme) setSelectedTheme(draft.selectedTheme);
+        draftRestored = true;
+        toast.info("Your surprise is back — just re-add your photos.");
+      }
       if (ret.status === "cancelled") {
         toast.info("Checkout cancelled. You can pick a free theme instead.");
       }
     }
+
+    // Hydrate template preset from ?template=<id>. The template decided the
+    // occasion, theme and reveal style, so all three apply verbatim — premium
+    // themes included. Picking is free; entitlement is settled once at the
+    // publish gate (and server-side in createInviteShell).
+    // A restored draft is strictly newer than the preset it may have started
+    // from (and already carries templateMode), so it wins outright.
+    const template = draftRestored ? null : readTemplateParam();
+    if (template) {
+      setTemplateMode(template);
+      setOccasionType(template.occasionId);
+      // Apply the preset reveal mechanic (tap / countdown / scroll story) to
+      // the live wizard state — this is what drives RevealSettings.
+      setRevealType(template.revealType);
+      const templateTheme = getThemeById(template.themeId);
+      // A checkout-success return already selected the theme the user paid
+      // for — never let a template preset override that.
+      if (templateTheme && !(ret.status === "success" && ret.theme)) {
+        setSelectedTheme(templateTheme.id);
+      }
+    }
   }, []);
-
-  // Step 1 — Occasion
-  const [occasionType, setOccasionType] = useState("custom");
-  const [photos, setPhotos] = useState<PhotoFile[]>([]);
-  const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
-  const [revealType, setRevealType] = useState<"tap" | "countdown">("tap");
-  const [countdownDate, setCountdownDate] = useState("");
-  const [expiresAt, setExpiresAt] = useState("");
-  const [hasExpiry, setHasExpiry] = useState(false);
-  const [acceptContributions, setAcceptContributions] = useState(false);
-  const [titleError, setTitleError] = useState("");
-  const [messageError, setMessageError] = useState("");
-
-  // Step 3 — Questions
-  const [questions, setQuestions] = useState<Question[]>([]);
 
   function goNext() {
     if (step === 1) {
@@ -157,6 +318,17 @@ export default function CreatePage() {
       else setMessageError("");
       if (photos.length === 0) { toast.error("Please add at least one photo"); valid = false; }
       if (revealType === "countdown" && !countdownDate) { toast.error("Please set a countdown date"); valid = false; }
+      // Scroll Story's finale counts down to the big day, so it needs a
+      // future date just like Countdown — but with its own message.
+      if (revealType === "scroll_story") {
+        if (!countdownDate) {
+          toast.error("Please set the date this story counts down to");
+          valid = false;
+        } else if (new Date(countdownDate).getTime() <= Date.now()) {
+          toast.error("The scroll story date must be in the future");
+          valid = false;
+        }
+      }
       if (!valid) return;
       setDirection(1);
       setStep(3);
@@ -171,20 +343,41 @@ export default function CreatePage() {
     setStep((s) => Math.max(1, s - 1));
   }
 
-  async function handlePremiumClick(theme: Theme) {
-    if (userTier === "unlimited") {
-      setSelectedTheme(theme.id);
-      return;
-    }
+  /**
+   * The publish gate's "Unlock" CTA. Saves the wizard draft first — Stripe
+   * returns to a fresh /create, so anything not persisted here is lost.
+   */
+  /** Current wizard state as a persistable draft. */
+  function snapshotDraft(): CreateDraft {
+    return {
+      occasionType,
+      selectedTheme,
+      revealType,
+      title,
+      message,
+      countdownDate,
+      expiresAt,
+      hasExpiry,
+      acceptContributions,
+      questions,
+      events,
+      templateId: templateMode?.id ?? null,
+      stripeSessionId,
+    };
+  }
+
+  async function handleUnlockTheme() {
+    writeDraft(snapshotDraft());
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "plus", themeId: theme.id }),
+        body: JSON.stringify({ mode: "plus", themeId: selectedTheme }),
       });
       if (res.status === 401) {
         toast.error("Please sign in to unlock premium themes");
-        window.location.href = `/auth/signin?next=/create`;
+        const next = `/create${window.location.search}`;
+        window.location.href = `/auth/signin?next=${encodeURIComponent(next)}`;
         return;
       }
       const data = (await res.json()) as { url?: string; error?: string };
@@ -206,7 +399,9 @@ export default function CreatePage() {
     formData.append("message", message);
     formData.append("revealType", revealType);
     formData.append("occasionType", occasionType);
-    if (revealType === "countdown" && countdownDate) {
+    // Both countdown and scroll story persist the reveal date — countdown
+    // gates on it, scroll story feeds its finale countdown.
+    if ((revealType === "countdown" || revealType === "scroll_story") && countdownDate) {
       formData.append("countdownDate", new Date(countdownDate).toISOString());
     }
     if (hasExpiry && expiresAt) {
@@ -214,9 +409,27 @@ export default function CreatePage() {
     }
     formData.append("acceptContributions", acceptContributions ? "true" : "false");
     formData.append("questions", JSON.stringify(questions));
+    // Scroll Story timeline plaques — only meaningful for scroll_story reveals.
+    // For every other mechanic we send an empty array so the server stores '[]'.
+    formData.append(
+      "events",
+      JSON.stringify(revealType === "scroll_story" ? events : [])
+    );
     if (giftId) formData.append("giftId", giftId);
+    // Proof of the one-off premium-theme purchase — the server re-verifies it
+    // with Stripe before allowing a free-tier user to publish a premium theme.
+    if (stripeSessionId) formData.append("stripeSessionId", stripeSessionId);
 
     const shell = await createInviteShell(formData);
+    // The wizard is reachable signed-out by design — publish is where auth is
+    // demanded. Persist the draft first so signing in returns to a filled
+    // wizard rather than a blank one.
+    if (shell?.error === "Not authenticated") {
+      writeDraft(snapshotDraft());
+      const next = `/create${window.location.search}`;
+      window.location.href = `/auth/signin?next=${encodeURIComponent(next)}`;
+      return null;
+    }
     if (shell?.error) {
       toast.error(shell.error);
       return null;
@@ -287,19 +500,20 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0]">
-      {/* Nav */}
-      <nav className="bg-white border-b border-[#D4CBC3]/40 px-6 py-4 sticky top-0 z-40">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Heart className="w-5 h-5 fill-[#C4686D] text-[#C4686D]" />
-            <span className="font-heading text-lg text-[#2D2926]">TaDaaaa</span>
-          </Link>
-          <span className="text-[#6B5E57] text-sm">Step {step} of 4</span>
-        </div>
-      </nav>
+    <div className="max-w-2xl mx-auto px-6 py-8">
+      {/* Wizard header row. The logo/account bar lives in the layout — this
+          keeps only the wizard's own context: an exit and the step count. */}
+      <div className="mb-6 flex items-center justify-between">
+        <Link
+          href="/dashboard"
+          className="group inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+          Dashboard
+        </Link>
+        <span className="text-[#6B5E57] text-sm">Step {step} of 4</span>
+      </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
         <div className="mb-8">
           <StepIndicator currentStep={step} />
         </div>
@@ -323,28 +537,57 @@ export default function CreatePage() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h2 className="font-heading text-2xl text-[#2D2926] mb-1">
-                        What&apos;s the occasion?
+                        {templateMode ? "Your template" : "What's the occasion?"}
                       </h2>
-                      <p className="text-sm text-[#6B5E57]">Pick a type — or let AI draft the whole invite for you</p>
+                      <p className="text-sm text-[#6B5E57]">
+                        {templateMode
+                          ? "Occasion, theme and reveal are already set — change them any time."
+                          : "Pick a type — or let AI draft the whole invite for you"}
+                      </p>
                     </div>
                     <AIDraftButton onDraft={applyDraft} />
                   </div>
-                  <OccasionSelector
-                    selected={occasionType}
-                    onSelect={setOccasionType}
-                    onPromptSelect={(prompt) => setTitle(prompt)}
-                    selectedPrompt={title}
-                  />
-                  <ThemeSelector
-                    selectedTheme={selectedTheme}
-                    onSelect={setSelectedTheme}
-                    onPremiumClick={handlePremiumClick}
-                    unlockedPremiumThemes={
-                      userTier === "unlimited"
-                        ? undefined
-                        : unlockedPremium
-                    }
-                  />
+                  <AnimatePresence mode="wait" initial={false}>
+                    {templateMode ? (
+                      <motion.div
+                        key="template-chip"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
+                      >
+                        <TemplateSummaryChip
+                          template={templateMode}
+                          onChange={() => setTemplateMode(null)}
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="full-pickers"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
+                        className="space-y-6"
+                      >
+                        <OccasionSelector
+                          selected={occasionType}
+                          onSelect={setOccasionType}
+                          onPromptSelect={(prompt) => setTitle(prompt)}
+                          selectedPrompt={title}
+                        />
+                        <ThemeSelector
+                          selectedTheme={selectedTheme}
+                          onSelect={setSelectedTheme}
+                          unlockedPremiumThemes={
+                            userTier === "unlimited"
+                              ? undefined
+                              : unlockedPremium
+                          }
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
 
@@ -371,6 +614,9 @@ export default function CreatePage() {
                     onHasExpiryChange={setHasExpiry}
                     onAcceptContributionsChange={setAcceptContributions}
                   />
+                  {revealType === "scroll_story" && (
+                    <EventsEditor events={events} onEventsChange={setEvents} />
+                  )}
                 </div>
               )}
 
@@ -395,6 +641,8 @@ export default function CreatePage() {
                   photos={photos}
                   tier={userTier}
                   acceptContributions={acceptContributions}
+                  sessionUnlocked={unlockedPremium.includes(selectedTheme)}
+                  onUnlockTheme={handleUnlockTheme}
                   onPublish={handlePublish}
                 />
               )}
@@ -440,7 +688,6 @@ export default function CreatePage() {
             </Button>
           </div>
         )}
-      </div>
     </div>
   );
 }

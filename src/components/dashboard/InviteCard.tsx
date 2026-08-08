@@ -76,6 +76,9 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
     }
   }
 
+  // Badge on "See responses" — how much there actually is to look at.
+  const engagementCount = (invite.rsvp_count ?? 0) + (invite.response_count ?? 0);
+
   const status = !invite.is_active
     ? "inactive"
     : expired
@@ -188,13 +191,28 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
         </div>
         <div className="mb-3" />
 
-        {/* Actions */}
+        {/* Actions — "See responses" is the primary affordance: the card's
+            numbers are the hook, this is where the "who" lives. */}
         <div className="flex gap-2">
+          <Button
+            onClick={() => setResponsesOpen(true)}
+            size="sm"
+            title="See who opened, who RSVP'd, and what they answered"
+            className="flex-1 h-9 rounded-full text-xs font-semibold bg-[#FFF0EE] text-[#C4686D] border border-[#C4686D]/40 shadow-none hover:bg-[#FFE4E1] hover:border-[#C4686D] transition-all duration-300"
+          >
+            <MessageCircleQuestion className="w-3.5 h-3.5 mr-1" />
+            See responses
+            {engagementCount > 0 && (
+              <span className="ml-1.5 rounded-full bg-[#C4686D] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                {engagementCount}
+              </span>
+            )}
+          </Button>
           <Button
             onClick={() => setShareOpen((v) => !v)}
             variant="outline"
             size="sm"
-            className={`flex-1 h-9 rounded-full text-xs transition-all duration-300 ${
+            className={`h-9 px-3 rounded-full text-xs transition-all duration-300 ${
               shareOpen
                 ? "bg-[#FFF0EE] border-[#C4686D] text-[#C4686D]"
                 : "border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0]"
@@ -203,20 +221,13 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             <Share2 className="w-3.5 h-3.5 mr-1" />
             Share
           </Button>
-          <Button
-            onClick={() => setResponsesOpen(true)}
-            variant="outline"
-            size="sm"
-            title="View responses"
-            className="h-9 w-9 rounded-full border-[#D4CBC3] text-[#6B5E57] hover:bg-[#FFF8F0] p-0 transition-all duration-300"
-          >
-            <MessageCircleQuestion className="w-3.5 h-3.5" />
-          </Button>
           <a
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0] transition-all duration-300"
+            aria-label={`Open live preview of ${invite.title}`}
+            title="Open live preview"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4686D] focus-visible:ring-offset-2"
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
@@ -224,6 +235,7 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             onClick={() => (deleteLocked ? undefined : setConfirmOpen(true))}
             disabled={deleting || deleteLocked}
             aria-disabled={deleteLocked}
+            aria-label={deleteLocked ? "Delete locked until this surprise expires" : `Delete ${invite.title}`}
             variant="outline"
             size="sm"
             title={

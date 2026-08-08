@@ -9,7 +9,12 @@ const polaroids = [
   { rotate: "8deg", bottom: "24%", right: "5%", emoji: "🎉", label: "Surprise!!" },
 ];
 
-export default function SignInPage() {
+interface SignInPageProps {
+  searchParams: Promise<{ next?: string }>;
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const { next } = await searchParams;
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
@@ -80,7 +85,7 @@ export default function SignInPage() {
           <span className="font-heading text-xl text-[#2D2926]">TaDaaaa</span>
         </div>
         <div className="w-full max-w-md">
-          <AuthForm mode="signin" />
+          <AuthForm mode="signin" next={next} />
         </div>
         <p className="text-xs text-[#6B5E57]/60 mt-10 text-center max-w-xs">
           By signing in you agree to our{" "}

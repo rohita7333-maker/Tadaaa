@@ -73,9 +73,11 @@ import { toast } from "sonner";
 
 interface AuthFormProps {
   mode: "signin" | "signup";
+  /** Where to land after auth completes — preserved from `?next=` on the page (e.g. /create?template=X). */
+  next?: string;
 }
 
-export default function AuthForm({ mode }: AuthFormProps) {
+export default function AuthForm({ mode, next }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -100,6 +102,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setLoading(true);
     const fd = new FormData();
     Object.entries(data).forEach(([k, v]) => fd.append(k, v as string));
+    if (next) fd.append("next", next);
     try {
       const result = (isSignUp ? await signUp(fd) : await signIn(fd)) as
         | { error?: string; success?: string }
@@ -117,7 +120,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   async function handleGoogle() {
     setGoogleLoading(true);
     try {
-      const result = await signInWithGoogle();
+      const result = await signInWithGoogle(next);
       if (result && "error" in result && result.error) {
         toast.error(result.error);
         setGoogleLoading(false);
@@ -151,6 +154,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
     try {
       const fd = new FormData();
       fd.append("email", email);
+      if (next) fd.append("next", next);
       const result = await signInWithMagicLink(fd);
       if (result.error) toast.error(result.error);
       else if (result.success) toast.success(result.success);

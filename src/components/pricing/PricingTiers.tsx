@@ -6,6 +6,7 @@ import NumberFlow from "@number-flow/react";
 import { Check } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import GiftCTA from "@/components/pricing/GiftCTA";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { getReducedMotionTransition } from "@/lib/a11y";
@@ -232,27 +233,6 @@ function PlanCTA({
   const [loading, setLoading] = useState(false);
 
   async function handle() {
-    if (plan.planKey === "gift") {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/stripe/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: "gift" }),
-        });
-        const data = (await res.json()) as { url?: string; error?: string };
-        if (data.url) {
-          window.location.href = data.url;
-          return;
-        }
-        toast.error(data.error || "Checkout failed");
-      } catch {
-        toast.error("Could not start checkout — try again");
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
     if (plan.planKey === "free") {
       router.push(isAuthed ? "/dashboard" : "/auth/signup");
       return;
@@ -293,6 +273,13 @@ function PlanCTA({
   const className = plan.highlight
     ? "w-full bg-white text-[#C4686D] hover:bg-[#FFF0E8] shadow-lg from-white to-white"
     : "w-full";
+
+  // Gift needs a recipient email before checkout can start — GiftCTA owns
+  // that modal + its own submit; it isn't the same one-click flow as the
+  // other tiers.
+  if (plan.planKey === "gift") {
+    return <GiftCTA label={plan.cta} className={className} />;
+  }
 
   return (
     <MagneticButton

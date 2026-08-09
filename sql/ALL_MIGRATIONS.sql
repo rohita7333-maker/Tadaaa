@@ -291,3 +291,16 @@ ALTER TABLE profiles
 CREATE INDEX IF NOT EXISTS profiles_subscription_tier_idx
   ON profiles (subscription_tier)
   WHERE subscription_tier <> 'free';
+
+-- =============================================================================
+-- invite_reveal_type_scroll_story.sql — allow the 'scroll_story' reveal type
+-- Phase 2: createInviteShell() writes reveal_type = 'scroll_story'; the old
+-- CHECK constraint (tap | countdown) rejects it and the publish insert fails.
+-- Idempotent: drops then re-adds the widened constraint.
+-- =============================================================================
+ALTER TABLE invites
+  DROP CONSTRAINT IF EXISTS invites_reveal_type_check;
+
+ALTER TABLE invites
+  ADD CONSTRAINT invites_reveal_type_check
+  CHECK (reveal_type IN ('tap', 'countdown', 'scroll_story'));

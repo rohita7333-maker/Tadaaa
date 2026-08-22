@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-const COLORS = ["#C4686D", "#E8A5A8", "#C9A96E", "#E8D5A8", "#9B3D42", "#fff"];
+// The mockup's `burst()` palette verbatim: coral · sand · ink · pebble.
+const COLORS = ["#D45847", "#CCAC9F", "#1A1A1A", "#F5F0ED"];
 const EMOJI = ["🎉", "✨", "🎊", "🥳"];
 
 type Part = {

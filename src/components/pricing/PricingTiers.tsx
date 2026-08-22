@@ -1,15 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import NumberFlow from "@number-flow/react";
-import { Check } from "lucide-react";
-import { SpotlightCard } from "@/components/ui/spotlight-card";
-import { MagneticButton } from "@/components/ui/magnetic-button";
 import GiftCTA from "@/components/pricing/GiftCTA";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { getReducedMotionTransition } from "@/lib/a11y";
 
 export type ClientPlan = {
   name: string;
@@ -32,187 +27,111 @@ interface Props {
   isAuthed: boolean;
 }
 
+// Mockup `.btn` — pill, 13px/600/.08em uppercase, 44px tap target,
+// transform+shadow+background over 180ms, scale(.98) on press. Horizontal
+// padding is 12px rather than the mockup's 30px: these are full-width block
+// buttons inside a ~243px column, where the pill's own padding is invisible
+// but 30px of it forces the real CTA labels onto two lines.
+const BTN =
+  "inline-flex items-center justify-center gap-2 w-full min-h-[44px] px-3 py-[14px] rounded-full text-[13px] font-semibold uppercase tracking-[0.08em] transition-[transform,box-shadow,background-color] duration-[180ms] ease-out active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed";
+const BTN_CORAL = `${BTN} bg-coral text-white hover:bg-coral-deep hover:shadow-[var(--sh-card)]`;
+const BTN_LINE = `${BTN} bg-paper border border-mist text-ink hover:border-ink`;
+
+// Mockup `.authtabs` segmented control, reused for billing cadence.
+const SEG_ON = "bg-paper text-ink shadow-[var(--sh)]";
+const SEG_OFF = "text-stone hover:text-ink";
+
 export default function PricingTiers({ plans, isAuthed }: Props) {
-  const shouldReduce = useReducedMotion();
   const [isYearly, setIsYearly] = useState(true);
 
   return (
     <>
-      {/* Billing cadence toggle — only meaningful for the Unlimited tier today,
-          but surfaced globally so future plus/year plans can hook in. */}
-      <div className="flex justify-center mb-10">
+      {/* Billing cadence — only the Unlimited tier prices differ today, but the
+          control is global so future per-year plans hook in unchanged. */}
+      <div className="flex justify-center mb-8">
         <div
           role="radiogroup"
           aria-label="Billing cadence"
-          className="inline-flex items-center gap-1 p-1 rounded-full bg-white border border-[#D4CBC3]/40 shadow-sm"
+          className="inline-flex gap-1.5 p-[5px] rounded-[12px] bg-pebble"
         >
-          <button
-            type="button"
-            role="radio"
-            aria-checked={!isYearly}
-            onClick={() => setIsYearly(false)}
-            className={`px-5 py-2 text-xs font-semibold rounded-full transition-colors ${
-              !isYearly
-                ? "bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white shadow"
-                : "text-[#6B5E57] hover:text-[#2D2926]"
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={isYearly}
-            onClick={() => setIsYearly(true)}
-            className={`px-5 py-2 text-xs font-semibold rounded-full transition-colors flex items-center gap-1.5 ${
-              isYearly
-                ? "bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white shadow"
-                : "text-[#6B5E57] hover:text-[#2D2926]"
-            }`}
-          >
-            Yearly
-            <span
-              className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                isYearly ? "bg-white/25 text-white" : "bg-[#C9A96E]/15 text-[#C9A96E]"
+          {(
+            [
+              ["Monthly", false],
+              ["Yearly", true],
+            ] as const
+          ).map(([label, yearly]) => (
+            <button
+              key={label}
+              type="button"
+              role="radio"
+              aria-checked={isYearly === yearly}
+              onClick={() => setIsYearly(yearly)}
+              className={`min-h-[44px] px-6 rounded-[9px] text-sm font-semibold transition-colors duration-150 ease-out ${
+                isYearly === yearly ? SEG_ON : SEG_OFF
               }`}
             >
-              2 mo free
-            </span>
-          </button>
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+      <div className="grid gap-[18px] max-w-[1080px] mx-auto grid-cols-[repeat(auto-fit,minmax(240px,1fr))] items-stretch">
         {plans.map((plan) => {
-          const showNumeric = plan.monthlyPrice !== null;
           const price = isYearly
             ? plan.yearlyPrice ?? plan.monthlyPrice
             : plan.monthlyPrice;
+          const shownPrice = price ?? 0;
           const periodLabel =
             plan.periodOverride ?? (isYearly ? "per year" : "per month");
 
           return (
-            <SpotlightCard
+            <div
               key={plan.name}
-              bare
-              className={`rounded-3xl flex flex-col relative overflow-hidden ${
-                plan.highlight
-                  ? "bg-gradient-to-br from-[#C4686D] to-[#9B3D42] text-white shadow-[0_12px_48px_rgba(196,104,109,0.35)]"
-                  : "bg-white shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30"
+              className={`flex flex-col text-left bg-paper rounded-[var(--r-md)] px-7 py-8 ${
+                plan.highlight ? "border-2 border-coral" : "border border-mist"
               }`}
-              spotlightColor={
-                plan.highlight
-                  ? "rgba(255,255,255,0.18)"
-                  : "rgba(244, 213, 215, 0.55)"
-              }
             >
-              <div className="p-8 flex flex-col h-full">
-                {plan.badge && (
-                  <motion.div
-                    initial={shouldReduce ? false : { scale: 1 }}
-                    animate={
-                      shouldReduce
-                        ? undefined
-                        : { scale: [1, 1.05, 1] }
-                    }
-                    transition={
-                      shouldReduce
-                        ? undefined
-                        : { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                    }
-                    className={`absolute top-5 right-5 text-xs font-bold px-2.5 py-1 rounded-full ${
-                      plan.highlight
-                        ? "bg-white/20 text-white"
-                        : "bg-[#C9A96E]/15 text-[#C9A96E]"
-                    }`}
-                  >
-                    {plan.badge}
-                  </motion.div>
-                )}
+              {/* Mockup `.label` eyebrow, written as utilities so the highlight
+                  colour can win — globals.css `.label` is unlayered and would
+                  otherwise beat a Tailwind colour utility. */}
+              <p
+                className={`text-xs font-semibold uppercase tracking-[0.12em] mb-2 ${
+                  plan.highlight ? "text-coral-deep" : "text-stone"
+                }`}
+              >
+                {plan.badge ?? " "}
+              </p>
 
-                <div className="mb-7">
-                  <h2
-                    className={`font-heading text-xl mb-3 ${
-                      plan.highlight ? "text-white" : "text-[#2D2926]"
-                    }`}
-                  >
-                    {plan.name}
-                  </h2>
-                  <div className="flex items-end gap-1 mb-2">
-                    {showNumeric && price !== null ? (
-                      <span
-                        className={`font-heading text-5xl font-bold leading-none ${
-                          plan.highlight ? "text-white" : "text-[#2D2926]"
-                        }`}
-                      >
-                        <NumberFlow
-                          value={price}
-                          prefix="$"
-                          format={{
-                            minimumFractionDigits:
-                              Number.isInteger(price) ? 0 : 2,
-                            maximumFractionDigits: 2,
-                          }}
-                        />
-                      </span>
-                    ) : (
-                      <span
-                        className={`font-heading text-5xl font-bold leading-none ${
-                          plan.highlight ? "text-white" : "text-[#2D2926]"
-                        }`}
-                      >
-                        $0
-                      </span>
-                    )}
-                    <span
-                      className={`text-sm mb-1.5 ${
-                        plan.highlight ? "opacity-60" : "text-[#6B5E57]"
-                      }`}
-                    >
-                      /{periodLabel}
-                    </span>
-                  </div>
-                  <p
-                    className={`text-sm leading-relaxed ${
-                      plan.highlight ? "opacity-70" : "text-[#6B5E57]"
-                    }`}
-                  >
-                    {plan.description}
-                  </p>
-                </div>
+              <h2 className="text-[19px]">{plan.name}</h2>
 
-                <ul className="space-y-3 mb-8 flex-1">
-                  {plan.features.map((f, i) => (
-                    <motion.li
-                      key={f}
-                      initial={{ opacity: 0, x: shouldReduce ? 0 : -4 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={getReducedMotionTransition(shouldReduce, {
-                        duration: 0.35,
-                        delay: i * 0.05,
-                      })}
-                      className="flex items-start gap-2.5 text-sm"
-                    >
-                      <Check
-                        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                          plan.highlight ? "text-white/80" : "text-[#C4686D]"
-                        }`}
-                      />
-                      <span
-                        className={
-                          plan.highlight ? "text-white/90" : "text-[#2D2926]"
-                        }
-                      >
-                        {f}
-                      </span>
-                    </motion.li>
-                  ))}
-                </ul>
-
-                <PlanCTA plan={plan} isAuthed={isAuthed} isYearly={isYearly} />
+              {/* Every figure comes from src/lib/pricing.ts — no price literal
+                  is ever written into this markup. */}
+              <div className="font-heading text-[38px] leading-none mt-2.5 mb-0.5 text-ink">
+                <NumberFlow
+                  value={shownPrice}
+                  prefix="$"
+                  format={{
+                    minimumFractionDigits: Number.isInteger(shownPrice) ? 0 : 2,
+                    maximumFractionDigits: 2,
+                  }}
+                />
               </div>
-            </SpotlightCard>
+              <p className="text-[13px] text-stone mb-[18px]">{periodLabel}</p>
+
+              <ul className="list-none flex-1 mb-[22px]">
+                {plan.features.map((f) => (
+                  <li
+                    key={f}
+                    className="text-sm text-stone py-1.5 border-b border-pebble"
+                  >
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <PlanCTA plan={plan} isAuthed={isAuthed} isYearly={isYearly} />
+            </div>
           );
         })}
       </div>
@@ -269,10 +188,7 @@ function PlanCTA({
     }
   }
 
-  // Preserve light/dark CTA variant. Highlight card uses inverted (white bg / rose text).
-  const className = plan.highlight
-    ? "w-full bg-white text-[#C4686D] hover:bg-[#FFF0E8] shadow-lg from-white to-white"
-    : "w-full";
+  const className = plan.highlight ? BTN_CORAL : BTN_LINE;
 
   // Gift needs a recipient email before checkout can start — GiftCTA owns
   // that modal + its own submit; it isn't the same one-click flow as the
@@ -282,13 +198,13 @@ function PlanCTA({
   }
 
   return (
-    <MagneticButton
+    <button
       type="button"
       onClick={handle}
       disabled={loading}
       className={className}
     >
       {loading ? "Loading…" : plan.cta}
-    </MagneticButton>
+    </button>
   );
 }

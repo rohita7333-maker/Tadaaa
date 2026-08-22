@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { X } from "lucide-react";
 import { type Theme } from "@/lib/themes";
-import { getReducedMotionTransition, cssEasings } from "@/lib/motion";
+import { getReducedMotionTransition } from "@/lib/motion";
 
 interface Photo {
   url: string;
@@ -19,468 +19,191 @@ interface Note {
 
 interface PolaroidCarouselProps {
   photos: Photo[];
-  theme: Theme;
+  /**
+   * Retained for call-site compatibility. The mockup's photo scene
+   * (`.s-photos`) is a paper ground, not a themed one, so the theme is not
+   * painted here — it survives on the hero card and the message scene.
+   */
+  theme?: Theme;
   title: string;
   /**
    * Message-only contributions from collaborative invites (Task B2).
    * Photo contributions are merged into `photos` upstream; these letters-
-   * without-an-image render after the photo deck so they aren't lost.
+   * without-an-image render after the photo grid so they aren't lost.
    */
   notes?: Note[];
   onComplete: () => void;
 }
 
-// Deterministic tilts so polaroids feel hand-placed — matches PolaroidScroll.
-const TILTS = [-2.5, 2, -1.5, 3, -2, 1.5, -3, 2.5];
+/** Mockup `transition-delay:${i*.35}s` on `.masonry .m`, capped so a large
+ *  deck still finishes revealing in a couple of seconds. */
+const STAGGER_S = 0.35;
+const MAX_STAGGER_S = 2.45;
 
-// Sparkle burst positions when user views the last photo.
-const SPARKLES = [
-  { x: -120, y: -90, delay: 0 },
-  { x: 110, y: -110, delay: 0.05 },
-  { x: -90, y: 80, delay: 0.1 },
-  { x: 130, y: 60, delay: 0.15 },
-  { x: 0, y: -140, delay: 0.2 },
-  { x: -150, y: 0, delay: 0.25 },
-  { x: 150, y: -20, delay: 0.3 },
-  { x: 20, y: 130, delay: 0.35 },
-];
-
+/**
+ * Photo scene — mockup `.s-photos` / `.masonry` / `.mcap` (L457-463).
+ *
+ * A paper-ground masonry (2 columns, 3 above 800px) with mist-hairline tiles,
+ * left-aligned captions on a paper strip, and the mockup's slow staggered
+ * rise. Tapping a tile opens the mockup's `lightbox()`.
+ */
 export default function PolaroidCarousel({
   photos,
-  theme,
   title,
   notes = [],
   onComplete,
 }: PolaroidCarouselProps) {
   const shouldReduce = useReducedMotion();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [seen, setSeen] = useState<Set<number>>(() => new Set([0]));
   const [showingNotes, setShowingNotes] = useState(false);
+  const [lightbox, setLightbox] = useState<Photo | null>(null);
 
   const hasNotes = notes.length > 0;
-  const total = photos.length;
-  const accent = theme.colors.accent;
-  const textColor = theme.colors.text;
+  const revealDone = shouldReduce
+    ? 0
+    : Math.min((photos.length - 1) * STAGGER_S, MAX_STAGGER_S) + 0.6;
 
-  const allViewed = useMemo(() => seen.size >= total, [seen, total]);
-  const isLastPhotoActive = total > 0 && activeIndex === total - 1;
-  const showSparkles = isLastPhotoActive && allViewed && !shouldReduce && !showingNotes;
-
-  // Auto-fire onComplete if there's literally nothing to show.
+  // Escape closes the lightbox — standard dismissal for an overlay.
   useEffect(() => {
-    if (total === 0 && !hasNotes) onComplete();
-  }, [total, hasNotes, onComplete]);
-
-  const markSeen = useCallback((i: number) => {
-    setSeen((prev) => {
-      if (prev.has(i)) return prev;
-      const next = new Set(prev);
-      next.add(i);
-      return next;
-    });
-  }, []);
-
-  const goTo = useCallback(
-    (i: number) => {
-      if (total === 0) return;
-      const wrapped = ((i % total) + total) % total;
-      setActiveIndex(wrapped);
-      markSeen(wrapped);
-    },
-    [total, markSeen]
-  );
-
-  const handlePrev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
-  const handleNext = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
-
-  const handleContinue = useCallback(() => {
-    if (hasNotes && !showingNotes) {
-      setShowingNotes(true);
-      return;
-    }
-    onComplete();
-  }, [hasNotes, showingNotes, onComplete]);
-
-  // Keyboard nav: ←/→ to cycle, Enter/Space to advance once all viewed.
-  useEffect(() => {
+    if (!lightbox) return;
     function onKey(e: KeyboardEvent) {
-      if (showingNotes) {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onComplete();
-        }
-        return;
-      }
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        handlePrev();
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        handleNext();
-      } else if ((e.key === "Enter" || e.key === " ") && allViewed) {
-        e.preventDefault();
-        handleContinue();
-      }
+      if (e.key === "Escape") setLightbox(null);
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [handlePrev, handleNext, handleContinue, allViewed, showingNotes, onComplete]);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [lightbox]);
 
-  if (total === 0 && !hasNotes) return null;
-
-  // ── Notes screen — unchanged treatment from PolaroidScroll ────────────────
   if (showingNotes) {
     return (
-      <button
-        type="button"
-        onClick={onComplete}
-        aria-label="Continue to next part of the surprise"
-        className="w-full min-h-screen flex flex-col items-center justify-between px-6 py-8 cursor-pointer focus:outline-none"
-        style={{ background: theme.colors.background }}
-      >
-        <div className="w-full max-w-sm text-center pt-4">
-          <p
-            className="text-xs font-medium opacity-70 uppercase tracking-wider"
-            style={{ color: textColor }}
-          >
+      <div className="min-h-screen overflow-y-auto bg-paper px-7 pt-16 pb-28">
+        <div className="mx-auto max-w-[440px] text-center">
+          <p className="mb-1.5 font-heading text-[17px] italic text-stone">
             Notes from people who love you
           </p>
-          <h1 className="font-heading text-2xl mt-2" style={{ color: textColor }}>
-            {title}
-          </h1>
-        </div>
-        <div className="flex-1 w-full max-w-sm flex items-center justify-center py-6">
-          <div className="w-full space-y-4">
+          <h2 className="mb-8 font-heading text-2xl text-ink">{title}</h2>
+
+          <ul className="flex flex-col gap-2.5 text-left">
             {notes.map((n, i) => (
-              <div
-                key={`n-${i}`}
-                className="bg-white rounded-2xl p-5 shadow-[0_10px_28px_rgba(45,41,38,0.16)]"
+              <li
+                key={`${n.contributor_name}-${i}`}
+                className="rounded-[var(--r-md)] border border-mist bg-paper p-5 shadow-[var(--sh)]"
               >
-                <p
-                  className="text-[#2D2926] leading-relaxed"
-                  style={{
-                    fontFamily: "var(--font-caveat, cursive)",
-                    fontSize: "1.15rem",
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
+                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink">
                   {n.message}
                 </p>
-                <p className="mt-3 text-right text-xs text-[#6B5E57]">
-                  — {n.contributor_name}
+                <p className="mt-3 text-right text-[11px] uppercase tracking-[0.12em] text-stone">
+                  {n.contributor_name}
                 </p>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
+
+          <button type="button" onClick={onComplete} className="ed-btn ed-btn-coral mt-8">
+            Continue
+          </button>
         </div>
-        <div className="w-full max-w-sm text-center pb-4">
-          <div
-            className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-full"
-            style={{ background: `${accent}18`, color: accent }}
-          >
-            Tap to continue
-            <ChevronRight className="w-4 h-4" />
-          </div>
-        </div>
-      </button>
+      </div>
     );
   }
 
-  // ── Photo carousel screen ─────────────────────────────────────────────────
-  const activePhoto = photos[activeIndex];
-
-  // Side-stack indices. Hide siblings if only 1 photo; if 2, prev === next so
-  // the second card peeks from one side only (handled by isNext check below).
-  const prevIndex = total > 1 ? (activeIndex - 1 + total) % total : -1;
-  const nextIndex = total > 1 ? (activeIndex + 1) % total : -1;
-
   return (
-    <div
-      className="w-full min-h-screen flex flex-col items-center justify-between px-6 py-8"
-      style={{ background: theme.colors.background }}
-    >
-      {/* Header */}
-      <div className="w-full max-w-sm text-center pt-4">
-        <p
-          className="text-xs font-medium opacity-70 uppercase tracking-wider"
-          style={{ color: textColor }}
-        >
-          A memory for you
-        </p>
-        <h1 className="font-heading text-2xl mt-2" style={{ color: textColor }}>
-          {title}
-        </h1>
-        {total > 1 && (
-          <div className="flex justify-center gap-1.5 mt-4" aria-hidden="true">
-            {Array.from({ length: total }).map((_, i) => (
-              <span
-                key={i}
-                className="h-1.5 rounded-full transition-all duration-300"
-                style={{
-                  width: i === activeIndex ? "20px" : "6px",
-                  background: seen.has(i) ? accent : `${accent}33`,
-                }}
-              />
-            ))}
-          </div>
-        )}
+    <div className="min-h-screen overflow-y-auto bg-paper px-7 pt-16 pb-28 text-center">
+      {/* Mockup `.cap2.serif-i` above the grid. */}
+      <p className="mb-5 font-heading text-[17px] italic text-stone">A few favorites</p>
+
+      {/* Mockup `.masonry` — CSS columns, not a grid, so tiles of different
+          heights pack without gaps. */}
+      <div className="mx-auto max-w-[440px] columns-2 gap-3 min-[800px]:max-w-[860px] min-[800px]:columns-3">
+        {photos.map((photo, i) => (
+          <motion.button
+            key={`${photo.url}-${i}`}
+            type="button"
+            onClick={() => setLightbox(photo)}
+            aria-label={photo.caption || `Open memory ${i + 1}`}
+            className="mb-2.5 block w-full break-inside-avoid overflow-hidden rounded-[var(--r-sm)] border border-mist bg-paper text-left focus-visible:outline-2 focus-visible:outline-coral focus-visible:outline-offset-2"
+            initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 26 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={
+              shouldReduce
+                ? { duration: 0.2 }
+                : {
+                    duration: 0.6,
+                    ease: "easeOut",
+                    delay: Math.min(i * STAGGER_S, MAX_STAGGER_S),
+                  }
+            }
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photo.url}
+              alt={photo.caption || `Memory ${i + 1}`}
+              className="block w-full"
+              loading={i === 0 ? "eager" : "lazy"}
+            />
+            {photo.caption && (
+              <span className="block border-t border-mist bg-paper px-[9px] py-1.5 text-[11px] text-stone">
+                {photo.caption}
+              </span>
+            )}
+          </motion.button>
+        ))}
       </div>
 
-      {/* 3D circular stack */}
-      <div
-        className="relative w-full max-w-md flex items-center justify-center"
-        style={{
-          height: "580px",
-          perspective: "1500px",
-        }}
-      >
-        {/* Sparkle burst when user lands on last photo after seeing all */}
-        {showSparkles && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 flex items-center justify-center"
-            style={{ zIndex: 30 }}
-          >
-            {SPARKLES.map((s, i) => (
-              <motion.span
-                key={`spark-${i}`}
-                initial={{ opacity: 0, x: 0, y: 0, scale: 0.4 }}
-                animate={{
-                  opacity: [0, 1, 0],
-                  x: s.x,
-                  y: s.y,
-                  scale: [0.4, 1.1, 0.8],
-                }}
-                transition={{ duration: 1.4, delay: s.delay, ease: "easeOut" }}
-                className="absolute"
-              >
-                <Sparkles className="w-4 h-4" style={{ color: accent }} />
-              </motion.span>
-            ))}
-          </div>
-        )}
-
-        {photos.map((photo, i) => {
-          const isActive = i === activeIndex;
-          const isPrev = i === prevIndex && prevIndex !== activeIndex;
-          const isNext = i === nextIndex && nextIndex !== activeIndex && nextIndex !== prevIndex;
-
-          const tilt =
-            photo.rotation_deg !== undefined && photo.rotation_deg !== 0
-              ? photo.rotation_deg
-              : TILTS[i % TILTS.length];
-
-          let transform: string;
-          let zIndex: number;
-          let opacity: number;
-          let onClick: (() => void) | undefined;
-          let role: "button" | undefined;
-          let ariaLabel: string | undefined;
-
-          if (isActive) {
-            transform = `translateX(0px) translateY(0px) scale(1) rotateY(0deg) rotate(${tilt}deg)`;
-            zIndex = 3;
-            opacity = 1;
-          } else if (isPrev) {
-            transform = shouldReduce
-              ? `translateX(0px) translateY(0px) scale(1) rotate(${tilt}deg)`
-              : `translateX(-170px) translateY(-30px) scale(0.74) rotateY(22deg) rotate(${tilt}deg)`;
-            zIndex = 2;
-            opacity = shouldReduce ? 0 : 0.7;
-            onClick = handlePrev;
-            role = "button";
-            ariaLabel = "Previous photo";
-          } else if (isNext) {
-            transform = shouldReduce
-              ? `translateX(0px) translateY(0px) scale(1) rotate(${tilt}deg)`
-              : `translateX(170px) translateY(-30px) scale(0.74) rotateY(-22deg) rotate(${tilt}deg)`;
-            zIndex = 2;
-            opacity = shouldReduce ? 0 : 0.7;
-            onClick = handleNext;
-            role = "button";
-            ariaLabel = "Next photo";
-          } else {
-            transform = `translateX(0px) translateY(0px) scale(0.7) rotate(${tilt}deg)`;
-            zIndex = 1;
-            opacity = 0;
-          }
-
-          return (
-            <div
-              key={`${photo.url}-${i}`}
-              role={role}
-              tabIndex={onClick ? 0 : -1}
-              aria-label={ariaLabel}
-              onClick={onClick}
-              onKeyDown={
-                onClick
-                  ? (e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onClick();
-                      }
-                    }
-                  : undefined
-              }
-              className="absolute"
-              style={{
-                width: "380px",
-                transform,
-                zIndex,
-                opacity,
-                pointerEvents: opacity === 0 ? "none" : "auto",
-                cursor: onClick ? "pointer" : "default",
-                transition: shouldReduce
-                  ? "opacity 0.3s ease"
-                  : `transform 0.8s ${cssEasings.springBouncy}, opacity 0.5s ease`,
-                filter: "drop-shadow(0 18px 36px rgba(45,41,38,0.25))",
-              }}
-            >
-              <div
-                className="bg-white"
-                style={{
-                  padding: "12px 12px 56px 12px",
-                  borderRadius: "3px",
-                }}
-              >
-                <div
-                  className="overflow-hidden bg-[#F5EDE3]"
-                  style={{ width: "100%", aspectRatio: "1/1" }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photo.url}
-                    alt={photo.caption || `Memory ${i + 1}`}
-                    className="w-full h-full object-cover"
-                    style={{
-                      filter: "contrast(1.04) saturate(1.10) brightness(0.99)",
-                    }}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    draggable={false}
-                  />
-                </div>
-              </div>
-            </div>
-          );
+      {/* Continue arrives once the deck has finished revealing. */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={getReducedMotionTransition(shouldReduce, {
+          duration: 0.4,
+          delay: revealDone,
         })}
-      </div>
-
-      {/* Caption with word-by-word blur reveal */}
-      <div className="w-full max-w-sm flex flex-col items-center pt-2">
-        <div
-          className="text-center px-4"
-          style={{
-            minHeight: "60px",
-            fontFamily: "var(--font-caveat, cursive)",
-            fontSize: "20px",
-            lineHeight: "1.3",
-            color: "#5A4A40",
-          }}
+        className="mt-8"
+      >
+        <button
+          type="button"
+          onClick={() => (hasNotes ? setShowingNotes(true) : onComplete())}
+          className="ed-btn ed-btn-coral"
         >
-          <AnimatePresence mode="wait">
-            {activePhoto?.caption ? (
-              <motion.p
-                key={`cap-${activeIndex}`}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={{
-                  initial: { opacity: 0 },
-                  animate: { opacity: 1 },
-                  exit: { opacity: 0 },
-                }}
-                transition={getReducedMotionTransition(shouldReduce, { duration: 0.3 })}
-              >
-                {activePhoto.caption.split(" ").map((word, i) => (
-                  <motion.span
-                    key={`w-${activeIndex}-${i}`}
-                    initial={
-                      shouldReduce ? { opacity: 1 } : { filter: "blur(10px)", opacity: 0, y: 5 }
-                    }
-                    animate={
-                      shouldReduce
-                        ? { opacity: 1 }
-                        : { filter: "blur(0px)", opacity: 1, y: 0 }
-                    }
-                    transition={{
-                      duration: shouldReduce ? 0 : 0.22,
-                      ease: "easeInOut",
-                      delay: shouldReduce ? 0 : 0.025 * i,
-                    }}
-                    style={{ display: "inline-block" }}
-                  >
-                    {word}&nbsp;
-                  </motion.span>
-                ))}
-              </motion.p>
-            ) : (
-              <span aria-hidden="true">&nbsp;</span>
-            )}
-          </AnimatePresence>
-        </div>
+          {hasNotes ? "Read the notes" : "Continue"}
+        </button>
+      </motion.div>
 
-        {/* Arrow nav + counter */}
-        <div className="flex items-center gap-5 mt-4">
-          <button
-            type="button"
-            onClick={handlePrev}
-            disabled={total <= 1}
-            aria-label="Previous photo"
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{
-              background: accent,
-              color: theme.colors.background,
-            }}
+      {/* Mockup `lightbox()` — full-bleed ink scrim, caption underneath. */}
+      <AnimatePresence>
+        {lightbox && (
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={lightbox.caption || "Memory"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setLightbox(null)}
+            className="fixed inset-0 z-[80] flex flex-col items-center justify-center gap-4 bg-[rgba(26,26,26,0.94)] p-7"
           >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <p
-            className="text-[11px] opacity-60 min-w-[60px] text-center"
-            style={{ color: textColor }}
-          >
-            {activeIndex + 1} of {total}
-          </p>
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={total <= 1}
-            aria-label="Next photo"
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{
-              background: accent,
-              color: theme.colors.background,
-            }}
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Continue button — appears only after every photo viewed */}
-        <div className="h-14 mt-4 flex items-center">
-          <AnimatePresence>
-            {allViewed && (
-              <motion.button
-                key="continue"
-                type="button"
-                onClick={handleContinue}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={getReducedMotionTransition(shouldReduce, { duration: 0.4 })}
-                className="inline-flex items-center gap-2 text-sm font-medium px-6 py-3 rounded-full"
-                style={{
-                  background: `${accent}18`,
-                  color: accent,
-                }}
-                aria-label={hasNotes ? "Continue to notes" : "Continue to next part of the surprise"}
-              >
-                {hasNotes ? "Read the notes" : "Continue"}
-                <ChevronRight className="w-4 h-4" />
-              </motion.button>
+            <button
+              type="button"
+              onClick={() => setLightbox(null)}
+              aria-label="Close"
+              autoFocus
+              className="absolute right-5 top-[14px] flex h-11 w-11 items-center justify-center rounded-full text-white backdrop-blur-[6px] focus-visible:outline-2 focus-visible:outline-coral focus-visible:outline-offset-2"
+              style={{ backgroundColor: "rgba(255,254,253,0.14)" }}
+            >
+              <X className="h-[18px] w-[18px]" strokeWidth={1.6} />
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={lightbox.url}
+              alt={lightbox.caption || "Memory"}
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-[75vh] max-w-full rounded-[var(--r-sm)] object-contain"
+            />
+            {lightbox.caption && (
+              <p className="max-w-[440px] text-[13px] text-sand">{lightbox.caption}</p>
             )}
-          </AnimatePresence>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

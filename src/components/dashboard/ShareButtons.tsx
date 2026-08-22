@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Check, Share2, QrCode, Users, Video, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { APP_URL } from "@/lib/constants";
+import InviteQr from "@/components/dashboard/InviteQr";
 import { handleVideoShare } from "@/lib/video-share";
 import { getShareCopy, type ShareCopyVariant } from "@/lib/share-copy";
 
@@ -22,6 +22,11 @@ interface ShareButtonsProps {
    * accidentally lands on the contribute form.
    */
   acceptContributions?: boolean;
+  /**
+   * Hides the QR toggle + panel. Set where the surface already shows the QR
+   * inline (the publish success step), so one screen never offers two QRs.
+   */
+  hideQr?: boolean;
 }
 
 // Posthog is loaded lazily via the snippet in layout.tsx after cookie consent.
@@ -61,6 +66,7 @@ export default function ShareButtons({
   inviteId,
   creatorName,
   acceptContributions = false,
+  hideQr = false,
 }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
   const [contributeCopied, setContributeCopied] = useState(false);
@@ -162,7 +168,7 @@ export default function ShareButtons({
             disabled={videoSharing}
             aria-label="Share video"
             className="flex items-center justify-center gap-1.5 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ background: "linear-gradient(135deg, #D4868A 0%, #C4686D 100%)" }}
+            style={{ background: "linear-gradient(135deg, var(--coral-light) 0%, var(--coral) 100%)" }}
           >
             {videoSharing ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -178,43 +184,45 @@ export default function ShareButtons({
           onClick={handleShare}
           aria-label="Share invite link"
           className={`flex items-center justify-center gap-1.5 h-11 rounded-full text-white text-sm font-medium shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 ${!inviteId ? "col-span-2" : ""}`}
-          style={{ background: "linear-gradient(135deg, #C4686D 0%, #9B3D42 100%)" }}
+          style={{ background: "linear-gradient(135deg, var(--coral) 0%, var(--coral-deep) 100%)" }}
         >
           <Share2 className="w-4 h-4" />
           Share
         </button>
       </div>
 
-      {/* Row 2: utility actions — 2 cols */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Row 2: utility actions — 2 cols, or 1 when the QR lives elsewhere */}
+      <div className={`grid gap-2 ${hideQr ? "grid-cols-1" : "grid-cols-2"}`}>
         {/* Copy link */}
         <Button
           onClick={handleCopy}
           variant="outline"
-          className="h-11 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0] text-sm transition-all duration-200"
+          className="h-11 rounded-full border-mist text-ink hover:bg-pebble text-sm transition-all duration-200"
         >
-          {copied ? <Check className="w-4 h-4 mr-2 text-[#6B8F71]" /> : <Copy className="w-4 h-4 mr-2" />}
+          {copied ? <Check className="w-4 h-4 mr-2 text-success" /> : <Copy className="w-4 h-4 mr-2" />}
           {copied ? "Copied!" : "Copy link"}
         </Button>
 
         {/* QR toggle */}
+        {!hideQr && (
         <Button
           onClick={() => setShowQR((v) => !v)}
           variant="outline"
           aria-label={showQR ? "Hide QR code" : "Show QR code"}
           aria-expanded={showQR}
-          className={`h-11 rounded-full border-[#D4CBC3] text-sm transition-all duration-200 ${
-            showQR ? "bg-[#FFF0EE] border-[#C4686D] text-[#C4686D]" : "text-[#2D2926] hover:bg-[#FFF8F0]"
+          className={`h-11 rounded-full border-mist text-sm transition-all duration-200 ${
+            showQR ? "bg-chip-coral-bg border-coral text-coral" : "text-ink hover:bg-pebble"
           }`}
         >
           <QrCode className="w-4 h-4 mr-2" />
           QR Code
         </Button>
+        )}
       </div>
 
       {/* QR panel */}
       <AnimatePresence>
-        {showQR && (
+        {showQR && !hideQr && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -222,35 +230,30 @@ export default function ShareButtons({
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="border-2 border-dashed border-[#D4CBC3] rounded-2xl p-5 flex flex-col items-center gap-3 bg-white">
-              <QRCodeSVG
+            <div className="pt-3 pb-1">
+              <InviteQr
                 value={url}
-                size={180}
-                bgColor="#ffffff"
-                fgColor="#2D2926"
-                level="M"
+                fileName={`tadaaaa-${slug}`}
+                onSave={() => trackShare("qr_png")}
               />
-              <p className="text-xs text-[#6B5E57] text-center">
-                Scan to open the surprise
-              </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <p className="text-center text-xs text-[#6B5E57] opacity-70">
+      <p className="text-center text-xs text-stone opacity-70">
         Share via WhatsApp for best results 💚
       </p>
 
       {acceptContributions && (
-        <div className="mt-4 pt-4 border-t border-[#D4CBC3]/40">
+        <div className="mt-4 pt-4 border-t border-mist/40">
           <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-[#C4686D]" />
-            <p className="text-sm font-medium text-[#2D2926]">
+            <Users className="w-4 h-4 text-coral" />
+            <p className="text-sm font-medium text-ink">
               Contribute link
             </p>
           </div>
-          <p className="text-xs text-[#6B5E57] mb-2">
+          <p className="text-xs text-stone mb-2">
             Send to family who want to add memories
           </p>
           <div className="flex gap-2">
@@ -259,7 +262,7 @@ export default function ShareButtons({
               value={contributeUrl}
               readOnly
               onFocus={(e) => e.currentTarget.select()}
-              className="flex-1 h-10 rounded-full border border-[#D4CBC3] px-3 text-xs text-[#2D2926] bg-[#FFF8F0] focus:outline-none focus:border-[#C4686D]"
+              className="flex-1 h-10 rounded-full border border-mist px-3 text-xs text-ink bg-pebble focus:outline-none focus:border-coral"
             />
             <Button
               type="button"
@@ -276,10 +279,10 @@ export default function ShareButtons({
                   toast.error("Could not copy — tap the link to copy manually");
                 }
               }}
-              className="h-10 px-3 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF0EE] text-xs transition-all duration-200"
+              className="h-10 px-3 rounded-full border-mist text-ink hover:bg-chip-coral-bg text-xs transition-all duration-200"
             >
               {contributeCopied ? (
-                <Check className="w-3.5 h-3.5 text-[#6B8F71]" />
+                <Check className="w-3.5 h-3.5 text-success" />
               ) : (
                 <Copy className="w-3.5 h-3.5" />
               )}

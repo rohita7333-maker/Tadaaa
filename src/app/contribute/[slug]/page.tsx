@@ -1,7 +1,6 @@
 import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Heart } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { ContributeForm } from "@/components/contribute/ContributeForm";
 
@@ -10,7 +9,7 @@ interface Props {
 }
 
 export const metadata: Metadata = {
-  title: "Add to the surprise — TaDaaaa",
+  title: "Add to the surprise · TaDaaaa",
   robots: "noindex",
 };
 
@@ -32,19 +31,23 @@ export default async function ContributePage({ params }: Props) {
     notFound();
   }
 
+  // Mockup `.contribw` (L510-512): 480px rail, 48px top / 110px bottom.
   return (
-    <main className="min-h-screen bg-[#FFF8F0] flex items-start justify-center px-6 py-12">
-      <div className="max-w-md w-full">
-        <Link href="/" className="inline-flex items-center gap-2 mb-8">
-          <Heart className="w-5 h-5 fill-[#C4686D] text-[#C4686D]" />
-          <span className="font-heading text-lg text-[#2D2926]">TaDaaaa</span>
-        </Link>
+    <main className="min-h-screen bg-paper">
+      <header className="sticky top-0 z-40 border-b border-mist bg-paper px-5 py-3.5">
+        <div className="mx-auto max-w-[1080px]">
+          <Link href="/" className="font-heading text-xl tracking-[-0.01em] text-ink">
+            TaDaaaa<span className="text-coral">.</span>
+          </Link>
+        </div>
+      </header>
 
-        <h1 className="font-heading text-3xl text-[#2D2926]">
-          Add to &ldquo;{invite.title}&rdquo;
+      <div className="mx-auto max-w-[480px] px-6 pt-12 pb-[110px]">
+        <h1 className="font-heading text-[26px] leading-tight text-ink">
+          You&rsquo;re invited to add to &ldquo;{invite.title}&rdquo;.
         </h1>
-        <p className="mt-2 text-[#6B5E57] text-sm">
-          Drop a photo or short message — it&apos;ll appear in the reveal.
+        <p className="mt-1.5 mb-7 text-sm text-stone">
+          No account needed. Just your words, and a photo if you have one.
         </p>
 
         <ContributeForm slug={slug} />

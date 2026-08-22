@@ -18,29 +18,27 @@ export default function OccasionFilter({ current }: { current: string | null }) 
     router.push(`${pathname}?${params.toString()}`);
   }
 
+  // Mockup `.chips` / `.chip` / `.chip.on` (tadaaaa-editorial.html:282-283).
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <div className="ed-chiprow">
       <button
+        type="button"
         onClick={() => setFilter(null)}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
-          !current
-            ? "bg-[#C4686D] text-white border-[#C4686D] shadow-sm shadow-[#C4686D]/20"
-            : "bg-white text-[#6B5E57] border-[#D4CBC3] hover:border-[#C4686D]/40 hover:text-[#C4686D]"
-        }`}
+        aria-pressed={!current}
+        className={`ed-chip !min-h-0 !px-3 !py-1.5 !text-xs ${!current ? "ed-chip-on" : ""}`}
       >
         All
       </button>
       {occasions.map((occ) => (
         <button
           key={occ.id}
+          type="button"
           onClick={() => setFilter(occ.id)}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
-            current === occ.id
-              ? "bg-[#C4686D] text-white border-[#C4686D] shadow-sm shadow-[#C4686D]/20"
-              : "bg-white text-[#6B5E57] border-[#D4CBC3] hover:border-[#C4686D]/40 hover:text-[#C4686D]"
+          aria-pressed={current === occ.id}
+          className={`ed-chip !min-h-0 !px-3 !py-1.5 !text-xs ${
+            current === occ.id ? "ed-chip-on" : ""
           }`}
         >
-          <span>{occ.emoji}</span>
           {occ.label}
         </button>
       ))}

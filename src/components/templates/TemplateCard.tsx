@@ -2,12 +2,23 @@ import Link from "next/link";
 import type { Template } from "@/lib/templates";
 import { REVEAL_STYLE_LABELS } from "@/lib/templates";
 import { getThemeById } from "@/lib/themes";
+import { palette } from "@/lib/design-tokens";
 import { coverBackground } from "./cover-style";
 
 interface Props {
   template: Template;
 }
 
+/**
+ * Template card, editorial layer.
+ *
+ * The mockup's `.tgrid` cards (tadaaaa-editorial.html:286) are paper on a
+ * hairline mist border with a 12px radius — no drop shadow, no lift. Hover is
+ * a border darkening, matching `.ed-stat` and `.ed-chip`. Focus is the global
+ * coral `:focus-visible` outline, so no per-card ring class.
+ *
+ * The `?template=` handoff to /create is unchanged.
+ */
 export default function TemplateCard({ template }: Props) {
   const theme = getThemeById(template.themeId);
   const isPremium = template.tier === "premium";
@@ -16,9 +27,9 @@ export default function TemplateCard({ template }: Props) {
   return (
     <Link
       href={`/create?template=${template.id}`}
-      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
+      className="group block rounded-[var(--r-md)]"
     >
-      <article className="overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(45,41,38,0.06)] transition-[transform,box-shadow] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-[0_16px_40px_rgba(45,41,38,0.15)]">
+      <article className="overflow-hidden rounded-[var(--r-md)] border border-mist bg-paper transition-colors duration-200 group-hover:border-ink">
         <div
           className="relative flex items-center justify-center bg-cover bg-center"
           style={{
@@ -29,39 +40,43 @@ export default function TemplateCard({ template }: Props) {
             background: !template.art?.cover
               ? theme
                 ? coverBackground(theme)
-                : "#FFF8F0"
+                : palette.pebble
               : undefined,
           }}
         >
-          <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-[11px] font-semibold text-[#2D2926] backdrop-blur-sm">
+          <span
+            className="ed-pill absolute left-3 top-3 backdrop-blur-sm"
+            style={{
+              background: `color-mix(in srgb, ${palette.paper} 85%, transparent)`,
+              borderColor: palette.mist,
+              color: palette.ink,
+            }}
+          >
             {REVEAL_STYLE_LABELS[template.revealType]}
           </span>
           {/* Cover art replaces the emoji glyph — it already carries the mood. */}
           {!template.art?.cover && (
             <span
               aria-hidden="true"
-              className="text-6xl transition-transform duration-300 ease-out group-hover:rotate-6 group-hover:scale-110"
+              className="text-6xl transition-transform duration-300 ease-out group-hover:scale-105"
             >
               {template.emoji}
             </span>
           )}
         </div>
-        <div className="flex items-start justify-between gap-3 p-4">
+        <div className="flex items-start justify-between gap-3 border-t border-mist p-4">
           <div className="min-w-0">
-            <h3 className="font-heading text-lg leading-tight text-[#2D2926]">
+            <h3 className="font-heading text-lg leading-tight text-ink">
               {template.name}
             </h3>
-            {/* rose-deep: 4.5:1 small-text contrast on white (a11y) */}
-            <p className="mt-0.5 font-handwritten text-base leading-snug text-[#9B3D42]">
+            <p className="mt-1 text-sm leading-snug text-stone">
               {template.tagline}
             </p>
           </div>
-          {/* #8A6F35 not #C9A96E: the lighter gold fails WCAG AA (2.24:1) at this
-              text-xs weight — same darker gold already used for the premium
-              badge text in TemplateSummaryChip (5.87:1). */}
+          {/* Premium reads in the AA-safe deep coral; free stays quiet in stone. */}
           <span
-            className={`shrink-0 pt-0.5 text-xs font-semibold uppercase tracking-wider ${
-              isPremium ? "text-[#8A6F35]" : "text-[#6B5E57]"
+            className={`shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] ${
+              isPremium ? "text-coral-deep" : "text-stone"
             }`}
           >
             {tierLabel}

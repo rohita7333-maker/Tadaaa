@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { easings, durations, makeReducedMotionTransition } from "@/lib/motion";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import StepIndicator from "@/components/create/StepIndicator";
+import LivePreview from "@/components/create/LivePreview";
+import { WNAV, WIZ_H2, WIZ_SUB } from "@/components/create/editorial";
 import OccasionSelector from "@/components/create/OccasionSelector";
 import ThemeSelector from "@/components/create/ThemeSelector";
 import PhotoUploader, { type PhotoFile } from "@/components/create/PhotoUploader";
@@ -256,7 +257,7 @@ export default function CreatePage() {
       if (draft) {
         restoreDraft(draft);
         draftRestored = true;
-        toast.info("Your surprise is back — just re-add your photos.");
+        toast.info("Your surprise is back. Just re-add your photos.");
       }
       const next = Array.from(new Set([...stored, ret.theme]));
       try {
@@ -277,7 +278,7 @@ export default function CreatePage() {
         restoreDraft(draft);
         if (draft.selectedTheme) setSelectedTheme(draft.selectedTheme);
         draftRestored = true;
-        toast.info("Your surprise is back — just re-add your photos.");
+        toast.info("Your surprise is back. Just re-add your photos.");
       }
       if (ret.status === "cancelled") {
         toast.info("Checkout cancelled. You can pick a free theme instead.");
@@ -387,7 +388,7 @@ export default function CreatePage() {
       }
       toast.error(data.error || "Checkout failed");
     } catch {
-      toast.error("Could not start checkout — try again");
+      toast.error("Could not start checkout. Try again.");
     }
   }
 
@@ -500,24 +501,30 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
-      {/* Wizard header row. The logo/account bar lives in the layout — this
-          keeps only the wizard's own context: an exit and the step count. */}
-      <div className="mb-6 flex items-center justify-between">
-        <Link
-          href="/dashboard"
-          className="group inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-          Dashboard
-        </Link>
-        <span className="text-[#6B5E57] text-sm">Step {step} of 4</span>
-      </div>
+    // Mockup `.wrap` — 1080px rail, 32px top / 110px bottom (clears the app bar).
+    <div className="max-w-[1080px] mx-auto px-6 pt-8 pb-[110px]">
+      {/* The logo/account bar lives in the layout; this is the wizard's own
+          exit. Mockup relies on the app bar alone, but /create is reachable
+          signed-out where that bar is only a logo — so the way back stays. */}
+      <Link
+        href="/dashboard"
+        className="group mb-5 inline-flex items-center gap-1.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-stone hover:text-ink transition-colors"
+      >
+        <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+        Dashboard
+      </Link>
 
-        <div className="mb-8">
-          <StepIndicator currentStep={step} />
-        </div>
+      {/* Mockup `.hub` — 220px step rail · body · 260px live preview. */}
+      <div className="grid items-start gap-7 min-[961px]:grid-cols-[220px_1fr_260px]">
+        <StepIndicator
+          currentStep={step}
+          onJump={(target) => {
+            setDirection(-1);
+            setStep(target);
+          }}
+        />
 
+        <div className="min-w-0">
         <div className="relative overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
@@ -536,13 +543,13 @@ export default function CreatePage() {
                 <div className="space-y-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h2 className="font-heading text-2xl text-[#2D2926] mb-1">
+                      <h2 className={WIZ_H2}>
                         {templateMode ? "Your template" : "What's the occasion?"}
                       </h2>
-                      <p className="text-sm text-[#6B5E57]">
+                      <p className="text-sm text-stone">
                         {templateMode
-                          ? "Occasion, theme and reveal are already set — change them any time."
-                          : "Pick a type — or let AI draft the whole invite for you"}
+                          ? "Occasion, theme and reveal are already set. Change them any time."
+                          : "One selection. It shapes the tone of everything after."}
                       </p>
                     </div>
                     <AIDraftButton onDraft={applyDraft} />
@@ -591,9 +598,9 @@ export default function CreatePage() {
                 </div>
               )}
 
+              {/* Mockup w2 order: words first, then photos, then the toggles. */}
               {step === 2 && (
                 <div className="space-y-6">
-                  <PhotoUploader photos={photos} onPhotosChange={setPhotos} />
                   <MessageEditor
                     title={title}
                     message={message}
@@ -602,6 +609,7 @@ export default function CreatePage() {
                     titleError={titleError}
                     messageError={messageError}
                   />
+                  <PhotoUploader photos={photos} onPhotosChange={setPhotos} />
                   <RevealSettings
                     revealType={revealType}
                     countdownDate={countdownDate}
@@ -623,10 +631,10 @@ export default function CreatePage() {
               {step === 3 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="font-heading text-2xl text-[#2D2926] mb-1">
-                      The big question
-                    </h2>
-                    <p className="text-sm text-[#6B5E57]">Add a YES/NO question with custom labels and a dodging No button</p>
+                    <h2 className={WIZ_H2}>The question</h2>
+                    <p className={WIZ_SUB}>
+                      Ask them something. Give the No somewhere to run.
+                    </p>
                   </div>
                   <QuestionBuilder questions={questions} onQuestionsChange={setQuestions} />
                 </div>
@@ -650,44 +658,41 @@ export default function CreatePage() {
           </AnimatePresence>
         </div>
 
+        {/* Mockup `.wnav` — line Back on the left, ink Continue on the right. */}
         {step < 4 && (
-          <div className="flex items-center justify-between mt-8">
+          <div className={WNAV}>
             {step > 1 ? (
-              <Button
-                onClick={goBack}
-                variant="outline"
-                className="h-12 px-6 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0]"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
+              <button type="button" onClick={goBack} className="ed-btn ed-btn-line">
                 Back
-              </Button>
+              </button>
             ) : (
-              <div />
+              <span />
             )}
-            <Button
-              onClick={goNext}
-              className="h-12 px-8 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-medium transition-all duration-300 shadow-md"
-            >
-              {step === 3 ? "Preview" : "Next"}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <button type="button" onClick={goNext} className="ed-btn ed-btn-ink">
+              {step === 3 ? "Preview" : "Continue"}
+            </button>
           </div>
         )}
 
         {/* Preview step keeps a way back to edit before publishing — publish
             itself lives inside PreviewPublish, so we only surface Back here. */}
         {step === 4 && (
-          <div className="flex items-center justify-start mt-8">
-            <Button
-              onClick={goBack}
-              variant="outline"
-              className="h-12 px-6 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0]"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+          <div className={WNAV}>
+            <button type="button" onClick={goBack} className="ed-btn ed-btn-line">
               Back to edit
-            </Button>
+            </button>
+            <span />
           </div>
         )}
+        </div>
+
+        <LivePreview
+          occasionId={occasionType}
+          themeId={selectedTheme}
+          title={title}
+          message={message}
+        />
+      </div>
     </div>
   );
 }

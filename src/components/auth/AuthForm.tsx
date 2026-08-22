@@ -4,72 +4,73 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MagneticButton } from "@/components/ui/magnetic-button";
-
-function computePasswordStrength(pwd: string): number {
-  if (!pwd) return 0;
-  let score = 0;
-  if (pwd.length >= 8) score++;
-  if (pwd.length >= 12) score++;
-  if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
-  if (/\d/.test(pwd)) score++;
-  if (/[^A-Za-z0-9]/.test(pwd)) score++;
-  return Math.min(4, score);
-}
-
-function PasswordStrengthMeter({ password }: { password: string }) {
-  const shouldReduce = useReducedMotion();
-  const strength = computePasswordStrength(password);
-  const segments = [
-    { color: "#DC6B6B", label: "Weak" },
-    { color: "#E2A56B", label: "Fair" },
-    { color: "#D4B85A", label: "Good" },
-    { color: "#6B8F71", label: "Strong" },
-  ];
-  if (!password) return null;
-  const activeLabel = strength > 0 ? segments[strength - 1].label : "";
-  return (
-    <div className="mt-2 space-y-1.5">
-      <div className="flex gap-1.5">
-        {segments.map((seg, i) => {
-          const active = i < strength;
-          return (
-            <motion.div
-              key={i}
-              className="h-1 flex-1 rounded-full bg-[#D4CBC3]/40 overflow-hidden"
-            >
-              <motion.div
-                className="h-full rounded-full"
-                style={{ background: seg.color, originX: 0 }}
-                initial={false}
-                animate={{
-                  scaleX: active ? 1 : 0,
-                  opacity: active ? 1 : 0,
-                }}
-                transition={
-                  shouldReduce
-                    ? { duration: 0.15 }
-                    : { type: "spring", stiffness: 240, damping: 22 }
-                }
-              />
-            </motion.div>
-          );
-        })}
-      </div>
-      <p className="text-[10px] text-[#6B5E57] uppercase tracking-wider font-medium">
-        {activeLabel}
-      </p>
-    </div>
-  );
-}
 import { signIn, signUp, signInWithGoogle, signInWithMagicLink } from "@/actions/auth";
 import { signInSchema, signUpSchema, type SignInValues, type SignUpValues } from "@/lib/schemas";
+import { PASSWORD_CRITERIA, passwordCriteriaMet, passwordsMatch } from "@/lib/password";
 import { toast } from "sonner";
+
+/* ---------------------------------------------------------------------------
+ * Editorial atoms — ported from the mockup's `.auth` / `.field` / `.btn`
+ * blocks. Written as Tailwind utilities because the token layer is frozen and
+ * globals.css `.label` is unlayered (a colour utility could not override it).
+ * ------------------------------------------------------------------------- */
+export const AUTH_CARD =
+  "w-full max-w-[400px] bg-paper border border-mist rounded-[var(--r-md)] px-9 py-10";
+export const FIELD_LABEL =
+  "block text-[11px] font-semibold uppercase tracking-[0.08em] text-stone mb-[7px]";
+export const FIELD_INPUT =
+  "w-full px-[14px] py-[13px] rounded-[var(--r-sm)] border border-mist bg-paper text-ink placeholder:text-stone/55 transition-[border-color,box-shadow] duration-150 focus:outline-none focus:border-coral focus:shadow-[0_0_0_1px_var(--coral)]";
+/**
+ * Mockup `.field.err` — coral border + coral 1px ring.
+ *
+ * `border-coral!` needs the important flag: Tailwind emits `border-coral`
+ * before `border-mist` (same utility family, alphabetical), so the base
+ * FIELD_INPUT border won on specificity-free order and the error border
+ * rendered mist. Only the ring was ever coral.
+ */
+export const FIELD_INPUT_ERROR =
+  "border-coral! shadow-[0_0_0_1px_var(--coral)]";
+export const FIELD_MSG = "mt-[5px] text-xs text-coral-deep";
+export const BTN_BASE =
+  "inline-flex items-center justify-center gap-2 w-full min-h-[44px] px-[30px] py-[14px] rounded-full text-[13px] font-semibold uppercase tracking-[0.08em] transition-[transform,box-shadow,background-color] duration-[180ms] ease-out active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed";
+export const BTN_INK = `${BTN_BASE} bg-ink text-paper hover:shadow-[var(--sh-card)]`;
+export const BTN_CORAL = `${BTN_BASE} bg-coral text-white hover:bg-coral-deep hover:shadow-[var(--sh-card)]`;
+export const TLINK =
+  "text-coral-deep font-semibold text-sm hover:underline";
+
+/**
+ * Mockup `.meter` — one 5px bar whose fill width and colour track how many of
+ * the five password criteria are met, plus a live-region word underneath.
+ *
+ * Display only. It never gates submission and never touches `signUpSchema`;
+ * the server contract is the sole authority on what is accepted. The counting
+ * lives in `@/lib/password` so it can be unit-tested without a DOM.
+ */
+function PasswordStrengthMeter({ password }: { password: string }) {
+  const met = passwordCriteriaMet(password);
+  // Mockup colours: coral under 3, sand under 5, green at 5. The green is now
+  // the --success token (the mockup's #2E7D4F, darkened to clear AA on pebble).
+  const fill =
+    met < 3 ? "var(--coral)" : met < 5 ? "var(--sand)" : "var(--success)";
+  const word = !password ? "" : met < 3 ? "Weak" : met < 5 ? "Fair" : "Strong";
+
+  return (
+    <>
+      <div className="h-[5px] rounded-[3px] bg-pebble mt-[7px] overflow-hidden">
+        <div
+          className="h-full w-full rounded-[3px] origin-left transition-[transform,background-color] duration-300 ease-out"
+          style={{
+            transform: `scaleX(${met / PASSWORD_CRITERIA.length})`,
+            backgroundColor: fill,
+          }}
+        />
+      </div>
+      <p className="text-xs text-stone mt-1 min-h-[18px]" aria-live="polite">
+        {word}
+      </p>
+    </>
+  );
+}
 
 interface AuthFormProps {
   mode: "signin" | "signup";
@@ -83,6 +84,10 @@ export default function AuthForm({ mode, next }: AuthFormProps) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  // Confirm-password is client-side only: it is deliberately NOT in
+  // `signUpSchema` and is never appended to the FormData the action receives.
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmTouched, setConfirmTouched] = useState(false);
 
   const isSignUp = mode === "signup";
 
@@ -96,9 +101,17 @@ export default function AuthForm({ mode, next }: AuthFormProps) {
     resolver: zodResolver(isSignUp ? signUpSchema : signInSchema),
   });
 
-  const watchedPassword = watch("password") || "";
+  const watchedPassword = (watch("password") as string | undefined) || "";
+
+  const confirmMismatch =
+    isSignUp && !passwordsMatch(watchedPassword, confirmPassword);
+  const showConfirmError = confirmTouched && confirmMismatch;
 
   async function onSubmit(data: SignUpValues | SignInValues) {
+    if (isSignUp && !passwordsMatch(data.password, confirmPassword)) {
+      setConfirmTouched(true);
+      return;
+    }
     setLoading(true);
     const fd = new FormData();
     Object.entries(data).forEach(([k, v]) => fd.append(k, v as string));
@@ -166,179 +179,225 @@ export default function AuthForm({ mode, next }: AuthFormProps) {
     }
   }
 
+  // The mockup has one tabbed screen; the product has two real routes, so the
+  // inactive tab is a link. `next` rides along on the sign-in href exactly as
+  // the old cross-links did — sign-up has never read it.
+  const signInHref = next
+    ? `/auth/signin?next=${encodeURIComponent(next)}`
+    : "/auth/signin";
+  const tabBase =
+    "flex-1 min-h-[44px] flex items-center justify-center rounded-[9px] text-sm font-semibold transition-colors duration-150 ease-out";
+  const tabOn = "bg-paper text-ink shadow-[var(--sh)]";
+  const tabOff = "text-stone hover:text-ink";
+
   return (
-    <div className="w-full space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="font-heading text-3xl text-[#2D2926]">
-          {isSignUp ? "Create your account" : "Welcome back"}
-        </h1>
-        <p className="text-[#6B5E57] text-sm mt-1.5">
-          {isSignUp
-            ? "Start crafting beautiful surprises in minutes"
-            : "Sign in to continue creating magic"}
-        </p>
+    <div className={AUTH_CARD}>
+      {/* Tabs — mockup `.authtabs` */}
+      <div className="flex gap-1.5 bg-pebble rounded-[12px] p-[5px] mb-[22px]">
+        {isSignUp ? (
+          <Link href={signInHref} className={`${tabBase} ${tabOff}`}>
+            Sign in
+          </Link>
+        ) : (
+          <span aria-current="page" className={`${tabBase} ${tabOn}`}>
+            Sign in
+          </span>
+        )}
+        {isSignUp ? (
+          <span aria-current="page" className={`${tabBase} ${tabOn}`}>
+            Sign up
+          </span>
+        ) : (
+          <Link href="/auth/signup" className={`${tabBase} ${tabOff}`}>
+            Sign up
+          </Link>
+        )}
       </div>
 
-      {/* Google */}
-      <Button
+      <h1 className="text-[26px] mb-1">
+        {isSignUp ? "Create your account" : "Welcome back"}
+      </h1>
+      <p className="text-sm mb-[26px]">
+        {isSignUp
+          ? "It takes about a minute. No card needed."
+          : "Pick up where you left off."}
+      </p>
+
+      {/* Google — mockup `.gbtn` */}
+      <button
         type="button"
-        variant="outline"
-        className="w-full h-12 rounded-2xl border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0] hover:border-[#C4686D]/30 transition-all duration-300 font-medium"
         onClick={handleGoogle}
         disabled={googleLoading}
+        className="w-full min-h-[44px] flex items-center justify-center gap-2.5 px-4 py-[13px] rounded-[var(--r-sm)] border border-mist bg-paper text-sm font-semibold text-ink hover:border-ink transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {googleLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-        ) : (
-          <svg className="w-5 h-5 mr-2.5" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-          </svg>
-        )}
-        Continue with Google
-      </Button>
+        <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+        </svg>
+        {googleLoading ? "Opening Google…" : "Continue with Google"}
+      </button>
 
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[#D4CBC3]/70" />
-        </div>
-        <div className="relative flex justify-center">
-          <span className="bg-white px-3 text-xs text-[#6B5E57] uppercase tracking-wider">or</span>
-        </div>
+      {/* Divider — mockup `.hr` */}
+      <div className="flex items-center gap-3.5 my-[18px] text-xs uppercase tracking-[0.1em] text-stone">
+        <span className="flex-1 h-px bg-mist" />
+        or
+        <span className="flex-1 h-px bg-mist" />
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)}>
         {isSignUp && (
-          <div className="space-y-1.5">
-            <Label htmlFor="fullName" className="text-[#2D2926] text-sm font-medium">
+          <div className="mb-4">
+            <label htmlFor="fullName" className={FIELD_LABEL}>
               Full name
-            </Label>
-            <Input
+            </label>
+            <input
               id="fullName"
+              autoComplete="name"
               placeholder="Your name"
-              className="h-12 rounded-2xl border-[#D4CBC3] bg-white focus-visible:ring-[#C4686D] focus-visible:border-[#C4686D] transition-colors"
+              className={`${FIELD_INPUT} ${
+                "fullName" in errors && errors.fullName ? FIELD_INPUT_ERROR : ""
+              }`}
               {...register("fullName")}
             />
             {"fullName" in errors && errors.fullName && (
-              <p className="text-[#C4686D] text-xs">{errors.fullName.message}</p>
+              <p className={FIELD_MSG}>{errors.fullName.message}</p>
             )}
           </div>
         )}
 
-        <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-[#2D2926] text-sm font-medium">
+        <div className="mb-4">
+          <label htmlFor="email" className={FIELD_LABEL}>
             Email
-          </Label>
-          <Input
+          </label>
+          <input
             id="email"
             type="email"
+            autoComplete="email"
             placeholder="you@example.com"
-            className="h-12 rounded-2xl border-[#D4CBC3] bg-white focus-visible:ring-[#C4686D] focus-visible:border-[#C4686D] transition-colors"
+            className={`${FIELD_INPUT} ${errors.email ? FIELD_INPUT_ERROR : ""}`}
             {...register("email")}
           />
-          {errors.email && (
-            <p className="text-[#C4686D] text-xs">{errors.email.message}</p>
-          )}
+          {errors.email && <p className={FIELD_MSG}>{errors.email.message}</p>}
         </div>
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-[#2D2926] text-sm font-medium">
-              Password
-            </Label>
-            {!isSignUp && (
-              <Link href="/auth/forgot-password" className="text-xs text-[#C4686D] hover:underline font-medium">
-                Forgot password?
-              </Link>
-            )}
-          </div>
+        <div className="mb-4">
+          <label htmlFor="password" className={FIELD_LABEL}>
+            Password
+          </label>
           <div className="relative">
-            <Input
+            <input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder={isSignUp ? "Min. 8 characters" : "Your password"}
-              className="h-12 rounded-2xl border-[#D4CBC3] bg-white focus-visible:ring-[#C4686D] focus-visible:border-[#C4686D] transition-colors pr-10"
+              autoComplete={isSignUp ? "new-password" : "current-password"}
+              placeholder={
+                isSignUp ? "8+ chars, mixed case, number, symbol" : "Your password"
+              }
+              className={`${FIELD_INPUT} pr-[68px] ${
+                errors.password ? FIELD_INPUT_ERROR : ""
+              }`}
               {...register("password")}
             />
             <button
               type="button"
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6B5E57] hover:text-[#2D2926] transition-colors"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-1.5 text-xs text-stone hover:text-ink transition-colors"
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPassword ? "hide" : "show"}
             </button>
           </div>
           {errors.password && (
-            <p className="text-[#C4686D] text-xs">{errors.password.message}</p>
+            <p className={FIELD_MSG}>{errors.password.message}</p>
           )}
-          {isSignUp && <PasswordStrengthMeter password={watchedPassword as string} />}
+          {isSignUp && <PasswordStrengthMeter password={watchedPassword} />}
         </div>
 
         {isSignUp && (
-          <label className="flex items-start gap-2.5 cursor-pointer mt-1">
+          <div className="mb-4">
+            <label htmlFor="confirmPassword" className={FIELD_LABEL}>
+              Confirm password
+            </label>
+            <input
+              id="confirmPassword"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="Re-enter your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              onBlur={() => setConfirmTouched(true)}
+              aria-invalid={showConfirmError || undefined}
+              aria-describedby={showConfirmError ? "confirmPassword-error" : undefined}
+              className={`${FIELD_INPUT} ${showConfirmError ? FIELD_INPUT_ERROR : ""}`}
+            />
+            {showConfirmError && (
+              <p id="confirmPassword-error" className={FIELD_MSG}>
+                Passwords do not match.
+              </p>
+            )}
+          </div>
+        )}
+
+        {isSignUp && (
+          <label className="flex gap-2.5 items-start text-[13px] text-stone mb-3.5 cursor-pointer">
             <input
               type="checkbox"
               checked={acceptedTerms}
               onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded border-[#D4CBC3] text-[#C4686D] focus:ring-[#C4686D] accent-[#C4686D]"
+              className="w-[18px] h-[18px] mt-0.5 accent-coral shrink-0"
             />
-            <span className="text-xs text-[#6B5E57] leading-relaxed">
+            <span>
               I agree to the{" "}
-              <Link href="/terms" target="_blank" className="text-[#C4686D] hover:underline font-medium">
+              <Link href="/terms" target="_blank" className="text-coral-deep font-semibold hover:underline">
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" target="_blank" className="text-[#C4686D] hover:underline font-medium">
+              <Link href="/privacy" target="_blank" className="text-coral-deep font-semibold hover:underline">
                 Privacy Policy
               </Link>
+              .
             </span>
           </label>
         )}
 
-        <MagneticButton
+        <button
           type="submit"
           disabled={loading || (isSignUp && !acceptedTerms)}
-          className="w-full h-12 rounded-2xl font-semibold mt-2"
+          className={isSignUp ? BTN_CORAL : BTN_INK}
         >
-          {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-          {isSignUp ? "Create account" : "Sign in"}
-        </MagneticButton>
+          {loading
+            ? isSignUp
+              ? "Creating…"
+              : "Signing in…"
+            : isSignUp
+              ? "Create account"
+              : "Sign in"}
+        </button>
 
         {!isSignUp && (
-          <button
-            type="button"
-            onClick={handleMagicLink}
-            disabled={magicLinkLoading}
-            className="w-full text-center text-sm text-[#C4686D] hover:text-[#9B3D42] font-medium transition-colors disabled:opacity-50 mt-1"
-          >
-            {magicLinkLoading ? "Sending link..." : "Sign in with email link instead"}
-          </button>
+          <>
+            <p className="mt-3.5 text-sm text-center">
+              <button
+                type="button"
+                onClick={handleMagicLink}
+                disabled={magicLinkLoading}
+                className={`${TLINK} disabled:opacity-60`}
+              >
+                {magicLinkLoading
+                  ? "Sending link…"
+                  : "Or sign in with a magic link →"}
+              </button>
+            </p>
+            <p className="mt-2 text-[13px] text-center text-stone">
+              Forgot password?{" "}
+              <Link href="/auth/forgot-password" className={TLINK}>
+                Reset it
+              </Link>
+            </p>
+          </>
         )}
       </form>
-
-      {/* Switch mode */}
-      <p className="text-center text-sm text-[#6B5E57]">
-        {isSignUp ? (
-          <>
-            Already have an account?{" "}
-            <Link href="/auth/signin" className="text-[#C4686D] hover:underline font-semibold">
-              Sign in
-            </Link>
-          </>
-        ) : (
-          <>
-            Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="text-[#C4686D] hover:underline font-semibold">
-              Sign up free
-            </Link>
-          </>
-        )}
-      </p>
     </div>
   );
 }

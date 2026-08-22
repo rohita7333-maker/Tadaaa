@@ -1,52 +1,48 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
-import { Heart } from "lucide-react";
-import Link from "next/link";
-import FloatingPhotos from "./FloatingPhotos";
 import { getVisitorToken, postRsvp } from "@/lib/rsvp-client";
 
 interface RSVPButtonProps {
   theme: Theme;
   title: string;
+  /**
+   * Accepted for call-site compatibility but no longer rendered — the mockup's
+   * `.s-rsvp` scene is clean ink, and floating polaroids sat under the
+   * transparent name field and hurt legibility.
+   */
   photos?: { url: string; caption?: string; rotation_deg?: number }[];
   inviteId?: string;
 }
 
-export default function RSVPButton({ theme, title, photos = [], inviteId }: RSVPButtonProps) {
+/** Mockup `burst()` (L856) — the editorial confetti palette, verbatim. */
+const BURST_COLORS = ["#D45847", "#CCAC9F", "#1A1A1A", "#F5F0ED"];
+
+/**
+ * Closing RSVP beat — mockup `.s-rsvp` / `.rform` / `.dodgezone` / `.btn-no`
+ * (L465-472). Ink ground, sand-bordered transparent name field, coral block
+ * CTA, and a "No" that runs away from the pointer.
+ */
+export default function RSVPButton({ theme, title, inviteId }: RSVPButtonProps) {
   const [tapped, setTapped] = useState(false);
   const [name, setName] = useState("");
+  const [dodge, setDodge] = useState({ left: "50%", top: "6px" });
   const firedRef = useRef(false);
-  void title;
+  const shouldReduce = useReducedMotion();
 
   async function fireConfetti() {
+    // Celebration stays local to the beat that fires it, and never runs when
+    // the visitor asked for reduced motion.
+    if (shouldReduce) return;
     const confetti = (await import("canvas-confetti")).default;
-
     confetti({
-      particleCount: 120,
-      spread: 70,
+      particleCount: 70,
+      spread: 60,
       origin: { y: 0.6 },
-      colors: [theme.colors.accent, theme.colors.accentLight, "#ffffff", "#FFD700"],
+      colors: BURST_COLORS,
     });
-
-    setTimeout(() => {
-      confetti({
-        particleCount: 60,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.6 },
-        colors: [theme.colors.accent, theme.colors.accentLight, "#ffffff"],
-      });
-      confetti({
-        particleCount: 60,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.6 },
-        colors: [theme.colors.accent, theme.colors.accentLight, "#ffffff"],
-      });
-    }, 200);
   }
 
   function handleTap() {
@@ -66,114 +62,87 @@ export default function RSVPButton({ theme, title, photos = [], inviteId }: RSVP
     }
   }
 
+  /** Mockup `dodge(b)` (L1434) — jump the No button somewhere else nearby. */
+  function runAway() {
+    if (shouldReduce) return;
+    const x = (Math.random() - 0.5) * 220;
+    const y = Math.random() * 26 - 6;
+    setDodge({ left: `calc(50% + ${x}px)`, top: `${Math.max(-4, y)}px` });
+  }
+
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-8 relative overflow-hidden"
-      style={{ background: theme.colors.background }}
-    >
-      <FloatingPhotos photos={photos} screenIndex={200} />
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-ink px-7 text-center">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 opacity-25 [filter:brightness(0.55)_saturate(0.85)]"
+        style={{ background: theme.colors.background }}
+      />
 
-      <div className="relative text-center" style={{ zIndex: 20 }}>
-        <motion.div
-          animate={tapped ? { scale: [1, 1.4, 1], rotate: [0, -15, 15, 0] } : {}}
-          transition={{ duration: 0.6 }}
-        >
-          <Heart
-            className="w-16 h-16 mx-auto mb-6"
-            style={{
-              fill: tapped ? theme.colors.accent : "transparent",
-              color: theme.colors.accent,
-            }}
-          />
-        </motion.div>
-
+      <div className="relative w-full max-w-[300px] text-center" style={{ zIndex: 20 }}>
         <AnimatePresence mode="wait">
           {tapped ? (
             <motion.div
               key="tapped"
-              initial={{ opacity: 0, scale: 0.8, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
             >
-              <h2
-                className="font-heading text-3xl mb-3"
-                style={{ color: theme.colors.text }}
-              >
-                Can&apos;t wait! 🎉
-              </h2>
-              <p className="opacity-60 text-sm" style={{ color: theme.colors.text }}>
-                Get ready for something special
+              {/* Mockup `doRsvp` swaps the form for one italic serif line. */}
+              <p className="font-heading text-[17px] italic text-sand">
+                Recorded. They&rsquo;ll know you&rsquo;re in.
               </p>
             </motion.div>
           ) : (
             <motion.div
               key="pre"
-              initial={{ opacity: 0, y: 10 }}
+              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <h2
-                className="font-heading text-3xl mb-3"
-                style={{ color: theme.colors.text }}
-              >
-                Let&apos;s celebrate together!
-              </h2>
-              <p
-                className="opacity-60 text-sm mb-8"
-                style={{ color: theme.colors.text }}
-              >
-                Tap below to confirm you&apos;re in
+              {/* Mockup `.s-rsvp .cap2` + `h2` */}
+              <p className="mb-2.5 font-heading text-[17px] italic text-sand">
+                Don&rsquo;t leave me hanging
               </p>
+              <h2 className="mb-6 font-heading text-2xl text-white">{title}</h2>
+
+              {/* Mockup `.rform` */}
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={80}
-                placeholder="Your name (optional)"
-                aria-label="Your name (optional)"
-                className="w-56 max-w-full mx-auto mb-5 block h-11 px-4 rounded-full text-center text-sm bg-white/70 backdrop-blur-sm border outline-none transition-all duration-300 focus:bg-white focus:scale-[1.02]"
-                style={{
-                  color: theme.colors.text,
-                  borderColor: `${theme.colors.accent}40`,
-                }}
+                placeholder="Your name"
+                aria-label="Your name"
+                className="mb-3 w-full rounded-[var(--r-sm)] border border-sand bg-transparent px-4 py-[13px] text-center text-white placeholder:text-white/50 focus:outline-2 focus:outline-coral focus:outline-offset-2"
               />
-              <motion.button
+              <button
+                type="button"
                 onClick={handleTap}
-                className="h-14 px-10 rounded-full text-white text-base font-medium shadow-lg pulse-glow"
-                style={{ background: theme.colors.accent }}
-                whileTap={{ scale: 0.95 }}
-                whileHover={{ scale: 1.05 }}
+                className="ed-btn ed-btn-coral ed-btn-block"
               >
-                I&apos;m in! 🎊
-              </motion.button>
+                Count me in
+              </button>
+
+              {/* Mockup `.dodgezone` / `.btn-no` — reduced motion pins it still
+                  so the answer is always reachable. */}
+              <div className="relative mt-3 h-14">
+                <button
+                  type="button"
+                  onMouseEnter={runAway}
+                  onFocus={runAway}
+                  onClick={runAway}
+                  style={{ left: dodge.left, top: dodge.top }}
+                  className="absolute min-h-10 -translate-x-1/2 rounded-[var(--r-pill)] border border-sand bg-transparent px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-sand transition-[left,top] duration-[250ms] ease-out focus-visible:outline-2 focus-visible:outline-coral focus-visible:outline-offset-2"
+                >
+                  No, I&rsquo;m busy
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        <motion.div
-          className="fixed bottom-6 left-0 right-0 flex flex-col items-center gap-2"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 0.5 }}
-        >
-          <p className="text-xs opacity-40" style={{ color: theme.colors.text }}>
-            Want to surprise someone you love?
-          </p>
-          <Link
-            href="/auth/signup"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full border transition-all duration-300 hover:scale-105"
-            style={{
-              color: theme.colors.accent,
-              borderColor: `${theme.colors.accent}40`,
-              background: `${theme.colors.accent}10`,
-            }}
-          >
-            <Heart className="w-3 h-3 fill-current" />
-            Create your own with TaDaaaa — free
-          </Link>
-        </motion.div>
       </div>
+
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, Eye, Heart, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getDashboardUser } from "@/lib/dashboard-data";
 import {
@@ -25,12 +25,6 @@ const FOCUS_TABS: { key: ActivityFocus; label: string }[] = [
   { key: "rsvps", label: "RSVPs" },
   { key: "answers", label: "Answers" },
 ];
-
-const KIND_STYLE = {
-  view: { icon: Eye, color: "#C9A96E", tint: "#C9A96E15" },
-  rsvp: { icon: Heart, color: "#C4686D", tint: "#C4686D15" },
-  answer: { icon: MessageCircle, color: "#6B8F71", tint: "#6B8F7115" },
-} as const;
 
 /**
  * Activity — the "who" behind the dashboard's aggregate numbers.
@@ -118,26 +112,27 @@ export default async function ActivityPage({ searchParams }: Props) {
 
   return (
     <div>
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors mb-5 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 rounded-lg"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Dashboard
-      </Link>
-
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl text-[#2D2926]">Activity</h1>
-        <p className="text-[#6B5E57] mt-1 text-sm">
-          {events.length === 0
-            ? "Nothing yet — the moment someone opens a surprise, it lands here."
-            : "Who opened, who's coming, and what they answered — newest first."}
-        </p>
+      <div className="ed-phead">
+        <div>
+          <Link
+            href="/dashboard"
+            className="ed-tlink !text-stone inline-flex items-center gap-1.5"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" strokeWidth={1.6} />
+            Dashboard
+          </Link>
+          <h1 className="mt-1.5">Activity</h1>
+          <div className="ed-sub">
+            {events.length === 0
+              ? "Nothing yet — the moment someone opens a surprise, it lands here."
+              : "Who opened, who's coming, and what they answered — newest first."}
+          </div>
+        </div>
       </div>
 
-      {/* Focus tabs */}
+      {/* Focus chips — mockup `.chip` / `.chip.on` (L283) */}
       {events.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="ed-chiprow">
           {FOCUS_TABS.map((tab) => {
             const count =
               tab.key === "all" ? events.length : filterByFocus(events, tab.key).length;
@@ -147,14 +142,10 @@ export default async function ActivityPage({ searchParams }: Props) {
                 key={tab.key}
                 href={tab.key === "all" ? "/dashboard/activity" : `/dashboard/activity?focus=${tab.key}`}
                 aria-current={active ? "page" : undefined}
-                className={`inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 ${
-                  active
-                    ? "bg-[#FFF0EE] border-[#C4686D] text-[#C4686D]"
-                    : "bg-white border-[#D4CBC3]/60 text-[#6B5E57] hover:border-[#C4686D]/40 hover:text-[#2D2926]"
-                }`}
+                className={`ed-chip ${active ? "ed-chip-on" : ""}`}
               >
                 {tab.label}
-                <span className={active ? "text-[#C4686D]/70" : "text-[#9B8E87]"}>{count}</span>
+                <span className={active ? "opacity-70" : "text-stone"}>{count}</span>
               </Link>
             );
           })}
@@ -163,94 +154,75 @@ export default async function ActivityPage({ searchParams }: Props) {
 
       {/* Empty — nothing anywhere */}
       {events.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#FFF0E8] to-[#F5EDE3] flex items-center justify-center mb-5 shadow-[0_8px_32px_rgba(196,104,109,0.15)]">
-            <Sparkles className="w-8 h-8 text-[#C4686D]" />
+        <div className="ed-panel">
+          <div className="ed-empty">
+            <p className="font-heading text-xl text-ink mb-2">No activity yet</p>
+            <p className="max-w-sm mx-auto text-sm leading-relaxed">
+              Share a surprise link and every open, RSVP and answer shows up
+              here — your own previews never count.
+            </p>
+            <Link href="/dashboard" className="ed-btn ed-btn-line ed-btn-sm mt-6">
+              Back to your surprises
+            </Link>
           </div>
-          <h2 className="font-heading text-xl text-[#2D2926] mb-2">No activity yet</h2>
-          <p className="text-[#6B5E57] max-w-sm text-sm leading-relaxed mb-6">
-            Share a surprise link and every open, RSVP and answer shows up here — your
-            own previews never count.
-          </p>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center h-11 px-6 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white font-semibold text-sm transition-all duration-300 hover:scale-[1.02] shadow-md shadow-[#C4686D]/20"
-          >
-            Back to your surprises
-          </Link>
         </div>
       )}
 
       {/* Empty — this filter only */}
       {events.length > 0 && visible.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-14 text-center">
-          <p className="text-[#6B5E57] text-sm">Nothing in this filter yet.</p>
-          <Link
-            href="/dashboard/activity"
-            className="text-[#C4686D] text-sm hover:underline mt-2 font-medium"
-          >
-            Show everything
-          </Link>
+        <div className="ed-panel">
+          <div className="ed-empty">
+            Nothing in this filter yet.{" "}
+            <Link href="/dashboard/activity" className="ed-tlink">
+              Show everything
+            </Link>
+          </div>
         </div>
       )}
 
-      {/* Grouped feed */}
-      <div className="space-y-5">
+      {/* Grouped feed — one panel per surprise, mockup `.panel` + `.feedi` */}
+      <div className="flex flex-col gap-5">
         {groups.map((group) => (
-          <section
-            key={group.invite.id}
-            className="bg-white rounded-2xl border border-[#D4CBC3]/30 shadow-[0_2px_12px_rgba(45,41,38,0.04)] overflow-hidden"
-          >
-            <header className="flex items-baseline justify-between gap-3 px-5 pt-4 pb-3 border-b border-[#D4CBC3]/30">
+          <section key={group.invite.id} className="ed-panel">
+            <h2>
               <Link
                 href={`/surprise/${group.invite.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-heading text-lg text-[#2D2926] hover:text-[#C4686D] transition-colors truncate focus:outline-none focus:underline"
+                className="truncate hover:text-coral-deep transition-colors focus:outline-none focus:underline"
               >
                 {group.invite.title}
               </Link>
-              <span className="text-[11px] text-[#9B8E87] shrink-0">
+              <span className="label shrink-0 !text-[10px]">
                 {group.events.length} {group.events.length === 1 ? "moment" : "moments"}
               </span>
-            </header>
+            </h2>
 
-            <ul className="divide-y divide-[#D4CBC3]/20">
-              {group.events.map((event) => {
-                const style = KIND_STYLE[event.kind];
-                const Icon = style.icon;
-                return (
-                  <li key={event.id} className="flex items-center gap-3 px-5 py-3">
-                    <span
-                      className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ background: style.tint }}
-                      aria-hidden="true"
-                    >
-                      <Icon className="w-3.5 h-3.5" style={{ color: style.color }} />
-                    </span>
-                    <p className="flex-1 min-w-0 text-sm text-[#2D2926] truncate">
-                      {describeActivity(event)}
-                    </p>
-                    <time
-                      dateTime={event.at}
-                      className="text-[11px] text-[#9B8E87] shrink-0"
-                    >
+            <ul>
+              {group.events.map((event) => (
+                <li key={event.id} className="ed-feedi">
+                  <span className="ed-dot" aria-hidden="true" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-ink truncate">{describeActivity(event)}</p>
+                    <time dateTime={event.at} className="ed-t block">
                       {formatDistanceToNow(new Date(event.at), { addSuffix: true })}
                     </time>
-                  </li>
-                );
-              })}
+                  </div>
+                </li>
+              ))}
             </ul>
           </section>
         ))}
       </div>
 
       {isCapped && visible.length > 0 && (
-        <p className="mt-6 text-center text-xs text-[#9B8E87]">
+        <p className="mt-6 text-center text-xs text-stone">
           Showing your {ACTIVITY_FEED_CAP} most recent moments. Open a surprise&apos;s
           insights for its full history.
         </p>
       )}
+
+      <div className="ed-appbar-gutter sm:hidden" aria-hidden="true" />
     </div>
   );
 }

@@ -32,7 +32,7 @@ export default async function DashboardLayout({
     (user.user_metadata?.full_name as string | undefined)?.trim() || undefined;
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0]">
+    <div className="min-h-screen bg-paper">
       <Navbar
         userEmail={user.email}
         userInitial={initial}
@@ -42,7 +42,8 @@ export default async function DashboardLayout({
         greetingName={greetingName}
         activeRoute="dashboard"
       />
-      <div className="max-w-6xl mx-auto px-6 py-8">{children}</div>
+      {/* Mockup `.wrap` — 1080px, 24px gutter, generous bottom room */}
+      <div className="max-w-[1080px] mx-auto px-5 sm:px-6 pt-8 pb-16">{children}</div>
     </div>
   );
 }

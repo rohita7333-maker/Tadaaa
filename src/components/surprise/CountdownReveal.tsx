@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
@@ -11,6 +11,7 @@ import RSVPButton from "./RSVPButton";
 import QuestionScreen from "./QuestionScreen";
 import CelebrationOverlay from "./CelebrationOverlay";
 import VideoPlayer from "./VideoPlayer";
+import RevealChrome from "./RevealChrome";
 
 interface CountdownRevealProps {
   theme: Theme;
@@ -22,6 +23,8 @@ interface CountdownRevealProps {
   inviteId?: string;
   enableDodge?: boolean;
   videoUrl?: string | null;
+  /** Mirrors `from-invite.ts`: `is_paid ? "paid" : "free"`. Gates the watermark. */
+  tier?: "free" | "paid";
   /** Message-only contributions (Task B2) — rendered after polaroid stack. */
   contributorNotes?: { contributor_name: string; message: string }[];
 }
@@ -55,15 +58,24 @@ export default function CountdownReveal({
   inviteId = "",
   enableDodge = true,
   videoUrl,
+  tier = "free",
   contributorNotes = [],
 }: CountdownRevealProps) {
+  /** Skip scenes with nothing in them: a photo grid with no photos reads as
+   *  broken, and the mockup simply omits `.s-photos` when there are none. */
+  const firstRevealStage = useCallback((): Stage => {
+    if (videoUrl) return "video";
+    if (photos.length > 0) return "photos";
+    return questions.length > 0 ? "questions" : "message";
+  }, [videoUrl, photos.length, questions.length]);
+
   // Memoize the parsed Date so the effect dep is stable across ticks.
   // Without this, `target` is a new object every render → effect re-runs every
   // setTimeLeft call → interval re-created → visual flicker + dropped ticks.
   const target = useMemo(() => new Date(countdownDate), [countdownDate]);
   const alreadyPassed = target <= new Date();
 
-  const [stage, setStage] = useState<Stage>(alreadyPassed ? (videoUrl ? "video" : "photos") : "countdown");
+  const [stage, setStage] = useState<Stage>(alreadyPassed ? firstRevealStage() : "countdown");
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(getTimeLeft(target));
 
   useEffect(() => {
@@ -73,23 +85,33 @@ export default function CountdownReveal({
       setTimeLeft(tl);
       if (tl.days === 0 && tl.hours === 0 && tl.minutes === 0 && tl.seconds === 0) {
         clearInterval(interval);
-        setTimeout(() => setStage(videoUrl ? "video" : "photos"), 1500);
+        setTimeout(() => setStage(firstRevealStage()), 1500);
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [stage, target, videoUrl]);
+  }, [stage, target, firstRevealStage]);
 
   const shouldReduce = useReducedMotion();
 
-  const units = [
-    { label: "days", value: timeLeft.days },
-    { label: "hours", value: timeLeft.hours },
-    { label: "min", value: timeLeft.minutes },
-    { label: "sec", value: timeLeft.seconds },
-  ];
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const clock = `${pad(timeLeft.days)}:${pad(timeLeft.hours)}:${pad(timeLeft.minutes)}:${pad(
+    timeLeft.seconds
+  )}`;
+  const spoken = `${timeLeft.days} days, ${timeLeft.hours} hours, ${timeLeft.minutes} minutes and ${timeLeft.seconds} seconds to go`;
+
+  // Mockup `chrome()` rides above every stage. The RSVP scene carries its own
+  // closing rail, so the watermark stands down there.
+  function withChrome(node: React.ReactNode, showWatermark = true) {
+    return (
+      <>
+        <RevealChrome tier={tier} showWatermark={showWatermark} />
+        {node}
+      </>
+    );
+  }
 
   if (stage === "video" && videoUrl) {
-    return (
+    return withChrome(
       <VideoPlayer
         videoUrl={videoUrl}
         onComplete={() => setStage(questions.length > 0 ? "questions" : "message")}
@@ -97,7 +119,7 @@ export default function CountdownReveal({
     );
   }
   if (stage === "photos") {
-    return (
+    return withChrome(
       <PolaroidCarousel
         photos={photos}
         theme={theme}
@@ -108,7 +130,7 @@ export default function CountdownReveal({
     );
   }
   if (stage === "questions" && questions.length > 0) {
-    return (
+    return withChrome(
       <QuestionScreen
         questions={questions}
         theme={theme}
@@ -120,10 +142,12 @@ export default function CountdownReveal({
     );
   }
   if (stage === "celebrate") {
-    return <CelebrationOverlay onComplete={() => setStage("message")} duration={2200} />;
+    return withChrome(
+      <CelebrationOverlay onComplete={() => setStage("message")} duration={2200} />
+    );
   }
   if (stage === "message") {
-    return (
+    return withChrome(
       <MessageReveal
         title={title}
         message={message}
@@ -134,92 +158,63 @@ export default function CountdownReveal({
     );
   }
   if (stage === "cta") {
-    return <RSVPButton theme={theme} title={title} photos={photos} inviteId={inviteId} />;
+    return withChrome(
+      <RSVPButton theme={theme} title={title} photos={photos} inviteId={inviteId} />,
+      false
+    );
   }
 
-  return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden"
-      style={{ background: theme.colors.background }}
-    >
-      {/* Floating particles — hidden when reduced-motion is preferred */}
-      {!shouldReduce && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 rounded-full opacity-30"
-              style={{
-                backgroundColor: theme.colors.accent,
-                left: `${10 + i * 11}%`,
-                top: `${15 + (i % 4) * 20}%`,
-              }}
-              animate={{ y: [-10, 10, -10], scale: [1, 1.3, 1] }}
-              transition={{ duration: 3 + i, repeat: Infinity, delay: i * 0.4 }}
-            />
-          ))}
-        </div>
-      )}
+  // Mockup `.rr` + `.cdfull` (L501-505): ink ground, one sand serif clock,
+  // an italic serif line, and the creator's message underneath.
+  return withChrome(
+    <div className="flex min-h-screen flex-col items-center justify-center bg-ink px-7 py-10 text-center">
+      <motion.p
+        className="mb-5 text-[13px] uppercase tracking-[0.16em] text-sand"
+        initial={{ opacity: 0, y: shouldReduce ? 0 : 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={getReducedMotionTransition(shouldReduce, { delay: 0.1 })}
+      >
+        For {title}
+      </motion.p>
 
-      <div className="relative z-10 text-center">
+      {/* Mockup `.cdbig` — DD:HH:MM:SS, tabular, no unit chips. */}
+      <motion.p
+        className="font-heading text-[clamp(44px,14vw,64px)] leading-none tracking-[0.02em] text-sand tabular-nums"
+        aria-hidden="true"
+        initial={{ opacity: 0, y: shouldReduce ? 0 : 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={getReducedMotionTransition(shouldReduce, { delay: 0.2 })}
+      >
+        {clock}
+      </motion.p>
+      {/* The clock is decorative for AT; this is the readable equivalent and
+          the only thing announced when it changes. */}
+      <p className="sr-only" role="timer" aria-live="polite">
+        {spoken}
+      </p>
+
+      {/* Mockup `.som` — mockup paints this `--stone` (2.1:1 on ink); sand
+          ships instead so it clears AA. */}
+      <motion.p
+        className="mt-[22px] font-heading text-lg italic text-sand"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={getReducedMotionTransition(shouldReduce, { delay: 0.35 })}
+      >
+        Something&rsquo;s coming
+      </motion.p>
+
+      {/* Mockup `.hint2` */}
+      {message && (
         <motion.p
-          className="text-sm font-medium mb-4 opacity-60"
-          style={{ color: theme.colors.text }}
-          initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
-          animate={{ opacity: 0.6, y: 0 }}
-          transition={getReducedMotionTransition(shouldReduce, { delay: 0.2 })}
-        >
-          Something special is coming…
-        </motion.p>
-
-        <motion.h1
-          className="font-heading text-3xl mb-12"
-          style={{ color: theme.colors.text }}
-          initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={getReducedMotionTransition(shouldReduce, { delay: 0.4 })}
-        >
-          {title}
-        </motion.h1>
-
-        {/* Countdown tiles */}
-        <div className="flex gap-3 justify-center mb-12">
-          {units.map((unit, i) => (
-            <motion.div
-              key={unit.label}
-              className="flex flex-col items-center"
-              initial={{ opacity: 0, y: shouldReduce ? 0 : 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={getReducedMotionTransition(shouldReduce, { delay: 0.5 + i * 0.1 })}
-            >
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-1 shadow-[0_4px_16px_rgba(0,0,0,0.15)]"
-                style={{ background: theme.colors.accent }}
-              >
-                <span className="text-white font-heading text-2xl font-bold leading-none">
-                  {String(unit.value).padStart(2, "0")}
-                </span>
-              </div>
-              <span
-                className="text-xs uppercase tracking-wider opacity-60"
-                style={{ color: theme.colors.text }}
-              >
-                {unit.label}
-              </span>
-            </motion.div>
-          ))}
-        </div>
-
-        <motion.p
-          className="text-sm opacity-50"
-          style={{ color: theme.colors.text }}
+          className="mt-2.5 max-w-[300px] text-sm leading-relaxed text-white/70"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.5 }}
-          transition={getReducedMotionTransition(shouldReduce, { delay: 1 })}
+          animate={{ opacity: 1 }}
+          transition={getReducedMotionTransition(shouldReduce, { delay: 0.5 })}
         >
-          Come back when the timer runs out ✨
+          {message}
         </motion.p>
-      </div>
+      )}
     </div>
   );
 }

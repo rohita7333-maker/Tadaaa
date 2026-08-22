@@ -2,13 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Plus, Sparkles, Eye, Gift, TrendingUp, MessageCircle, Heart, LayoutTemplate, ArrowRight, Activity } from "lucide-react";
+import { LayoutTemplate, ArrowRight, BarChart3 } from "lucide-react";
 import InviteList from "@/components/dashboard/InviteList";
 import OccasionFilter from "@/components/dashboard/OccasionFilter";
 import OnboardingModal from "@/components/dashboard/OnboardingModal";
 import FreeLimitBanner from "@/components/dashboard/FreeLimitBanner";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import CommandPalette from "@/components/dashboard/CommandPalette";
+import Greeting from "@/components/dashboard/Greeting";
 import { getActiveTier, monthlyInviteLimit } from "@/lib/tier";
 import { getDashboardUser, getDashboardProfile } from "@/lib/dashboard-data";
 
@@ -95,12 +96,12 @@ export default async function DashboardPage({ searchParams }: Props) {
   // The three engagement tiles drill into the Activity feed — the aggregate
   // number answers "how many", the feed answers "who". Sorting by the same
   // metrics moved to the explicit sort row below the filters.
-  const stats: { label: string; value: number; icon: typeof Gift; color: string; href: string; hint: string }[] = [
-    { label: "Total Surprises", value: all.length, icon: Gift, color: "#C4686D", href: "/dashboard", hint: "Every surprise you've created" },
-    { label: "Total Views", value: totalViews, icon: Eye, color: "#C9A96E", href: "/dashboard/activity?focus=views", hint: "Times your surprise pages were opened (your own previews don't count) · click to see who" },
-    { label: "RSVPs", value: totalRsvps, icon: Heart, color: "#C4686D", href: "/dashboard/activity?focus=rsvps", hint: "Guests who tapped “I'm in!” to confirm · click to see who" },
-    { label: "Responses", value: totalResponses, icon: MessageCircle, color: "#6B8F71", href: "/dashboard/activity?focus=answers", hint: "Answers to the yes/no questions you added · click to see them" },
-    { label: "Active", value: activeCount, icon: TrendingUp, color: "#B07CC6", href: "/dashboard?status=active", hint: "Surprises that are live right now · click to filter" },
+  const stats: { label: string; value: number; href: string; hint: string }[] = [
+    { label: "Views", value: totalViews, href: "/dashboard/activity?focus=views", hint: "Times your surprise pages were opened (your own previews don't count) · click to see who" },
+    { label: "RSVPs", value: totalRsvps, href: "/dashboard/activity?focus=rsvps", hint: "Guests who tapped “I'm in!” to confirm · click to see who" },
+    { label: "Answers", value: totalResponses, href: "/dashboard/activity?focus=answers", hint: "Answers to the yes/no questions you added · click to see them" },
+    { label: "Surprises", value: all.length, href: "/dashboard", hint: "Every surprise you've created" },
+    { label: "Live", value: activeCount, href: "/dashboard?status=active", hint: "Surprises that are live right now · click to filter" },
   ];
 
   // Sort controls — preserved from the old stat-tile links so the ?sort= params
@@ -131,176 +132,191 @@ export default async function DashboardPage({ searchParams }: Props) {
       {limitReached && freeLimit !== null && (
         <FreeLimitBanner used={usedThisMonth} limit={freeLimit} />
       )}
-      {/* Page header */}
-      <div className="flex items-start justify-between mb-8">
+
+      {/* Mockup `.phead` — greeting, count, primary action */}
+      <div className="ed-phead">
         <div>
-          <h1 className="font-heading text-3xl text-[#2D2926]">Your Surprises</h1>
-          <p className="text-[#6B5E57] mt-1 text-sm">
+          <h1>
+            <Greeting name={creatorName?.split(" ")[0]} />
+          </h1>
+          <div className="ed-sub">
             {all.length === 0
-              ? "Create your first surprise below"
-              : `${all.length} surprise${all.length !== 1 ? "s" : ""} created`}
-          </p>
+              ? "No surprises yet — the first one takes a few minutes"
+              : `${all.length} surprise${all.length !== 1 ? "s" : ""} so far`}
+          </div>
         </div>
-        <Link
-          href="/create"
-          className="hidden sm:inline-flex items-center h-10 px-5 rounded-xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-semibold transition-all duration-300 hover:scale-[1.02] shadow-md shadow-[#C4686D]/20 text-sm"
-        >
-          <Plus className="w-4 h-4 mr-1.5" />
-          New Surprise
+        <Link href="/create" className="ed-btn ed-btn-coral">
+          New surprise
         </Link>
       </div>
 
-      {/* Start-from-a-template CTA — mirrors the stat card styling */}
-      <Link
-        href="/templates"
-        className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-[#D4CBC3]/30 shadow-[0_2px_12px_rgba(45,41,38,0.04)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,41,38,0.10)] hover:border-[#C4686D]/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 mb-8"
-      >
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "#B07CC615" }}
-        >
-          <LayoutTemplate className="w-4 h-4" style={{ color: "#B07CC6" }} />
-        </div>
-        <div className="flex-1">
-          <p className="font-medium text-[#2D2926] text-sm">Start from a template</p>
-          <p className="text-[#6B5E57] text-xs mt-0.5">
-            Occasion, theme and reveal picked for you — just add your words
-          </p>
-        </div>
-        <ArrowRight className="w-4 h-4 text-[#6B5E57] flex-shrink-0" />
-      </Link>
-
-      {/* Stats strip — clickable filters/sorts */}
+      {/* Mockup `.stats4` — the numbers, each drilling into the feed */}
       {all.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+        <div className="ed-stats">
           {stats.map((s) => (
-            <Link
-              key={s.label}
-              href={s.href}
-              title={s.hint}
-              className="bg-white rounded-2xl p-4 border border-[#D4CBC3]/30 shadow-[0_2px_12px_rgba(45,41,38,0.04)] flex items-center gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,41,38,0.10)] hover:border-[#C4686D]/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40"
-            >
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: `${s.color}15` }}
-              >
-                <s.icon className="w-4 h-4" style={{ color: s.color }} />
+            <Link key={s.label} href={s.href} title={s.hint} className="ed-stat">
+              <div className="ed-v">
+                <AnimatedCounter value={s.value} />
               </div>
-              <div>
-                <p className="font-heading text-xl text-[#2D2926] font-bold leading-none">
-                  <AnimatedCounter value={s.value} />
-                </p>
-                <p className="text-[#6B5E57] text-xs mt-0.5">{s.label}</p>
-              </div>
+              <div className="ed-l">{s.label}</div>
             </Link>
           ))}
         </div>
       )}
 
-      {/* Activity drilldown — the "who" behind the numbers above */}
+      {/* Drill-downs for the numbers above. The mockup wires its stat tiles
+          straight into the analytics screen (`go('#analytics/s1')`); we keep the
+          tiles pointed at the feed, which answers "who", and put the charts —
+          which answer "how it's trending" — one deliberate click away here. */}
       {all.length > 0 && (
-        <Link
-          href="/dashboard/activity"
-          className="inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors mb-8 -mt-4 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 rounded-lg"
-        >
-          <Activity className="w-3.5 h-3.5" />
-          See all activity
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+        <div className="-mt-5 mb-7 flex flex-wrap items-center gap-x-5 gap-y-2">
+          <Link href="/dashboard/activity" className="ed-tlink">
+            See all activity →
+          </Link>
+          <Link href="/dashboard/analytics" className="ed-tlink">
+            Full analytics →
+          </Link>
+        </div>
       )}
 
-      {/* Occasion filter + sort */}
-      {all.length > 0 && (
-        <Suspense>
-          <OccasionFilter current={occasion ?? null} />
-        </Suspense>
-      )}
-      {all.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <span className="text-xs text-[#9B8E87] mr-1">Sort</span>
-          {sortOptions.map((opt) => {
-            const active = (sort ?? "") === opt.key;
-            return (
-              <Link
-                key={opt.key || "newest"}
-                href={sortHref(opt.key)}
-                aria-current={active ? "true" : undefined}
-                className={`h-8 inline-flex items-center px-3 rounded-full text-xs font-medium border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 ${
-                  active
-                    ? "bg-[#FFF0EE] border-[#C4686D] text-[#C4686D]"
-                    : "bg-white border-[#D4CBC3]/60 text-[#6B5E57] hover:border-[#C4686D]/40 hover:text-[#2D2926]"
-                }`}
-              >
-                {opt.label}
+      {/* Mockup `.gr2` — surprises panel beside the activity panel */}
+      <div className="ed-gr2">
+        <div className="ed-panel">
+          <h2>
+            Your surprises
+            {all.length > 0 && (
+              <Link href="/templates" className="ed-tlink !text-xs">
+                Start from a template
               </Link>
-            );
-          })}
+            )}
+          </h2>
+
+          {/* Occasion filter + sort */}
+          {all.length > 0 && (
+            <Suspense>
+              <OccasionFilter current={occasion ?? null} />
+            </Suspense>
+          )}
+          {all.length > 0 && (
+            <div className="ed-chiprow">
+              <span className="label self-center pr-1">Sort</span>
+              {sortOptions.map((opt) => {
+                const active = (sort ?? "") === opt.key;
+                return (
+                  <Link
+                    key={opt.key || "newest"}
+                    href={sortHref(opt.key)}
+                    aria-current={active ? "true" : undefined}
+                    className={`ed-chip !min-h-0 !px-3 !py-1.5 !text-xs ${
+                      active ? "ed-chip-on" : ""
+                    }`}
+                  >
+                    {opt.label}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Empty — nothing created yet */}
+          {all.length === 0 && (
+            <div className="ed-empty">
+              No surprises yet.{" "}
+              <Link href="/create" className="ed-tlink">
+                Create one →
+              </Link>
+              <p className="mt-3 text-sm">
+                Or{" "}
+                <Link href="/templates" className="ed-tlink !text-sm">
+                  start from a template
+                </Link>{" "}
+                — occasion, theme and reveal picked for you.
+              </p>
+            </div>
+          )}
+
+          {/* Empty — this filter only */}
+          {all.length > 0 && list.length === 0 && (
+            <div className="ed-empty">
+              Nothing matches this filter.{" "}
+              <Link href="/dashboard" className="ed-tlink">
+                Clear filters
+              </Link>
+            </div>
+          )}
+
+          {list.length > 0 && (
+            <InviteList
+              creatorName={creatorName}
+              tier={tier}
+              invites={list.map((invite) => ({
+                id: invite.id,
+                slug: invite.slug,
+                title: invite.title,
+                theme: invite.theme,
+                view_count: invite.view_count ?? 0,
+                response_count: invite.response_count ?? 0,
+                rsvp_count: rsvpMap[invite.id] ?? 0,
+                is_active: invite.is_active,
+                expires_at: invite.expires_at,
+                created_at: invite.created_at,
+                reveal_type: invite.reveal_type,
+                accept_contributions: invite.accept_contributions ?? false,
+                revealed_at: invite.revealed_at ?? null,
+                countdown_date: invite.countdown_date ?? null,
+              }))}
+            />
+          )}
         </div>
-      )}
 
-      {/* Empty state — no invites at all */}
-      {all.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#FFF0E8] to-[#F5EDE3] flex items-center justify-center mb-6 shadow-[0_8px_32px_rgba(196,104,109,0.15)]">
-            <Sparkles className="w-10 h-10 text-[#C4686D]" />
-          </div>
-          <h2 className="font-heading text-2xl text-[#2D2926] mb-3">No surprises yet</h2>
-          <p className="text-[#6B5E57] max-w-sm mb-8 text-sm leading-relaxed">
-            Create your first surprise page and share it with someone you love. It only takes a few minutes!
-          </p>
-          <Link
-            href="/create"
-            className="inline-flex items-center h-12 px-8 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-semibold transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C4686D]/25 pulse-glow text-sm"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create your first surprise
-          </Link>
+        {/* Activity panel. The mockup renders a demo feed inline; ours links to
+            the real one, which is creator-scoped, grouped and capped — see the
+            divergence note in the phase report. */}
+        <div className="ed-panel">
+          <h2>
+            Activity
+            <Link href="/dashboard/activity" className="ed-tlink !text-xs">
+              See responses
+            </Link>
+          </h2>
+          {all.length === 0 ? (
+            <p className="text-sm">
+              The moment someone opens a surprise, it lands here.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm">
+                Every open, RSVP and answer, newest first and grouped by
+                surprise. Your own previews never count.
+              </p>
+              <Link
+                href="/dashboard/activity"
+                className="ed-btn ed-btn-line ed-btn-sm ed-btn-block mt-4"
+              >
+                Open activity
+                <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.6} />
+              </Link>
+              <Link
+                href="/dashboard/analytics"
+                className="ed-btn ed-btn-line ed-btn-sm ed-btn-block mt-2"
+              >
+                <BarChart3 className="w-3.5 h-3.5" strokeWidth={1.6} />
+                Full analytics
+              </Link>
+              <Link
+                href="/templates"
+                className="ed-btn ed-btn-line ed-btn-sm ed-btn-block mt-2"
+              >
+                <LayoutTemplate className="w-3.5 h-3.5" strokeWidth={1.6} />
+                Browse templates
+              </Link>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Empty state — filter has no matches */}
-      {all.length > 0 && list.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-[#6B5E57] text-sm">No surprises match this filter.</p>
-          <Link
-            href="/dashboard"
-            className="text-[#C4686D] text-sm hover:underline mt-2 font-medium"
-          >
-            Clear filter
-          </Link>
-        </div>
-      )}
-
-      {/* Invite grid */}
-      {list.length > 0 && (
-        <InviteList
-          creatorName={creatorName}
-          tier={tier}
-          invites={list.map((invite) => ({
-            id: invite.id,
-            slug: invite.slug,
-            title: invite.title,
-            theme: invite.theme,
-            view_count: invite.view_count ?? 0,
-            response_count: invite.response_count ?? 0,
-            rsvp_count: rsvpMap[invite.id] ?? 0,
-            is_active: invite.is_active,
-            expires_at: invite.expires_at,
-            created_at: invite.created_at,
-            reveal_type: invite.reveal_type,
-            accept_contributions: invite.accept_contributions ?? false,
-            revealed_at: invite.revealed_at ?? null,
-          }))}
-        />
-      )}
-
-      {/* Mobile FAB */}
-      <Link
-        href="/create"
-        className="sm:hidden fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center text-white shadow-[0_4px_20px_rgba(196,104,109,0.4)] hover:scale-110 transition-transform duration-300 z-50"
-      >
-        <Plus className="w-6 h-6" />
-      </Link>
+      {/* Bottom app bar clears the last row on mobile */}
+      <div className="ed-appbar-gutter sm:hidden" aria-hidden="true" />
     </div>
   );
 }

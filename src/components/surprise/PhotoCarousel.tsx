@@ -151,10 +151,10 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
                 <div
                   className="text-center mt-2 px-1"
                   style={{
-                    fontFamily: "var(--font-caveat, cursive)",
+                    fontFamily: "var(--body)",
                     fontSize: "15px",
                     lineHeight: "1.3",
-                    color: "#6B5E57",
+                    color: "var(--stone)",
                     height: "36px",
                     overflow: "hidden",
                     display: "flex",
@@ -203,24 +203,22 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
           initial={{ opacity: 0, y: shouldReduce ? 0 : 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={getReducedMotionTransition(shouldReduce, { delay: 0.5 })}
-          className="absolute bottom-8 left-0 right-0 mx-auto w-fit px-8 py-3 rounded-full text-white text-sm font-medium shadow-lg"
-          style={{ background: theme.colors.accent }}
+          className="ed-btn ed-btn-coral absolute bottom-8 left-0 right-0 mx-auto w-fit"
           aria-label="Continue to next section"
         >
-          Continue ✨
+          Continue
         </motion.button>
       )}
 
       {/* Swipe hint — only on first photo */}
       {current === 0 && photos.length > 1 && (
         <motion.p
-          className="absolute bottom-8 text-xs opacity-50"
-          style={{ color: theme.colors.text }}
+          className="absolute bottom-8 text-[12px] uppercase tracking-[0.1em] text-stone"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.5 }}
+          animate={{ opacity: 1 }}
           transition={getReducedMotionTransition(shouldReduce, { delay: 1.5 })}
         >
-          Swipe to flip through ✦
+          Swipe to flip through
         </motion.p>
       )}
 

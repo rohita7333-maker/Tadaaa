@@ -1,37 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, DM_Sans, Caveat } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/CookieConsent";
-import { Ribbons } from "@/components/fx/Ribbons";
-import { ConfettiCanvas } from "@/components/fx/ConfettiCanvas";
 import "./globals.css";
-
-const bricolage = Bricolage_Grotesque({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-bricolage",
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-dm-sans",
-  display: "swap",
-});
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-caveat",
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#FFF8F0",
+  themeColor: "#FFFEFD",
 };
 
 export const metadata: Metadata = {
@@ -58,10 +34,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${dmSans.variable} ${caveat.variable}`}>
+    <html lang="en">
       <body className="antialiased">
-        <Ribbons />
-        <ConfettiCanvas />
+        {/*
+          No ambient fx layer. The editorial mockup has none: it fires confetti
+          only on discrete celebrations (RSVP, publish, contribute) in
+          #D45847 / #CCAC9F / #1A1A1A / #F5F0ED, never ambiently.
+
+          Removed here: <Ribbons /> painted 26 drifting rectangles in the
+          retired rose/gold palette on every screen, and <ConfettiCanvas />
+          bound a document-wide click handler that threw emoji off every
+          .btn-pri — emoji-as-content is banned by the identity.
+
+          Reveal celebrations are unaffected: RSVPButton and the scroll-story
+          scenes import canvas-confetti locally. Both components are left on
+          disk, now unused. Pinned by layout.test.ts.
+        */}
         {children}
         <CookieConsent />
         <Toaster richColors position="top-center" />

@@ -6,7 +6,6 @@ import { ConfettiCanvas } from "@/components/fx/ConfettiCanvas";
 import { Reveal } from "./Reveal";
 import {
   FOCUS_RING_CLASS,
-  HANDWRITING_STACK,
   SEAM_POLAROID_TO_RSVP,
   SEAM_RSVP_TO_FINALE,
   SERIF_STACK,
@@ -22,10 +21,14 @@ interface RsvpSceneProps {
 }
 
 /**
- * Scene 5 — the RSVP ask.
- * GRADIENT SEAM CONTRACT: first stop #E8A5A8 blush (SEAM_POLAROID_TO_RSVP)
- * === PolaroidScene's final stop; final stop #9B3D42 (SEAM_RSVP_TO_FINALE)
- * === FinaleScene's first stop.
+ * Scene 5 — the RSVP ask (`.s-rsvp` in the mockup: ink ground, italic serif
+ * caption in sand, white ask, transparent sand-bordered field, coral CTA).
+ *
+ * GRADIENT SEAM CONTRACT: first stop #E8E4E0 (SEAM_POLAROID_TO_RSVP) ===
+ * PolaroidScene's final stop; final stop #D45847 (SEAM_RSVP_TO_FINALE) ===
+ * FinaleScene's first stop. This scene owns the whole descent into night: mist
+ * drops to ink by 26 % so the vertically-centred ask sits on the mockup's ink
+ * ground, then the ground flares coral on the way out.
  */
 export default function RsvpScene({ config, onRsvp }: RsvpSceneProps) {
   const [isRecorded, setIsRecorded] = useState(false);
@@ -35,7 +38,9 @@ export default function RsvpScene({ config, onRsvp }: RsvpSceneProps) {
   async function handleRsvp() {
     if (isRecorded) return;
     setIsRecorded(true);
-    setStatusMessage("Recorded!");
+    setStatusMessage(
+      config.sender ? `Recorded. ${config.sender} will know.` : "Recorded."
+    );
     if (!onRsvp) return;
     try {
       await onRsvp(name.trim() || undefined);
@@ -50,7 +55,7 @@ export default function RsvpScene({ config, onRsvp }: RsvpSceneProps) {
       aria-label="RSVP"
       className="relative flex min-h-[85vh] items-center justify-center px-6 py-28"
       style={{
-        background: `linear-gradient(180deg, ${SEAM_POLAROID_TO_RSVP} 0%, #C4686D 55%, ${SEAM_RSVP_TO_FINALE} 100%)`,
+        background: `linear-gradient(180deg, ${SEAM_POLAROID_TO_RSVP} 0%, #8F8B87 12%, #1A1A1A 26%, #1A1A1A 58%, #522C28 76%, #8A3F35 90%, ${SEAM_RSVP_TO_FINALE} 100%)`,
       }}
     >
       {/* Confetti burst engine — listens for .btn-pri clicks, reduced-motion aware */}
@@ -58,31 +63,37 @@ export default function RsvpScene({ config, onRsvp }: RsvpSceneProps) {
 
       <Reveal className="mx-auto max-w-2xl text-center">
         <p
-          className="text-gold-light"
-          style={{ fontFamily: HANDWRITING_STACK, fontSize: "clamp(24px, 4vw, 32px)" }}
-        >
-          don&apos;t leave me hanging…
-        </p>
-        <p
-          className="mt-2 text-cream"
           style={{
             fontFamily: SERIF_STACK,
             fontStyle: "italic",
-            fontWeight: 500,
-            fontSize: "clamp(44px, 9vw, 76px)",
-            lineHeight: 1.05,
+            fontSize: "17px",
+            color: "var(--sand)",
           }}
         >
-          please rsvp
+          Don&apos;t leave me hanging
         </p>
+        <h2
+          className="mt-2"
+          style={{
+            fontFamily: SERIF_STACK,
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            fontSize: "clamp(24px, 5vw, 32px)",
+            lineHeight: 1.1,
+            color: "var(--paper)",
+          }}
+        >
+          Are you in?
+        </h2>
+
         {/* Optional name — turns an anonymous count into a guest list. Never
             required: the promise is that nobody has to sign in to say yes. */}
         {!isRecorded && (
-          <div className="mt-9">
+          <div className="mx-auto mt-8 w-full max-w-[300px]">
             <label
               htmlFor="rsvp-name"
-              className="block text-sm text-cream/85"
-              style={{ fontFamily: SERIF_STACK, fontStyle: "italic" }}
+              className="block text-[11px] uppercase"
+              style={{ letterSpacing: "0.1em", color: "var(--sand)" }}
             >
               Who&apos;s saying yes?
             </label>
@@ -94,7 +105,11 @@ export default function RsvpScene({ config, onRsvp }: RsvpSceneProps) {
               maxLength={NAME_MAX_LENGTH}
               autoComplete="name"
               placeholder="Your name (optional)"
-              className={`mx-auto mt-3 block h-12 w-64 max-w-full rounded-full border border-white/35 bg-white/15 px-5 text-center text-base text-cream backdrop-blur-sm outline-none transition-all duration-300 placeholder:text-cream/55 focus:border-white/70 focus:bg-white/25 ${FOCUS_RING_CLASS}`}
+              className={`mt-3 block w-full rounded-md bg-transparent px-4 py-3 text-center text-base outline-none transition-colors duration-200 ${FOCUS_RING_CLASS}`}
+              style={{
+                border: "1px solid var(--sand)",
+                color: "var(--paper)",
+              }}
             />
           </div>
         )}
@@ -102,14 +117,19 @@ export default function RsvpScene({ config, onRsvp }: RsvpSceneProps) {
           type="button"
           onClick={handleRsvp}
           disabled={isRecorded}
-          className={`btn-pri mt-7 rounded-full bg-white px-9 py-4 text-base font-semibold text-rose-deep shadow-[0_16px_36px_rgba(35,20,15,0.3)] transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.97] disabled:hover:translate-y-0 ${FOCUS_RING_CLASS}`}
+          className={`btn-pri ed-btn ed-btn-coral mx-auto mt-3 block w-full max-w-[300px] ${FOCUS_RING_CLASS}`}
         >
-          {isRecorded ? "You're in! 🎉" : "🎉 Count me in!"}
+          {isRecorded ? "You're in" : "Count me in"}
         </button>
         <p
           role="status"
           aria-live="polite"
-          className="mt-4 min-h-6 text-sm text-cream/85"
+          className="mt-4 min-h-6 text-sm"
+          style={{
+            fontFamily: SERIF_STACK,
+            fontStyle: "italic",
+            color: "var(--sand)",
+          }}
         >
           {statusMessage}
         </p>

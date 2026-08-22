@@ -1,12 +1,19 @@
 "use client";
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Clock, Hand, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { springs, durations, easings, makeReducedMotionTransition } from "@/lib/motion";
+import { durations, easings, makeReducedMotionTransition } from "@/lib/motion";
 import type { RevealStyle } from "@/lib/templates";
+import {
+  LABEL,
+  INPUT,
+  SELECTABLE,
+  SELECTABLE_ON,
+  TGLROW,
+  TGLROW_M,
+  TGLROW_H,
+  TGLROW_P,
+} from "./editorial";
 
 interface RevealSettingsProps {
   revealType: RevealStyle;
@@ -24,6 +31,66 @@ interface RevealSettingsProps {
 const conditionalFieldTransition = (shouldReduce: boolean | null | undefined) =>
   makeReducedMotionTransition(shouldReduce, { duration: durations.quick, ease: easings.entrance });
 
+const STYLES: { id: RevealStyle; name: string; blurb: string }[] = [
+  { id: "tap", name: "Tap to reveal", blurb: "One tap. Everything at once." },
+  { id: "countdown", name: "Countdown", blurb: "Anticipation, to the second." },
+  { id: "scroll_story", name: "Scroll story", blurb: "A cinematic scroll, scene by scene." },
+];
+
+/**
+ * Reveal-style shot — mockup `w4`'s inline `shots` map (L1188-1191). The
+ * mockup drives these with `@keyframes mscroll` / `mpulse`; the token layer is
+ * frozen this phase, so the same motion is expressed with framer-motion, which
+ * also gets `prefers-reduced-motion` for free.
+ */
+function Shot({ id, still }: { id: RevealStyle; still: boolean }) {
+  const loop = { repeat: Infinity, ease: "easeInOut" as const };
+
+  if (id === "scroll_story") {
+    return (
+      <div className="relative h-full w-full overflow-hidden">
+        <motion.div
+          className="absolute inset-x-0 top-0 h-[200%]"
+          animate={still ? undefined : { y: ["0%", "-15%", "0%"] }}
+          transition={{ ...loop, duration: 3 }}
+        >
+          <div className="h-1/2 bg-ink" />
+          <div className="h-1/2 bg-pebble" />
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (id === "tap") {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-ink">
+        <motion.span
+          className="block h-8 w-[26px] rounded bg-sand"
+          animate={still ? undefined : { opacity: [0.6, 1, 0.6] }}
+          transition={{ ...loop, duration: 1.6 }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-ink">
+      <motion.span
+        className="font-heading text-xs tabular-nums text-sand"
+        animate={still ? undefined : { opacity: [0.6, 1, 0.6] }}
+        transition={{ ...loop, duration: 1 }}
+      >
+        03:12:44
+      </motion.span>
+    </div>
+  );
+}
+
+/**
+ * Reveal mechanic + schedule — mockup `w4` `.rsel`/`.rcard` (L364-368) and
+ * `w5`'s `.tglrow`/`.sw` rows (L338-348). The switch markup is the `.ed-sw`
+ * atom already ported into globals.css.
+ */
 export default function RevealSettings({
   revealType,
   countdownDate,
@@ -42,102 +109,39 @@ export default function RevealSettings({
   const minDateStr = minDate.toISOString().slice(0, 16);
 
   return (
-    <div className="space-y-5">
-      {/* Reveal type */}
-      <div>
-        <Label className="text-[#2D2926] font-medium text-sm mb-3 block">
-          Reveal mechanic
-        </Label>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <motion.button
-            type="button"
-            onClick={() => onRevealTypeChange("tap")}
-            initial={false}
-            animate={{ scale: revealType === "tap" ? 1.02 : 1 }}
-            whileTap={shouldReduce ? {} : { scale: 0.96 }}
-            transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
-            className={cn(
-              "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
-              revealType === "tap"
-                ? "border-[#C4686D] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(196,104,109,0.1)]"
-                : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
-            )}
-          >
-            <Hand
-              className={`w-6 h-6 ${revealType === "tap" ? "text-[#C4686D]" : "text-[#6B5E57]"}`}
-            />
-            <div>
-              <p
-                className={`font-medium text-sm ${revealType === "tap" ? "text-[#C4686D]" : "text-[#2D2926]"}`}
-              >
-                Tap to Reveal
-              </p>
-              <p className="text-[#6B5E57] text-xs mt-0.5">They tap to open</p>
-            </div>
-          </motion.button>
-
-          <motion.button
-            type="button"
-            onClick={() => onRevealTypeChange("countdown")}
-            initial={false}
-            animate={{ scale: revealType === "countdown" ? 1.02 : 1 }}
-            whileTap={shouldReduce ? {} : { scale: 0.96 }}
-            transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
-            className={cn(
-              "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
-              revealType === "countdown"
-                ? "border-[#C4686D] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(196,104,109,0.1)]"
-                : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
-            )}
-          >
-            <Clock
-              className={`w-6 h-6 ${revealType === "countdown" ? "text-[#C4686D]" : "text-[#6B5E57]"}`}
-            />
-            <div>
-              <p
-                className={`font-medium text-sm ${revealType === "countdown" ? "text-[#C4686D]" : "text-[#2D2926]"}`}
-              >
-                Countdown
-              </p>
-              <p className="text-[#6B5E57] text-xs mt-0.5">Build anticipation</p>
-            </div>
-          </motion.button>
-
-          <motion.button
-            type="button"
-            onClick={() => onRevealTypeChange("scroll_story")}
-            initial={false}
-            animate={{ scale: revealType === "scroll_story" ? 1.02 : 1 }}
-            whileTap={shouldReduce ? {} : { scale: 0.96 }}
-            transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
-            className={cn(
-              "relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
-              revealType === "scroll_story"
-                ? "border-[#C4686D] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(196,104,109,0.1)]"
-                : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
-            )}
-          >
-            <span className="absolute right-2 top-2 rounded-full bg-[#C4686D] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-              New
-            </span>
-            <Moon
-              className={`w-6 h-6 ${revealType === "scroll_story" ? "text-[#C4686D]" : "text-[#6B5E57]"}`}
-            />
-            <div>
-              <p
-                className={`font-medium text-sm ${revealType === "scroll_story" ? "text-[#C4686D]" : "text-[#2D2926]"}`}
-              >
-                Scroll Story
-              </p>
-              <p className="text-[#6B5E57] text-xs mt-0.5">A cinematic scroll</p>
-            </div>
-          </motion.button>
-        </div>
+    <div>
+      {/* Mockup `.rsel` */}
+      <p className={LABEL}>Pick how it unfolds</p>
+      <div className="flex flex-col gap-3" role="radiogroup" aria-label="Reveal mechanic">
+        {STYLES.map((style) => {
+          const on = revealType === style.id;
+          return (
+            <button
+              key={style.id}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => onRevealTypeChange(style.id)}
+              className={cn(
+                SELECTABLE,
+                "flex items-center gap-4",
+                on ? `${SELECTABLE_ON} p-[15px]` : "p-4"
+              )}
+            >
+              <span className="block h-[104px] w-[74px] shrink-0 overflow-hidden rounded-lg border border-mist">
+                <Shot id={style.id} still={Boolean(shouldReduce)} />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-heading text-[17px] text-ink">{style.name}</span>
+                <span className="block text-[13px] text-stone">{style.blurb}</span>
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Reveal date picker — slides in for countdown AND scroll story.
-          Countdown gates the whole reveal on the date; scroll story uses it
-          to power the finale countdown at the end of the cinematic scroll. */}
+      {/* Reveal date picker — countdown gates the whole reveal on it; scroll
+          story feeds its finale countdown from the same value. */}
       <AnimatePresence>
         {(revealType === "countdown" || revealType === "scroll_story") && (
           <motion.div
@@ -146,82 +150,90 @@ export default function RevealSettings({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
             transition={conditionalFieldTransition(shouldReduce)}
+            className="mt-5"
           >
-            <Label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
+            <label htmlFor="reveal-date" className={LABEL}>
               Reveal date &amp; time
-            </Label>
+            </label>
             <input
+              id="reveal-date"
               type="datetime-local"
               value={countdownDate}
               min={minDateStr}
               onChange={(e) => onCountdownDateChange(e.target.value)}
-              className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] text-sm bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
+              className={INPUT}
             />
             {revealType === "scroll_story" && (
-              <p className="text-[#6B5E57] text-xs mt-1.5">
-                The big day — powers the finale countdown ✨
+              <p className="mt-1.5 text-[13px] text-stone">
+                The big day. This is what the finale counts down to.
               </p>
             )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Expiry toggle */}
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FFF8F0] border border-[#D4CBC3]/40">
-        <div>
-          <p className="text-[#2D2926] font-medium text-sm">Set expiry date</p>
-          <p className="text-[#6B5E57] text-xs mt-0.5">
-            Surprise auto-expires on this date
-          </p>
-        </div>
-        <Switch
-          checked={hasExpiry}
-          onCheckedChange={onHasExpiryChange}
-          className="data-[state=checked]:bg-[#C4686D]"
-        />
-      </div>
-
-      {/* Expiry date field — slides in when toggle is on */}
-      <AnimatePresence>
-        {hasExpiry && (
-          <motion.div
-            key="expiry-date"
-            initial={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
-            transition={conditionalFieldTransition(shouldReduce)}
-          >
-            <Label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
-              Expiry date
-            </Label>
+      <div className="mt-2">
+        {/* Mockup `.tglrow` + `.sw` */}
+        <div className={TGLROW}>
+          <div className={TGLROW_M}>
+            <h4 className={TGLROW_H}>Set an expiry date</h4>
+            <p className={TGLROW_P}>The link stops working after this moment.</p>
+          </div>
+          <label className="ed-sw">
             <input
-              type="datetime-local"
-              value={expiresAt}
-              min={minDateStr}
-              onChange={(e) => onExpiresAtChange(e.target.value)}
-              className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] text-sm bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
+              type="checkbox"
+              checked={hasExpiry}
+              onChange={(e) => onHasExpiryChange(e.target.checked)}
+              aria-label="Set an expiry date"
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Contributions toggle — collaborative memory invites (Task B2). When
-          on, the dashboard exposes a /contribute/<slug> link and family
-          members can drop a photo + note before the reveal. */}
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FFF8F0] border border-[#D4CBC3]/40">
-        <div className="pr-3">
-          <p className="text-[#2D2926] font-medium text-sm">
-            Let family contribute photos/messages
-          </p>
-          <p className="text-[#6B5E57] text-xs mt-0.5">
-            Get a second link to send to people who want to add memories
-          </p>
+            <span className="ed-tr" />
+          </label>
         </div>
-        <Switch
-          checked={acceptContributions}
-          onCheckedChange={onAcceptContributionsChange}
-          className="data-[state=checked]:bg-[#C4686D]"
-        />
+
+        <AnimatePresence>
+          {hasExpiry && (
+            <motion.div
+              key="expiry-date"
+              initial={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
+              transition={conditionalFieldTransition(shouldReduce)}
+              className="py-4"
+            >
+              <label htmlFor="expiry-date" className={LABEL}>
+                Expiry date
+              </label>
+              <input
+                id="expiry-date"
+                type="datetime-local"
+                value={expiresAt}
+                min={minDateStr}
+                onChange={(e) => onExpiresAtChange(e.target.value)}
+                className={INPUT}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Collaborative memory invites — when on, the dashboard exposes a
+            /contribute/<slug> link for family to add photos and notes. */}
+        <div className={TGLROW}>
+          <div className={TGLROW_M}>
+            <h4 className={TGLROW_H}>Group contributions</h4>
+            <p className={TGLROW_P}>
+              Friends add words and photos before it goes live. You approve each one.
+            </p>
+          </div>
+          <label className="ed-sw">
+            <input
+              type="checkbox"
+              checked={acceptContributions}
+              onChange={(e) => onAcceptContributionsChange(e.target.checked)}
+              aria-label="Let family contribute photos and messages"
+            />
+            <span className="ed-tr" />
+          </label>
+        </div>
       </div>
     </div>
   );

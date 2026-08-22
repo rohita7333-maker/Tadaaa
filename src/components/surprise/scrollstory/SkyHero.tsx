@@ -5,45 +5,27 @@ import type { CSSProperties } from "react";
 import { useReducedMotion } from "framer-motion";
 import { particleLayout } from "@/lib/scroll-story/seeded";
 import type { StoryConfig } from "@/lib/scroll-story/config";
-import {
-  BRAND_PARTY_COLORS,
-  HANDWRITING_STACK,
-  SEAM_SKY_TO_MESSAGE,
-  SERIF_STACK,
-} from "./shared";
+import { SEAM_SKY_TO_MESSAGE, SERIF_STACK } from "./shared";
 
 const STAR_COUNT = 30;
 const LANTERN_COUNT = 14;
 const PARALLAX_FACTOR_A = -0.12;
 const PARALLAX_FACTOR_B = -0.22;
 
-// --- Bunting garland — generated deterministically in module scope (no randomness) ---
-const BUNTING_FLAG_COUNT = 18;
-const ROPE_START = { x: 0, y: 24 };
-const ROPE_CTRL = { x: 500, y: 92 };
-const ROPE_END = { x: 1000, y: 24 };
-
-function ropePoint(t: number): { x: number; y: number } {
-  const mt = 1 - t;
-  return {
-    x: mt * mt * ROPE_START.x + 2 * mt * t * ROPE_CTRL.x + t * t * ROPE_END.x,
-    y: mt * mt * ROPE_START.y + 2 * mt * t * ROPE_CTRL.y + t * t * ROPE_END.y,
-  };
-}
-
-const BUNTING_FLAGS = Array.from({ length: BUNTING_FLAG_COUNT }, (_, i) => {
-  const t = (i + 0.5) / BUNTING_FLAG_COUNT;
-  const { x, y } = ropePoint(t);
-  return { x, y, color: BRAND_PARTY_COLORS[i % BRAND_PARTY_COLORS.length] };
-});
-
 interface SkyHeroProps {
   config: StoryConfig;
 }
 
 /**
- * Scene 1 — evening sky, twinkling stars, floating lanterns, parallax bands.
- * GRADIENT SEAM CONTRACT: final stop #E8D5A8 (SEAM_SKY_TO_MESSAGE) ===
+ * Scene 1 — night sky warming to a sand horizon, twinkling stars and drifting
+ * lantern motes on two parallax bands.
+ *
+ * Editorial re-skin: the ground ramps ink → sand through four documented
+ * ink→sand mixes (22 / 46 / 66 / 84 %), the same derivation convention the
+ * `derived` block in `src/lib/design-tokens.ts` uses. No hue outside the
+ * editorial palette appears.
+ *
+ * GRADIENT SEAM CONTRACT: final stop #CCAC9F (SEAM_SKY_TO_MESSAGE) ===
  * MessageScene's first stop.
  */
 export default function SkyHero({ config }: SkyHeroProps) {
@@ -97,8 +79,9 @@ export default function SkyHero({ config }: SkyHeroProps) {
       className="relative min-h-[175vh] overflow-hidden"
       style={{
         background:
-          "radial-gradient(70% 30% at 50% 100%, rgba(201,169,110,0.55), transparent 70%), " +
-          `linear-gradient(180deg, #3E3733 0%, #6B5E57 22%, #9B3D42 48%, #C4686D 66%, #E8A5A8 82%, ${SEAM_SKY_TO_MESSAGE} 100%)`,
+          "radial-gradient(70% 30% at 50% 100%, rgba(204,172,159,0.45), transparent 70%), " +
+          // ink → sand, stepped through documented mixes of the two primitives
+          `linear-gradient(180deg, #1A1A1A 0%, #413A37 22%, #6C5D57 46%, #8F7A72 66%, #AF958A 84%, ${SEAM_SKY_TO_MESSAGE} 100%)`,
       }}
     >
       <style>{`
@@ -108,6 +91,13 @@ export default function SkyHero({ config }: SkyHeroProps) {
           to { transform: translateY(-14px) scale(var(--ss-scale, 1)); }
         }
         @keyframes ss-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+        /* Ambient motion is killed in CSS as well as JS. The JS flag
+           (useReducedMotion) cannot be known during SSR, so relying on it
+           alone leaves the first painted frame animating; this media query is
+           authoritative and needs no hydration branch. */
+        @media (prefers-reduced-motion: reduce) {
+          .ss-anim { animation: none !important; }
+        }
       `}</style>
 
       {/* Parallax band A — stars (slow drift) */}
@@ -120,10 +110,11 @@ export default function SkyHero({ config }: SkyHeroProps) {
         {stars.map((p, i) => (
           <span
             key={i}
-            className="absolute h-0.5 w-0.5 rounded-full bg-cream"
+            className="ss-anim absolute h-0.5 w-0.5 rounded-full"
             style={{
               left: `${p.x}%`,
               top: `${p.y}%`,
+              backgroundColor: "var(--paper)",
               opacity: 0.6,
               animation: reduced
                 ? "none"
@@ -133,7 +124,7 @@ export default function SkyHero({ config }: SkyHeroProps) {
         ))}
       </div>
 
-      {/* Parallax band B — lanterns (faster drift) */}
+      {/* Parallax band B — lantern motes (faster drift) */}
       <div
         ref={bandBRef}
         data-band="b"
@@ -143,7 +134,7 @@ export default function SkyHero({ config }: SkyHeroProps) {
         {lanterns.map((p, i) => (
           <span
             key={i}
-            className="absolute block h-[26px] w-[18px] rounded-[7px] after:absolute after:-inset-2.5 after:rounded-full after:bg-[radial-gradient(circle,rgba(232,213,168,0.7),transparent_70%)] after:blur-[6px] after:content-['']"
+            className="ss-anim absolute block h-[26px] w-[18px] rounded-[7px] after:absolute after:-inset-2.5 after:rounded-full after:bg-[radial-gradient(circle,rgba(204,172,159,0.55),transparent_70%)] after:blur-[6px] after:content-['']"
             style={
               {
                 left: `${p.x}%`,
@@ -151,7 +142,7 @@ export default function SkyHero({ config }: SkyHeroProps) {
                 "--ss-scale": p.scale,
                 transform: `scale(${p.scale})`,
                 background:
-                  "radial-gradient(circle at 50% 62%, #E8D5A8 0%, #C9A96E 48%, rgba(155,61,66,0.85) 100%)",
+                  "radial-gradient(circle at 50% 62%, #E0CDC5 0%, #CCAC9F 48%, rgba(26,26,26,0.55) 100%)",
                 animation: reduced
                   ? "none"
                   : `ss-lantern-float ${(p.duration + 2).toFixed(2)}s ease-in-out ${p.delay.toFixed(2)}s infinite alternate`,
@@ -164,27 +155,32 @@ export default function SkyHero({ config }: SkyHeroProps) {
       {/* Centered hero copy — first viewport */}
       <div className="relative z-10 flex h-[100svh] flex-col items-center justify-center px-6 text-center">
         <p
-          className="text-gold-light"
           style={{
-            fontFamily: HANDWRITING_STACK,
-            fontSize: "clamp(24px, 4.5vw, 34px)",
+            fontFamily: SERIF_STACK,
+            fontStyle: "italic",
+            fontSize: "clamp(17px, 2.6vw, 20px)",
+            color: "var(--sand)",
           }}
         >
           {config.eyebrow}
         </p>
         <h1
-          className="mt-2 text-cream"
+          className="mt-3"
           style={{
             fontFamily: SERIF_STACK,
-            fontWeight: 500,
-            fontSize: "clamp(46px, 10vw, 84px)",
-            lineHeight: 1.04,
-            textShadow: "0 2px 28px rgba(35, 20, 15, 0.45)",
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            fontSize: "clamp(38px, 10vw, 56px)",
+            lineHeight: 1.1,
+            color: "var(--paper)",
           }}
         >
           {config.recipient}
         </h1>
-        <p className="mt-4 text-sm uppercase tracking-[0.38em] text-rose-light">
+        <p
+          className="mt-5 text-xs font-semibold uppercase"
+          style={{ letterSpacing: "0.22em", color: "var(--sand)" }}
+        >
           {config.occasionLine}
         </p>
       </div>
@@ -195,40 +191,16 @@ export default function SkyHero({ config }: SkyHeroProps) {
         className="pointer-events-none absolute inset-x-0 top-[calc(100svh-84px)] flex justify-center"
       >
         <span
-          className="text-sm text-cream/80"
+          className="ss-anim text-xs"
           style={{
-            fontFamily: HANDWRITING_STACK,
-            fontSize: "22px",
+            letterSpacing: "0.1em",
+            color: "var(--sand)",
             animation: reduced ? "none" : "ss-bob 2.4s ease-in-out infinite",
           }}
         >
-          scroll slowly ↓
+          Scroll slowly ↓
         </span>
       </div>
-
-      {/* Bunting garland across the bottom seam */}
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 1000 130"
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[110px] w-full"
-      >
-        <path
-          d={`M ${ROPE_START.x} ${ROPE_START.y} Q ${ROPE_CTRL.x} ${ROPE_CTRL.y} ${ROPE_END.x} ${ROPE_END.y}`}
-          fill="none"
-          stroke="rgba(45, 41, 38, 0.55)"
-          strokeWidth="3"
-        />
-        {BUNTING_FLAGS.map((flag, i) => (
-          <polygon
-            key={i}
-            points={`${flag.x - 14},${flag.y} ${flag.x + 14},${flag.y} ${flag.x},${flag.y + 26}`}
-            fill={flag.color}
-            stroke="rgba(45, 41, 38, 0.25)"
-            strokeWidth="1"
-          />
-        ))}
-      </svg>
     </section>
   );
 }

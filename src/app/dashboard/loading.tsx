@@ -2,27 +2,33 @@ import { InviteCardSkeleton, StatTileSkeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLoading() {
   return (
+    // Shapes match the loaded layout: `.ed-phead`, `.ed-stats`, then rows
+    // inside the surprises panel — so nothing shifts when the data arrives.
     <div>
-      {/* Header placeholder */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="ed-phead">
         <div className="space-y-2">
-          <div className="h-8 w-48 rounded-xl bg-[#F0E5D8] animate-shimmer" />
-          <div className="h-4 w-32 rounded-md bg-[#F0E5D8] animate-shimmer" />
+          <div className="h-8 w-48 rounded-[6px] bg-pebble animate-shimmer" />
+          <div className="h-4 w-32 rounded-[6px] bg-pebble animate-shimmer" />
         </div>
       </div>
 
-      {/* Stats strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+      <div className="ed-stats">
         {Array.from({ length: 5 }).map((_, i) => (
           <StatTileSkeleton key={i} />
         ))}
       </div>
 
-      {/* Invite grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <InviteCardSkeleton key={i} />
-        ))}
+      <div className="ed-gr2">
+        <div className="ed-panel">
+          <div className="h-5 w-40 rounded-[6px] bg-pebble animate-shimmer mb-4" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <InviteCardSkeleton key={i} />
+          ))}
+        </div>
+        <div className="ed-panel">
+          <div className="h-5 w-24 rounded-[6px] bg-pebble animate-shimmer mb-4" />
+          <div className="h-4 w-full rounded-[6px] bg-pebble animate-shimmer" />
+        </div>
       </div>
     </div>
   );

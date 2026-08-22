@@ -1,11 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { MapPin, Plus, Trash2 } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Plus, Trash2 } from "lucide-react";
 import { springs, makeReducedMotionTransition } from "@/lib/motion";
 import type { StoryEventInput } from "@/lib/schemas";
+import { LABEL, INPUT, WIZ_H2 } from "./editorial";
 
 export type StoryEventDraft = StoryEventInput;
 
@@ -29,9 +28,11 @@ const EMPTY_EVENT: StoryEventDraft = {
   mapsQuery: "",
 };
 
-const inputClass =
-  "w-full h-10 bg-white rounded-xl border border-[#D4CBC3] px-3 text-sm text-[#2D2926] placeholder:text-[#D4CBC3] focus:outline-none focus:border-[#C4686D] focus-visible:ring-2 focus-visible:ring-[#C4686D]/20 transition-all";
-
+/**
+ * Scroll-story plaques — mockup `.contribitem` card anatomy (L358-362) with
+ * `.field` inputs inside. Blank rows are filtered server-side by
+ * `eventsSchema`; this editor only collects.
+ */
 export default function EventsEditor({ events, onEventsChange }: EventsEditorProps) {
   const shouldReduce = useReducedMotion();
 
@@ -49,119 +50,96 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#D4CBC3]/40 shadow-[0_4px_16px_rgba(45,41,38,0.04)] p-6">
-      <div className="flex items-center gap-2 mb-1">
-        <MapPin className="w-4 h-4 text-[#C4686D]" />
-        <h3 className="font-heading text-base text-[#2D2926]">The plan (optional)</h3>
-      </div>
-      <p className="text-xs text-[#6B5E57] mb-5">
-        Add up to 4 plaques to the cinematic scroll — the when, the where, the
+    <div>
+      <h2 className={WIZ_H2}>The plan</h2>
+      <p className="mb-5 text-sm text-stone">
+        Up to four plaques in the cinematic scroll: the when, the where, the
         little details. Leave it empty and the story shows a single countdown
-        plaque instead. ✨
+        plaque instead.
       </p>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-2.5">
         <AnimatePresence initial={false}>
           {events.map((event, i) => (
             <motion.div
               key={i}
-              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.97 }}
+              initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -10 }}
               transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
-              className="bg-[#FFF8F0] rounded-2xl border border-[#D4CBC3]/50 p-4 space-y-3"
+              className="rounded-[var(--r-md)] border border-mist bg-paper p-4"
             >
-              {/* Label + remove */}
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <Label
-                    htmlFor={`event-label-${i}`}
-                    className="block text-[10px] font-semibold text-[#C4686D] uppercase tracking-wider mb-1"
-                  >
-                    Label
-                  </Label>
-                  <input
-                    id={`event-label-${i}`}
-                    type="text"
-                    value={event.label}
-                    onChange={(e) =>
-                      updateEvent(i, { label: e.target.value.slice(0, MAX_LABEL) })
-                    }
-                    placeholder="When"
-                    maxLength={MAX_LABEL}
-                    className={inputClass}
-                  />
-                </div>
+              <div className="mb-2 flex items-start justify-between gap-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-stone">
+                  Plaque {i + 1}
+                </span>
                 <button
                   type="button"
                   onClick={() => removeEvent(i)}
                   aria-label={`Remove plaque ${i + 1}`}
-                  className="mt-6 h-10 w-10 rounded-full border border-[#D4CBC3] text-[#C4686D] hover:bg-[#FFF0EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4686D]/40 flex items-center justify-center transition-all shrink-0"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-mist text-coral-deep transition-colors hover:border-coral-deep hover:bg-chip-coral-bg focus-visible:outline-2 focus-visible:outline-coral focus-visible:outline-offset-2"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
 
-              {/* Title */}
-              <div>
-                <Label
-                  htmlFor={`event-title-${i}`}
-                  className="block text-[10px] font-semibold text-[#6B5E57] uppercase tracking-wider mb-1"
-                >
+              <div className="mb-3">
+                <label htmlFor={`event-label-${i}`} className={LABEL}>
+                  Label
+                </label>
+                <input
+                  id={`event-label-${i}`}
+                  type="text"
+                  value={event.label}
+                  onChange={(e) => updateEvent(i, { label: e.target.value.slice(0, MAX_LABEL) })}
+                  placeholder="When"
+                  maxLength={MAX_LABEL}
+                  className={INPUT}
+                />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor={`event-title-${i}`} className={LABEL}>
                   Title
-                </Label>
+                </label>
                 <input
                   id={`event-title-${i}`}
                   type="text"
                   value={event.title}
-                  onChange={(e) =>
-                    updateEvent(i, { title: e.target.value.slice(0, MAX_TITLE) })
-                  }
+                  onChange={(e) => updateEvent(i, { title: e.target.value.slice(0, MAX_TITLE) })}
                   placeholder="Saturday, October 24 · 5:30 PM"
                   maxLength={MAX_TITLE}
-                  className={inputClass}
+                  className={INPUT}
                 />
               </div>
 
-              {/* Detail */}
-              <div>
-                <Label
-                  htmlFor={`event-detail-${i}`}
-                  className="block text-[10px] font-semibold text-[#6B5E57] uppercase tracking-wider mb-1"
-                >
+              <div className="mb-3">
+                <label htmlFor={`event-detail-${i}`} className={LABEL}>
                   Detail (optional)
-                </Label>
+                </label>
                 <input
                   id={`event-detail-${i}`}
                   type="text"
                   value={event.detail ?? ""}
-                  onChange={(e) =>
-                    updateEvent(i, { detail: e.target.value.slice(0, MAX_DETAIL) })
-                  }
+                  onChange={(e) => updateEvent(i, { detail: e.target.value.slice(0, MAX_DETAIL) })}
                   placeholder="golden hour, sharp"
                   maxLength={MAX_DETAIL}
-                  className={inputClass}
+                  className={INPUT}
                 />
               </div>
 
-              {/* Maps query */}
               <div>
-                <Label
-                  htmlFor={`event-maps-${i}`}
-                  className="block text-[10px] font-semibold text-[#6B5E57] uppercase tracking-wider mb-1"
-                >
+                <label htmlFor={`event-maps-${i}`} className={LABEL}>
                   Map location (optional)
-                </Label>
+                </label>
                 <input
                   id={`event-maps-${i}`}
                   type="text"
                   value={event.mapsQuery ?? ""}
-                  onChange={(e) =>
-                    updateEvent(i, { mapsQuery: e.target.value.slice(0, MAX_MAPS) })
-                  }
+                  onChange={(e) => updateEvent(i, { mapsQuery: e.target.value.slice(0, MAX_MAPS) })}
                   placeholder="Sunset Terrace, Jubilee Hills, Hyderabad"
                   maxLength={MAX_MAPS}
-                  className={inputClass}
+                  className={INPUT}
                 />
               </div>
             </motion.div>
@@ -170,20 +148,19 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
       </div>
 
       {events.length < MAX_EVENTS && (
-        <Button
+        <button
           type="button"
           onClick={addEvent}
-          variant="outline"
-          className="mt-4 w-full h-10 rounded-full border-dashed border-[#C4686D]/50 text-[#C4686D] hover:bg-[#FFF0EE] hover:border-[#C4686D] text-sm font-medium transition-all"
+          className="ed-btn ed-btn-line ed-btn-sm mt-3"
         >
-          <Plus className="w-4 h-4 mr-1.5" />
+          <Plus className="h-3.5 w-3.5" />
           Add plaque
           {events.length > 0 && (
-            <span className="ml-auto text-xs text-[#D4CBC3]">
+            <span className="text-stone">
               {events.length}/{MAX_EVENTS}
             </span>
           )}
-        </Button>
+        </button>
       )}
     </div>
   );

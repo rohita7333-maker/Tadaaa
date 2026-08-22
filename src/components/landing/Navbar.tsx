@@ -1,153 +1,79 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Heart, Menu, X } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { easings, durations, makeReducedMotionTransition } from "@/lib/motion";
+import { usePathname } from "next/navigation";
+import { BTN, BTN_CORAL, TLINK_INK } from "./editorial";
 
+const LINKS = [
+  { href: "/templates", label: "Templates" },
+  { href: "/create", label: "Create" },
+  { href: "/pricing", label: "Pricing" },
+] as const;
+
+/**
+ * Marketing top nav — mockup `.topnav`.
+ *
+ * Sticky paper bar with a mist hairline, centered uppercase link rail, and the
+ * signed-out auth pair on the right. The link rail collapses below 760px
+ * exactly as the mockup does (`@media(max-width:760px){.topnav .navlinks{display:none}}`);
+ * the footer carries the same destinations on small screens.
+ */
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const reducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 20);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const pathname = usePathname();
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 backdrop-blur-md border-b border-[#D4CBC3]/40 shadow-[0_2px_12px_rgba(45,41,38,0.06)]"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center group-hover:scale-105 transition-transform">
-            <Heart className="w-4 h-4 fill-white text-white" />
-          </div>
-          <span className="font-heading text-lg text-[#2D2926] font-semibold">TaDaaaa</span>
+    <div className="sticky top-0 z-[700] border-b border-mist bg-paper">
+      {/* Mockup padding/gap are 20px/18px; below 360px they are tightened so the
+          logo + auth pair still fit without horizontal scroll. */}
+      <div className="mx-auto flex max-w-[1080px] items-center gap-2 px-4 py-3.5 min-[360px]:gap-[18px] min-[360px]:px-5">
+        <Link
+          href="/"
+          className="font-heading text-xl tracking-[-0.01em] text-ink"
+        >
+          TaDaaaa<span className="text-coral">.</span>
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden sm:flex items-center gap-6">
-          <Link
-            href="#how-it-works"
-            className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium transition-colors"
-          >
-            How it works
-          </Link>
-          <Link
-            href="/templates"
-            className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium transition-colors"
-          >
-            Templates
-          </Link>
-          <Link
-            href="/pricing"
-            className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium transition-colors"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/about"
-            className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium transition-colors"
-          >
-            About
-          </Link>
-        </div>
+        <nav
+          aria-label="Main"
+          className="mx-auto hidden gap-1 min-[761px]:flex"
+        >
+          {LINKS.map((link) => {
+            const active =
+              pathname === link.href || pathname.startsWith(`${link.href}/`);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? "page" : undefined}
+                className={`rounded-[var(--r-sm)] px-3.5 py-2 text-[13px] font-semibold uppercase tracking-[0.06em] transition-colors ${
+                  active
+                    ? "text-ink shadow-[inset_0_-2px_0_var(--coral)]"
+                    : "text-stone hover:text-ink"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-        {/* Desktop auth buttons */}
-        <div className="hidden sm:flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 min-[360px]:gap-3 min-[761px]:ml-0">
           <Link
             href="/auth/signin"
-            className="text-sm font-medium text-[#2D2926] hover:text-[#C4686D] transition-colors px-4 py-2"
+            className={`${TLINK_INK} whitespace-nowrap text-[13px] font-semibold tracking-[0.04em]`}
           >
-            Sign in
+            Log in
           </Link>
           <Link
             href="/auth/signup"
-            className="text-sm font-semibold text-white bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_2px_12px_rgba(196,104,109,0.35)] hover:shadow-[0_4px_20px_rgba(196,104,109,0.5)]"
+            /* mockup .btn-sm is 18px of side padding; tightened below 360px so
+               the nav row clears a 320px viewport */
+            className={`${BTN} ${BTN_CORAL} whitespace-nowrap px-3.5 py-[9px] text-[11px] min-[360px]:px-[18px]`}
           >
-            Sign up free
+            Get started
           </Link>
         </div>
-
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="sm:hidden w-9 h-9 flex items-center justify-center text-[#2D2926]"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
       </div>
-
-      {/* Mobile menu — opacity+y only (no height animation = no layout thrash) */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={makeReducedMotionTransition(reducedMotion, {
-              duration: durations.quick,
-              ease: easings.entrance,
-            })}
-            className="sm:hidden overflow-hidden bg-white/95 backdrop-blur-md border-b border-[#D4CBC3]/40"
-          >
-            <div className="px-6 py-4 flex flex-col gap-3">
-              <Link
-                href="#how-it-works"
-                onClick={() => setMobileOpen(false)}
-                className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium py-2"
-              >
-                How it works
-              </Link>
-              <Link
-                href="/templates"
-                className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium py-2"
-              >
-                Templates
-              </Link>
-              <Link
-                href="/pricing"
-                className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium py-2"
-              >
-                Pricing
-              </Link>
-              <Link
-                href="/about"
-                onClick={() => setMobileOpen(false)}
-                className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium py-2"
-              >
-                About
-              </Link>
-              <div className="border-t border-[#D4CBC3]/40 pt-3 flex flex-col gap-2">
-                <Link
-                  href="/auth/signin"
-                  className="text-center text-sm font-medium text-[#2D2926] border border-[#D4CBC3] rounded-xl py-2.5 hover:bg-[#FFF8F0] transition-colors"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="text-center text-sm font-semibold text-white bg-gradient-to-r from-[#C4686D] to-[#9B3D42] rounded-xl py-2.5 shadow-sm"
-                >
-                  Sign up free
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+    </div>
   );
 }

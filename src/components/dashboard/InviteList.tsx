@@ -20,6 +20,7 @@ type Invite = {
   reveal_type: "tap" | "countdown";
   accept_contributions?: boolean;
   revealed_at?: string | null;
+  countdown_date?: string | null;
 };
 
 interface InviteListProps {
@@ -79,11 +80,6 @@ const cardExitReduced = {
   transition: { duration: durations.instant },
 };
 
-const STATIC_SHADOW =
-  "0 2px 4px rgba(45,41,38,0.04), 0 8px 24px rgba(45,41,38,0.08), 0 24px 48px rgba(45,41,38,0.06)";
-const HOVER_SHADOW =
-  "0 4px 8px rgba(45,41,38,0.06), 0 16px 40px rgba(45,41,38,0.14), 0 40px 80px rgba(45,41,38,0.10)";
-
 export default function InviteList({ invites, creatorName, tier = "free" }: InviteListProps) {
   const shouldReduce = useReducedMotion();
   const router = useRouter();
@@ -101,8 +97,10 @@ export default function InviteList({ invites, creatorName, tier = "free" }: Invi
   }
 
   return (
+    // The mockup's `#slist` — hairline-separated rows inside the panel, not a
+    // card grid (tadaaaa-editorial.html:1038-1050).
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+      className="ed-srow-list"
       variants={containerVariants}
       initial="hidden"
       animate="show"
@@ -116,14 +114,6 @@ export default function InviteList({ invites, creatorName, tier = "free" }: Invi
               custom={origIdx}
               variants={shouldReduce ? reducedCardVariants : cardVariants}
               exit={shouldReduce ? cardExitReduced : cardExitNormal}
-              className="rounded-3xl"
-              style={{ boxShadow: STATIC_SHADOW }}
-              whileHover={
-                shouldReduce
-                  ? undefined
-                  : { y: -6, boxShadow: HOVER_SHADOW }
-              }
-              whileTap={shouldReduce ? undefined : { scale: 0.98 }}
               transition={springs.soft}
             >
               <InviteCard

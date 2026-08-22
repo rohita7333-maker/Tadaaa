@@ -108,11 +108,11 @@ export default function CoverflowFan() {
         onPointerCancel={() => {
           dragStartX.current = null;
         }}
-        className="relative w-full select-none cursor-grab active:cursor-grabbing rounded-3xl outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
+        className="relative mx-auto w-full max-w-[640px] cursor-grab select-none rounded-[var(--r-md)] active:cursor-grabbing"
         style={{
-          height: "clamp(320px, 44vw, 430px)",
-          perspective: "1300px",
-          perspectiveOrigin: "50% 42%",
+          height: "340px",
+          perspective: "1200px",
+          perspectiveOrigin: "50% 50%",
           touchAction: "pan-y",
         }}
       >
@@ -123,50 +123,43 @@ export default function CoverflowFan() {
           const occasionLabel = occasionLabelById.get(template.occasionId) ?? "";
 
           return (
+            /* Card chrome matches the mockup `.fan-card`: 190x270, --r-md,
+               mist hairline, paper body, --sh-card, art on top and a
+               left-aligned `.lbl2` caption block beneath. Geometry comes from
+               coverflow-math.ts and is deliberately untouched. */
             <div
               key={template.id}
               aria-hidden={!slot.visible}
-              className="absolute left-1/2 top-1/2 overflow-hidden rounded-[18px] bg-cover bg-center shadow-[0_18px_50px_rgba(45,41,38,0.22)]"
+              className="absolute left-1/2 top-1/2 flex h-[270px] w-[190px] flex-col overflow-hidden rounded-[var(--r-md)] border border-mist bg-paper shadow-[var(--sh-card)]"
               style={{
-                width: "clamp(160px, 22vw, 218px)",
-                aspectRatio: "3 / 4.25",
                 transform: `translate(-50%, -50%) translateX(${slot.x}px) translateZ(${slot.z}px) rotateY(${slot.rotY}deg) scale(${slot.scale})`,
                 filter: `brightness(${slot.brightness})`,
                 zIndex: slot.zIndex,
                 opacity: slot.visible ? 1 : 0,
                 transition: cardTransition,
-                backgroundImage: template.art?.cover
-                  ? `url(${template.art.cover})`
-                  : undefined,
-                background: !template.art?.cover
-                  ? theme
-                    ? coverBackground(theme)
-                    : "#FFF8F0"
-                  : undefined,
               }}
             >
-              {/* Cover art replaces the emoji glyph when present. */}
-              {!template.art?.cover && (
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-0 flex items-center justify-center pb-8 text-6xl"
-                >
-                  {template.emoji}
-                </span>
-              )}
-              <span
-                className="absolute inset-x-0 bottom-0 px-4 pb-3.5 pt-10 text-white"
+              <div
+                className="relative flex-1 bg-cover bg-center"
                 style={{
-                  background: `linear-gradient(to top, ${theme?.colors.overlay ?? "rgba(45,41,38,0.5)"}, transparent)`,
+                  backgroundImage: template.art?.cover
+                    ? `url(${template.art.cover})`
+                    : undefined,
+                  background: !template.art?.cover
+                    ? theme
+                      ? coverBackground(theme)
+                      : "var(--pebble)"
+                    : undefined,
                 }}
-              >
-                <span className="block font-heading text-base leading-tight">
+              />
+              <div className="px-3 py-2.5 text-left">
+                <span className="block font-heading text-[15px] leading-tight text-ink">
                   {template.name}
                 </span>
-                <span className="block font-handwritten text-sm opacity-90">
+                <span className="block text-[10px] uppercase tracking-[0.08em] text-stone">
                   {occasionLabel}
                 </span>
-              </span>
+              </div>
             </div>
           );
         })}
@@ -188,14 +181,14 @@ export default function CoverflowFan() {
               aria-label={`Show ${template.name}`}
               aria-current={isActive ? "true" : undefined}
               /* p-2 gives a >=24px hit target (WCAG target-size); the inner span stays a small visual dot */
-              className="group/dot rounded-full p-2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
+              className="group/dot rounded-full p-2"
             >
               <span
                 aria-hidden="true"
-                className={`block h-2.5 rounded-full transition-all duration-300 ${
+                className={`block h-[7px] transition-all duration-200 ${
                   isActive
-                    ? "w-6 bg-[#C4686D]"
-                    : "w-2.5 bg-[#D4CBC3] group-hover/dot:bg-[#C4686D]/60"
+                    ? "w-5 rounded-[4px] bg-ink"
+                    : "w-[7px] rounded-full bg-mist group-hover/dot:bg-stone"
                 }`}
               />
             </button>

@@ -73,7 +73,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm px-4 sm:px-6"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink/40 backdrop-blur-sm px-4 sm:px-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -81,7 +81,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
           onClick={dismiss}
         >
           <motion.div
-            className="w-full max-w-md bg-white rounded-3xl shadow-[0_20px_60px_rgba(45,41,38,0.18)] border border-[#D4CBC3]/40 overflow-hidden"
+            className="w-full max-w-md bg-white rounded-3xl shadow-[0_20px_60px_rgba(45,41,38,0.18)] border border-mist/40 overflow-hidden"
             initial={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
@@ -99,7 +99,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
                     className="h-1 rounded-full transition-all duration-300"
                     style={{
                       width: i === step ? 24 : 10,
-                      background: i <= step ? "#C4686D" : "#E7DED5",
+                      background: i <= step ? "var(--coral)" : "var(--mist)",
                     }}
                   />
                 ))}
@@ -107,7 +107,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
               <button
                 onClick={dismiss}
                 aria-label="Close onboarding"
-                className="w-8 h-8 rounded-full text-[#6B5E57] hover:bg-[#FFF8F0] flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full text-stone hover:bg-pebble flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -133,18 +133,18 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
                       "linear-gradient(135deg, rgba(196,104,109,0.12), rgba(201,169,110,0.12))",
                   }}
                 >
-                  <current.icon className="w-5 h-5 text-[#C4686D]" />
+                  <current.icon className="w-5 h-5 text-coral" />
                 </div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#C4686D] mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-coral mb-2">
                   {current.eyebrow}
                 </p>
                 <h2
                   id="onboarding-title"
-                  className="font-heading text-[22px] leading-tight text-[#2D2926] mb-3"
+                  className="font-heading text-[22px] leading-tight text-ink mb-3"
                 >
                   {current.title}
                 </h2>
-                <p className="text-[#6B5E57] text-sm leading-relaxed">{current.body}</p>
+                <p className="text-stone text-sm leading-relaxed">{current.body}</p>
               </motion.div>
             </AnimatePresence>
 
@@ -152,7 +152,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
               <button
                 onClick={dismiss}
                 aria-label="Skip onboarding for now"
-                className="text-xs text-[#6B5E57] hover:text-[#2D2926] underline underline-offset-2"
+                className="text-xs text-stone hover:text-ink underline underline-offset-2"
               >
                 Skip for now
               </button>
@@ -164,7 +164,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
                       window.localStorage.setItem(STORAGE_KEY, new Date().toISOString());
                     } catch {}
                   }}
-                  className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all shadow-md shadow-[#C4686D]/25"
+                  className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-coral to-coral-deep text-white text-sm font-semibold hover:from-coral-deep hover:to-coral transition-all shadow-md shadow-coral/25"
                 >
                   Create my first
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -173,7 +173,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
                 <button
                   onClick={() => setStep((s) => Math.min(steps.length - 1, s + 1))}
                   aria-label={`Go to step ${step + 2} of ${steps.length}`}
-                  className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all shadow-md shadow-[#C4686D]/25"
+                  className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-coral to-coral-deep text-white text-sm font-semibold hover:from-coral-deep hover:to-coral transition-all shadow-md shadow-coral/25"
                 >
                   Keep going
                   <ArrowRight className="w-3.5 h-3.5" />

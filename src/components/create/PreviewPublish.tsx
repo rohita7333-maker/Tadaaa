@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Check, ExternalLink, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Check, ExternalLink } from "lucide-react";
 import { getThemeById } from "@/lib/themes";
 import { canPublishTheme } from "@/lib/publish-gate";
 import { APP_URL, PREMIUM_THEME_PRICE } from "@/lib/constants";
@@ -11,7 +10,9 @@ import { springs, durations, makeReducedMotionTransition } from "@/lib/motion";
 import type { PhotoFile } from "./PhotoUploader";
 import { REVEAL_STYLE_LABELS, type RevealStyle } from "@/lib/templates";
 import ShareButtons from "@/components/dashboard/ShareButtons";
+import InviteQr from "@/components/dashboard/InviteQr";
 import VideoGenerator from "./VideoGenerator";
+import { SUMCARD, SUMROW, SUMROW_K, SUMROW_V, PAYWALL, WIZ_H2, WIZ_SUB } from "./editorial";
 
 interface PreviewPublishProps {
   title: string;
@@ -28,6 +29,15 @@ interface PreviewPublishProps {
   onPublish: () => Promise<{ slug: string; inviteId: string } | null>;
 }
 
+/**
+ * Final wizard step — mockup `w6` (L1208): a `.sumcard` of what is about to
+ * ship, the `.paywall` when the theme is premium, and a coral block CTA.
+ *
+ * The old titanium phone shell is gone: re-drawn device chrome is banned by
+ * the editorial identity, and the mockup previews with the flat `.mini` card
+ * instead. The publish gate, Stripe session verification and the free-tier
+ * expiry notice are unchanged.
+ */
 export default function PreviewPublish({
   title,
   message,
@@ -78,87 +88,85 @@ export default function PreviewPublish({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
-          className="text-center py-8"
+          className="py-8 text-center"
         >
-          {/* Check circle — the payoff moment. springs.weighty gives it landed weight. */}
+          {/* Coral disc — the payoff moment, in the palette's one accent. */}
           <motion.div
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={makeReducedMotionTransition(shouldReduce, springs.weighty)}
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-[#6B8F71] to-[#4a6b50] flex items-center justify-center mx-auto mb-6 shadow-[0_4px_24px_rgba(107,143,113,0.3)]"
+            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-coral"
           >
-            <Check className="w-10 h-10 text-white" />
+            <Check className="h-8 w-8 text-white" strokeWidth={1.8} />
           </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={makeReducedMotionTransition(shouldReduce, {
-              duration: durations.base,
-              delay: shouldReduce ? 0 : durations.instant,
-            })}
-            className="font-heading text-3xl text-[#2D2926] mb-2"
-          >
-            Your surprise is ready! ✨
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={makeReducedMotionTransition(shouldReduce, {
-              duration: durations.base,
-              delay: shouldReduce ? 0 : durations.quick,
-            })}
-            className="text-[#6B5E57] mb-8 max-w-xs mx-auto"
-          >
-            Share this link with the lucky person. They&apos;ll have no idea what&apos;s waiting for them!
-          </motion.p>
 
-          {/* Link box */}
-          <div className="bg-[#FFF8F0] border border-[#D4CBC3]/60 rounded-2xl p-4 mb-6 max-w-sm mx-auto">
-            <p className="text-[#6B5E57] text-xs mb-2 font-medium uppercase tracking-wider">
+          <h2 className="mb-2 font-heading text-[30px] text-ink">Your surprise is live.</h2>
+          <p className="mx-auto mb-8 max-w-xs text-sm text-stone">
+            Send the link. They will have no idea what is waiting.
+          </p>
+
+          {/* Link plaque — mockup `.copyrow` input styling. */}
+          <div className="mx-auto mb-6 max-w-sm rounded-[var(--r-md)] border border-mist bg-pebble p-4 text-left">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-stone">
               Shareable link
             </p>
-            <p className="text-[#2D2926] text-sm font-medium break-all">{link}</p>
+            <p className="break-all text-[13px] text-ink">{link}</p>
           </div>
 
-          <div className="max-w-sm mx-auto mb-4">
+          {/* Mockup `.qrbox` sits between the copy row and the share targets
+              (L1474). Shown outright here — at publish the QR is the artefact
+              you print into a card, not a thing to go hunting for. */}
+          <div className="mb-6">
+            <InviteQr
+              value={link}
+              caption="Print it, tuck it into a card."
+              fileName={`tadaaaa-${publishedSlug}`}
+            />
+          </div>
+
+          <div className="mx-auto mb-4 max-w-sm">
             <ShareButtons
-              slug={publishedSlug!}
+              slug={publishedSlug}
               title={title}
               inviteId={publishedInviteId ?? undefined}
               acceptContributions={acceptContributions}
+              hideQr
             />
           </div>
 
           {publishedInviteId && (
-            <div className="max-w-sm mx-auto mb-4">
+            <div className="mx-auto mb-4 max-w-sm">
               <VideoGenerator inviteId={publishedInviteId} tier={tier} />
             </div>
           )}
 
-          <div className="flex justify-center gap-3 mt-2">
+          <div className="mt-2 flex justify-center gap-3">
             <a
               href={link}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center h-10 px-5 rounded-full border border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0] transition-all duration-300 text-sm font-medium"
+              className="ed-btn ed-btn-line"
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
+              <ExternalLink className="h-4 w-4" />
               Preview
             </a>
           </div>
 
           {tier === "free" && (
-            <p className="text-xs text-[#9B8E87] mt-5 px-4">
-              ⏳ This surprise stays live for 28 days after it&apos;s opened.{" "}
-              <a href="/pricing" className="text-[#C4686D] hover:underline">Upgrade</a> to keep it forever.
+            <p className="mt-5 px-4 text-[13px] text-stone">
+              This surprise stays live for 28 days after it is opened.{" "}
+              <a href="/pricing" className="ed-tlink">
+                Upgrade
+              </a>{" "}
+              to keep it forever.
             </p>
           )}
 
           <a
             href="/dashboard"
-            className="block mt-3 text-[#6B5E57] hover:text-[#2D2926] text-sm text-center transition-colors"
+            className="mt-3 block text-center text-[13px] text-stone transition-colors hover:text-ink"
           >
-            ← Back to dashboard
+            Back to dashboard
           </a>
         </motion.div>
       ) : (
@@ -168,108 +176,81 @@ export default function PreviewPublish({
           exit={{ opacity: 0 }}
           transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
         >
-          <h2 className="font-heading text-2xl text-[#2D2926] mb-2">Preview & Publish</h2>
-          <p className="text-[#6B5E57] mb-8">
-            Here&apos;s how your surprise will look. Ready to share?
-          </p>
+          <h2 className={WIZ_H2}>Preview &amp; finalize</h2>
+          <p className={WIZ_SUB}>See it exactly as they will. Then decide.</p>
 
-          {/* Phone preview */}
-          <div className="flex justify-center mb-8">
-            <div className="relative w-[230px]">
-              {/* Side power button */}
-              <div className="absolute -right-[3px] top-[80px] w-[3px] h-10 bg-[#c0c0c0] rounded-r-sm" />
-              {/* Volume buttons (left) */}
-              <div className="absolute -left-[3px] top-[70px] w-[3px] h-6 bg-[#c0c0c0] rounded-l-sm" />
-              <div className="absolute -left-[3px] top-[102px] w-[3px] h-6 bg-[#c0c0c0] rounded-l-sm" />
-              {/* Device shell — titanium-ish gradient */}
-              <div
-                className="rounded-[44px] p-2 shadow-[0_32px_80px_rgba(45,41,38,0.28)]"
-                style={{
-                  background: "linear-gradient(to bottom, #e8e8e8, #d0d0d0, #b8b8b8)",
-                }}
-              >
-                {/* Inner screen */}
-                <div className="relative rounded-[36px] overflow-hidden aspect-[9/19]"
-                  style={{ background: themeData?.colors.background }}
-                >
-                  {/* Dynamic island */}
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-10" />
-
-                  {firstPhoto ? (
-                    <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={firstPhoto.preview}
-                        alt="Preview"
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                      {/* CSS gradient scrim — photo shows through but text stays legible */}
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
-                    </>
-                  ) : null}
-
-                  <div className="relative z-10 text-center px-4 absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl mb-3 block">
-                      {themeData?.revealIcon === "envelope"
-                        ? "✉️"
-                        : themeData?.revealIcon === "gift"
-                        ? "🎁"
-                        : themeData?.revealIcon === "heart"
-                        ? "❤️"
-                        : themeData?.revealIcon === "star"
-                        ? "⭐"
-                        : "🎈"}
-                    </span>
-                    <p
-                      className="text-sm font-medium mb-1 leading-tight"
-                      style={{ color: themeData?.colors.text || "#fff" }}
-                    >
-                      {title || "Your surprise title"}
-                    </p>
-                    <p
-                      className="text-xs opacity-70"
-                      style={{ color: themeData?.colors.text || "#fff" }}
-                    >
-                      {revealType === "tap"
-                        ? "Tap to open ✨"
-                        : revealType === "scroll_story"
-                          ? "Scroll story 🌙"
-                          : "Countdown reveal ⏱"}
-                    </p>
-                  </div>
-
-                  {/* Home indicator bar */}
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 bg-white/40 rounded-full z-10" />
-                </div>
+          {/* Mockup `.mini` — a flat 9:16 card, no re-drawn device chrome.
+              Below 961px this is the only preview, since the hub's live
+              preview column is hidden there. */}
+          <div className="mb-6 flex justify-center min-[961px]:hidden">
+            <div className="w-[200px] rounded-[18px] border border-mist bg-paper p-2">
+              <div className="relative flex aspect-[9/16] flex-col items-center justify-center overflow-hidden rounded-xl bg-ink p-[18px] text-center">
+                {firstPhoto ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={firstPhoto.preview}
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 h-full w-full object-cover opacity-[0.35]"
+                    />
+                  </>
+                ) : (
+                  themeData && (
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 opacity-[0.22]"
+                      style={{ background: themeData.colors.background }}
+                    />
+                  )
+                )}
+                <p className="relative text-[8px] uppercase tracking-[0.14em] text-sand">
+                  {REVEAL_STYLE_LABELS[revealType]}
+                </p>
+                <p className="relative my-1.5 break-words font-heading text-base text-white">
+                  {title || "Their name"}
+                </p>
+                <p className="relative max-h-11 overflow-hidden break-words text-[9px] leading-relaxed text-white/75">
+                  {message || "Your message will appear here."}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Summary */}
-          <div className="bg-[#FFF8F0] rounded-2xl p-5 mb-6 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-[#6B5E57]">Theme</span>
-              <span className="text-[#2D2926] font-medium">{themeData?.name}</span>
+          {/* Mockup `.sumcard` */}
+          <div className={SUMCARD}>
+            <div className={SUMROW}>
+              <span className={SUMROW_K}>Title</span>
+              <span className={SUMROW_V}>{title || "Untitled"}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-[#6B5E57]">Photos</span>
-              <span className="text-[#2D2926] font-medium">{photos.length}</span>
+            <div className={SUMROW}>
+              <span className={SUMROW_K}>Theme</span>
+              <span className={SUMROW_V}>{themeData?.name ?? "Not set"}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-[#6B5E57]">Reveal</span>
-              <span className="text-[#2D2926] font-medium">{REVEAL_STYLE_LABELS[revealType]}</span>
+            <div className={SUMROW}>
+              <span className={SUMROW_K}>Reveal</span>
+              <span className={SUMROW_V}>{REVEAL_STYLE_LABELS[revealType]}</span>
+            </div>
+            <div className={SUMROW}>
+              <span className={SUMROW_K}>Photos</span>
+              <span className={SUMROW_V}>{photos.length}</span>
+            </div>
+            <div className={SUMROW}>
+              <span className={SUMROW_K}>Contributions</span>
+              <span className={SUMROW_V}>{acceptContributions ? "On" : "Off"}</span>
             </div>
           </div>
 
-          {/* Free-tier expiry notice */}
           {tier === "free" && (
-            <div className="flex items-start gap-2 bg-[#FFF0E8] border border-[#D4CBC3]/50 rounded-xl px-4 py-3 mb-5 text-xs text-[#6B5E57]">
-              <span className="text-base leading-none mt-0.5">⏳</span>
-              <span>
-                Free surprises stay live for <strong className="text-[#2D2926]">28 days after they&apos;re opened</strong>. After that, the link expires.{" "}
-                <a href="/pricing" className="text-[#C4686D] font-medium hover:underline">Upgrade</a> to keep yours forever.
-              </span>
-            </div>
+            <p className="mb-[18px] rounded-[var(--r-sm)] border border-mist bg-pebble px-4 py-3 text-[13px] text-stone">
+              Free surprises stay live for{" "}
+              <strong className="font-semibold text-ink">28 days after they are opened</strong>.
+              After that the link expires.{" "}
+              <a href="/pricing" className="ed-tlink">
+                Upgrade
+              </a>{" "}
+              to keep yours forever.
+            </p>
           )}
 
           {/* Premium gate — the one place a price appears in the wizard.
@@ -283,38 +264,25 @@ export default function PreviewPublish({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
-                className="rounded-2xl border border-[#C9A96E]/40 bg-gradient-to-br from-[#FFF8F0] to-[#FDF1E3] p-5"
+                className={PAYWALL}
               >
-                <div className="flex items-start gap-3">
-                  <span className="shrink-0 grid place-items-center w-10 h-10 rounded-xl bg-white/70 border border-[#C9A96E]/25">
-                    <Sparkles className="w-5 h-5 text-[#C9A96E]" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-heading text-lg text-[#2D2926] leading-tight">
-                      Premium surprise — ${PREMIUM_THEME_PRICE.toFixed(2)}
-                    </p>
-                    <p className="mt-1 text-sm text-[#6B5E57] leading-snug">
-                      <span className="font-medium text-[#2D2926]">
-                        {themeData?.name}
-                      </span>{" "}
-                      is a premium theme. Unlock it once, or get every premium
-                      theme with Unlimited.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex flex-col sm:flex-row gap-3">
-                  <Button
+                <h3 className="mb-1.5 font-heading text-xl text-ink">
+                  This theme is premium.
+                </h3>
+                <p className="mb-[18px] text-sm text-stone">
+                  <span className="font-semibold text-ink">{themeData?.name}</span> unlocks for $
+                  {PREMIUM_THEME_PRICE.toFixed(2)}, or go Unlimited and never think about it again.
+                </p>
+                <div className="flex flex-col justify-center gap-2.5 sm:flex-row">
+                  <button
+                    type="button"
                     onClick={onUnlockTheme}
                     disabled={!onUnlockTheme}
-                    className="flex-1 h-12 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-medium transition-colors shadow-md"
+                    className="ed-btn ed-btn-coral"
                   >
                     Unlock for ${PREMIUM_THEME_PRICE.toFixed(2)}
-                  </Button>
-                  <a
-                    href="/pricing"
-                    className="flex-1 inline-flex items-center justify-center h-12 rounded-full border border-[#C9A96E]/50 text-[#8A6F35] hover:bg-[#C9A96E]/10 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
-                  >
+                  </button>
+                  <a href="/pricing" className="ed-btn ed-btn-line">
                     Go Unlimited
                   </a>
                 </div>
@@ -327,33 +295,14 @@ export default function PreviewPublish({
                 exit={{ opacity: 0, y: -8 }}
                 transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
               >
-                {/* Publish CTA — whileTap spring replaces CSS hover:scale */}
-                <motion.div
-                  whileTap={shouldReduce ? {} : { scale: 0.97 }}
-                  transition={springs.soft}
-                  className="w-full"
+                <button
+                  type="button"
+                  onClick={handlePublish}
+                  disabled={publishing}
+                  className="ed-btn ed-btn-coral ed-btn-block"
                 >
-                  <Button
-                    onClick={handlePublish}
-                    disabled={publishing}
-                    className="w-full h-14 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white text-base font-medium transition-colors shadow-lg pulse-glow"
-                  >
-                    {publishing ? (
-                      <span className="flex items-center gap-2">
-                        <motion.span
-                          animate={shouldReduce ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.7, 1] }}
-                          transition={{ repeat: Infinity, duration: durations.base }}
-                          style={{ display: "inline-flex" }}
-                        >
-                          ✨
-                        </motion.span>
-                        Publishing…
-                      </span>
-                    ) : (
-                      <>✨ Publish Your Surprise</>
-                    )}
-                  </Button>
-                </motion.div>
+                  {publishing ? "Publishing…" : "Publish your surprise"}
+                </button>
               </motion.div>
             )}
           </AnimatePresence>

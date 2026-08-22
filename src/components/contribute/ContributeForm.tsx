@@ -2,10 +2,19 @@
 
 import { useState } from "react";
 import imageCompression from "browser-image-compression";
-import { Loader2, ImagePlus, Heart, X } from "lucide-react";
+import Link from "next/link";
+import { Check, X } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { PHOTO_MAX_SIZE_MB, PHOTO_MAX_DIMENSION } from "@/lib/constants";
+import {
+  LABEL,
+  INPUT,
+  CC,
+  DROP,
+  DROP_P,
+  DROP_SMALL,
+  THUMB_X,
+} from "@/components/create/editorial";
 
 interface ContributeFormProps {
   slug: string;
@@ -20,7 +29,7 @@ const ERROR_COPY: Record<string, string> = {
   photo_rejected: "That photo didn't pass our content filter. Try another one.",
   bad_input: "Something looked off with your submission. Please check and retry.",
   bad_mime: "Use a JPEG, PNG, or WebP photo.",
-  too_large: "That photo is too large — try a smaller one.",
+  too_large: "That photo is too large. Try a smaller one.",
   upload_failed: "Couldn't upload the photo. Try again?",
 };
 
@@ -120,112 +129,107 @@ export function ContributeForm({ slug }: ContributeFormProps) {
         return;
       }
       if (json.dedup) {
-        toast.success("Looks like you've already added a memory — thanks!");
+        toast.success("Looks like you've already added a memory. Thanks!");
       }
       setDone(true);
     } catch {
-      toast.error("Network blip — please try again.");
+      toast.error("Network blip. Please try again.");
       setSubmitting(false);
     }
   }
 
   if (done) {
+    // Mockup `subContrib` thank-you state (L1509).
     return (
-      <div className="mt-8 bg-white rounded-2xl border border-[#D4CBC3]/40 shadow-[0_4px_24px_rgba(45,41,38,0.06)] p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center mx-auto mb-4 shadow-[0_4px_24px_rgba(196,104,109,0.3)]">
-          <Heart className="w-8 h-8 fill-white text-white" />
+      <div className="rounded-[var(--r-md)] border border-mist bg-paper p-8 text-center shadow-[var(--sh-card)]">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-coral">
+          <Check className="h-7 w-7 text-white" strokeWidth={1.8} />
         </div>
-        <h2 className="font-heading text-2xl text-[#2D2926] mb-2">
-          Memory saved.
-        </h2>
-        <p className="text-[#6B5E57] text-sm">
-          Thank you for being part of this surprise. Your note will show up
-          in the reveal.
+        <p className="font-heading text-[22px] italic leading-snug text-ink">
+          Thank you. Your message has been added.
         </p>
+        <p className="mt-3.5 text-sm text-stone">
+          The creator will review it before it goes live.
+        </p>
+        <Link href="/" className="ed-tlink mt-6 inline-block">
+          Create your own surprise →
+        </Link>
       </div>
     );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mt-8 bg-white rounded-2xl border border-[#D4CBC3]/40 shadow-[0_4px_24px_rgba(45,41,38,0.06)] p-6 space-y-5"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
+        <label htmlFor="contrib-name" className={LABEL}>
           Your name
         </label>
         <input
+          id="contrib-name"
           type="text"
           required
           maxLength={60}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
-          className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
+          placeholder="Aanya"
+          className={INPUT}
         />
       </div>
 
       <div>
-        <label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
-          Email <span className="text-[#6B5E57] font-normal">(optional)</span>
+        <label htmlFor="contrib-email" className={LABEL}>
+          Email (optional)
         </label>
         <input
+          id="contrib-email"
           type="email"
           maxLength={120}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="So they can thank you later"
-          className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
+          className={INPUT}
         />
       </div>
 
       <div>
-        <label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
-          A short note
+        <label htmlFor="contrib-message" className={LABEL}>
+          Your message
         </label>
         <textarea
+          id="contrib-message"
           maxLength={500}
           rows={4}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Say something sweet…"
-          className="w-full rounded-xl border border-[#D4CBC3] px-3 py-3 text-[#2D2926] bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors resize-none"
-          style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1.1rem" }}
+          placeholder="A memory, a wish, an inside joke."
+          className={`${INPUT} resize-none leading-relaxed`}
         />
-        <p className="text-right text-[10px] text-[#6B5E57] mt-1">
-          {message.length}/500
-        </p>
+        <div className={CC}>{message.length}/500</div>
       </div>
 
       <div>
-        <label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
-          Add a photo <span className="text-[#6B5E57] font-normal">(optional)</span>
-        </label>
+        <span className={LABEL}>Add a photo (optional)</span>
         {preview ? (
           <div className="relative inline-block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview}
               alt="Photo preview"
-              className="w-32 h-32 object-cover rounded-xl border border-[#D4CBC3]"
+              className="h-32 w-32 rounded-[var(--r-sm)] border border-mist object-cover"
             />
             <button
               type="button"
               onClick={clearPhoto}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#C4686D] text-white flex items-center justify-center shadow-md hover:bg-[#9B3D42] transition-colors"
+              className={THUMB_X}
               aria-label="Remove photo"
             >
-              <X className="w-3 h-3" />
+              <X className="h-3 w-3" />
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center gap-2 border-2 border-dashed border-[#D4CBC3] rounded-2xl p-6 cursor-pointer bg-[#FFF8F0] hover:border-[#C4686D]/60 transition-colors">
-            <ImagePlus className="w-8 h-8 text-[#C4686D]" />
-            <span className="text-[#2D2926] text-sm font-medium">
-              Tap to choose a photo
-            </span>
-            <span className="text-[#6B5E57] text-xs">JPEG, PNG, or WebP</span>
+          <label className={`${DROP} block`}>
+            <span className={`block ${DROP_P}`}>Tap to choose a photo</span>
+            <span className={`block ${DROP_SMALL}`}>JPEG, PNG or WebP</span>
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -236,21 +240,15 @@ export function ContributeForm({ slug }: ContributeFormProps) {
         )}
       </div>
 
-      <Button
+      <button
         type="submit"
         disabled={submitting}
-        className="w-full h-12 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-medium transition-all duration-300 shadow-md"
+        className="ed-btn ed-btn-coral ed-btn-block"
       >
-        {submitting ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Sending…
-          </>
-        ) : (
-          "Send memory ✨"
-        )}
-      </Button>
-      <p className="text-center text-xs text-[#6B5E57] opacity-70">
+        {submitting ? "Sending…" : "Submit"}
+      </button>
+
+      <p className="text-center text-[13px] text-stone">
         We never share your email. It only goes to the surprise&apos;s creator.
       </p>
     </form>

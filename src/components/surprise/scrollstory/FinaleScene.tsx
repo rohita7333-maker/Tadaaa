@@ -5,11 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { particleLayout } from "@/lib/scroll-story/seeded";
 import type { StoryConfig } from "@/lib/scroll-story/config";
 import { Reveal } from "./Reveal";
-import {
-  HANDWRITING_STACK,
-  SEAM_RSVP_TO_FINALE,
-  SERIF_STACK,
-} from "./shared";
+import { FINALE_NIGHT, SEAM_RSVP_TO_FINALE, SERIF_STACK } from "./shared";
 
 const STAR_COUNT = 40;
 const TICK_MS = 1000;
@@ -42,9 +38,13 @@ interface FinaleSceneProps {
 }
 
 /**
- * Scene 6 — night sky finale with a live countdown.
- * GRADIENT SEAM CONTRACT: first stop #9B3D42 (SEAM_RSVP_TO_FINALE) ===
- * RsvpScene's final stop.
+ * Scene 6 — the countdown under a night sky (`.s-fin` in the mockup: ink
+ * ground, sand `✦` stars, italic serif caption, bare tabular numerals, a
+ * closing serif line).
+ *
+ * GRADIENT SEAM CONTRACT: first stop #D45847 (SEAM_RSVP_TO_FINALE) ===
+ * RsvpScene's final stop; terminal stop #1A1A1A (FINALE_NIGHT). The coral
+ * flare burns down through documented coral→ink mixes into night.
  */
 export default function FinaleScene({ config }: FinaleSceneProps) {
   const reduced = useReducedMotion();
@@ -67,10 +67,10 @@ export default function FinaleScene({ config }: FinaleSceneProps) {
   }, [config.countdownTo]);
 
   const units: Array<{ label: string; value: string }> = [
-    { label: "days", value: remaining ? pad(remaining.days) : "00" },
-    { label: "hours", value: remaining ? pad(remaining.hours) : "00" },
-    { label: "mins", value: remaining ? pad(remaining.minutes) : "00" },
-    { label: "secs", value: remaining ? pad(remaining.seconds) : "00" },
+    { label: "Days", value: remaining ? pad(remaining.days) : "00" },
+    { label: "Hrs", value: remaining ? pad(remaining.hours) : "00" },
+    { label: "Min", value: remaining ? pad(remaining.minutes) : "00" },
+    { label: "Sec", value: remaining ? pad(remaining.seconds) : "00" },
   ];
 
   return (
@@ -78,11 +78,18 @@ export default function FinaleScene({ config }: FinaleSceneProps) {
       aria-label="The countdown"
       className="relative overflow-hidden px-6 py-32"
       style={{
-        background: `linear-gradient(180deg, ${SEAM_RSVP_TO_FINALE} 0%, #3E3330 26%, #231F1D 55%, #181513 100%)`,
+        background: `linear-gradient(180deg, ${SEAM_RSVP_TO_FINALE} 0%, #8A3F35 20%, #522C28 44%, #2B2020 70%, ${FINALE_NIGHT} 100%)`,
       }}
     >
       <style>{`
         @keyframes ss-dim-twinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.55; } }
+        /* Ambient motion is killed in CSS as well as JS. The JS flag
+           (useReducedMotion) cannot be known during SSR, so relying on it
+           alone leaves the first painted frame animating; this media query is
+           authoritative and needs no hydration branch. */
+        @media (prefers-reduced-motion: reduce) {
+          .ss-anim { animation: none !important; }
+        }
       `}</style>
 
       {/* Dim seeded stars */}
@@ -90,10 +97,11 @@ export default function FinaleScene({ config }: FinaleSceneProps) {
         {stars.map((p, i) => (
           <span
             key={i}
-            className="absolute h-0.5 w-0.5 rounded-full bg-cream"
+            className="ss-anim absolute h-0.5 w-0.5 rounded-full"
             style={{
               left: `${p.x}%`,
               top: `${p.y}%`,
+              backgroundColor: "var(--sand)",
               opacity: 0.3,
               animation: reduced
                 ? "none"
@@ -104,35 +112,45 @@ export default function FinaleScene({ config }: FinaleSceneProps) {
       </div>
 
       <Reveal className="relative z-10 mx-auto max-w-2xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold">
-          the countdown begins
+        <p
+          style={{
+            fontFamily: SERIF_STACK,
+            fontStyle: "italic",
+            fontSize: "17px",
+            color: "var(--sand)",
+          }}
+        >
+          The countdown
         </p>
 
         {config.countdownTo && (
           <div
             role="timer"
             aria-label={`Countdown to ${config.recipient}'s surprise`}
-            className="mx-auto mt-8 grid max-w-md grid-cols-4 gap-3"
+            className="mx-auto mt-6 flex max-w-md justify-center gap-3"
           >
             {units.map((unit) => (
-              <div
-                key={unit.label}
-                className="rounded-[18px] px-2 py-4"
-                style={{
-                  backgroundColor: "rgba(255, 248, 240, 0.07)",
-                  border: "1px solid rgba(201, 169, 110, 0.4)",
-                }}
-              >
+              <div key={unit.label} className="min-w-16">
                 <p
-                  className="text-3xl text-gold-light tabular-nums"
                   style={{
                     fontFamily: SERIF_STACK,
+                    fontSize: "clamp(32px, 8vw, 44px)",
+                    lineHeight: 1,
+                    color: "var(--sand)",
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
                   {unit.value}
                 </p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-cream/60">
+                {/* The mockup labels these in --stone; stone on ink measures
+                    1.9:1, so this ships sand dimmed to 75% (~5:1) instead. */}
+                <p
+                  className="mt-1.5 text-[10px] uppercase"
+                  style={{
+                    letterSpacing: "0.14em",
+                    color: "rgba(204,172,159,0.75)",
+                  }}
+                >
                   {unit.label}
                 </p>
               </div>
@@ -141,25 +159,17 @@ export default function FinaleScene({ config }: FinaleSceneProps) {
         )}
 
         <p
-          className="mt-14 text-cream"
+          className="mt-8"
           style={{
             fontFamily: SERIF_STACK,
-            fontWeight: 600,
-            fontSize: "clamp(40px, 9vw, 72px)",
-            lineHeight: 1.05,
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            fontSize: "clamp(26px, 6vw, 30px)",
+            lineHeight: 1.1,
+            color: "var(--paper)",
           }}
         >
-          Yaaay! 🎉
-        </p>
-        <p
-          className="mt-3 text-gold-light"
-          style={{ fontFamily: HANDWRITING_STACK, fontSize: "clamp(24px, 4vw, 32px)" }}
-        >
-          see you there
-        </p>
-
-        <p className="mt-20 text-xs text-cream/40">
-          made with TaDaaaa · © 2026
+          See you there.
         </p>
       </Reveal>
     </section>

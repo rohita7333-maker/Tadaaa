@@ -60,7 +60,7 @@ export default function AvatarUpload({
         {preview ? (
           <img src={preview} alt="Avatar" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center text-white text-xl font-bold">
+          <div className="w-full h-full bg-gradient-to-br from-coral to-coral-deep flex items-center justify-center text-white text-xl font-bold">
             {userInitial}
           </div>
         )}
@@ -73,8 +73,8 @@ export default function AvatarUpload({
         </div>
       </button>
       <div>
-        <p className="text-sm font-medium text-[#2D2926]">Profile photo</p>
-        <p className="text-xs text-[#6B5E57]">JPG, PNG, or WebP. Max 2MB.</p>
+        <p className="text-sm font-medium text-ink">Profile photo</p>
+        <p className="text-xs text-stone">JPG, PNG, or WebP. Max 2MB.</p>
       </div>
       <input
         ref={inputRef}

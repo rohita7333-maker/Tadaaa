@@ -7,10 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-dm-sans);
-  --font-heading: var(--font-bricolage);
-  --font-handwritten: var(--font-caveat);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--body);
+  --font-heading: var(--head);
+  --font-handwritten: var(--body);
+  --font-mono: ui-monospace, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -43,52 +43,106 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* SurpriseInvite brand colors */
-  --color-cream: #FFF8F0;
-  --color-cream-dark: #F5EDE3;
-  --color-rose: #C4686D;
-  --color-rose-light: #E8A5A8;
-  --color-rose-deep: #9B3D42;
-  --color-gold: #C9A96E;
-  --color-gold-light: #E8D5A8;
-  --color-charcoal: #2D2926;
-  --color-warm-gray: #6B5E57;
-  --color-light-gray: #D4CBC3;
+  /* Editorial primitives — Tailwind utilities: bg-paper, text-ink, border-mist… */
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-stone: var(--stone);
+  --color-pebble: var(--pebble);
+  --color-mist: var(--mist);
+  --color-coral: var(--coral);
+  --color-sand: var(--sand);
+  --color-kohlrabi: var(--kohlrabi);
+
+  /* Derived extension — utilities: text-coral-deep, bg-chip-coral-bg… */
+  --color-coral-deep: var(--coral-deep);
+  --color-coral-light: var(--coral-light);
+  --color-sand-light: var(--sand-light);
+  --color-sand-deep: var(--sand-deep);
+  --color-white: var(--white);
+  --color-chip-coral-bg: var(--chip-coral-bg);
+  --color-chip-coral-border: var(--chip-coral-border);
+  --color-chip-muted-text: var(--chip-muted-text);
+  --color-success: var(--success);
 }
 
 :root {
-  --background: #FFF8F0;
-  --foreground: #2D2926;
-  --card: #FFFFFF;
-  --card-foreground: #2D2926;
-  --popover: #FFFFFF;
-  --popover-foreground: #2D2926;
-  --primary: #C4686D;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F5EDE3;
-  --secondary-foreground: #2D2926;
-  --muted: #F5EDE3;
-  --muted-foreground: #6B5E57;
-  --accent: #C9A96E;
-  --accent-foreground: #2D2926;
-  --destructive: #C4686D;
-  --border: #D4CBC3;
-  --input: #D4CBC3;
-  --ring: #C4686D;
-  --radius: 0.75rem;
-  --sidebar: #FFF8F0;
-  --sidebar-foreground: #2D2926;
-  --sidebar-primary: #C4686D;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F5EDE3;
-  --sidebar-accent-foreground: #2D2926;
-  --sidebar-border: #D4CBC3;
-  --sidebar-ring: #C4686D;
+  /* ---- Editorial primitives — the only source of colour truth ---- */
+  --ink: #1A1A1A;
+  --paper: #FFFEFD;
+  --stone: #484848;
+  --pebble: #F5F0ED;
+  --mist: #E8E4E0;
+  --coral: #D45847;
+  --sand: #CCAC9F;
+  --kohlrabi: #994EA8;
 
-  /* Phase 1 modernization tokens — supporting tints */
-  --rose-glow: #F4D5D7;
-  --midnight: #1F1B19;
-  --cream-deep: #F0E5D8;
+  /* ---- Derived extension — primitives-tier, NOT aliases. Every value is a
+     documented mix/shade of the eight primitives above, so no alias anywhere
+     has to hold its own literal. Shared verbatim with mobile
+     (`tadaaaa/mobile/src/theme/tokens.ts` → `derived`).
+
+     --coral-deep is the AA-safe coral for small text. The mockup sanctions a
+     dark coral (`.btn-coral:hover{background:#c04a3a}`), but we ship #B8412F
+     instead because (a) mobile already shipped that exact value and (b) it
+     measures better on the legacy cream scroll-story ground: 5.20:1 vs 4.66:1.
+     It clears WCAG AA (4.5:1) on every ground we put it on — legacy cream
+     5.20:1, legacy cream-dark 4.72:1, pebble 4.84:1, paper 5.43:1. Exact hexes
+     and arithmetic live in src/lib/design-tokens.ts (`derived`), which cannot
+     name retired brand hexes here without tripping the retired-hex sweep. ---- */
+  --coral-deep: #B8412F;   /* coral shaded toward ink */
+  --coral-light: #E18A7D;  /* coral ~30% toward paper */
+  --sand-light: #E0CDC5;   /* sand ~40% toward paper */
+  --sand-deep: #B08D7E;    /* sand shaded toward ink */
+  --white: #FFFFFF;        /* absolute white, for text on coral fills */
+  --chip-coral-bg: #FBEDEB;      /* coral ~10% over paper */
+  --chip-coral-border: #F4D4D0;  /* coral ~25% over paper */
+  --chip-muted-text: #73635D;    /* sand shaded ~50% toward ink; 5.06:1 on pebble */
+  --success: #2C784C;            /* the mockup's success green (#2E7D4F) darkened for AA:
+                                    #2E7D4F measures 5.01:1 on paper but only 4.46:1 on
+                                    pebble; #2C784C is 5.35:1 on paper, 4.76:1 on pebble */
+
+  --grad-hero: linear-gradient(180deg, #FFFEFD 0%, #F5F0ED 100%);
+  --grad-dark: linear-gradient(180deg, #1A1A1A 0%, #2D2D2D 100%);
+
+  --sh: 0 1px 3px rgba(26, 26, 26, 0.08);
+  --sh-card: 0 4px 20px rgba(26, 26, 26, 0.06);
+  --sh-float: 0 8px 30px rgba(26, 26, 26, 0.10);
+
+  --head: Georgia, "Times New Roman", "Tiempos Headline", serif;
+  --body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-pill: 100px;
+
+  /* ---- shadcn semantics — every one derives from a primitive ---- */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--coral);
+  --primary-foreground: var(--white);
+  --secondary: var(--pebble);
+  --secondary-foreground: var(--ink);
+  --muted: var(--pebble);
+  --muted-foreground: var(--stone);
+  --accent: var(--sand);
+  --accent-foreground: var(--ink);
+  --destructive: var(--coral);
+  --border: var(--mist);
+  --input: var(--mist);
+  --ring: var(--coral);
+  --radius: 0.75rem;
+  --sidebar: var(--paper);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--coral);
+  --sidebar-primary-foreground: var(--white);
+  --sidebar-accent: var(--pebble);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--mist);
+  --sidebar-ring: var(--coral);
 
   /* P0 motion easing tokens — one "hand" across all surfaces */
   --ease-entrance: cubic-bezier(0.22, 1, 0.36, 1);
@@ -96,18 +150,41 @@
   --ease-spring-soft: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-spring-bouncy: cubic-bezier(0.4, 2, 0.3, 1);
 
-  /* Mockup geometry + gradient tokens (tadaaaa-app-animated_1.html / brief §3) */
+  /* Geometry retained by existing components */
   --r: 16px;
   --r-lg: 24px;
   --r-xl: 32px;
-  --sh: 0 8px 30px rgba(45, 41, 38, 0.08);
-  --sh-lg: 0 24px 60px rgba(45, 41, 38, 0.16);
-  --grad: linear-gradient(135deg, #C4686D 0%, #9B3D42 100%);
-  --grad-gold: linear-gradient(135deg, #E8D5A8 0%, #C9A96E 100%);
   /* Reveal/curtain choreography easings */
   --ease-curtain: cubic-bezier(0.77, 0, 0.18, 1);
   --ease-polaroid: cubic-bezier(0.2, 1.2, 0.3, 1);
 }
+
+/* @deprecated-aliases:start */
+/* Every alias below is deleted in P5. No independent values — each one
+   resolves to an editorial primitive. Do not add anything here. */
+@theme inline {
+  --color-cream: var(--paper);
+  --color-cream-dark: var(--pebble);
+  --color-rose: var(--coral);
+  --color-rose-light: var(--coral-light);
+  --color-rose-deep: var(--coral-deep);
+  --color-gold: var(--sand);
+  --color-gold-light: var(--sand-light);
+  --color-gold-deep: var(--sand-deep);
+  --color-charcoal: var(--ink);
+  --color-warm-gray: var(--stone);
+  --color-light-gray: var(--mist);
+}
+
+:root {
+  --rose-glow: var(--sand);
+  --midnight: var(--ink);
+  --cream-deep: var(--pebble);
+  --grad: linear-gradient(135deg, var(--coral) 0%, var(--coral) 100%);
+  --grad-gold: linear-gradient(135deg, var(--sand) 0%, var(--sand) 100%);
+  --sh-lg: var(--sh-float);
+}
+/* @deprecated-aliases:end */
 
 @layer base {
   html {
@@ -118,13 +195,23 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-family: var(--body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3 {
-    font-family: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;
-    font-weight: 800;
+  h1, h2, h3, h4 {
+    font-family: var(--head);
+    font-weight: 400;
     letter-spacing: -0.02em;
-    line-height: 1.02;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  p {
+    color: var(--stone);
+  }
+  :focus-visible {
+    outline: 2px solid var(--coral);
+    outline-offset: 2px;
   }
 }
 
@@ -161,10 +248,10 @@
 /* Pulse glow for CTA buttons */
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(196, 104, 109, 0.4);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--coral) 40%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 12px rgba(196, 104, 109, 0);
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--coral) 0%, transparent);
   }
 }
 
@@ -174,7 +261,7 @@
 
 /* Gradient text utility */
 .text-gradient {
-  background: linear-gradient(135deg, #C4686D 0%, #C9A96E 100%);
+  background: linear-gradient(135deg, var(--coral) 0%, var(--sand) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -182,7 +269,7 @@
 
 /* Warm noise overlay */
 .bg-warm-noise {
-  background-color: #FFF8F0;
+  background-color: var(--paper);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
@@ -239,8 +326,9 @@
 }
 
 .polaroid-caption {
-  font-family: var(--font-caveat), cursive;
-  color: #4a4a4a;
+  font-family: var(--body);
+  font-style: italic;
+  color: var(--stone);
   text-align: center;
   margin-top: 8px;
   font-size: 1.1rem;
@@ -275,9 +363,9 @@
 .animate-shimmer {
   background: linear-gradient(
     90deg,
-    rgba(212, 203, 195, 0.15) 0%,
-    rgba(244, 213, 215, 0.5) 50%,
-    rgba(212, 203, 195, 0.15) 100%
+    color-mix(in srgb, var(--mist) 15%, transparent) 0%,
+    color-mix(in srgb, var(--chip-coral-border) 50%, transparent) 50%,
+    color-mix(in srgb, var(--mist) 15%, transparent) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
@@ -295,11 +383,11 @@
 .shimmer-text-gradient {
   background: linear-gradient(
     90deg,
-    var(--rose-deep, #9B3D42) 0%,
-    var(--rose, #C4686D) 25%,
-    var(--gold, #C9A96E) 50%,
-    var(--rose, #C4686D) 75%,
-    var(--rose-deep, #9B3D42) 100%
+    var(--coral) 0%,
+    var(--sand) 25%,
+    var(--coral) 50%,
+    var(--sand) 75%,
+    var(--coral) 100%
   );
   background-size: 200% auto;
   background-clip: text;
@@ -318,7 +406,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-family: var(--body);
   font-weight: 600;
   font-size: 14.5px;
   border-radius: 30px;
@@ -331,24 +419,39 @@
 .btn-pri {
   background: var(--grad);
   color: #fff;
-  box-shadow: 0 10px 26px rgba(196, 104, 109, 0.34);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--coral) 34%, transparent);
 }
 .btn-pri:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(196, 104, 109, 0.44);
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--coral) 44%, transparent);
 }
 .btn-pri:active {
   transform: translateY(0);
 }
 .btn-sec {
   background: #fff;
-  color: var(--charcoal, #2D2926);
-  border: 1px solid var(--light-gray, #D4CBC3);
+  color: var(--ink);
+  border: 1px solid var(--mist);
   box-shadow: var(--sh);
 }
 .btn-sec:hover {
   transform: translateY(-2px);
   box-shadow: var(--sh-lg);
+}
+
+/* Eyebrow/label — mockup .label */
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
+
+/* Serif italic accent — mockup .serif-i */
+.serif-i {
+  font-family: var(--head);
+  font-style: italic;
 }
 
 /* Chip — mockup .chip */
@@ -361,8 +464,8 @@
   padding: 5px 12px;
   border-radius: 30px;
   background: #fff;
-  border: 1px solid var(--light-gray, #D4CBC3);
-  color: var(--warm-gray, #6B5E57);
+  border: 1px solid var(--mist);
+  color: var(--stone);
 }
 
 /* Ambient falling ribbons — mockup .ribbons */
@@ -445,7 +548,7 @@
   border-radius: 14px;
   padding: 9px;
   box-shadow: var(--sh);
-  border: 1px solid var(--light-gray, #D4CBC3);
+  border: 1px solid var(--mist);
   animation: floaty 6s ease-in-out infinite;
 }
 .occard:nth-child(1) { --rot: -6deg; transform: rotate(-6deg); animation-delay: 0s; z-index: 2; }
@@ -454,12 +557,13 @@
 .occard .stage { aspect-ratio: 1; border-radius: 10px; position: relative; overflow: hidden; }
 .occard .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bg-bday { background: radial-gradient(120% 100% at 50% 0%, #FFF1DA, #F7D9B0 70%, #E8A5A8); }
-.bg-mom { background: radial-gradient(120% 100% at 50% 10%, #FCE7E9, #F0B9BC 70%, #C4686D); }
-.bg-anniv { background: radial-gradient(120% 100% at 50% 0%, #FBF0D2, #EBD6A6 65%, #C9A96E); }
+.bg-mom { background: radial-gradient(120% 100% at 50% 10%, #FCE7E9, #F0B9BC 70%, var(--coral)); }
+.bg-anniv { background: radial-gradient(120% 100% at 50% 0%, #FBF0D2, #EBD6A6 65%, var(--sand)); }
 .occard .cap {
-  font-family: var(--font-caveat), cursive;
+  font-family: var(--body);
+  font-style: italic;
   font-size: 16px;
-  color: var(--charcoal, #2D2926);
+  color: var(--ink);
   text-align: center;
   margin-top: 6px;
 }
@@ -476,6 +580,565 @@
 .an-clink-l { transform-origin: 80% 90%; animation: clink 1.8s ease-in-out infinite; }
 .an-clink-r { transform-origin: 20% 90%; animation: clink2 1.8s ease-in-out infinite; }
 .an-confetti { animation: confetti-fall 2.2s ease-in infinite; }
+
+/* ============================================================
+   P2-A — App-chrome atoms (ported from tadaaaa-editorial.html)
+
+   Dashboard, activity and settings chrome. Every rule below mirrors a named
+   rule in the mockup; the line reference is on the block. Prefix is `ed-` so
+   nothing collides with the Phase 0 atoms above or with shadcn.
+
+   Colour comes only from the eight editorial primitives. No literal hexes.
+   ============================================================ */
+
+/* --- buttons — mockup .btn / .btn-coral / .btn-ink / .btn-line (L55-66) --- */
+.ed-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 30px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s,
+    border-color 0.18s;
+  min-height: 44px;
+  white-space: nowrap;
+}
+.ed-btn:active {
+  transform: scale(0.98);
+}
+/* Primary CTA.
+   Ground is --coral-deep, NOT --coral. White on --coral #D45847 measures
+   3.96:1, under the 4.5:1 AA floor for this button's 13px/600 label; white on
+   --coral-deep #B8412F measures 5.47:1 and clears it. The mockup uses plain
+   coral here and is wrong — the accessibility gate outranks it, same call as
+   the P0 --color-rose-deep fix. Pinned by ed-atoms.test.ts. */
+.ed-btn-coral {
+  background: var(--coral-deep);
+  color: var(--white);
+}
+.ed-btn-ink {
+  background: var(--ink);
+  color: var(--paper);
+}
+.ed-btn-line {
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  color: var(--ink);
+}
+.ed-btn-danger {
+  background: var(--paper);
+  border: 1px solid var(--coral-deep);
+  color: var(--coral-deep);
+}
+.ed-btn-sm {
+  padding: 9px 18px;
+  font-size: 11px;
+  min-height: 38px;
+}
+.ed-btn-block {
+  width: 100%;
+}
+.ed-btn:disabled,
+.ed-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ed-btn-coral:hover:not(:disabled) {
+    /* Base is already --coral-deep, so hover shades further toward ink rather
+       than repeating it. Derived from a primitive, no new literal. */
+    background: color-mix(in srgb, var(--coral-deep) 88%, var(--ink));
+    box-shadow: var(--sh-card);
+  }
+  .ed-btn-ink:hover:not(:disabled) {
+    background: #000;
+  }
+  .ed-btn-line:hover:not(:disabled),
+  .ed-btn-danger:hover:not(:disabled) {
+    border-color: var(--ink);
+  }
+  .ed-btn-danger:hover:not(:disabled) {
+    border-color: var(--coral-deep);
+    background: var(--chip-coral-bg);
+  }
+}
+
+/* --- text link — mockup .tlink / .tlink-ink (L67-71) --- */
+.ed-tlink {
+  color: var(--coral-deep);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
+.ed-tlink:hover {
+  text-decoration: underline;
+}
+
+/* --- page head — mockup .phead (L249-251) --- */
+.ed-phead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.ed-phead h1 {
+  font-size: 30px;
+}
+.ed-phead .ed-sub {
+  font-size: 14px;
+  color: var(--stone);
+  margin-top: 4px;
+}
+
+/* --- stat tiles — mockup .stats4 / .stat (L252-256) --- */
+.ed-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 30px;
+}
+.ed-stat {
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  border-radius: var(--r-md);
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  display: block;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ed-stat:hover {
+    border-color: var(--ink);
+  }
+}
+.ed-stat .ed-v {
+  font-family: var(--head);
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.ed-stat .ed-l {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stone);
+  margin-top: 2px;
+}
+
+/* --- resume strip — mockup .resume (L257-259) --- */
+.ed-resume {
+  border: 1px solid var(--sand);
+  background: var(--pebble);
+  border-radius: var(--r-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.ed-resume p {
+  flex: 1;
+  min-width: 200px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+/* --- two-column dashboard body — mockup .gr2 (L259) --- */
+.ed-gr2 {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .ed-gr2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- panel — mockup .panel (L260-261) --- */
+.ed-panel {
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  border-radius: var(--r-md);
+  padding: 22px;
+}
+.ed-panel > h2,
+.ed-panel > h3 {
+  font-size: 19px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+/* --- surprise row — mockup .srow (L262-267) --- */
+.ed-srow {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--mist);
+  /* Not in the mockup: our rows carry a full-width disclosure drawer, which
+     needs a wrap opportunity. No row without a drawer ever wraps. */
+  flex-wrap: wrap;
+}
+.ed-srow:last-child,
+.ed-srow-list > *:last-child .ed-srow {
+  border-bottom: none;
+}
+.ed-srow .ed-th {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  background: var(--pebble) center / cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ed-srow .ed-m {
+  flex: 1;
+  min-width: 0;
+}
+.ed-srow .ed-m h3,
+.ed-srow .ed-m h4 {
+  font-size: 17px;
+}
+.ed-srow .ed-meta {
+  font-size: 12px;
+  color: var(--stone);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 2px;
+}
+.ed-srow .ed-acts {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+/* Below ~520px the four 38px actions (170px) plus the 60px thumbnail leave the
+   title ~20px. Drop the actions onto their own line instead of letting the row
+   overflow: thumbnail + title on one line, actions beneath. */
+@media (max-width: 520px) {
+  .ed-srow .ed-m {
+    flex-basis: calc(100% - 74px);
+  }
+  .ed-srow .ed-acts {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* --- status pill — mockup .stat-pill (L268-270) --- */
+.ed-pill {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--mist);
+  color: var(--stone);
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.ed-pill-live {
+  border-color: var(--coral);
+  color: var(--coral-deep);
+}
+.ed-pill-scheduled {
+  border-color: var(--sand);
+  color: var(--chip-muted-text);
+}
+.ed-pill-expired,
+.ed-pill-archived,
+.ed-pill-draft {
+  border-color: var(--mist);
+  color: var(--stone);
+}
+
+/* --- icon button — mockup .ib (L271-274) --- */
+.ed-ib {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--mist);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  background: var(--paper);
+  flex-shrink: 0;
+  transition: border-color 0.15s, transform 0.16s ease;
+}
+.ed-ib:active {
+  transform: scale(0.96);
+}
+.ed-ib:disabled,
+.ed-ib[aria-disabled="true"] {
+  color: var(--sand-deep);
+  background: var(--pebble);
+  cursor: not-allowed;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ed-ib:not(:disabled):not([aria-disabled="true"]):hover {
+    border-color: var(--ink);
+  }
+}
+.ed-ib svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* --- activity feed item — mockup .feedi (L275-278) --- */
+.ed-feedi {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--mist);
+  font-size: 14px;
+  color: var(--ink);
+  width: 100%;
+  text-align: left;
+  align-items: flex-start;
+}
+.ed-feedi:last-child {
+  border-bottom: none;
+}
+.ed-feedi .ed-t {
+  color: var(--stone);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.ed-feedi .ed-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--coral);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+.ed-feedgroup {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stone);
+  margin: 12px 0 4px;
+}
+
+/* --- empty state — mockup .empty (L279) --- */
+.ed-empty {
+  text-align: center;
+  padding: 64px 20px;
+  color: var(--stone);
+  font-size: 15px;
+}
+
+/* --- filter chip — mockup .chip (L283) --- */
+.ed-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--mist);
+  background: var(--paper);
+  color: var(--stone);
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 38px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s,
+    transform 0.16s ease;
+}
+.ed-chip:active {
+  transform: scale(0.97);
+}
+.ed-chip-on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ed-chip:not(.ed-chip-on):hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+}
+.ed-chiprow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex-wrap: wrap;
+  padding-bottom: 4px;
+  margin-bottom: 18px;
+}
+
+/* --- settings row — mockup .setrow (L406-410) --- */
+.ed-setrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--mist);
+  flex-wrap: wrap;
+}
+.ed-setrow:last-child {
+  border-bottom: none;
+}
+.ed-setrow .ed-m {
+  flex: 1;
+  min-width: 180px;
+}
+.ed-setrow .ed-m h2,
+.ed-setrow .ed-m h3 {
+  font-size: 15px;
+  font-family: var(--body);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.ed-setrow .ed-m p {
+  font-size: 13px;
+}
+.ed-setrow-danger .ed-m h2,
+.ed-setrow-danger .ed-m h3 {
+  color: var(--coral-deep);
+}
+
+/* --- toggle — mockup .sw (L343-348) --- */
+.ed-sw {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.ed-sw input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+.ed-sw .ed-tr {
+  position: absolute;
+  inset: 0;
+  background: var(--mist);
+  border-radius: 13px;
+  transition: background 0.18s;
+}
+.ed-sw .ed-tr::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: var(--sh);
+  transition: left 0.18s ease;
+}
+.ed-sw input:checked + .ed-tr {
+  background: var(--ink);
+}
+.ed-sw input:checked + .ed-tr::after {
+  left: 23px;
+}
+.ed-sw input:focus-visible + .ed-tr {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+
+/* --- avatar — mockup .avatar (L48) --- */
+.ed-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* --- bottom app bar — mockup .appbar (L49-53) ---
+   Fixed, paper, mist top border, 44pt targets, 10px uppercase labels, coral
+   2px underline on the active tab, safe-area padding. Mobile only: the top
+   nav cluster is hidden under `sm`, this replaces it. */
+.ed-appbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--paper);
+  border-top: 1px solid var(--mist);
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  z-index: 40;
+}
+.ed-appbar a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stone);
+  padding: 6px 10px;
+  min-width: 44px;
+  min-height: 44px;
+  transition: color 0.15s, transform 0.16s ease;
+}
+.ed-appbar a:active {
+  transform: scale(0.96);
+}
+.ed-appbar a[aria-current="page"] {
+  color: var(--ink);
+}
+.ed-appbar a[aria-current="page"]::after {
+  content: "";
+  width: 16px;
+  height: 2px;
+  background: var(--coral);
+  margin-top: 2px;
+}
+.ed-appbar svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+}
+/* Reserve the bar's height so the last row of content is never covered. */
+.ed-appbar-gutter {
+  height: calc(62px + env(safe-area-inset-bottom));
+}
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {

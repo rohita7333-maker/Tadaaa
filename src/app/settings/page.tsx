@@ -5,7 +5,7 @@ import DeleteAccountButton from "./DeleteAccountButton";
 import AvatarUpload from "./AvatarUpload";
 import Link from "next/link";
 import DashboardNavServer from "@/components/dashboard/DashboardNavServer";
-import { User, Bell, ShieldAlert, Crown, Lock, Download, Sparkles } from "lucide-react";
+import { signOut } from "@/actions/auth";
 import ChangePasswordForm from "./ChangePasswordForm";
 import { SavePreferencesButton, SettingsSection, ToggleRow } from "./SettingsAnimated";
 
@@ -29,12 +29,6 @@ export default async function SettingsPage() {
   const tier = profile?.subscription_tier ?? "free";
   const tierLabel =
     tier === "unlimited" ? "Unlimited" : tier === "plus" ? "Plus" : "Free";
-  const tierColor =
-    tier === "unlimited"
-      ? "bg-amber-50 text-amber-800 border border-amber-200"
-      : tier === "plus"
-      ? "bg-rose-50 text-rose-700 border border-rose-200"
-      : "bg-[#F5EDE3] text-[#6B5E57] border border-[#D4CBC3]";
 
   const notifItems = [
     { name: "notify_on_view", label: "Someone views your surprise", sub: "Get notified when your link gets opened", defaultChecked: profile?.notify_on_view ?? false },
@@ -43,103 +37,56 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0]">
+    <div className="min-h-screen bg-paper">
       {/* Same authenticated bar as every other product surface — it carries the
-          logo and Dashboard link, so the page needs no separate back link. */}
+          logo, the product nav and the mobile app bar, so the page needs no
+          separate back link. */}
       <DashboardNavServer activeRoute="settings" />
-      <div className="relative overflow-hidden">
-      {/* Decorative bloom */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full opacity-40 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(closest-side, #F8B4B8 0%, #FFE7D9 60%, transparent 100%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-40 -left-24 w-[380px] h-[380px] rounded-full opacity-30 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(closest-side, #FFC97A 0%, #FFE9C2 60%, transparent 100%)",
-        }}
-      />
 
-      <div className="relative max-w-xl mx-auto px-6 py-10">
-        {/* Hero */}
+      {/* Mockup `.wrap.wrap-n` — a single 560px column of `.setrow`s under one
+          headline. No section cards, no decorative blooms: the mockup's
+          settings screen is a plain hairline-separated list. */}
+      <div className="max-w-[560px] mx-auto px-5 sm:px-6 pt-8 pb-16">
         <SettingsSection index={0}>
-          <div className="mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 border border-[#D4CBC3]/60 shadow-sm backdrop-blur-sm mb-4">
-              <Sparkles className="w-3.5 h-3.5 text-[#C4686D]" />
-              <span className="text-xs font-medium text-[#6B5E57]">Your account</span>
-            </div>
-            <h1 className="font-heading text-4xl sm:text-5xl text-[#2D2926] tracking-tight">
-              Settings
-            </h1>
-            <p className="text-[#6B5E57] mt-2 text-sm leading-relaxed max-w-md">
-              Make TaDaaaa feel like you. Tweak your profile, notifications, and privacy
-              from one calm place.
-            </p>
+          <div className="ed-phead">
+            <h1>Settings</h1>
           </div>
         </SettingsSection>
 
-        {/* Account */}
-        <SettingsSection
-          index={1}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
-        >
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
-              <User className="w-4 h-4 text-[#C4686D]" />
-            </div>
-            <h2 className="font-heading text-lg text-[#2D2926]">Account</h2>
+        <SettingsSection index={1}>
+          <div className="ed-setrow">
+            <AvatarUpload currentUrl={avatarUrl} userInitial={initial} />
           </div>
-          <div className="space-y-4">
-            <div className="bg-[#FFF8F0] rounded-2xl p-4">
-              <AvatarUpload currentUrl={avatarUrl} userInitial={initial} />
+
+          <div className="ed-setrow">
+            <div className="ed-m">
+              <h2>Email</h2>
+              <p>{user.email}</p>
             </div>
-            <div className="bg-[#FFF8F0] rounded-2xl p-4">
-              <p className="text-xs text-[#6B5E57] uppercase tracking-wider mb-1 font-medium">Email</p>
-              <p className="text-[#2D2926] font-medium text-sm">{user.email}</p>
+          </div>
+
+          <div className="ed-setrow">
+            <div className="ed-m">
+              <h2>Current plan: {tierLabel}</h2>
+              <p>
+                {tier === "free"
+                  ? "Upgrade anytime."
+                  : profile?.subscription_expires_at
+                  ? `Renews ${new Date(profile.subscription_expires_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`
+                  : "Thanks for supporting TaDaaaa."}
+              </p>
             </div>
-            <div className="bg-[#FFF8F0] rounded-2xl p-4">
-              <p className="text-xs text-[#6B5E57] uppercase tracking-wider mb-2 font-medium">Plan</p>
-              <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${tierColor}`}>
-                  {tier !== "free" && <Crown className="w-3 h-3" />}
-                  {tierLabel}
-                </span>
-                {tier === "free" && (
-                  <Link href="/pricing" className="text-xs text-[#C4686D] hover:underline font-semibold">
-                    Upgrade →
-                  </Link>
-                )}
-              </div>
-            </div>
-            {profile?.subscription_expires_at && (
-              <div className="bg-[#FFF8F0] rounded-2xl p-4">
-                <p className="text-xs text-[#6B5E57] uppercase tracking-wider mb-1 font-medium">Renews</p>
-                <p className="text-[#2D2926] text-sm font-medium">
-                  {new Date(profile.subscription_expires_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                </p>
-              </div>
+            {tier === "free" && (
+              <Link href="/pricing" className="ed-btn ed-btn-ink ed-btn-sm">
+                Upgrade
+              </Link>
             )}
           </div>
         </SettingsSection>
 
-        {/* Notifications */}
-        <SettingsSection
-          index={2}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
-        >
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
-              <Bell className="w-4 h-4 text-[#C4686D]" />
-            </div>
-            <h2 className="font-heading text-lg text-[#2D2926]">Notifications</h2>
-          </div>
-          <form action={updateNotifications} className="space-y-1.5">
+        {/* Notifications — each row is a `.setrow` with a `.sw` switch */}
+        <SettingsSection index={2}>
+          <form action={updateNotifications}>
             {notifItems.map((item) => (
               <ToggleRow
                 key={item.name}
@@ -153,59 +100,43 @@ export default async function SettingsPage() {
           </form>
         </SettingsSection>
 
-        {/* Security */}
-        <SettingsSection
-          index={3}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
-        >
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
-              <Lock className="w-4 h-4 text-[#C4686D]" />
+        <SettingsSection index={3}>
+          <div className="ed-setrow !block">
+            <div className="ed-m mb-4">
+              <h2>Password</h2>
+              <p>Change the password you sign in with.</p>
             </div>
-            <h2 className="font-heading text-lg text-[#2D2926]">Security</h2>
+            <ChangePasswordForm />
           </div>
-          <ChangePasswordForm />
         </SettingsSection>
 
-        {/* Your Data */}
-        <SettingsSection
-          index={4}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
-        >
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
-              <Download className="w-4 h-4 text-[#C4686D]" />
+        <SettingsSection index={4}>
+          <div className="ed-setrow">
+            <div className="ed-m">
+              <h2>Download your data</h2>
+              <p>Everything we store about you, in one JSON file.</p>
             </div>
-            <h2 className="font-heading text-lg text-[#2D2926]">Your Data</h2>
+            <Link href="/settings/data" className="ed-btn ed-btn-line ed-btn-sm">
+              Export
+            </Link>
           </div>
-          <p className="text-sm text-[#6B5E57] mb-4 leading-relaxed">
-            Download a JSON copy of everything we store about you.
-          </p>
-          <Link
-            href="/settings/data"
-            className="inline-flex items-center gap-1.5 text-sm text-[#C4686D] hover:underline font-semibold"
-          >
-            Export my data →
-          </Link>
+
+          <div className="ed-setrow ed-setrow-danger">
+            <div className="ed-m">
+              <h2>Delete account</h2>
+              <p>Permanent. Every surprise and message goes with it.</p>
+            </div>
+            <DeleteAccountButton />
+          </div>
         </SettingsSection>
 
-        {/* Danger zone */}
-        <SettingsSection
-          index={5}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-red-100"
-        >
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
-              <ShieldAlert className="w-4 h-4 text-red-500" />
-            </div>
-            <h2 className="font-heading text-lg text-red-600">Danger zone</h2>
-          </div>
-          <p className="text-sm text-[#6B5E57] mb-5 leading-relaxed">
-            Permanently delete your account and all surprises. This cannot be undone.
-          </p>
-          <DeleteAccountButton />
-        </SettingsSection>
-      </div>
+        <form action={signOut} className="mt-6">
+          <button type="submit" className="ed-tlink">
+            Sign out
+          </button>
+        </form>
+
+        <div className="ed-appbar-gutter sm:hidden" aria-hidden="true" />
       </div>
     </div>
   );

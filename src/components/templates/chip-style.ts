@@ -1,9 +1,13 @@
 /** Shared toggle-chip classNames — used by every filter rail control
- * (occasion, price, style) so they read as one consistent facet group. */
+ * (occasion, price, style) so they read as one consistent facet group.
+ *
+ * Editorial layer: the shipped `.ed-chip` / `.ed-chip-on` atoms carry the whole
+ * look (pill, mist border, ink-on-active, hover + :active states). The focus
+ * ring is the global `:focus-visible` coral outline in globals.css — no
+ * per-component ring. */
 export function chipClassName(isActive: boolean): string {
-  return `rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0] ${
-    isActive
-      ? "bg-[#2D2926] text-white"
-      : "border border-[#D4CBC3]/60 bg-white text-[#6B5E57] hover:border-[#C4686D]/60 hover:text-[#2D2926]"
-  }`;
+  return isActive ? "ed-chip ed-chip-on" : "ed-chip";
 }
+
+/** Wrapper for a row of chips — mockup `.chips` (tadaaaa-editorial.html:282). */
+export const CHIP_ROW_CLASS = "ed-chiprow !mb-0";

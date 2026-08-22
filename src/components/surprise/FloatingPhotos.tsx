@@ -201,9 +201,9 @@ export default function FloatingPhotos({ photos, screenIndex }: FloatingPhotosPr
               {caption ? (
                 <div
                   style={{
-                    fontFamily: "var(--font-caveat, cursive)",
+                    fontFamily: "var(--body)",
                     fontSize: photos.length <= 4 ? "14px" : "11px",
-                    color: "#6B5E57",
+                    color: "var(--stone)",
                     textAlign: "center",
                     marginTop: "6px",
                     overflow: "hidden",

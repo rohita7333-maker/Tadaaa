@@ -5,10 +5,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Heart, Loader2, ArrowLeft, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  AUTH_CARD,
+  BTN_INK,
+  FIELD_INPUT,
+  FIELD_INPUT_ERROR,
+  FIELD_LABEL,
+  FIELD_MSG,
+  TLINK,
+} from "@/components/auth/AuthForm";
 import { sendPasswordReset } from "@/actions/auth";
 import { toast } from "sonner";
 
@@ -45,81 +50,61 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FFF8F0] px-6 py-12">
-      {/* Logo */}
-      <Link href="/" className="flex items-center gap-2 mb-10">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center">
-          <Heart className="w-4 h-4 fill-white text-white" />
-        </div>
-        <span className="font-heading text-xl text-[#2D2926]">TaDaaaa</span>
+    <div className="min-h-screen bg-paper flex flex-col items-center px-6 py-14">
+      <Link href="/" className="font-heading text-xl text-ink mb-10">
+        TaDaaaa<span className="text-coral">.</span>
       </Link>
 
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-[0_4px_24px_rgba(45,41,38,0.08)] border border-[#D4CBC3]/30 p-8">
+      <div className={AUTH_CARD}>
         {sent ? (
-          /* Success state */
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FFF0E8] to-[#F5EDE3] flex items-center justify-center mx-auto">
-              <Mail className="w-8 h-8 text-[#C4686D]" />
-            </div>
-            <h1 className="font-heading text-2xl text-[#2D2926]">Check your email</h1>
-            <p className="text-[#6B5E57] text-sm leading-relaxed">
-              We sent a reset link to{" "}
-              <span className="font-semibold text-[#2D2926]">{getValues("email")}</span>.
-              It expires in 1 hour.
+          <>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-stone">
+              Reset link sent
             </p>
-            <Link
-              href="/auth/signin"
-              className="inline-flex items-center gap-2 text-sm text-[#C4686D] hover:underline font-medium mt-2"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Back to sign in
+            <h1 className="text-[26px] mt-1 mb-1">Check your email</h1>
+            <p className="text-sm mb-[26px]">
+              We sent a reset link to{" "}
+              <span className="text-ink font-semibold">{getValues("email")}</span>.
+              It expires in an hour.
+            </p>
+            <Link href="/auth/signin" className={TLINK}>
+              ← Back to sign in
             </Link>
-          </div>
+          </>
         ) : (
-          /* Form state */
-          <div className="space-y-6">
-            <div>
-              <h1 className="font-heading text-2xl text-[#2D2926]">Forgot password?</h1>
-              <p className="text-[#6B5E57] text-sm mt-1.5">
-                Enter your email and we&apos;ll send a reset link.
-              </p>
-            </div>
+          <>
+            <h1 className="text-[26px] mb-1">Forgot password?</h1>
+            <p className="text-sm mb-[26px]">
+              Enter your email and we&apos;ll send a reset link.
+            </p>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-[#2D2926] text-sm font-medium">
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="mb-4">
+                <label htmlFor="email" className={FIELD_LABEL}>
                   Email
-                </Label>
-                <Input
+                </label>
+                <input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="you@example.com"
-                  className="h-12 rounded-2xl border-[#D4CBC3] bg-white focus-visible:ring-[#C4686D] focus-visible:border-[#C4686D] transition-colors"
+                  className={`${FIELD_INPUT} ${errors.email ? FIELD_INPUT_ERROR : ""}`}
                   {...register("email")}
                 />
-                {errors.email && (
-                  <p className="text-[#C4686D] text-xs">{errors.email.message}</p>
-                )}
+                {errors.email && <p className={FIELD_MSG}>{errors.email.message}</p>}
               </div>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-semibold transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/25 mt-2"
-              >
-                {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                Send reset link
-              </Button>
+              <button type="submit" disabled={loading} className={BTN_INK}>
+                {loading ? "Sending…" : "Send reset link"}
+              </button>
             </form>
 
-            <Link
-              href="/auth/signin"
-              className="flex items-center justify-center gap-2 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Back to sign in
-            </Link>
-          </div>
+            <p className="mt-3.5 text-[13px] text-center text-stone">
+              <Link href="/auth/signin" className={TLINK}>
+                ← Back to sign in
+              </Link>
+            </p>
+          </>
         )}
       </div>
     </div>

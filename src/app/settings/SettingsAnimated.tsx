@@ -42,38 +42,28 @@ interface ToggleProps {
 }
 
 /**
- * Tailwind-only checkbox-as-toggle. Visible thumb slides via `peer-checked:`.
- * Native checkbox stays in the form for the existing server-action handler.
+ * The mockup's notification row: `.setrow` carrying a `.sw` switch
+ * (tandaaaa-editorial.html:406-410 and 343-348). The native checkbox stays in
+ * the form so the existing server action keeps working unchanged; the visible
+ * track and thumb are the checkbox's own sibling, driven by `:checked`.
  */
 export function ToggleRow({ name, defaultChecked, label, sub }: ToggleProps) {
   return (
-    <label className="flex items-start justify-between gap-4 cursor-pointer p-4 rounded-2xl hover:bg-[#FFF8F0] transition-colors group select-none">
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-[#2D2926] font-medium">{label}</p>
-        <p className="text-xs text-[#6B5E57] mt-0.5">{sub}</p>
+    <div className="ed-setrow">
+      <div className="ed-m">
+        <h3>{label}</h3>
+        <p>{sub}</p>
       </div>
-      <div className="flex-shrink-0 pt-0.5 relative w-11 h-6">
+      <label className="ed-sw">
         <input
           type="checkbox"
           name={name}
           defaultChecked={defaultChecked}
-          className="sr-only peer"
           aria-label={label}
         />
-        {/* Track — peer-checked changes bg color */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 rounded-full bg-[#D4CBC3] peer-checked:bg-[#C4686D] peer-focus-visible:ring-2 peer-focus-visible:ring-[#C4686D]/40 transition-colors duration-300"
-        />
-        {/* Thumb — peer sibling of checkbox, slides on peer-checked.
-            Spring micro-bounce on tap via active: scale (CSS-driven to avoid
-            wiring framer-motion to a hidden checkbox). */}
-        <span
-          aria-hidden="true"
-          className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 will-change-transform peer-checked:translate-x-5 peer-active:scale-90 motion-reduce:peer-active:scale-100"
-        />
-      </div>
-    </label>
+        <span className="ed-tr" aria-hidden="true" />
+      </label>
+    </div>
   );
 }
 
@@ -108,7 +98,7 @@ export function SavePreferencesButton() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-4 w-full h-11 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/20 disabled:opacity-80 relative overflow-hidden"
+      className="ed-btn ed-btn-ink ed-btn-sm ed-btn-block mt-5 relative overflow-hidden"
     >
       <AnimatePresence mode="wait" initial={false}>
         {justSaved ? (

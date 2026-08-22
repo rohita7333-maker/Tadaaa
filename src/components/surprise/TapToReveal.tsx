@@ -9,6 +9,7 @@ import RSVPButton from "./RSVPButton";
 import QuestionScreen from "./QuestionScreen";
 import CelebrationOverlay from "./CelebrationOverlay";
 import VideoPlayer from "./VideoPlayer";
+import RevealChrome from "./RevealChrome";
 import { playSound } from "@/lib/sounds";
 import { easings, durations, springs, makeReducedMotionTransition } from "@/lib/motion";
 
@@ -21,6 +22,8 @@ interface TapToRevealProps {
   inviteId?: string;
   enableDodge?: boolean;
   videoUrl?: string | null;
+  /** Mirrors `from-invite.ts`: `is_paid ? "paid" : "free"`. Gates the watermark. */
+  tier?: "free" | "paid";
   /**
    * Message-only contributions from collaborative invites (Task B2).
    * Rendered after the polaroid stack as signed letters. Photo-bearing
@@ -32,74 +35,31 @@ interface TapToRevealProps {
 
 type Stage = "landing" | "video" | "photos" | "questions" | "celebrate" | "message" | "cta";
 
-function FloatingParticles({
-  type,
-  shouldReduce,
-}: {
-  type: Theme["particleType"];
-  shouldReduce: boolean | null | undefined;
-}) {
-  const particles = Array.from({ length: 12 });
-  const icons: Record<Theme["particleType"], string> = {
-    hearts: "❤️",
-    sparkles: "✨",
-    confetti: "🎊",
-    petals: "🌸",
-    stars: "⭐",
-  };
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {particles.map((_, i) => (
-        <motion.span
-          key={i}
-          className="absolute text-lg select-none"
-          style={{
-            left: `${5 + (i * 8) % 90}%`,
-            top: `${10 + (i * 13) % 80}%`,
-          }}
-          // Reduced-motion: particles visible but fully static (no vestibular stimulus)
-          animate={shouldReduce ? {} : {
-            y: [-10, 10, -10],
-            x: [-5, 5, -5],
-            rotate: [0, 20, -20, 0],
-            opacity: [0.4, 0.8, 0.4],
-          }}
-          transition={shouldReduce ? {} : {
-            duration: durations.ambient + (i % 3) * durations.quick,
-            repeat: Infinity,
-            delay: i * durations.quick,
-            ease: "easeInOut",
-          }}
-        >
-          {icons[type]}
-        </motion.span>
-      ))}
-    </div>
-  );
-}
-
-export default function TapToReveal({ theme, photos, title, message, questions = [], inviteId = "", enableDodge = true, videoUrl, contributorNotes = [] }: TapToRevealProps) {
+/**
+ * Tap reveal — mockup `bTap` (L1375) and `.tap` / `.giftimg` / `.tt` / `.rn`
+ * (L491-499). Full-bleed ink ground, a breathing 4:5 theme card, a serif
+ * "Tap to reveal", and an uppercase sand kicker. No emoji: the editorial
+ * identity bans emoji-as-content, so the mockup's photographic card stands in
+ * for the old gift glyph and the ambient emoji field is gone.
+ */
+export default function TapToReveal({ theme, photos, title, message, questions = [], inviteId = "", enableDodge = true, videoUrl, tier = "free", contributorNotes = [] }: TapToRevealProps) {
   const [stage, setStage] = useState<Stage>("landing");
   const shouldReduce = useReducedMotion();
 
-  const revealEmoji =
-    theme.revealIcon === "envelope"
-      ? "✉️"
-      : theme.revealIcon === "gift"
-      ? "🎁"
-      : theme.revealIcon === "heart"
-      ? "❤️"
-      : theme.revealIcon === "star"
-      ? "⭐"
-      : "🎈";
+  /** Skip scenes with nothing in them: a photo grid with no photos reads as
+   *  broken, and the mockup simply omits `.s-photos` when there are none. */
+  function nextAfterOpen(): Stage {
+    if (videoUrl) return "video";
+    if (photos.length > 0) return "photos";
+    return questions.length > 0 ? "questions" : "message";
+  }
 
   function handleTap() {
     playSound("reveal");
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate(50);
     }
-    setStage(videoUrl ? "video" : "photos");
+    setStage(nextAfterOpen());
   }
 
   function handleSettleVibrate() {
@@ -113,12 +73,14 @@ export default function TapToReveal({ theme, photos, title, message, questions =
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
+      {/* Mockup `chrome()` — the RSVP scene carries its own closing rail. */}
+      <RevealChrome tier={tier} showWatermark={stage !== "cta"} />
       <AnimatePresence mode="wait">
         {stage === "landing" && (
           <motion.div
             key="landing"
-            className="absolute inset-0 flex flex-col items-center justify-center"
-            style={{ background: theme.colors.background }}
+            // Mockup `.rr` + `.tap`: ink ground, centred column, 40px/28px pad.
+            className="absolute inset-0 flex flex-col items-center justify-center bg-ink px-7 py-10 text-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             // Unwrap exit: lid lifts up and away, revealing what's beneath
@@ -128,78 +90,55 @@ export default function TapToReveal({ theme, photos, title, message, questions =
             }
             transition={makeReducedMotionTransition(shouldReduce, { ease: easings.entrance, duration: durations.base })}
           >
-            <FloatingParticles type={theme.particleType} shouldReduce={shouldReduce} />
+            {/* Mockup `.giftimg` — 4:5 theme card, `brth` 3s breathing loop. */}
+            <motion.button
+              type="button"
+              onClick={handleTap}
+              aria-label="Tap to reveal"
+              className="block w-[min(280px,72vw)] cursor-pointer overflow-hidden rounded-[var(--r-md)] shadow-[var(--sh-float)] focus-visible:outline-2 focus-visible:outline-coral focus-visible:outline-offset-4"
+              style={{ aspectRatio: "4 / 5", background: theme.colors.background }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={shouldReduce
+                ? { opacity: 1, scale: 1 }
+                : { opacity: 1, scale: [1, 1.03, 1] }
+              }
+              transition={shouldReduce
+                ? rmInstant
+                : {
+                    scale: { duration: durations.ambient, repeat: Infinity, ease: "easeInOut" },
+                    opacity: { duration: durations.base },
+                  }
+              }
+              whileTap={{ scale: shouldReduce ? 1 : 0.97 }}
+            />
 
-            <div className="relative z-10 text-center px-8">
-              <motion.p
-                className="text-sm font-medium mb-8 opacity-70"
-                style={{ color: theme.colors.text }}
-                initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
-                animate={{ opacity: 0.7, y: 0 }}
-                transition={makeReducedMotionTransition(shouldReduce, {
-                  ease: easings.entrance,
-                  duration: durations.base,
-                  delay: durations.quick,
-                })}
-              >
-                Someone made this for you ✨
-              </motion.p>
+            {/* Mockup `.tt` */}
+            <motion.p
+              className="mt-[26px] font-heading text-2xl text-white"
+              initial={{ opacity: 0, y: shouldReduce ? 0 : 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={makeReducedMotionTransition(shouldReduce, {
+                ease: easings.entrance,
+                duration: durations.base,
+                delay: durations.quick,
+              })}
+            >
+              Tap to reveal
+            </motion.p>
 
-              <motion.button
-                onClick={handleTap}
-                className="text-8xl mb-8 block select-none cursor-pointer"
-                // Entrance: pops in from nothing
-                initial={{ scale: 0, rotate: -10, opacity: 0 }}
-                // Ambient loop — skip entirely when reduced (settle at resting state)
-                animate={shouldReduce
-                  ? { scale: 1, rotate: 0, opacity: 1 }
-                  : { scale: [1, 1.08, 1], rotate: [0, -3, 3, 0], opacity: 1 }
-                }
-                transition={shouldReduce
-                  ? rmInstant
-                  : {
-                      scale: { duration: durations.ambient, repeat: Infinity },
-                      rotate: { duration: durations.ambient * 1.2, repeat: Infinity },
-                      opacity: { duration: durations.base, delay: durations.base },
-                      delay: durations.base,
-                    }
-                }
-                // Weighted tap: resistance feel before the gift opens
-                whileTap={{ scale: shouldReduce ? 0.96 : 0.88, rotate: shouldReduce ? 0 : -5 }}
-              >
-                {revealEmoji}
-              </motion.button>
-
-              <motion.h1
-                className="font-heading text-3xl mb-3"
-                style={{ color: theme.colors.text }}
-                initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={makeReducedMotionTransition(shouldReduce, {
-                  ease: easings.entrance,
-                  duration: durations.base,
-                  delay: durations.slow,
-                })}
-              >
-                {title}
-              </motion.h1>
-
-              <motion.button
-                onClick={handleTap}
-                className="mt-6 text-white text-sm font-medium px-8 py-3 rounded-full pulse-glow"
-                style={{ background: theme.colors.accent }}
-                initial={{ opacity: 0, y: shouldReduce ? 0 : 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={makeReducedMotionTransition(shouldReduce, {
-                  ease: easings.entrance,
-                  duration: durations.base,
-                  delay: durations.slow + durations.quick,
-                })}
-                whileTap={{ scale: shouldReduce ? 0.96 : 0.95 }}
-              >
-                Tap to Open
-              </motion.button>
-            </div>
+            {/* Mockup `.rn` */}
+            <motion.p
+              className="mt-2 text-[13px] uppercase tracking-[0.16em] text-sand"
+              initial={{ opacity: 0, y: shouldReduce ? 0 : 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={makeReducedMotionTransition(shouldReduce, {
+                ease: easings.entrance,
+                duration: durations.base,
+                delay: durations.base,
+              })}
+            >
+              For {title}
+            </motion.p>
           </motion.div>
         )}
 

@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { MAX_MESSAGE_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 import EmojiPicker from "./EmojiPicker";
+import { LABEL, INPUT, INPUT_ERR, FMSG, CC, WIZ_H2, WIZ_SUB } from "./editorial";
 
 interface MessageEditorProps {
   title: string;
@@ -35,6 +36,11 @@ function insertAtCaret(
   });
 }
 
+/**
+ * Wizard step 2 heart — mockup `w2` (L1152). Label-above-field `.field`
+ * anatomy with an uppercase 11px label, mist hairline, coral focus ring and a
+ * right-aligned `.cc` counter. No floating labels: the mockup has none.
+ */
 export default function MessageEditor({
   title,
   message,
@@ -47,27 +53,27 @@ export default function MessageEditor({
   const messageRef = useRef<HTMLTextAreaElement>(null);
 
   return (
-    <div className="space-y-5">
-      {/* Title — floating label */}
-      <div>
+    <div>
+      <h2 className={WIZ_H2}>Add your words. We&rsquo;ll handle the rest.</h2>
+      <p className={WIZ_SUB}>Title, message, photos. The heart of it.</p>
+
+      {/* Title — mockup `.field` with `#wt` */}
+      <div className="mb-4">
+        <label htmlFor="msg-title" className={LABEL}>
+          Who&rsquo;s it for?
+        </label>
         <div className="relative">
           <input
             id="msg-title"
             ref={titleRef}
             value={title}
             onChange={(e) => onTitleChange(e.target.value.slice(0, MAX_TITLE_LENGTH))}
-            placeholder=" "
-            aria-label="Title"
+            placeholder="Maya turns thirty"
             aria-invalid={!!titleError}
-            className="peer w-full h-14 rounded-xl border border-[#D4CBC3] bg-white px-3 pt-5 pb-1.5 pr-20 text-[#2D2926] placeholder:text-transparent focus:border-[#C4686D] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/20 transition-colors"
+            aria-describedby={titleError ? "msg-title-err" : undefined}
+            className={`${INPUT} pr-12 ${titleError ? INPUT_ERR : ""}`}
           />
-          <label
-            htmlFor="msg-title"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6B5E57] text-sm transition-all duration-200 peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#C4686D] peer-focus:font-medium peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:translate-y-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:font-medium"
-          >
-            Title
-          </label>
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
             <EmojiPicker
               label="Insert emoji into title"
               onPick={(emoji) =>
@@ -75,35 +81,37 @@ export default function MessageEditor({
               }
             />
           </div>
-          <span className="absolute right-3 bottom-1.5 text-[10px] text-[#6B5E57]">
-            {title.length}/{MAX_TITLE_LENGTH}
-          </span>
         </div>
-        {titleError && <p className="text-[#C4686D] text-xs mt-1">{titleError}</p>}
+        <div className={CC}>
+          {title.length}/{MAX_TITLE_LENGTH}
+        </div>
+        {titleError && (
+          <p id="msg-title-err" className={FMSG}>
+            {titleError}
+          </p>
+        )}
       </div>
 
-      {/* Message — floating label */}
-      <div>
+      {/* Message — mockup `.field` with `#wm` + `.cc` counter */}
+      <div className="mb-4">
+        <label htmlFor="msg-message" className={LABEL}>
+          What do you want to say?
+        </label>
         <div className="relative">
           <textarea
             id="msg-message"
             ref={messageRef}
             value={message}
-            onChange={(e) =>
-              onMessageChange(e.target.value.slice(0, MAX_MESSAGE_LENGTH))
-            }
-            placeholder=" "
-            aria-label="Message"
+            onChange={(e) => onMessageChange(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
+            placeholder="The thing you've been meaning to say."
+            rows={5}
             aria-invalid={!!messageError}
-            className="peer w-full min-h-[160px] rounded-xl border border-[#D4CBC3] bg-white px-3 pt-6 pb-6 text-[#2D2926] placeholder:text-transparent focus:border-[#C4686D] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/20 resize-none leading-relaxed transition-colors"
+            aria-describedby={messageError ? "msg-message-err" : undefined}
+            className={`${INPUT} pr-12 resize-none leading-relaxed ${
+              messageError ? INPUT_ERR : ""
+            }`}
           />
-          <label
-            htmlFor="msg-message"
-            className="pointer-events-none absolute left-3 top-4 text-[#6B5E57] text-sm transition-all duration-200 peer-focus:top-2 peer-focus:text-xs peer-focus:text-[#C4686D] peer-focus:font-medium peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:font-medium"
-          >
-            Message
-          </label>
-          <div className="absolute right-2 top-2.5">
+          <div className="absolute right-1.5 top-2">
             <EmojiPicker
               label="Insert emoji into message"
               onPick={(emoji) =>
@@ -117,15 +125,15 @@ export default function MessageEditor({
               }
             />
           </div>
-          <span
-            className={`absolute right-3 bottom-2 text-[10px] ${
-              message.length > MAX_MESSAGE_LENGTH * 0.9 ? "text-[#C4686D]" : "text-[#6B5E57]"
-            }`}
-          >
-            {message.length}/{MAX_MESSAGE_LENGTH}
-          </span>
         </div>
-        {messageError && <p className="text-[#C4686D] text-xs mt-1">{messageError}</p>}
+        <div className={CC}>
+          {message.length}/{MAX_MESSAGE_LENGTH}
+        </div>
+        {messageError && (
+          <p id="msg-message-err" className={FMSG}>
+            {messageError}
+          </p>
+        )}
       </div>
     </div>
   );

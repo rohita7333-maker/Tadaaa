@@ -10,7 +10,7 @@ import PlanScene from "./PlanScene";
 import PolaroidScene from "./PolaroidScene";
 import RsvpScene from "./RsvpScene";
 import FinaleScene from "./FinaleScene";
-import { FOCUS_RING_CLASS } from "./shared";
+import { FINALE_NIGHT, FOCUS_RING_CLASS } from "./shared";
 
 // Soft arpeggio — C5 E5 G5 B5 sine chimes.
 const NOTE_FREQS = [523.25, 659.25, 783.99, 987.77] as const;
@@ -123,15 +123,19 @@ export default function ScrollStoryReveal({
   }, []);
 
   return (
-    <div className="relative bg-[#181513]">
+    <div className="relative" style={{ backgroundColor: FINALE_NIGHT }}>
       <button
         type="button"
         onClick={handleMusicToggle}
         aria-pressed={isMusicOn}
         aria-label={isMusicOn ? "Pause music" : "Play music"}
-        className={`fixed right-4 top-4 z-50 rounded-full bg-black/40 px-3.5 py-2 text-base text-white backdrop-blur-sm transition-transform duration-200 hover:scale-105 active:scale-95 ${FOCUS_RING_CLASS}`}
+        className={`fixed right-5 top-[14px] z-50 flex h-11 w-11 items-center justify-center rounded-full text-[15px] backdrop-blur-[6px] transition-transform duration-200 hover:scale-105 active:scale-95 ${FOCUS_RING_CLASS}`}
+        style={{
+          backgroundColor: "rgba(255,254,253,0.14)",
+          color: "var(--paper)",
+        }}
       >
-        {isMusicOn ? "🔊" : "🎵"}
+        {isMusicOn ? "❚❚" : "♪"}
       </button>
 
       <SkyHero config={config} />
@@ -144,9 +148,13 @@ export default function ScrollStoryReveal({
       {config.tier === "free" && (
         <Link
           href="/templates"
-          className={`fixed bottom-4 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/45 px-4 py-2 text-xs text-white backdrop-blur-sm ${FOCUS_RING_CLASS}`}
+          className={`fixed bottom-4 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-2 text-[11px] backdrop-blur-[8px] ${FOCUS_RING_CLASS}`}
+          style={{
+            backgroundColor: "rgba(26,26,26,0.65)",
+            color: "rgba(255,254,253,0.75)",
+          }}
         >
-          Made with 🎁 TaDaaaa
+          Made with TaDaaaa · <span style={{ color: "var(--sand)" }}>Create your own →</span>
         </Link>
       )}
     </div>

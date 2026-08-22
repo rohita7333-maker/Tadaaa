@@ -34,7 +34,7 @@ export default function DeleteAccountButton() {
 
   return (
     <div className="space-y-3">
-      <p className="text-sm font-medium text-[#2D2926]">
+      <p className="text-sm font-medium text-ink">
         Type <span className="font-mono font-bold">DELETE</span> to confirm
       </p>
       <input
@@ -42,13 +42,13 @@ export default function DeleteAccountButton() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="DELETE"
-        className="w-full h-10 px-4 rounded-xl border border-[#D4CBC3] text-sm outline-none focus:border-red-400 transition-colors"
+        className="w-full h-10 px-4 rounded-xl border border-mist text-sm outline-none focus:border-red-400 transition-colors"
       />
       {error && <p className="text-xs text-red-600">{error}</p>}
       <div className="flex gap-3">
         <button
           onClick={() => { setOpen(false); setValue(""); }}
-          className="flex-1 h-10 rounded-full border border-[#D4CBC3] text-[#6B5E57] text-sm hover:bg-[#FFF0E8] transition-colors"
+          className="flex-1 h-10 rounded-full border border-mist text-stone text-sm hover:bg-chip-coral-bg transition-colors"
         >
           Cancel
         </button>

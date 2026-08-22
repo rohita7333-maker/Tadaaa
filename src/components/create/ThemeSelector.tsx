@@ -1,10 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { Sparkles } from "lucide-react";
 import { themes } from "@/lib/themes";
 import { cn } from "@/lib/utils";
-import { springs, makeReducedMotionTransition } from "@/lib/motion";
+import { WIZ_H2 } from "./editorial";
 
 interface ThemeSelectorProps {
   selectedTheme: string;
@@ -13,96 +11,73 @@ interface ThemeSelectorProps {
 }
 
 /**
+ * Theme picker — mockup `.themecard` (L326-330): a mist-bordered swatch, a
+ * serif name underneath, and a 10px uppercase label that turns coral when the
+ * theme is premium. No emoji: the editorial identity bans emoji-as-content.
+ *
  * Selection is free — entitlement is settled once, at publish. Premium themes
- * carry a "Premium" badge here and no price: the only $ moment in the wizard
- * is the publish gate.
+ * carry a label here and no price: the only $ moment in the wizard is the
+ * publish gate.
  */
 export default function ThemeSelector({
   selectedTheme,
   onSelect,
   unlockedPremiumThemes,
 }: ThemeSelectorProps) {
-  const shouldReduce = useReducedMotion();
   // `undefined` means the caller is on an Unlimited plan — all premium themes unlocked.
   const allUnlocked = unlockedPremiumThemes === undefined;
   const unlockedSet = unlockedPremiumThemes ?? [];
+
   return (
     <div className="w-full">
-      <h2 className="font-heading text-2xl text-[#2D2926] mb-2">Choose a theme</h2>
-      <p className="text-[#6B5E57] mb-6">
-        Pick the vibe that matches your surprise. 3 free themes included.
+      <h2 className={WIZ_H2}>Choose a theme</h2>
+      <p className="text-sm text-stone mb-6">
+        The colour the whole reveal is built from. Three are free.
       </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div
+        className="grid grid-cols-2 gap-4 sm:grid-cols-3"
+        role="radiogroup"
+        aria-label="Theme"
+      >
         {themes.map((theme) => {
           const isUnlocked =
             !theme.isPremium || allUnlocked || unlockedSet.includes(theme.id);
           const isSelected = selectedTheme === theme.id;
 
           return (
-            <motion.button
+            <button
               key={theme.id}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
               onClick={() => onSelect(theme.id)}
-              initial={false}
-              animate={{ scale: isSelected ? 1.02 : 1 }}
-              whileTap={shouldReduce ? {} : { scale: 0.96 }}
-              transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
-              className={cn(
-                "relative rounded-2xl overflow-hidden border-2 transition-colors text-left group",
-                isSelected
-                  ? "border-[#C4686D] shadow-[0_0_0_4px_rgba(196,104,109,0.15)]"
-                  : "border-transparent hover:border-[#D4CBC3] hover:shadow-[0_4px_16px_rgba(45,41,38,0.08)]"
-              )}
+              className="text-left group focus-visible:outline-2 focus-visible:outline-coral focus-visible:outline-offset-2"
             >
-              {/* Preview gradient */}
-              <div
-                className="h-24 w-full transition-transform duration-300 group-hover:scale-105"
+              <span
+                className={cn(
+                  "block h-[120px] rounded-[var(--r-md)] transition-[border-color,transform] duration-200",
+                  isSelected
+                    ? "border-2 border-coral"
+                    : "border border-mist group-hover:-translate-y-1 group-hover:shadow-[var(--sh-card)]"
+                )}
                 style={{ background: theme.colors.background }}
+              />
+              <span className="mt-2.5 block font-heading text-[15px] text-ink">
+                {theme.name}
+              </span>
+              <span
+                className={cn(
+                  "block text-[10px] font-semibold uppercase tracking-[0.12em]",
+                  theme.isPremium && !isUnlocked ? "text-coral-deep" : "text-stone"
+                )}
               >
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-3xl">
-                    {theme.revealIcon === "envelope"
-                      ? "✉️"
-                      : theme.revealIcon === "gift"
-                      ? "🎁"
-                      : theme.revealIcon === "heart"
-                      ? "❤️"
-                      : theme.revealIcon === "star"
-                      ? "⭐"
-                      : "🎈"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-3 bg-white">
-                <div className="flex items-start justify-between gap-1">
-                  <div>
-                    <p className="font-medium text-[#2D2926] text-sm leading-tight">
-                      {theme.name}
-                    </p>
-                    <p className="text-[#6B5E57] text-xs mt-0.5 leading-tight">
-                      {theme.description}
-                    </p>
-                  </div>
-                  {theme.isPremium && !isUnlocked && (
-                    <div className="shrink-0 flex items-center gap-0.5 bg-[#C9A96E]/10 text-[#8A6F35] text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-[#C9A96E]/20">
-                      <Sparkles className="w-2.5 h-2.5" />
-                      Premium
-                    </div>
-                  )}
-                  {isUnlocked && theme.isPremium && (
-                    <div className="shrink-0 text-[#6B8F71] text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#6B8F71]/10">
-                      Unlocked
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Selected ring */}
-              {isSelected && (
-                <div className="absolute inset-0 border-2 border-[#C4686D] rounded-2xl pointer-events-none" />
-              )}
-            </motion.button>
+                {theme.isPremium ? (isUnlocked ? "Premium · unlocked" : "Premium") : "Free"}
+              </span>
+              <span className="mt-0.5 block text-[13px] leading-snug text-stone">
+                {theme.description}
+              </span>
+            </button>
           );
         })}
       </div>

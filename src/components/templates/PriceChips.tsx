@@ -1,6 +1,6 @@
 "use client";
 
-import { chipClassName } from "./chip-style";
+import { chipClassName, CHIP_ROW_CLASS } from "./chip-style";
 
 export type PriceFilterValue = "all" | "free" | "premium";
 
@@ -20,7 +20,7 @@ export default function PriceChips({ active, onChange }: Props) {
     <div
       role="group"
       aria-label="Filter templates by price"
-      className="flex flex-wrap gap-2"
+      className={CHIP_ROW_CLASS}
     >
       {priceOptions.map((option) => {
         const isActive = option.id === active;

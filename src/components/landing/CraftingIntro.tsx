@@ -81,7 +81,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
               {/* Caption writes in */}
               <motion.p
                 className="text-center mt-2 text-[#4a4a4a]"
-                style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "14px" }}
+                style={{ fontFamily: "var(--body)", fontSize: "14px" }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8, duration: 0.4 }}

@@ -26,7 +26,7 @@ export default function CreateSignInLink() {
   return (
     <Link
       href={href}
-      className="text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors font-medium"
+      className="text-[13px] font-semibold uppercase tracking-[0.06em] text-stone hover:text-ink transition-colors"
     >
       Sign in
     </Link>

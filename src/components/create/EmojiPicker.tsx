@@ -54,7 +54,7 @@ export default function EmojiPicker({
         aria-controls={panelId}
         aria-label={label}
         title={label}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#6B5E57] hover:text-[#C4686D] hover:bg-[#FFF0EE] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 transition-colors"
+        className="inline-flex items-center justify-center w-9 h-9 rounded-[var(--r-sm)] text-stone transition-colors hover:text-coral-deep hover:bg-chip-coral-bg focus-visible:outline-2 focus-visible:outline-coral focus-visible:outline-offset-2"
       >
         <Smile className="w-4 h-4" />
       </button>
@@ -69,11 +69,11 @@ export default function EmojiPicker({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: -6 }}
             transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
-            className="absolute right-0 z-50 mt-2 w-64 max-h-72 overflow-y-auto rounded-xl border border-[#D4CBC3] bg-white p-3 shadow-lg"
+            className="absolute right-0 z-50 mt-2 w-64 max-h-72 overflow-y-auto rounded-[var(--r-md)] border border-mist bg-paper p-3 shadow-[var(--sh-float)]"
           >
             {EMOJI_GROUPS.map((group) => (
               <div key={group.label} className="mb-2 last:mb-0">
-                <p className="text-[10px] uppercase tracking-wider text-[#9C8E87] mb-1.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-stone mb-1.5">
                   {group.label}
                 </p>
                 <div className="grid grid-cols-5 gap-1">
@@ -90,7 +90,7 @@ export default function EmojiPicker({
                         duration: durations.quick,
                       })}
                       aria-label={`Insert ${emoji}`}
-                      className="flex items-center justify-center h-8 rounded-lg text-lg hover:bg-[#FFF0EE] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 transition-colors"
+                      className="flex items-center justify-center h-8 rounded-[var(--r-sm)] text-lg transition-colors hover:bg-chip-coral-bg focus-visible:outline-2 focus-visible:outline-coral focus-visible:outline-offset-1"
                     >
                       {emoji}
                     </motion.button>

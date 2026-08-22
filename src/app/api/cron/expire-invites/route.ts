@@ -15,13 +15,18 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createServiceClient();
 
-  // Mark expired invites as inactive AND set status. Page queries read either
-  // is_active or status — keep them in sync so cron actually takes effect.
+  // Deactivate invites whose expiry has passed.
+  //
+  // `invites` has NO `status` column — only `gift_purchases` does. This route
+  // previously wrote `status: "expired"` and filtered on `.neq("status", …)`,
+  // so every run errored and free-tier expiry never actually fired.
+  // `is_active` + `expires_at` + `deleted_at` are the source of truth, which is
+  // what `src/actions/invite.ts` already reads. Pinned by route.test.ts.
   const { data, error } = await supabase
     .from("invites")
-    .update({ status: "expired", is_active: false })
+    .update({ is_active: false })
     .lt("expires_at", new Date().toISOString())
-    .neq("status", "expired")
+    .eq("is_active", true)
     .not("expires_at", "is", null)
     .select("id");
 

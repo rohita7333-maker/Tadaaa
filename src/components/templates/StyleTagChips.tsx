@@ -1,7 +1,7 @@
 "use client";
 
 import { allStyleTags } from "@/lib/templates";
-import { chipClassName } from "./chip-style";
+import { chipClassName, CHIP_ROW_CLASS } from "./chip-style";
 
 interface Props {
   active: string[];
@@ -17,7 +17,7 @@ export default function StyleTagChips({ active, onToggle }: Props) {
     <div
       role="group"
       aria-label="Filter templates by style"
-      className="flex flex-wrap gap-2"
+      className={CHIP_ROW_CLASS}
     >
       {tags.map((tag) => {
         const isActive = active.includes(tag);

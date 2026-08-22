@@ -1,7 +1,7 @@
 "use client";
 
 import { occasions } from "@/lib/themes";
-import { chipClassName } from "./chip-style";
+import { chipClassName, CHIP_ROW_CLASS } from "./chip-style";
 
 const filterOptions: { id: string; label: string }[] = [
   { id: "all", label: "All" },
@@ -18,7 +18,7 @@ export default function FilterChips({ active, onChange }: Props) {
     <div
       role="group"
       aria-label="Filter templates by occasion"
-      className="flex flex-wrap gap-2"
+      className={CHIP_ROW_CLASS}
     >
       {filterOptions.map((option) => {
         const isActive = option.id === active;

@@ -1,35 +1,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  AccessibilityInfo,
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  View,
-} from "react-native";
+import { AccessibilityInfo, ActivityIndicator, ScrollView, Share, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withRepeat,
-  withSequence,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
-import { Image } from "expo-image";
-import { Gift, Heart } from "lucide-react-native";
-import { Txt, colors as brand, fonts, radii } from "@/components/ui";
+import { Body, EdButton, Heading, palette } from "@/components/editorial";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
-import { Confetti, Ribbons } from "@/components/reveal/Particles";
-import { getInviteForReveal, recordAnswer, recordRsvp, recordView, type RevealData } from "@/lib/db";
+import { EditorialBurst } from "@/components/reveal/Particles";
+import { REVEAL_GROUND, RevealTopBar } from "@/components/reveal/chrome";
+import TapClosed from "@/components/reveal/TapClosed";
+import CountdownClosed from "@/components/reveal/CountdownClosed";
+import RevealOpen from "@/components/reveal/RevealOpen";
+import {
+  getInviteForReveal,
+  getRevealBundle,
+  getRevealUnavailableReason,
+  recordView,
+  type RevealData,
+} from "@/lib/db";
 import { fetchRevealPhotos } from "@/lib/api";
-import { getOccasionById, getThemeById, gradientStops, themes } from "@/lib/themes";
+import { getOccasionById, getThemeById, themes } from "@/lib/themes";
+import { ENV } from "@/lib/env";
+import {
+  REVEAL_UNAVAILABLE_COPY,
+  type RevealUnavailableReason,
+} from "@/lib/reveal-unavailable";
 import ScrollStoryReveal from "@/components/reveal/scrollstory/ScrollStoryReveal";
+import LettersReveal from "@/components/reveal/LettersReveal";
+import PinGate from "@/components/reveal/PinGate";
+import type { LetterRow } from "@/lib/letters";
+import { getPinMeta, type PinMeta } from "@/lib/pin-gate";
+import WaitingRoom from "@/components/reveal/WaitingRoom";
 import { inviteToStoryConfig } from "@/lib/scroll-story/from-invite";
 
 export default function SurpriseReveal() {
@@ -39,40 +39,102 @@ export default function SurpriseReveal() {
   const canGoBack = router.canGoBack();
   const [data, setData] = useState<RevealData | null>(null);
   const [state, setState] = useState<"loading" | "locked" | "open" | "notfound">("loading");
+  // Which of web's three unavailable branches applies. Resolved only when the
+  // load fails, so the happy path costs nothing.
+  const [unavailable, setUnavailable] = useState<RevealUnavailableReason>("missing");
   const [reduced, setReduced] = useState(false);
   // photo id → signed URL, fetched from the mobile BFF (private bucket). Empty
-  // when no backend is configured — the polaroids then show themed placeholders.
+  // when no backend is configured — the tiles then show themed placeholders.
   const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const viewedRef = useRef(false);
+  /**
+   * D1 — the PIN the recipient cleared, held for the rest of the session.
+   *
+   * It is not a convenience. Since 2026-08-17 the reveal readers WITHHOLD a
+   * PIN-locked invite server-side, so this string is what every subsequent
+   * read is authorised by: the payload itself, the letters shelf, and each
+   * letter open. Null means either "no PIN on this surprise" or "not yet
+   * cleared" — `pinMeta.hasPin` distinguishes them.
+   */
+  const [pin, setPin] = useState<string | null>(null);
+  const pinCleared = pin !== null;
+  /** Carried from the gated bundle so D5 needs no second round trip. */
+  const [letters, setLetters] = useState<LetterRow[] | undefined>(undefined);
+  /** null until the PIN meta read lands, so the reveal never flashes first. */
+  const [pinMeta, setPinMeta] = useState<PinMeta | null>(null);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduced);
   }, []);
 
+  const loadPhotos = useCallback(
+    async (count: number) => {
+      if (count === 0) return;
+      const signed = await fetchRevealPhotos(slug);
+      if (signed) setPhotoUrls(Object.fromEntries(signed.photos.map((p) => [p.id, p.url])));
+    },
+    [slug]
+  );
+
   useEffect(() => {
     let active = true;
     (async () => {
       if (!slug) return;
+
+      // PIN meta FIRST, and nothing else until it lands. The old order fetched
+      // the payload and then asked whether it should have — which was harmless
+      // only because the readers were leaking it anyway. They no longer are, so
+      // a locked slug now legitimately returns nothing from `getInviteForReveal`
+      // and would have classified as "this surprise has closed".
+      const meta = await getPinMeta(slug);
+      if (!active) return;
+      setPinMeta(meta);
+
+      if (meta.hasPin) {
+        // Stop here. The keypad renders with no payload behind it; the bundle
+        // is fetched by `onUnlocked` once the server has verified four digits.
+        setState("locked");
+        return;
+      }
+
       const d = await getInviteForReveal(slug);
       if (!active) return;
       if (!d) {
+        const reason = await getRevealUnavailableReason(slug);
+        if (!active) return;
+        setUnavailable(reason);
         setState("notfound");
         return;
       }
       setData(d);
       setState("locked");
-      // Best-effort: fetch signed photo URLs so the polaroids show real images.
-      if (d.photos.length > 0) {
-        const signed = await fetchRevealPhotos(slug);
-        if (active && signed) {
-          setPhotoUrls(Object.fromEntries(signed.photos.map((p) => [p.id, p.url])));
-        }
-      }
+      await loadPhotos(d.photos.length);
     })();
     return () => {
       active = false;
     };
-  }, [slug]);
+  }, [slug, loadPhotos]);
+
+  /** Called by PinGate with the PIN the SERVER accepted. */
+  const onUnlocked = useCallback(
+    async (verified: string) => {
+      const bundle = await getRevealBundle(slug, verified);
+      if (!bundle.ok) {
+        // verify_invite_pin said yes and the bundle said no: the only ways that
+        // happens are the limiter tripping or the surprise expiring between the
+        // two calls. Neither is "wrong PIN", so do not send them back to the
+        // keypad with a lie.
+        setUnavailable("missing");
+        setState("notfound");
+        return;
+      }
+      setData(bundle.data);
+      setLetters(bundle.letters);
+      setPin(verified);
+      await loadPhotos(bundle.data.photos.length);
+    },
+    [slug, loadPhotos]
+  );
 
   const onReveal = useCallback(() => {
     if (!data) return;
@@ -84,33 +146,128 @@ export default function SurpriseReveal() {
     setState("open");
   }, [data, reduced]);
 
+  const onShare = useCallback(() => {
+    const url = `${ENV.siteUrl || "https://tadaaaa.app"}/surprise/${slug}`;
+    Share.share({ message: url, url }).catch(() => {});
+  }, [slug]);
+
   const theme = getThemeById(data?.invite.theme ?? "") ?? themes[0];
-  const stops = gradientStops(theme);
-  const onDark = theme.colors.text.startsWith("#F") || theme.colors.text.startsWith("#f");
-  const textColor = theme.colors.text;
+  const occasionMicroLabel = data
+    ? (getOccasionById(data.invite.occasion_type)?.label ?? "A SURPRISE").toUpperCase()
+    : undefined;
 
   if (state === "loading") {
     return (
-      <View style={{ flex: 1, backgroundColor: brand.charcoal, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator color={brand.goldLight} />
+      <View style={[REVEAL_GROUND, { alignItems: "center", justifyContent: "center" }]}>
+        <ActivityIndicator color={palette.sand} />
       </View>
     );
   }
 
-  if (state === "notfound" || !data) {
+  /**
+   * D1 — PIN gate. Sits in FRONT of every reveal style AND in front of the
+   * unavailable screen: whatever the invite renders, a locked one renders the
+   * keypad first.
+   *
+   * This branch used to sit BELOW the `state === "notfound" || !data` guard.
+   * That was correct until the `pin_gates_reveal_content_server_side`
+   * migration, which is precisely the point at which a locked invite stopped
+   * carrying a payload: `data` is null by design while the keypad is up, so the
+   * `|| !data` guard swallowed the gate and EVERY PIN-locked link rendered
+   * "This surprise doesn't exist". Seen doing exactly that. The keypad needs no
+   * payload — `pin_hint` comes from `get_invite_pin_meta`, and the bundle is
+   * fetched by `onUnlocked` once the server has verified four digits.
+   */
+  if (pinMeta?.hasPin && !pinCleared) {
     return (
-      <LinearGradient colors={[brand.charcoal, "#1a1417"]} style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 12 }}>
-        <Txt style={{ fontSize: 44 }}>🎈</Txt>
-        <Txt style={{ fontFamily: fonts.heading, fontSize: 24, color: "#fff", textAlign: "center" }}>
-          This surprise has drifted away
-        </Txt>
-        <Txt style={{ fontFamily: fonts.body, color: "rgba(255,255,255,0.7)", textAlign: "center" }}>
-          The link may have expired or been closed by its creator.
-        </Txt>
-      </LinearGradient>
+      <PinGate
+        slug={slug}
+        microLabel={occasionMicroLabel}
+        hint={pinMeta.hint}
+        onUnlocked={onUnlocked}
+        onBack={canGoBack ? () => router.back() : undefined}
+      />
     );
   }
 
+  if (state === "notfound" || !data) {
+    const copy = REVEAL_UNAVAILABLE_COPY[unavailable];
+    return (
+      <View
+        style={[
+          REVEAL_GROUND,
+          { alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 10 },
+        ]}
+      >
+        <Heading size={26} style={{ color: palette.paper, textAlign: "center" }}>
+          {copy.heading}
+        </Heading>
+        <Body size={14} style={{ color: palette.sand, textAlign: "center" }}>
+          {copy.body}
+        </Body>
+        {copy.cta ? (
+          <EdButton
+            title={copy.cta}
+            variant="coral"
+            style={{ marginTop: 14 }}
+            onPress={() => router.replace("/(tabs)")}
+          />
+        ) : null}
+      </View>
+    );
+  }
+
+  /**
+   * D7 — Waiting room. A surprise opened before its moment shows the wait.
+   *
+   * Two reveal types are excluded because they own their own countdown, and
+   * sending them here replaces a designed scene with a holding page:
+   *
+   *   scroll_story — its countdown is the finale scene.
+   *   countdown    — frame D4 IS a countdown. This exclusion was missing, so
+   *                  `CountdownClosed` could only ever be reached with a target
+   *                  already in the past, which fires `onReachZero` on its
+   *                  first tick. Frame D4 was unreachable: every countdown
+   *                  reveal rendered D7 instead. Found by trying to open one.
+   */
+  const scheduledFor = data.invite.countdown_date;
+  if (
+    scheduledFor &&
+    data.invite.reveal_type !== "scroll_story" &&
+    data.invite.reveal_type !== "countdown" &&
+    new Date(scheduledFor) > new Date()
+  ) {
+    return (
+      <WaitingRoom
+        slug={data.invite.slug}
+        title={data.invite.title}
+        targetIso={scheduledFor}
+        onReachZero={() => setState("locked")}
+        onBack={canGoBack ? () => router.back() : undefined}
+      />
+    );
+  }
+
+  // D5 — Open-when letters. Added as a FOURTH branch above the existing three,
+  // which stay byte-identical: the same discipline that kept tap/countdown safe
+  // when scroll_story landed. Letters own their own chrome (ink list, paper
+  // letter) so nothing below this line had to change shape.
+  if (data.invite.reveal_type === "letters") {
+    return (
+      /* No `fromName`: the mobile reveal payload carries no creator name —
+         `get_invite_by_slug` deliberately omits creator_id and every field that
+         could identify them. The signature is omitted rather than faked. */
+      <LettersReveal
+        slug={data.invite.slug}
+        recipientName={data.invite.title}
+        pin={pin}
+        initialLetters={letters}
+        onBack={canGoBack ? () => router.back() : undefined}
+      />
+    );
+  }
+
+  // Scroll Story owns its own chrome and choreography end to end — untouched.
   if (data.invite.reveal_type === "scroll_story") {
     const storyConfig = {
       ...inviteToStoryConfig(
@@ -144,253 +301,54 @@ export default function SurpriseReveal() {
             <ScreenHeader variant="back" onDark />
           </View>
         )}
-        <ScrollStoryReveal config={storyConfig} inviteId={data.invite.id} />
-      </View>
-    );
-  }
-
-  return (
-    <LinearGradient colors={stops as [string, string]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
-      {/* Only shown when this reveal was opened from inside the app (preview).
-          Real recipients arriving via a link have no history → no chrome. */}
-      {canGoBack && (
-        <View style={{ position: "absolute", top: insets.top, left: 0, right: 0, zIndex: 50 }} pointerEvents="box-none">
-          <ScreenHeader variant="back" onDark />
-        </View>
-      )}
-      {state === "locked" ? (
-        <LockedView invite={data.invite} theme={theme} textColor={textColor} reduced={reduced} onReveal={onReveal} />
-      ) : (
-        <OpenView data={data} theme={theme} textColor={textColor} onDark={onDark} reduced={reduced} photoUrls={photoUrls} />
-      )}
-    </LinearGradient>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Locked — ambient ribbons + pulsing gift + "tap to reveal"
-// ---------------------------------------------------------------------------
-function LockedView({
-  invite,
-  theme,
-  textColor,
-  reduced,
-  onReveal,
-}: {
-  invite: RevealData["invite"];
-  theme: ReturnType<typeof getThemeById> & {};
-  textColor: string;
-  reduced: boolean;
-  onReveal: () => void;
-}) {
-  const pulse = useSharedValue(1);
-  useEffect(() => {
-    if (reduced) return;
-    pulse.value = withRepeat(withSequence(withTiming(1.06, { duration: 900 }), withTiming(1, { duration: 900 })), -1, true);
-  }, [pulse, reduced]);
-  const giftStyle = useAnimatedStyle(() => ({ transform: [{ scale: pulse.value }] }));
-
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 28 }}>
-      <Ribbons colors={[theme!.colors.accent, theme!.colors.accentLight, "#E8D5A8"]} reduced={reduced} />
-      <Animated.View entering={FadeInDown.duration(500)} style={{ alignItems: "center", gap: 8, marginBottom: 12 }}>
-        <Txt style={{ fontFamily: fonts.hand, fontSize: 22, color: theme!.colors.accent }}>a little something</Txt>
-        <Txt style={{ fontFamily: fonts.heading, fontSize: 28, color: textColor, textAlign: "center" }}>{invite.title}</Txt>
-      </Animated.View>
-
-      <Animated.View style={[{ marginVertical: 24 }, giftStyle]}>
-        <LinearGradient colors={[theme!.colors.accentLight, theme!.colors.accent]} style={{ width: 128, height: 128, borderRadius: 28, alignItems: "center", justifyContent: "center" }}>
-          <Gift size={58} color="#fff" strokeWidth={1.6} />
-        </LinearGradient>
-      </Animated.View>
-
-      <Pressable onPress={onReveal} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.96 : 1 }], marginTop: 8 })}>
-        <View style={{ backgroundColor: "#fff", paddingHorizontal: 28, paddingVertical: 15, borderRadius: radii.pill, flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <Heart size={18} color={theme!.colors.accent} fill={theme!.colors.accent} />
-          <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 15, color: brand.charcoal }}>Tap to reveal</Txt>
-        </View>
-      </Pressable>
-    </View>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Open — confetti burst, message, polaroids, question, RSVP, contributions
-// ---------------------------------------------------------------------------
-function OpenView({
-  data,
-  theme,
-  textColor,
-  onDark,
-  reduced,
-  photoUrls,
-}: {
-  data: RevealData;
-  theme: NonNullable<ReturnType<typeof getThemeById>>;
-  textColor: string;
-  onDark: boolean;
-  reduced: boolean;
-  photoUrls: Record<string, string>;
-}) {
-  const { invite, photos, questions, contributions } = data;
-  const [rsvped, setRsvped] = useState(false);
-
-  return (
-    <View style={{ flex: 1 }}>
-      <Confetti run theme={theme} reduced={reduced} />
-      <ScrollView contentContainerStyle={{ padding: 26, paddingTop: 72, gap: 22, alignItems: "center" }} showsVerticalScrollIndicator={false}>
-        <Animated.View entering={reduced ? FadeIn : FadeInDown.duration(600)} style={{ alignItems: "center", gap: 10 }}>
-          <Txt style={{ fontFamily: fonts.hand, fontSize: 22, color: theme.colors.accent }}>tadaaaa ✨</Txt>
-          <Txt style={{ fontFamily: fonts.heading, fontSize: 32, color: textColor, textAlign: "center" }}>{invite.title}</Txt>
-        </Animated.View>
-
-        <Animated.View entering={reduced ? FadeIn : FadeInDown.delay(200).duration(600)}>
-          <Txt style={{ fontFamily: fonts.body, fontSize: 16, lineHeight: 24, color: textColor, textAlign: "center", opacity: 0.92 }}>
-            {invite.message}
-          </Txt>
-        </Animated.View>
-
-        {photos.length > 0 && (
-          <Animated.View entering={reduced ? FadeIn : FadeInDown.delay(350).duration(600)} style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 4 }}>
-            {photos.map((p, i) => (
-              <Polaroid key={p.id} caption={p.caption} rotation={(p.rotation_deg ?? 0) || (i % 2 === 0 ? -3 : 3)} theme={theme} imageUrl={photoUrls[p.id]} />
-            ))}
-          </Animated.View>
-        )}
-
-        {questions.map((q, i) => (
-          <QuestionCard
-            key={q.id}
-            question={q}
-            enableDodge={!!invite.enable_dodge_no}
-            theme={theme}
-            textColor={textColor}
-            reduced={reduced}
-            onAnswer={(ans) => recordAnswer(invite.id, q.id, ans).catch(() => {})}
-          />
-        ))}
-
-        <Animated.View entering={reduced ? FadeIn : FadeInDown.delay(500).duration(600)} style={{ width: "100%", alignItems: "center", marginTop: 6 }}>
-          {rsvped ? (
-            <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 15, color: textColor }}>💛 Thanks — they'll know you're in!</Txt>
-          ) : (
-            <Pressable
-              onPress={async () => {
-                if (!reduced) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-                setRsvped(true);
-                try { await recordRsvp(invite.id); } catch { /* dedup / offline — still show thanks */ }
-              }}
-              style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}
-            >
-              <LinearGradient colors={[theme.colors.accentLight, theme.colors.accent]} style={{ paddingHorizontal: 30, paddingVertical: 15, borderRadius: radii.pill, flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Heart size={18} color="#fff" fill="#fff" />
-                <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 15, color: "#fff" }}>Count me in!</Txt>
-              </LinearGradient>
-            </Pressable>
-          )}
-        </Animated.View>
-
-        {contributions.length > 0 && (
-          <View style={{ width: "100%", gap: 10, marginTop: 10 }}>
-            <Txt style={{ fontFamily: fonts.heading, fontSize: 18, color: textColor, textAlign: "center" }}>Notes from everyone</Txt>
-            {contributions.map((c) => (
-              <View key={c.id} style={{ backgroundColor: onDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.7)", borderRadius: radii.lg, padding: 14 }}>
-                <Txt style={{ fontFamily: fonts.hand, fontSize: 16, color: textColor }}>{c.contributor_name}</Txt>
-                {c.message ? <Txt style={{ fontFamily: fonts.body, fontSize: 13, color: textColor, opacity: 0.9, marginTop: 2 }}>{c.message}</Txt> : null}
-              </View>
-            ))}
-          </View>
-        )}
-
-        <View style={{ height: 20 }} />
-        <Txt style={{ fontFamily: fonts.body, fontSize: 11, color: textColor, opacity: 0.5 }}>Made with TaDaaaa</Txt>
-      </ScrollView>
-    </View>
-  );
-}
-
-function Polaroid({ caption, rotation, theme, imageUrl }: { caption: string; rotation: number; theme: NonNullable<ReturnType<typeof getThemeById>>; imageUrl?: string }) {
-  // Photo binaries live in a private bucket; the mobile BFF supplies signed URLs
-  // when a backend is configured. Without one, the polaroid frame + caption
-  // still convey the moment (graceful, honest degrade — no broken image icons).
-  return (
-    <View style={{ backgroundColor: "#fff", padding: 7, paddingBottom: 18, borderRadius: 5, transform: [{ rotate: `${rotation}deg` }], shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 6 }}>
-      {imageUrl ? (
-        <Image
-          source={{ uri: imageUrl }}
-          style={{ width: 120, height: 120, borderRadius: 3 }}
-          contentFit="cover"
-          transition={300}
+        <ScrollStoryReveal
+          config={storyConfig}
+          inviteId={data.invite.id}
+          slug={data.invite.slug}
+          pin={pin}
         />
-      ) : (
-        <LinearGradient colors={[theme.colors.accentLight, theme.colors.accent]} style={{ width: 120, height: 120, borderRadius: 3, alignItems: "center", justifyContent: "center" }}>
-          <Heart size={26} color="rgba(255,255,255,0.85)" />
-        </LinearGradient>
-      )}
-      {caption ? <Txt style={{ fontFamily: fonts.hand, fontSize: 14, textAlign: "center", marginTop: 5, color: brand.charcoal }}>{caption}</Txt> : null}
-    </View>
-  );
-}
-
-function QuestionCard({
-  question,
-  enableDodge,
-  theme,
-  textColor,
-  reduced,
-  onAnswer,
-}: {
-  question: RevealData["questions"][number];
-  enableDodge: boolean;
-  theme: NonNullable<ReturnType<typeof getThemeById>>;
-  textColor: string;
-  reduced: boolean;
-  onAnswer: (answer: boolean) => void;
-}) {
-  const [answered, setAnswered] = useState<null | boolean>(null);
-  const noX = useSharedValue(0);
-  const noY = useSharedValue(0);
-
-  const noStyle = useAnimatedStyle(() => ({ transform: [{ translateX: noX.value }, { translateY: noY.value }] }));
-
-  function dodge() {
-    if (reduced) return; // reduced-motion: don't run away — accessible No.
-    noX.value = withSpring((Math.random() - 0.5) * 180, { stiffness: 300, damping: 14 });
-    noY.value = withSpring((Math.random() - 0.5) * 80, { stiffness: 300, damping: 14 });
-  }
-
-  if (answered !== null) {
-    return (
-      <Animated.View entering={FadeIn} style={{ alignItems: "center", gap: 6 }}>
-        <Txt style={{ fontFamily: fonts.heading, fontSize: 20, color: textColor, textAlign: "center" }}>{question.question_text}</Txt>
-        <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 15, color: theme.colors.accent }}>
-          You said {answered ? (question.yes_label || "Yes") : (question.no_label || "No")} 💌
-        </Txt>
-      </Animated.View>
+      </View>
     );
   }
 
+  const isCountdown = data.invite.reveal_type === "countdown" && !!data.invite.countdown_date;
+  const occasionLabel = getOccasionById(data.invite.occasion_type)?.label;
+
   return (
-    <Animated.View entering={reduced ? FadeIn : FadeInDown.delay(420).duration(600)} style={{ alignItems: "center", gap: 14, width: "100%" }}>
-      <Txt style={{ fontFamily: fonts.heading, fontSize: 22, color: textColor, textAlign: "center" }}>{question.question_text}</Txt>
-      <View style={{ flexDirection: "row", gap: 14, alignItems: "center", justifyContent: "center" }}>
-        <Pressable onPress={() => { setAnswered(true); onAnswer(true); }} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.96 : 1 }] })}>
-          <LinearGradient colors={[theme.colors.accentLight, theme.colors.accent]} style={{ paddingHorizontal: 28, paddingVertical: 14, borderRadius: radii.pill }}>
-            <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 15, color: "#fff" }}>{question.yes_label || "Yes"}</Txt>
-          </LinearGradient>
-        </Pressable>
-        <Animated.View style={noStyle}>
-          <Pressable
-            onPress={() => { if (!enableDodge) { setAnswered(false); onAnswer(false); } }}
-            onPressIn={() => enableDodge && dodge()}
-            style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.96 : 1 }] })}
+    <View style={REVEAL_GROUND}>
+      {/* `.rtop` — only shown when the reveal was opened from inside the app.
+          A recipient arriving on the link has no history, so no close control. */}
+      <RevealTopBar onClose={canGoBack ? () => router.back() : undefined} onShare={onShare} />
+
+      {state === "locked" ? (
+        isCountdown ? (
+          <CountdownClosed
+            targetIso={data.invite.countdown_date as string}
+            title={data.invite.title}
+            message={data.invite.message}
+            onReachZero={onReveal}
+            slug={data.invite.slug}
+          />
+        ) : (
+          <TapClosed title={data.invite.title} theme={theme} reduced={reduced} onOpen={onReveal} />
+        )
+      ) : (
+        <View style={{ flex: 1 }}>
+          {/* `burst()` — palette-only, and a no-op under reduce-motion. */}
+          <EditorialBurst run reduced={reduced} />
+          <ScrollView
+            contentContainerStyle={{ paddingTop: insets.top + 76, paddingBottom: insets.bottom + 32 }}
+            showsVerticalScrollIndicator={false}
           >
-            <View style={{ paddingHorizontal: 28, paddingVertical: 14, borderRadius: radii.pill, backgroundColor: "rgba(255,255,255,0.85)" }}>
-              <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 15, color: brand.charcoal }}>{question.no_label || "No"}</Txt>
-            </View>
-          </Pressable>
-        </Animated.View>
-      </View>
-    </Animated.View>
+            <RevealOpen
+              data={data}
+              photoUrls={photoUrls}
+              reduced={reduced}
+              occasionLabel={occasionLabel}
+            />
+          </ScrollView>
+        </View>
+      )}
+    </View>
   );
 }

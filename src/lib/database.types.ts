@@ -2,6 +2,20 @@
 // Do not hand-edit. Regenerate with:
 //   supabase gen types typescript --project-id xrlmnlknymgakswsbawk
 // Ground-truth DB shape — mobile must match web exactly.
+//
+// Regenerated 2026-08-17 (second pass, after `owner_invite_analytics`). The
+// first pass MISSED `get_contribute_meta` and `get_invite_reveal` — both shipped
+// that same day and both were being called through an `as never` cast, so tsc
+// could not see the drift. Verified this time by listing every table and
+// function in the live project and grepping for each one.
+//
+// The previous copy predated the phase-0 migration and
+// was missing FOUR tables (entitlements, letters, notify_requests, push_tokens)
+// and ELEVEN functions. While it was stale, `tsc` could not see `pin_hash`,
+// `moderation_status` or `display_timezone`, so a screen reading them failed to
+// compile while a screen WRITING a column that no longer existed would have
+// compiled fine. Regenerating is what makes the typecheck gate mean anything
+// about the schema again.
 
 export type Json =
   | string
@@ -77,6 +91,42 @@ export type Database = {
         }
         Relationships: []
       }
+      entitlements: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          invite_id: string | null
+          kind: string
+          source: string
+          store_txn_id: string | null
+          theme_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invite_id?: string | null
+          kind: string
+          source: string
+          store_txn_id?: string | null
+          theme_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invite_id?: string | null
+          kind?: string
+          source?: string
+          store_txn_id?: string | null
+          theme_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       gift_purchases: {
         Row: {
           created_at: string
@@ -123,15 +173,7 @@ export type Database = {
           status?: string
           stripe_session_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "gift_purchases_redeemed_invite_id_fkey"
-            columns: ["redeemed_invite_id"]
-            isOneToOne: false
-            referencedRelation: "invites"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       invite_answers: {
         Row: {
@@ -158,15 +200,7 @@ export type Database = {
           question_id?: string
           user_agent?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "invite_answers_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "invite_questions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       invite_contributions: {
         Row: {
@@ -177,6 +211,7 @@ export type Database = {
           id: string
           invite_id: string
           message: string | null
+          moderation_status: string | null
           photo_url: string | null
           visitor_hash: string
         }
@@ -188,6 +223,7 @@ export type Database = {
           id?: string
           invite_id: string
           message?: string | null
+          moderation_status?: string | null
           photo_url?: string | null
           visitor_hash: string
         }
@@ -199,18 +235,11 @@ export type Database = {
           id?: string
           invite_id?: string
           message?: string | null
+          moderation_status?: string | null
           photo_url?: string | null
           visitor_hash?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "invite_contributions_invite_id_fkey"
-            columns: ["invite_id"]
-            isOneToOne: false
-            referencedRelation: "invites"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       invite_photos: {
         Row: {
@@ -240,15 +269,7 @@ export type Database = {
           sort_order?: number
           storage_path?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "invite_photos_invite_id_fkey"
-            columns: ["invite_id"]
-            isOneToOne: false
-            referencedRelation: "invites"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       invite_questions: {
         Row: {
@@ -284,15 +305,28 @@ export type Database = {
           sort_order?: number
           yes_label?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "invite_questions_invite_id_fkey"
-            columns: ["invite_id"]
-            isOneToOne: false
-            referencedRelation: "invites"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      invite_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          invite_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          invite_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          invite_id?: string
+        }
+        Relationships: []
       }
       invite_rsvps: {
         Row: {
@@ -319,15 +353,7 @@ export type Database = {
           user_agent?: string | null
           visitor_hash?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "invite_rsvps_invite_id_fkey"
-            columns: ["invite_id"]
-            isOneToOne: false
-            referencedRelation: "invites"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       invite_views: {
         Row: {
@@ -348,15 +374,7 @@ export type Database = {
           user_agent?: string | null
           viewed_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "invite_views_invite_id_fkey"
-            columns: ["invite_id"]
-            isOneToOne: false
-            referencedRelation: "invites"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       invites: {
         Row: {
@@ -365,6 +383,7 @@ export type Database = {
           created_at: string | null
           creator_id: string
           deleted_at: string | null
+          display_timezone: string | null
           enable_dodge_no: boolean | null
           events: Json
           expires_at: string | null
@@ -373,10 +392,14 @@ export type Database = {
           is_paid: boolean | null
           message: string
           occasion_type: string
+          password_hash: string | null
+          pin_hash: string | null
+          pin_hint: string | null
           response_count: number | null
           reveal_type: string | null
           revealed_at: string | null
           slug: string
+          status: string
           stripe_session_id: string | null
           theme: string
           title: string
@@ -392,6 +415,7 @@ export type Database = {
           created_at?: string | null
           creator_id: string
           deleted_at?: string | null
+          display_timezone?: string | null
           enable_dodge_no?: boolean | null
           events?: Json
           expires_at?: string | null
@@ -400,10 +424,14 @@ export type Database = {
           is_paid?: boolean | null
           message: string
           occasion_type?: string
+          password_hash?: string | null
+          pin_hash?: string | null
+          pin_hint?: string | null
           response_count?: number | null
           reveal_type?: string | null
           revealed_at?: string | null
           slug: string
+          status?: string
           stripe_session_id?: string | null
           theme?: string
           title: string
@@ -419,6 +447,7 @@ export type Database = {
           created_at?: string | null
           creator_id?: string
           deleted_at?: string | null
+          display_timezone?: string | null
           enable_dodge_no?: boolean | null
           events?: Json
           expires_at?: string | null
@@ -427,10 +456,14 @@ export type Database = {
           is_paid?: boolean | null
           message?: string
           occasion_type?: string
+          password_hash?: string | null
+          pin_hash?: string | null
+          pin_hint?: string | null
           response_count?: number | null
           reveal_type?: string | null
           revealed_at?: string | null
           slug?: string
+          status?: string
           stripe_session_id?: string | null
           theme?: string
           title?: string
@@ -440,19 +473,66 @@ export type Database = {
           video_storage_path?: string | null
           view_count?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "invites_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      letters: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          invite_id: string
+          label: string
+          opened_at: string | null
+          position: number
+          unlock_at: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          invite_id: string
+          label: string
+          opened_at?: string | null
+          position?: number
+          unlock_at?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          invite_id?: string
+          label?: string
+          opened_at?: string | null
+          position?: number
+          unlock_at?: string | null
+        }
+        Relationships: []
+      }
+      notify_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invite_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invite_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invite_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
           avatar_url: string | null
+          biometric_lock: boolean
           created_at: string | null
           email: string
           full_name: string | null
@@ -460,6 +540,7 @@ export type Database = {
           notify_occasions: boolean
           notify_on_answer: boolean
           notify_on_view: boolean
+          occasions: string[]
           stripe_customer_id: string | null
           subscription_expires_at: string | null
           subscription_tier: string
@@ -467,6 +548,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          biometric_lock?: boolean
           created_at?: string | null
           email: string
           full_name?: string | null
@@ -474,6 +556,7 @@ export type Database = {
           notify_occasions?: boolean
           notify_on_answer?: boolean
           notify_on_view?: boolean
+          occasions?: string[]
           stripe_customer_id?: string | null
           subscription_expires_at?: string | null
           subscription_tier?: string
@@ -481,6 +564,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          biometric_lock?: boolean
           created_at?: string | null
           email?: string
           full_name?: string | null
@@ -488,10 +572,35 @@ export type Database = {
           notify_occasions?: boolean
           notify_on_answer?: boolean
           notify_on_view?: boolean
+          occasions?: string[]
           stripe_customer_id?: string | null
           subscription_expires_at?: string | null
           subscription_tier?: string
           welcomed_at?: string | null
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -536,6 +645,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_push_token: {
+        Args: { p_platform: string; p_token: string }
+        Returns: Json
+      }
       claim_stripe_event: {
         Args: { p_event_id: string; p_event_type: string }
         Returns: boolean
@@ -544,7 +657,142 @@ export type Database = {
         Args: { p_key: string; p_limit: number; p_window_ms: number }
         Returns: boolean
       }
+      derive_invite_status: {
+        Args: {
+          p_countdown_date: string
+          p_deleted_at: string
+          p_expires_at: string
+          p_is_active: boolean
+        }
+        Returns: string
+      }
+      get_contribute_meta: {
+        Args: { p_slug: string }
+        Returns: {
+          open: boolean
+          title: string
+        }[]
+      }
+      get_invite_analytics: { Args: { p_invite_id: string }; Returns: Json }
+      get_invite_by_slug: {
+        Args: { p_slug: string }
+        Returns: {
+          accept_contributions: boolean
+          countdown_date: string
+          created_at: string
+          enable_dodge_no: boolean
+          events: Json
+          expires_at: string
+          id: string
+          is_paid: boolean
+          message: string
+          occasion_type: string
+          response_count: number
+          reveal_type: string
+          slug: string
+          theme: string
+          title: string
+          view_count: number
+        }[]
+      }
+      get_invite_contributions: {
+        Args: { p_invite_id: string }
+        Returns: {
+          approved: boolean
+          contributor_name: string
+          created_at: string
+          id: string
+          invite_id: string
+          message: string
+          photo_url: string
+        }[]
+      }
+      get_invite_letters: {
+        Args: { p_slug: string }
+        Returns: {
+          body: string
+          id: string
+          label: string
+          locked: boolean
+          opened_at: string
+          position: number
+          unlock_at: string
+        }[]
+      }
+      get_invite_photos: {
+        Args: { p_invite_id: string }
+        Returns: {
+          caption: string
+          created_at: string
+          id: string
+          invite_id: string
+          rotation_deg: number
+          sort_order: number
+          storage_path: string
+        }[]
+      }
+      get_invite_pin_meta: {
+        Args: { p_slug: string }
+        Returns: {
+          has_pin: boolean
+          pin_hint: string
+        }[]
+      }
+      get_invite_questions: {
+        Args: { p_invite_id: string }
+        Returns: {
+          attached_photo_index: number
+          id: string
+          invite_id: string
+          no_label: string
+          question_text: string
+          require_answer: boolean
+          sort_order: number
+          yes_label: string
+        }[]
+      }
+      get_invite_reveal: {
+        Args: { p_pin: string; p_slug: string }
+        Returns: Json
+      }
+      get_invite_state: {
+        Args: { p_slug: string }
+        Returns: {
+          expires_at: string
+          found: boolean
+          is_active: boolean
+        }[]
+      }
+      get_owner_contributions: {
+        Args: { p_invite_id: string }
+        Returns: {
+          approved: boolean
+          contributor_name: string
+          created_at: string
+          id: string
+          invite_id: string
+          message: string
+          moderation_status: string
+          photo_url: string
+        }[]
+      }
+      get_reaction_counts: {
+        Args: { p_slug: string }
+        Returns: {
+          count: number
+          emoji: string
+        }[]
+      }
       increment_view_count: { Args: { invite_id: string }; Returns: number }
+      log_invite_open: {
+        Args: { p_invite_id: string; p_user_agent?: string }
+        Returns: number
+      }
+      moderate_contribution: {
+        Args: { p_id: string; p_status: string }
+        Returns: Json
+      }
+      open_invite_letter: { Args: { p_letter_id: string }; Returns: Json }
       record_answer: {
         Args: {
           p_answer: boolean
@@ -552,6 +800,14 @@ export type Database = {
           p_question_id: string
           p_user_agent?: string
         }
+        Returns: Json
+      }
+      record_notify_request: {
+        Args: { p_email: string; p_slug: string }
+        Returns: Json
+      }
+      record_reaction: {
+        Args: { p_emoji: string; p_slug: string; p_visitor_hash: string }
         Returns: Json
       }
       record_rsvp:
@@ -572,9 +828,27 @@ export type Database = {
             }
             Returns: Json
           }
+      set_invite_pin: {
+        Args: { p_hint?: string; p_invite_id: string; p_pin: string }
+        Returns: Json
+      }
+      submit_contribution: {
+        Args: {
+          p_message: string
+          p_name: string
+          p_photo_url?: string
+          p_slug: string
+          p_visitor_hash?: string
+        }
+        Returns: Json
+      }
       unsubscribe_user: {
         Args: { p_list: string; p_user_id: string }
         Returns: boolean
+      }
+      verify_invite_pin: {
+        Args: { p_pin: string; p_slug: string }
+        Returns: Json
       }
       verify_stripe_customer: {
         Args: { p_customer_id: string; p_user_id: string }

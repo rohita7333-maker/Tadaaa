@@ -19,6 +19,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import type { Theme } from "@/lib/themes";
+import { derived, palette } from "@/theme/tokens";
 
 const PARTICLE_GLYPH: Record<Theme["particleType"], string | null> = {
   hearts: "♥",
@@ -174,6 +175,31 @@ function ConfettiPiece({
   );
 }
 
+/**
+ * `burst()` in `tadaaaa/tadaaaa-editorial.html`:
+ *
+ *   function burst(){ if(matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+ *     confetti({particleCount:70,spread:60,origin:{y:.6},
+ *               colors:["#D45847","#CCAC9F","#1A1A1A","#F5F0ED"]}); }
+ *
+ * Four palette primitives, no glyph — the editorial identity has no emoji
+ * confetti — and a hard no-op under reduce-motion, exactly like the mockup.
+ */
+const BURST_COLORS = [palette.coral, palette.sand, palette.ink, palette.pebble];
+const BURST_COUNT = 70;
+
+export function EditorialBurst({ run, reduced = false }: { run: boolean; reduced?: boolean }) {
+  const items = useMemo(() => Array.from({ length: BURST_COUNT }, (_, i) => i), []);
+  if (!run || reduced) return null;
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      {items.map((i) => (
+        <ConfettiPiece key={i} index={i} run={run} colors={BURST_COLORS} glyph={null} reduced={false} />
+      ))}
+    </View>
+  );
+}
+
 export function Confetti({
   run,
   theme,
@@ -186,13 +212,21 @@ export function Confetti({
   reduced?: boolean;
 }) {
   const items = useMemo(() => Array.from({ length: count }, (_, i) => i), [count]);
-  const palette = [theme.colors.accent, theme.colors.accentLight, "#E8D5A8", "#C9A96E", "#fff"];
+  // Was `#E8D5A8` / `#C9A96E` — retired warm-palette literals that survived the
+  // token migration here. Now the editorial equivalents, so this matches web.
+  const particleColors = [
+    theme.colors.accent,
+    theme.colors.accentLight,
+    palette.sand,
+    derived.sandDeep,
+    derived.white,
+  ];
   const glyph = PARTICLE_GLYPH[theme.particleType];
   if (!run) return null;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       {items.map((i) => (
-        <ConfettiPiece key={i} index={i} run={run} colors={palette} glyph={glyph} reduced={reduced} />
+        <ConfettiPiece key={i} index={i} run={run} colors={particleColors} glyph={glyph} reduced={reduced} />
       ))}
     </View>
   );

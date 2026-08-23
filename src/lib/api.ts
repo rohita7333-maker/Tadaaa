@@ -12,12 +12,66 @@
 import { ENV, hasBackend } from "./env";
 import { supabase } from "./supabase";
 
+/**
+ * A failed backend call, carrying the HTTP status.
+ *
+ * `post()` used to throw a bare `Error`, which discarded the status and left
+ * every caller unable to tell 429 from 422 from 503. Web branches on exactly
+ * those codes to pick its four AI-drafter messages; mobile could not, so it
+ * showed one generic string for all of them. The alternative — string-matching
+ * the thrown message — would silently go stale the moment the backend reworded
+ * anything.
+ *
+ * Additive and backwards-compatible: this still extends Error, so every
+ * existing `catch (e) { e.message }` keeps working untouched.
+ */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 export class BackendUnavailableError extends Error {
   constructor() {
     super(
       "This feature needs the TaDaaaa web backend. Set EXPO_PUBLIC_API_BASE_URL to your running Next app (LAN dev IP or deployed URL)."
     );
     this.name = "BackendUnavailableError";
+  }
+}
+
+/**
+ * Every backend call is time-boxed.
+ *
+ * `EXPO_PUBLIC_API_BASE_URL` is BAKED into the bundle at export time and points
+ * at a LAN address in development — an address that changes whenever the Mac
+ * moves network. A `fetch` to a host that does not answer does not fail: it
+ * hangs for the OS connect timeout, which is over a minute. Frame B2 loaded its
+ * invite, its RSVP count and its header photo in one `Promise.all`, so a stale
+ * base URL left the surprise detail screen on its loading skeleton for the
+ * whole of that minute. Seen doing exactly that in a browser.
+ *
+ * GETs are the ones on a render path, so they get the short leash. POSTs
+ * include the AI drafter, which legitimately takes tens of seconds.
+ */
+const GET_TIMEOUT_MS = 8_000;
+const POST_TIMEOUT_MS = 30_000;
+
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -32,11 +86,15 @@ async function authHeader(): Promise<Record<string, string>> {
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   if (!hasBackend) throw new BackendUnavailableError();
-  const res = await fetch(`${ENV.apiBaseUrl}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...(await authHeader()) },
-    body: JSON.stringify(body),
-  });
+  const res = await fetchWithTimeout(
+    `${ENV.apiBaseUrl}${path}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(await authHeader()) },
+      body: JSON.stringify(body),
+    },
+    POST_TIMEOUT_MS
+  );
   if (!res.ok) {
     // Prefer the backend's friendly message when present; never leak internals.
     let msg = `Request failed (${res.status})`;
@@ -50,7 +108,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
         /* keep default */
       }
     }
-    throw new Error(msg);
+    throw new ApiError(msg, res.status);
   }
   return (await res.json()) as T;
 }
@@ -58,7 +116,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 async function getJson<T>(path: string): Promise<T | null> {
   if (!hasBackend) return null;
   try {
-    const res = await fetch(`${ENV.apiBaseUrl}${path}`);
+    const res = await fetchWithTimeout(`${ENV.apiBaseUrl}${path}`, {}, GET_TIMEOUT_MS);
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {

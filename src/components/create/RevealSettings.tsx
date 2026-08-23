@@ -1,6 +1,23 @@
-import { Pressable, Switch, View } from "react-native";
-import { Clock, Hand, Moon } from "lucide-react-native";
-import { Txt, colors, fonts, radii, spacing } from "@/components/ui";
+/**
+ * `w4` + `w5` in `tadaaaa/tadaaaa-editorial.html` — the `.rsel` / `.rcard`
+ * reveal picker (each card carrying a 74x104 `.shot` of the style), and the
+ * `.tglrow` switch rows, which are exactly the shape of the shipped `EdSetRow`.
+ *
+ * The mockup's `.shot` previews animate (`mscroll` / `mpulse`). They ship static
+ * here: three looping animations behind a picker is motion without a job, and
+ * the still frame already reads the difference between the three styles.
+ */
+import { Pressable, Text, View } from "react-native";
+import {
+  EdHairline,
+  EdSetRow,
+  EdSwitch,
+  fieldStyles,
+  fonts,
+  palette,
+  radii,
+} from "@/components/editorial";
+import { spacing } from "@/components/ui";
 
 interface Props {
   revealType: "tap" | "countdown" | "scroll_story";
@@ -48,16 +65,12 @@ function formatFriendly(iso: string): string {
   });
 }
 
-function DatePickerRow({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (iso: string) => void;
-}) {
+/* --------------------------------------------------------------- date chips */
+
+function DatePickerRow({ value, onChange }: { value: string; onChange: (iso: string) => void }) {
   return (
     <View style={{ gap: spacing.sm }}>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         {DAY_OFFSETS.map((opt) => {
           const iso = computeDate(opt).toISOString();
           const selected = value === iso;
@@ -65,37 +78,110 @@ function DatePickerRow({
             <Pressable
               key={opt.label}
               onPress={() => onChange(iso)}
-              style={({ pressed }) => ({
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              accessibilityLabel={opt.label}
+              hitSlop={8}
+              style={{
+                minHeight: 36,
+                justifyContent: "center",
                 paddingHorizontal: 12,
-                paddingVertical: 8,
                 borderRadius: radii.pill,
                 borderWidth: 1,
-                borderColor: selected ? colors.rose : colors.lightGray,
-                backgroundColor: selected ? colors.roseChipBg : colors.white,
-                transform: [{ scale: pressed ? 0.96 : 1 }],
-              })}
+                borderColor: selected ? palette.ink : palette.mist,
+                backgroundColor: selected ? palette.ink : palette.paper,
+              }}
             >
-              <Txt
+              <Text
                 style={{
-                  fontFamily: fonts.bodyMedium,
-                  fontSize: 12,
-                  color: selected ? colors.roseDeep : colors.warmGray,
+                  fontFamily: fonts.body,
+                  fontSize: 13,
+                  color: selected ? palette.paper : palette.stone,
                 }}
               >
                 {opt.label}
-              </Txt>
+              </Text>
             </Pressable>
           );
         })}
       </View>
       {value ? (
-        <Txt variant="body" muted style={{ fontSize: 12 }}>
+        <Text style={{ fontFamily: fonts.body, fontSize: 12, color: palette.stone }}>
           Set for {formatFriendly(value)}
-        </Txt>
+        </Text>
       ) : null}
     </View>
   );
 }
+
+/* --------------------------------------------------------------- shot stills */
+
+/** `.rcard .shot{width:74px;height:104px;border:1px solid var(--mist)}` */
+function Shot({ kind }: { kind: "tap" | "countdown" | "scroll_story" }) {
+  return (
+    <View
+      style={{
+        width: 74,
+        height: 104,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: palette.mist,
+        overflow: "hidden",
+        backgroundColor: palette.ink,
+      }}
+    >
+      {kind === "scroll_story" ? (
+        <>
+          <View style={{ flex: 1, backgroundColor: palette.ink }} />
+          <View style={{ flex: 1, backgroundColor: palette.pebble }} />
+        </>
+      ) : kind === "tap" ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 26, height: 32, borderRadius: 4, backgroundColor: palette.sand }} />
+        </View>
+      ) : (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <Text
+            style={{
+              fontFamily: fonts.heading,
+              fontWeight: "400",
+              fontSize: 12,
+              color: palette.sand,
+            }}
+          >
+            03:12:44
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+/* -------------------------------------------------------------------- main */
+
+/**
+ * Verbatim from web's `STYLES` in
+ * `surprise-invite/src/components/create/RevealSettings.tsx`. The picker names
+ * are web's picker names and the blurbs are web's blurbs; mobile previously
+ * re-worded all six strings and, worse, disagreed with its own summary chips.
+ */
+const REVEAL_STYLES = [
+  {
+    key: "tap",
+    label: "Tap to reveal",
+    sub: "One tap. Everything at once.",
+  },
+  {
+    key: "countdown",
+    label: "Countdown",
+    sub: "Anticipation, to the second.",
+  },
+  {
+    key: "scroll_story",
+    label: "Scroll story",
+    sub: "A cinematic scroll, scene by scene.",
+  },
+] as const;
 
 export default function RevealSettings({
   revealType,
@@ -112,174 +198,95 @@ export default function RevealSettings({
   onEnableDodgeNoChange,
 }: Props) {
   return (
-    <View style={{ gap: spacing.lg }}>
-      <View style={{ gap: spacing.sm }}>
-        <Txt variant="label">Reveal mechanic</Txt>
-        <View style={{ gap: spacing.sm }}>
-          {(
-            [
-              { key: "tap", label: "Tap to Reveal", sub: "They tap to open", Icon: Hand, isNew: false },
-              { key: "countdown", label: "Countdown", sub: "Build anticipation", Icon: Clock, isNew: false },
-              {
-                key: "scroll_story",
-                label: "Scroll Story",
-                sub: "The moment unfolds as they scroll",
-                Icon: Moon,
-                isNew: true,
-              },
-            ] as const
-          ).map(({ key, label, sub, Icon, isNew }) => {
-            const selected = revealType === key;
-            return (
-              <Pressable
-                key={key}
-                onPress={() => onRevealTypeChange(key)}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                accessibilityLabel={`${label}. ${sub}`}
-                style={({ pressed }) => ({
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: spacing.md,
-                  padding: spacing.md,
-                  borderRadius: radii.lg,
-                  borderWidth: 2,
-                  borderColor: selected ? colors.rose : colors.lightGray,
-                  backgroundColor: selected ? colors.roseChipBg : colors.white,
-                  transform: [{ scale: pressed ? 0.98 : 1 }],
-                })}
-              >
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: radii.md,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: selected ? colors.white : colors.cream,
-                  }}
+    <View style={{ gap: spacing.xl }}>
+      <View style={{ gap: 12 }}>
+        <Text style={fieldStyles.label}>Pick how it unfolds</Text>
+        {REVEAL_STYLES.map(({ key, label, sub }) => {
+          const selected = revealType === key;
+          return (
+            <Pressable
+              key={key}
+              onPress={() => onRevealTypeChange(key)}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              accessibilityLabel={`${label}. ${sub}`}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 16,
+                backgroundColor: palette.paper,
+                borderRadius: radii.md,
+                borderWidth: selected ? 2 : 1,
+                borderColor: selected ? palette.coral : palette.mist,
+                padding: selected ? 15 : 16,
+              }}
+            >
+              <Shot kind={key} />
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text
+                  style={{ fontFamily: fonts.heading, fontWeight: "400", fontSize: 17, color: palette.ink }}
                 >
-                  <Icon size={20} color={selected ? colors.rose : colors.warmGray} />
-                </View>
-                <View style={{ flex: 1, gap: 1 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    <Txt
-                      style={{
-                        fontFamily: fonts.bodyMedium,
-                        fontSize: 13.5,
-                        color: selected ? colors.roseDeep : colors.charcoal,
-                      }}
-                    >
-                      {label}
-                    </Txt>
-                    {isNew && (
-                      <View
-                        style={{
-                          backgroundColor: colors.goldChipBg,
-                          borderColor: colors.goldChipBorder,
-                          borderWidth: 1,
-                          borderRadius: radii.pill,
-                          paddingHorizontal: 6,
-                          paddingVertical: 1,
-                        }}
-                      >
-                        <Txt
-                          style={{
-                            fontFamily: fonts.bodyBold,
-                            fontSize: 8.5,
-                            letterSpacing: 0.4,
-                            color: colors.goldChipText,
-                          }}
-                        >
-                          NEW
-                        </Txt>
-                      </View>
-                    )}
-                  </View>
-                  <Txt variant="body" muted style={{ fontSize: 11 }}>
-                    {sub}
-                  </Txt>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
+                  {label}
+                </Text>
+                <Text style={{ fontFamily: fonts.body, fontSize: 13, color: palette.stone }}>{sub}</Text>
+              </View>
+            </Pressable>
+          );
+        })}
       </View>
 
-      {revealType === "countdown" && (
+      {revealType === "countdown" ? (
         <View style={{ gap: spacing.sm }}>
-          <Txt variant="label">Reveal date &amp; time</Txt>
+          <Text style={fieldStyles.label}>Reveal date &amp; time</Text>
           <DatePickerRow value={countdownDate} onChange={onCountdownDateChange} />
         </View>
-      )}
+      ) : null}
 
-      <ToggleRow
-        title="Set expiry date"
-        subtitle="Surprise auto-expires on this date"
-        value={hasExpiry}
-        onChange={onHasExpiryChange}
-      />
-      {hasExpiry && (
-        <View style={{ gap: spacing.sm }}>
-          <Txt variant="label">Expiry date</Txt>
-          <DatePickerRow value={expiresAt} onChange={onExpiresAtChange} />
-        </View>
-      )}
+      <View>
+        <EdHairline />
+        <EdSetRow
+          title="Set an expiry date"
+          sub="The link stops working after this moment."
+          right={
+            <EdSwitch
+              value={hasExpiry}
+              onValueChange={onHasExpiryChange}
+              accessibilityLabel="Toggle expiry date"
+            />
+          }
+        />
+        {hasExpiry ? (
+          <View style={{ gap: spacing.sm, paddingBottom: spacing.lg }}>
+            <Text style={fieldStyles.label}>Expiry date</Text>
+            <DatePickerRow value={expiresAt} onChange={onExpiresAtChange} />
+          </View>
+        ) : null}
 
-      <ToggleRow
-        title="Let family contribute photos/messages"
-        subtitle="Get a second link to send to people who want to add memories"
-        value={acceptContributions}
-        onChange={onAcceptContributionsChange}
-      />
+        <EdSetRow
+          title="Group contributions"
+          sub="Friends add words and photos before it goes live. You approve each one."
+          right={
+            <EdSwitch
+              value={acceptContributions}
+              onValueChange={onAcceptContributionsChange}
+              accessibilityLabel="Toggle group contributions"
+            />
+          }
+        />
 
-      <ToggleRow
-        title="Dodging No button"
-        subtitle="No button runs away when tapped near"
-        value={enableDodgeNo}
-        onChange={onEnableDodgeNoChange}
-      />
-    </View>
-  );
-}
-
-function ToggleRow({
-  title,
-  subtitle,
-  value,
-  onChange,
-}: {
-  title: string;
-  subtitle: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: spacing.md,
-        padding: spacing.md,
-        borderRadius: radii.lg,
-        backgroundColor: colors.cream,
-        borderWidth: 1,
-        borderColor: colors.hair,
-      }}
-    >
-      <View style={{ flex: 1, gap: 2 }}>
-        <Txt style={{ fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.charcoal }}>{title}</Txt>
-        <Txt variant="body" muted style={{ fontSize: 11 }}>
-          {subtitle}
-        </Txt>
+        <EdSetRow
+          title={'Dodging "No" button'}
+          sub="The No runs away when they reach for it. A classic."
+          last
+          right={
+            <EdSwitch
+              value={enableDodgeNo}
+              onValueChange={onEnableDodgeNoChange}
+              accessibilityLabel="Toggle dodging No button"
+            />
+          }
+        />
       </View>
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        trackColor={{ true: colors.rose, false: colors.lightGray }}
-        thumbColor="#fff"
-      />
     </View>
   );
 }

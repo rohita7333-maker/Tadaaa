@@ -1,8 +1,16 @@
+/**
+ * Settings — the privacy/data half of the mockup's `renderSettings()`
+ * (`tadaaaa-editorial.html` L1530): a stack of `.setrow` entries, each a label
+ * block plus one trailing control, closing on the `.setrow.danger` delete row.
+ *
+ * Behaviour preserved: the same GDPR export, the same web hand-off for legal
+ * pages and account deletion, the same confirm-before-destructive dialogs.
+ */
 import { useState } from "react";
-import { Alert, Share, View } from "react-native";
+import { Alert, ScrollView, Share } from "react-native";
 import * as WebBrowser from "expo-web-browser";
-import { Download, FileText, LogOut, Shield, Trash2 } from "lucide-react-native";
-import { Button, Card, Screen, Txt, colors, spacing } from "@/components/ui";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { EdButton, EdPageHead, EdPanel, EdSetRow, palette } from "@/components/editorial";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/lib/supabase";
@@ -76,52 +84,69 @@ export default function Settings() {
   }
 
   return (
-    <Screen bg={colors.cream} scroll contentStyle={{ paddingTop: spacing.sm }}>
+    <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, backgroundColor: palette.pebble }}>
       <ScreenHeader />
-      <View style={{ gap: 4 }}>
-        <Txt variant="eyebrow">preferences</Txt>
-        <Txt variant="h1">Settings</Txt>
-        <Txt variant="body" muted>Privacy, data export, and account controls.</Txt>
-      </View>
+      <ScrollView
+        contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <EdPageHead title="Settings" sub="Privacy, data export, and account controls." />
 
-      <Card style={{ gap: spacing.md }}>
-        <Txt variant="title">Privacy & data</Txt>
-        <Button
-          title="Export my data (GDPR)"
-          variant="outline"
-          left={<Download size={18} color={colors.charcoal} />}
-          loading={exporting}
-          onPress={exportData}
-        />
-        <Button
-          title="Terms of service"
-          variant="outline"
-          left={<FileText size={18} color={colors.charcoal} />}
-          onPress={() => openLegal("/terms")}
-        />
-        <Button
-          title="Privacy policy"
-          variant="outline"
-          left={<Shield size={18} color={colors.charcoal} />}
-          onPress={() => openLegal("/privacy")}
-        />
-      </Card>
+        <EdPanel title="Privacy & data">
+          <EdSetRow
+            title="Download your data"
+            sub="Everything we store about you, in one JSON file."
+            right={
+              <EdButton
+                title="Export"
+                variant="line"
+                small
+                loading={exporting}
+                onPress={exportData}
+              />
+            }
+          />
+          <EdSetRow
+            title="Terms of service"
+            right={
+              <EdButton
+                title="Read"
+                variant="line"
+                small
+                onPress={() => openLegal("/terms")}
+              />
+            }
+          />
+          <EdSetRow
+            title="Privacy policy"
+            last
+            right={
+              <EdButton
+                title="Read"
+                variant="line"
+                small
+                onPress={() => openLegal("/privacy")}
+              />
+            }
+          />
+        </EdPanel>
 
-      <Card style={{ gap: spacing.md }}>
-        <Txt variant="title">Account</Txt>
-        <Button
-          title="Sign out"
-          variant="outline"
-          left={<LogOut size={18} color={colors.roseDeep} />}
-          onPress={confirmSignOut}
-        />
-        <Button
-          title="Delete account"
-          variant="outline"
-          left={<Trash2 size={18} color={colors.roseDeep} />}
-          onPress={confirmDelete}
-        />
-      </Card>
-    </Screen>
+        <EdPanel title="Account">
+          <EdSetRow
+            title="Sign out"
+            sub="You can always sign back in."
+            right={<EdButton title="Sign out" variant="line" small onPress={confirmSignOut} />}
+          />
+          {/* `.setrow.danger` — coral label, coral-outlined control. */}
+          <EdSetRow
+            title="Delete account"
+            sub="Permanent. Every surprise and message goes with it."
+            danger
+            last
+            right={<EdButton title="Delete account" variant="danger" small onPress={confirmDelete} />}
+          />
+        </EdPanel>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

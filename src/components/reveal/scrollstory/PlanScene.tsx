@@ -9,7 +9,8 @@ import { Linking, Pressable, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import type { StoryConfig, StoryEvent } from "@/lib/scroll-story/config";
 import { Txt, fonts } from "@/components/ui";
-import { HAND_FONT, SEAM_MESSAGE_TO_PLAN, SEAM_PLAN_TO_POLAROID } from "./shared";
+import { palette } from "@/theme/tokens";
+import { SERIF_FONT, SEAM_MESSAGE_TO_PLAN, SEAM_PLAN_TO_POLAROID } from "./shared";
 
 function formatWhen(iso: string): string {
   const d = new Date(iso);
@@ -25,29 +26,26 @@ function formatWhen(iso: string): string {
 
 function Plaque({ event }: { event: StoryEvent }) {
   return (
-    <LinearGradient
-      colors={["#FDF6E8", "#E8D5A8"]}
-      start={{ x: 0.2, y: 0 }}
-      end={{ x: 0.8, y: 1 }}
+    <View
       style={{
         width: "100%",
-        maxWidth: 380,
-        borderRadius: 32,
-        paddingHorizontal: 28,
-        paddingVertical: 30,
-        alignItems: "center",
+        maxWidth: 330,
+        borderRadius: 12,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        backgroundColor: palette.paper,
         borderWidth: 1,
-        borderColor: "rgba(201,169,110,0.65)",
+        borderColor: palette.mist,
       }}
     >
-      <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 2.5, textTransform: "uppercase", color: "#9B3D42" }}>
+      <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 2.5, textTransform: "uppercase", color: palette.stone }}>
         {event.label}
       </Txt>
-      <Txt style={{ marginTop: 12, fontFamily: fonts.heading, fontSize: 22, lineHeight: 28, color: "#2D2926", textAlign: "center" }}>
+      <Txt style={{ marginTop: 4, fontFamily: fonts.heading, fontSize: 18, lineHeight: 24, color: palette.ink }}>
         {event.title}
       </Txt>
       {event.detail ? (
-        <Txt style={{ marginTop: 8, fontFamily: fonts.body, fontStyle: "italic", color: "#6B5E57", textAlign: "center" }}>
+        <Txt style={{ marginTop: 2, fontSize: 13, color: palette.stone }}>
           {event.detail}
         </Txt>
       ) : null}
@@ -57,14 +55,14 @@ function Plaque({ event }: { event: StoryEvent }) {
             const url = `https://maps.google.com/?q=${encodeURIComponent(event.mapsQuery ?? "")}`;
             Linking.openURL(url).catch(() => {});
           }}
-          style={{ marginTop: 16 }}
+          style={{ marginTop: 12 }}
         >
-          <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 14, color: "#9B3D42", textDecorationLine: "underline" }}>
+          <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: palette.coral }}>
             See the route →
           </Txt>
         </Pressable>
       ) : null}
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -87,13 +85,12 @@ export default function PlanScene({ config }: PlanSceneProps) {
       colors={[SEAM_MESSAGE_TO_PLAN, SEAM_PLAN_TO_POLAROID]}
       style={{ paddingHorizontal: 24, paddingVertical: 96 }}
     >
-      <View style={{ alignItems: "center", gap: 4 }}>
-        <Txt style={{ fontFamily: HAND_FONT, fontSize: 24, color: "#9B3D42" }}>here&apos;s the plan ✨</Txt>
-        <Txt style={{ fontFamily: fonts.heading, fontWeight: "600" as const, fontSize: 32, color: "#2D2926" }}>
+      <View style={{ alignItems: "center" }}>
+        <Txt style={{ fontFamily: SERIF_FONT, fontStyle: "italic", fontSize: 17, color: palette.stone }}>
           The plan
         </Txt>
       </View>
-      <View style={{ marginTop: 36, gap: 28, alignItems: "center" }}>
+      <View style={{ marginTop: 22, gap: 12, alignItems: "center" }}>
         {events.map((event, i) => (
           <Plaque key={i} event={event} />
         ))}

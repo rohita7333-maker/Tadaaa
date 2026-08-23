@@ -36,6 +36,9 @@ interface AuthState {
     fullName: string
   ) => Promise<{ needsConfirmation: boolean }>;
   signInWithMagicLink: (email: string) => Promise<void>;
+  /** A2's "Forgot password? Reset it". Sends the reset mail; never reveals
+   *  whether the address has an account — Supabase answers ok either way. */
+  resetPassword: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -113,6 +116,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signInWithOtp({
           email: email.trim(),
           options: { emailRedirectTo: `tadaaaa://auth/callback` },
+        });
+        if (error) throw new Error(error.message);
+      },
+      async resetPassword(email) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `tadaaaa://auth/callback`,
         });
         if (error) throw new Error(error.message);
       },

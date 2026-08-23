@@ -22,7 +22,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
-import { colors, fonts, gradients, radii, shadows, spacing } from "@/theme/tokens";
+import { colors, fonts, gradients, palette, radii, shadows, spacing, typography } from "@/theme/tokens";
 
 type TxtVariant =
   | "h1"
@@ -73,6 +73,7 @@ export function Screen({
   scroll,
   bg = colors.creamDark,
   contentStyle,
+  overlay,
   ...rest
 }: ViewProps & {
   children: ReactNode;
@@ -80,6 +81,17 @@ export function Screen({
   scroll?: boolean;
   bg?: string;
   contentStyle?: ViewProps["style"];
+  /**
+   * Rendered as a SIBLING of the scroll container, so it pins to the viewport.
+   *
+   * Anything absolutely-positioned that must stay put — toasts, snackbars —
+   * has to go here. Passing it as a normal child puts it inside the
+   * ScrollView's content container, where `position: "absolute"` is relative
+   * to the scrolled content and the element drifts off-screen as the user
+   * scrolls. That is not obvious from the call site, which is why this slot
+   * exists rather than a comment telling people to be careful.
+   */
+  overlay?: ReactNode;
 }) {
   const inner = scroll ? (
     <ScrollView
@@ -95,6 +107,7 @@ export function Screen({
   return (
     <SafeAreaView edges={edges} style={[{ flex: 1, backgroundColor: bg }, rest.style]}>
       {inner}
+      {overlay}
     </SafeAreaView>
   );
 }
@@ -266,4 +279,4 @@ export function Field({
   );
 }
 
-export { colors, fonts, gradients, radii, shadows, spacing };
+export { colors, fonts, gradients, palette, radii, shadows, spacing, typography };

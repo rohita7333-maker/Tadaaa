@@ -1,55 +1,78 @@
-import { useCallback, useMemo, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
+/**
+ * B4 — Activity + moderation.
+ *
+ * Frame anatomy: a title row with a coral "Mark all read" · the
+ * coral-bordered moderation card at the TOP ("moderation lives at the top of
+ * Activity rather than in its own tab — approving is a reaction to a
+ * notification, not a destination") · then notifications grouped under Today
+ * and Earlier, unread rows carrying an 8px coral dot and ink text, read rows no
+ * dot and stone text.
+ *
+ * DEVIATION — the pre-handoff screen grouped by SURPRISE and offered
+ * views/RSVPs/answers filter chips. The frame does neither: it is one recency
+ * list. Both are dropped to match it. Per-surprise history is still reachable —
+ * every row deep-links to its surprise, and B2 carries that surprise's own
+ * numbers.
+ *
+ * READ STATE IS LOCAL — see `lib/activity-read.ts` for why there is no column.
+ */
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { formatDistanceToNow } from "date-fns";
-import { Eye, Heart, MessageCircle, Sparkles } from "lucide-react-native";
-import { Card, Txt, colors, fonts, radii, spacing } from "@/components/ui";
+import { EdEmpty, derived, palette } from "@/components/editorial";
+import { ModerationCard } from "@/components/handoff";
 import { useAuth } from "@/providers/AuthProvider";
 import { getActivityRows } from "@/lib/db";
 import {
   ACTIVITY_FEED_CAP,
   buildActivityFeed,
   describeActivity,
-  filterByFocus,
-  groupByInvite,
   type ActivityEvent,
-  type ActivityFocus,
   type InviteMeta,
 } from "@/lib/activity-feed";
+import {
+  groupByRecency,
+  isUnread,
+  markAllRead,
+  moderationLine,
+  readLastReadAt,
+  relativeAge,
+} from "@/lib/activity-read";
+import {
+  getOwnerContributions,
+  moderateContribution,
+  partitionByModeration,
+  type OwnerContribution,
+} from "@/lib/contributions";
+import { radii, space, touch, type } from "@/theme/tokens";
 
-const FOCUS_TABS: { key: ActivityFocus; label: string }[] = [
-  { key: "all", label: "Everything" },
-  { key: "views", label: "Opens" },
-  { key: "rsvps", label: "RSVPs" },
-  { key: "answers", label: "Answers" },
-];
-
-const KIND_ICON = {
-  view: Eye,
-  rsvp: Heart,
-  answer: MessageCircle,
-} as const;
-
-const KIND_COLOR = {
-  view: "#C9A96E",
-  rsvp: "#C4686D",
-  answer: "#6B8F71",
-} as const;
+/** One pending contribution, plus which surprise it belongs to. */
+interface PendingItem extends OwnerContribution {
+  inviteId: string;
+  inviteTitle: string;
+}
 
 /**
- * Activity — the "who" behind the Home tab's counters, mirroring the web
- * `/dashboard/activity` feed: views, RSVPs and answers merged newest-first and
- * grouped per invite. Reads are creator-scoped in db.ts and re-filtered in
- * buildActivityFeed; guest names are sanitized + capped there too.
+ * `get_owner_contributions` is per-invite, so this fans out. Capped because a
+ * creator with fifty live surprises should not pay fifty round trips to render
+ * one card — the newest surprises are the ones with anything waiting.
  */
+const MODERATION_INVITE_SCAN = 10;
+
 export default function Activity() {
   const { user } = useAuth();
   const router = useRouter();
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [invites, setInvites] = useState<InviteMeta[]>([]);
-  const [focus, setFocus] = useState<ActivityFocus>("all");
+  const [pending, setPending] = useState<PendingItem[]>([]);
+  const [lastReadAt, setLastReadAt] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    readLastReadAt().then(setLastReadAt);
+  }, []);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -64,6 +87,19 @@ export default function Activity() {
         ownedInviteIds: rows.invites.map((inv) => inv.id),
       })
     );
+
+    const scanned = rows.invites.slice(0, MODERATION_INVITE_SCAN);
+    const perInvite = await Promise.all(
+      scanned.map(async (inv) => {
+        const all = await getOwnerContributions(inv.id);
+        return partitionByModeration(all).pending.map((c) => ({
+          ...c,
+          inviteId: inv.id,
+          inviteTitle: inv.title,
+        }));
+      })
+    );
+    setPending(perInvite.flat());
   }, [user]);
 
   useFocusEffect(
@@ -72,19 +108,75 @@ export default function Activity() {
     }, [load])
   );
 
-  const visible = useMemo(() => filterByFocus(events, focus), [events, focus]);
-  const groups = useMemo(() => groupByInvite(visible, invites), [visible, invites]);
-  const isCapped = events.length === ACTIVITY_FEED_CAP;
+  const groups = useMemo(
+    () => groupByRecency(events.map((e) => ({ ...e, at: e.at }))),
+    [events]
+  );
+  const unreadCount = useMemo(
+    () => events.filter((e) => isUnread(e.at, lastReadAt)).length,
+    [events, lastReadAt]
+  );
+
+  const top = pending[0] ?? null;
+
+  async function moderate(id: string, status: "approved" | "rejected") {
+    setBusy(true);
+    try {
+      await moderateContribution(id, status);
+      // Drop it locally first: the queue is the point of this card, and a
+      // full refetch before the row disappears reads as a stuck button.
+      setPending((p) => p.filter((c) => c.id !== id));
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.creamDark }}>
+    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: palette.paper }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          paddingHorizontal: 20,
+          paddingTop: 6,
+          paddingBottom: 12,
+        }}
+      >
+        <Text style={type.screenTitle}>Activity</Text>
+        {unreadCount > 0 ? (
+          <Pressable
+            onPress={async () => {
+              const now = Date.now();
+              await markAllRead(now);
+              setLastReadAt(now);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={`Mark all ${unreadCount} as read`}
+            hitSlop={10}
+          >
+            <Text
+              style={{
+                ...type.buttonLabel,
+                letterSpacing: 12 * 0.06,
+                // coralDeep: plain coral is 3.94:1 on paper and this is 12px.
+                color: derived.coralDeep,
+              }}
+            >
+              Mark all read
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+
       <ScrollView
-        contentContainerStyle={{ padding: spacing.xl, gap: spacing.md, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            tintColor={colors.rose}
+            tintColor={palette.coral}
             onRefresh={async () => {
               setRefreshing(true);
               await load();
@@ -93,122 +185,189 @@ export default function Activity() {
           />
         }
       >
-        <View style={{ gap: 4, marginBottom: spacing.sm }}>
-          <Txt variant="eyebrow">what&apos;s happening</Txt>
-          <Txt variant="h1">Activity</Txt>
-        </View>
+        {top ? (
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: palette.coral,
+              borderRadius: radii.md,
+              padding: 16,
+              marginBottom: 20,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                marginBottom: 12,
+                gap: 12,
+              }}
+            >
+              <Text style={{ ...type.sectionLabel, color: derived.coralDeep }}>Needs you</Text>
+              <Text style={{ ...type.bodySecondary, fontSize: 12 }} numberOfLines={1}>
+                {top.inviteTitle}
+              </Text>
+            </View>
 
-        {events.length > 0 && (
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {FOCUS_TABS.map((tab) => {
-              const count =
-                tab.key === "all" ? events.length : filterByFocus(events, tab.key).length;
-              const active = tab.key === focus;
+            <Text
+              style={{
+                ...type.screenTitle,
+                fontSize: 17,
+                lineHeight: 17 * 1.55,
+                fontStyle: "italic",
+                marginBottom: 6,
+              }}
+            >
+              “{top.message}”
+            </Text>
+            <Text style={{ ...type.bodySecondary, marginBottom: 14 }}>
+              {moderationLine({
+                name: top.name,
+                photoCount: top.photoUrl ? 1 : 0,
+                createdAt: top.createdAt ?? new Date().toISOString(),
+              })}
+            </Text>
+
+            <View style={{ flexDirection: "row", gap: 9 }}>
+              <ModerationAction
+                label="Reject"
+                disabled={busy}
+                onPress={() => moderate(top.id, "rejected")}
+              />
+              <ModerationAction
+                label="Approve"
+                filled
+                disabled={busy}
+                onPress={() => moderate(top.id, "approved")}
+              />
+            </View>
+
+            {pending.length > 1 ? (
+              <Text style={{ ...type.bodySecondary, fontSize: 12, marginTop: 10 }}>
+                {pending.length - 1} more waiting
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {events.length === 0 ? (
+          <EdEmpty>
+            Share a surprise link and every open, RSVP and answer shows up here — your own
+            previews never count.
+          </EdEmpty>
+        ) : null}
+
+        {groups.map((group) => (
+          <View key={group.title}>
+            <Text style={{ ...type.sectionLabel, marginTop: 16, marginBottom: 6 }}>
+              {group.title}
+            </Text>
+            {group.items.map((event) => {
+              const unread = isUnread(event.at, lastReadAt);
+              const invite = invites.find((i) => i.id === event.inviteId);
               return (
                 <Pressable
-                  key={tab.key}
-                  onPress={() => setFocus(tab.key)}
+                  key={event.id}
+                  onPress={() => invite && router.push(`/invite/${invite.id}`)}
                   accessibilityRole="button"
-                  accessibilityState={{ selected: active }}
-                  accessibilityLabel={`${tab.label}, ${count}`}
-                  hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+                  accessibilityLabel={`${describeActivity(event)}. ${relativeAge(event.at)}.${
+                    unread ? " Unread." : ""
+                  }`}
                   style={({ pressed }) => ({
-                    height: 34,
-                    paddingHorizontal: 14,
-                    borderRadius: radii.pill,
-                    borderWidth: 1,
                     flexDirection: "row",
-                    alignItems: "center",
-                    gap: 6,
-                    borderColor: active ? colors.rose : colors.hair,
-                    backgroundColor: active ? "#FFF0EE" : "#fff",
-                    opacity: pressed ? 0.85 : 1,
+                    gap: 12,
+                    paddingVertical: 13,
+                    borderBottomWidth: 1,
+                    borderBottomColor: palette.mist,
+                    minHeight: touch.min,
+                    opacity: pressed ? 0.6 : 1,
                   })}
                 >
-                  <Txt
+                  <View
                     style={{
-                      fontFamily: fonts.bodyBold,
-                      fontSize: 12,
-                      color: active ? colors.rose : colors.warmGray,
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      marginTop: 6,
+                      backgroundColor: unread ? palette.coral : "transparent",
                     }}
-                  >
-                    {tab.label}
-                  </Txt>
-                  <Txt
-                    style={{ fontSize: 11, color: active ? colors.rose : colors.warmGray }}
-                  >
-                    {count}
-                  </Txt>
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        ...type.body,
+                        fontSize: 15,
+                        lineHeight: 15 * 1.45,
+                        color: unread ? palette.ink : palette.stone,
+                      }}
+                    >
+                      {describeActivity(event)}
+                    </Text>
+                    <Text style={{ ...type.bodySecondary, fontSize: 12, marginTop: 3 }}>
+                      {relativeAge(event.at)}
+                    </Text>
+                  </View>
                 </Pressable>
               );
             })}
           </View>
-        )}
-
-        {events.length === 0 && (
-          <Card style={{ alignItems: "center", gap: 10, paddingVertical: 28 }}>
-            <Sparkles size={26} color={colors.rose} />
-            <Txt variant="title">No activity yet</Txt>
-            <Txt variant="body" muted style={{ textAlign: "center" }}>
-              Share a surprise link and every open, RSVP and answer lands here. Your own
-              previews never count.
-            </Txt>
-          </Card>
-        )}
-
-        {events.length > 0 && visible.length === 0 && (
-          <Card>
-            <Txt variant="body" muted style={{ textAlign: "center" }}>
-              Nothing in this filter yet.
-            </Txt>
-          </Card>
-        )}
-
-        {groups.map((group) => (
-          <Card key={group.invite.id} style={{ gap: 10 }}>
-            <Pressable
-              onPress={() => router.push(`/invite/${group.invite.id}`)}
-              accessibilityRole="button"
-              accessibilityLabel={`Open ${group.invite.title}`}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Txt variant="title" numberOfLines={1} style={{ flex: 1 }}>
-                  {group.invite.title}
-                </Txt>
-                <Txt variant="body" muted style={{ fontSize: 11 }}>
-                  {group.events.length} {group.events.length === 1 ? "moment" : "moments"}
-                </Txt>
-              </View>
-            </Pressable>
-
-            <View style={{ gap: 8 }}>
-              {group.events.map((event) => {
-                const Icon = KIND_ICON[event.kind];
-                return (
-                  <View
-                    key={event.id}
-                    style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
-                  >
-                    <Icon size={15} color={KIND_COLOR[event.kind]} />
-                    <Txt variant="body" numberOfLines={1} style={{ flex: 1 }}>
-                      {describeActivity(event)}
-                    </Txt>
-                    <Txt variant="body" muted style={{ fontSize: 11 }}>
-                      {formatDistanceToNow(new Date(event.at), { addSuffix: true })}
-                    </Txt>
-                  </View>
-                );
-              })}
-            </View>
-          </Card>
         ))}
 
-        {isCapped && visible.length > 0 && (
-          <Txt variant="body" muted style={{ textAlign: "center", fontSize: 11 }}>
-            Showing your {ACTIVITY_FEED_CAP} most recent moments.
-          </Txt>
-        )}
+        {events.length === ACTIVITY_FEED_CAP ? (
+          <View style={{ marginTop: space.x5 }}>
+            <EdEmpty>
+              Showing your {ACTIVITY_FEED_CAP} most recent moments. Open a surprise for its full
+              history.
+            </EdEmpty>
+          </View>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+/** Frame B4's 50/50 Reject / Approve split, 44px tall. */
+function ModerationAction({
+  label,
+  filled,
+  disabled,
+  onPress,
+}: {
+  label: string;
+  filled?: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        flex: 1,
+        minHeight: touch.min,
+        borderRadius: radii.pill,
+        backgroundColor: filled ? palette.ink : "transparent",
+        borderWidth: filled ? 0 : 1,
+        borderColor: palette.mist,
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: disabled ? 0.5 : pressed ? 0.7 : 1,
+      })}
+    >
+      <Text
+        style={{
+          ...type.buttonLabel,
+          letterSpacing: 12 * 0.06,
+          color: filled ? palette.paper : palette.ink,
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+export { ModerationCard };

@@ -1,35 +1,24 @@
-import { View } from "react-native";
+/**
+ * Invite-detail metric tile — the mockup's `.stat`
+ * (`tadaaaa-editorial.html` L253-256). Thin wrapper over the shared `EdStat`
+ * so the detail screen and the dashboard cannot drift.
+ *
+ * The pre-editorial version carried a leading icon; the mockup's stat is
+ * numeral-over-caption with no glyph, so `icon` is accepted and ignored
+ * rather than breaking the call sites in `invite/[id].tsx`, which another
+ * phase owns.
+ */
 import type { ReactNode } from "react";
-import { Txt, colors, radii, spacing } from "@/components/ui";
+import { EdStat } from "@/components/editorial";
 
-/** Small metric tile used in the invite detail stats row. */
 export function StatCard({
-  icon,
   value,
   label,
 }: {
-  icon: ReactNode;
+  /** Accepted for call-site compatibility; the editorial stat has no glyph. */
+  icon?: ReactNode;
   value: string | number;
   label: string;
 }) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: "center",
-        gap: 6,
-        paddingVertical: spacing.lg,
-        backgroundColor: colors.white,
-        borderRadius: radii.lg,
-        borderWidth: 1,
-        borderColor: colors.hair,
-      }}
-    >
-      {icon}
-      <Txt variant="h3">{value}</Txt>
-      <Txt variant="label" muted style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: 0.6 }}>
-        {label}
-      </Txt>
-    </View>
-  );
+  return <EdStat value={String(value)} label={label} />;
 }

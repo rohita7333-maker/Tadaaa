@@ -17,7 +17,10 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import type { StoryConfig } from "@/lib/scroll-story/config";
 import { Txt, fonts } from "@/components/ui";
-import { BRAND_PARTY_COLORS, SEAM_MESSAGE_TO_PLAN, SEAM_SKY_TO_MESSAGE, particleLayout } from "./shared";
+import { palette } from "@/theme/tokens";
+import {
+  SERIF_FONT, BRAND_PARTY_COLORS, SEAM_MESSAGE_TO_PLAN, SEAM_SKY_TO_MESSAGE, particleLayout
+} from "./shared";
 
 const CONFETTI_COUNT = 16;
 const SCENE_HEIGHT_FACTOR = 1.2;
@@ -69,12 +72,12 @@ export default function MessageScene({ config, reduced }: MessageSceneProps) {
     [config.slug]
   );
 
-  const fromLine = config.sender ? `from ${config.sender}, with love —` : "with love —";
+  const fromLine = config.sender ? `From ${config.sender}` : "With love";
 
   return (
     <View style={{ minHeight: sceneHeight, overflow: "hidden" }}>
       <LinearGradient
-        colors={[SEAM_SKY_TO_MESSAGE, "#F5EDE3", SEAM_MESSAGE_TO_PLAN]}
+        colors={[SEAM_SKY_TO_MESSAGE, "#E3D1C9", SEAM_MESSAGE_TO_PLAN]}
         locations={[0, 0.45, 1]}
         style={{ minHeight: sceneHeight, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, paddingVertical: 96 }}
       >
@@ -95,15 +98,15 @@ export default function MessageScene({ config, reduced }: MessageSceneProps) {
         )}
 
         <View style={{ maxWidth: 480, alignItems: "center" }}>
-          <Txt style={{ fontFamily: fonts.hand, fontSize: 26, color: "#9B3D42" }}>{fromLine}</Txt>
+          <Txt style={{ fontFamily: SERIF_FONT, fontStyle: "italic", fontSize: 16, color: palette.stone }}>
+            {fromLine}
+          </Txt>
           <Txt
             style={{
               marginTop: 20,
-              fontFamily: fonts.heading,
-              fontStyle: "italic",
-              fontSize: 21,
-              lineHeight: 32,
-              color: "#2D2926",
+              fontSize: 18,
+              lineHeight: 31,
+              color: palette.ink,
               textAlign: "center",
             }}
           >

@@ -1,14 +1,30 @@
 /**
- * Templates marketplace — mirrors the web /templates page: pick a curated
- * occasion + theme + reveal-style bundle, then jump into the create wizard
- * with it preset. Pushed screen (not a modal) so back navigation feels like
- * browsing, matching /pricing and /settings.
+ * Templates marketplace — the RN equivalent of the mockup's templates screen
+ * (`tadaaaa-editorial.html` L690-697 markup, L282-296 CSS): a `.phead`, a
+ * scrolling `.chips` filter row, a `.rescount` line, then the `.tgrid` of
+ * `.tcard`s.
+ *
+ * Pushed screen (not a modal) so back navigation feels like browsing, matching
+ * /pricing and /settings. Filtering behaviour is unchanged.
  */
 import { useMemo, useState } from "react";
-import { FlatList, Pressable, View, type ListRenderItem } from "react-native";
+import { FlatList, Pressable, Text, View, type ListRenderItem } from "react-native";
 import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { Screen, Txt, colors, fonts, radii, shadows, spacing } from "@/components/ui";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  EdChip,
+  EdEmpty,
+  EdMeta,
+  EdPageHead,
+  fonts,
+  palette,
+  radii,
+  derived,
+} from "@/components/editorial";
+import {
+  LETTER_SPACING_HEADING_RATIO,
+  LINE_HEIGHT_HEADING_RATIO,
+} from "@/theme/tokens";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import {
   templates,
@@ -20,27 +36,26 @@ import {
 import { occasions, getThemeById, gradientStops } from "@/lib/themes";
 
 const FEATURED_COUNT = 5;
-const GRID_GAP = spacing.md;
-// Featured carousel card geometry — declared here (above first use in the
-// snapToInterval below) rather than beside FeaturedCard further down.
+const GUTTER = 20;
+const GRID_GAP = 12;
 const FEATURED_CARD_WIDTH = 168;
 const FEATURED_COVER_HEIGHT = 150;
+/** `.tcard .img { height:150px }`, scaled for the 2-up mobile grid. */
+const GRID_COVER_HEIGHT = 128;
+const CARD_TITLE_SIZE = 17;
 
-const OCCASION_FILTERS: { id: string; label: string; emoji: string }[] = [
-  { id: "all", label: "All", emoji: "✨" },
-  ...occasions.map((o) => ({ id: o.id, label: o.label, emoji: o.emoji })),
+const OCCASION_FILTERS: { id: string; label: string }[] = [
+  { id: "all", label: "All" },
+  ...occasions.map((o) => ({ id: o.id, label: o.label })),
 ];
 
-const PRICE_FILTERS: { id: "all" | "free" | "premium"; label: string; emoji: string }[] = [
-  { id: "all", label: "Any price", emoji: "💫" },
-  { id: "free", label: "Free", emoji: "🎁" },
-  { id: "premium", label: "Premium", emoji: "✨" },
+const PRICE_FILTERS: { id: "all" | "free" | "premium"; label: string }[] = [
+  { id: "all", label: "Any price" },
+  { id: "free", label: "Free" },
+  { id: "premium", label: "Premium" },
 ];
 
-const STYLE_FILTERS: { id: string; label: string }[] = allStyleTags().map((tag) => ({
-  id: tag,
-  label: tag,
-}));
+const STYLE_FILTERS = allStyleTags().map((tag) => ({ id: tag, label: tag }));
 
 export default function TemplatesScreen() {
   const router = useRouter();
@@ -58,6 +73,12 @@ export default function TemplatesScreen() {
     [activeOccasion, activeTier, activeStyleTags]
   );
   const featured = useMemo(() => templates.slice(0, FEATURED_COUNT), []);
+  // A 2-column FlatList stretches a lone trailing card across the full row.
+  // One invisible spacer keeps the last real card at half width.
+  const grid: (Template | null)[] = useMemo(
+    () => (filtered.length % 2 === 1 ? [...filtered, null] : filtered),
+    [filtered]
+  );
 
   function toggleStyleTag(tag: string) {
     setActiveStyleTags((current) =>
@@ -70,118 +91,138 @@ export default function TemplatesScreen() {
   }
 
   return (
-    <Screen bg={colors.creamDark} scroll={false} contentStyle={{ padding: 0, gap: 0 }}>
-      <ScreenHeader variant="back" title="Templates" subtitle="find their moment" />
+    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: palette.pebble }}>
+      <ScreenHeader variant="back" title="Templates" />
 
       <FlatList
-        data={filtered}
-        keyExtractor={(t) => t.id}
+        data={grid}
+        keyExtractor={(t, i) => t?.id ?? `spacer-${i}`}
         numColumns={2}
-        columnWrapperStyle={{ gap: GRID_GAP, paddingHorizontal: spacing.xl }}
+        columnWrapperStyle={{ gap: GRID_GAP, paddingHorizontal: GUTTER }}
         contentContainerStyle={{ gap: GRID_GAP, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         renderItem={renderGridItem(openTemplate)}
         ListHeaderComponent={
-          <View style={{ gap: spacing.xxl, paddingBottom: spacing.lg }}>
-            <View style={{ paddingHorizontal: spacing.xl, gap: 4, paddingTop: spacing.sm }}>
-              <Txt variant="eyebrow">psst… they have no idea</Txt>
-              <Txt variant="h1">Find their moment</Txt>
-              <Txt variant="body" muted>
-                A ready-made occasion, theme, and reveal — just add your words.
-              </Txt>
-            </View>
+          <View style={{ gap: 22, paddingBottom: GRID_GAP }}>
+            <EdPageHead
+              title="Find their moment"
+              sub="A ready-made occasion, theme, and reveal — just add your words."
+              style={{ paddingHorizontal: GUTTER, paddingTop: 8 }}
+            />
 
             <ChipRow
               items={OCCASION_FILTERS}
               activeIds={[activeOccasion]}
               onToggle={setActiveOccasion}
-              accessibilityLabelPrefix="Filter templates by occasion"
+              labelPrefix="Filter by occasion"
             />
-
             <ChipRow
               items={PRICE_FILTERS}
               activeIds={[activeTier]}
               onToggle={(id) => setActiveTier(id as "all" | "free" | "premium")}
-              accessibilityLabelPrefix="Filter templates by price"
+              labelPrefix="Filter by price"
             />
-
             <ChipRow
               items={STYLE_FILTERS}
               activeIds={activeStyleTags}
               onToggle={toggleStyleTag}
-              accessibilityLabelPrefix="Filter templates by style"
+              labelPrefix="Filter by style"
             />
 
-            <View style={{ gap: spacing.md }}>
-              <Txt variant="h3" style={{ paddingHorizontal: spacing.xl }}>
-                Featured
-              </Txt>
+            <View style={{ gap: GRID_GAP }}>
+              <CardTitle style={{ paddingHorizontal: GUTTER }}>Featured</CardTitle>
               <FlatList
                 horizontal
                 data={featured}
                 keyExtractor={(t) => t.id}
                 showsHorizontalScrollIndicator={false}
-                snapToInterval={FEATURED_CARD_WIDTH + spacing.md}
+                snapToInterval={FEATURED_CARD_WIDTH + GRID_GAP}
                 decelerationRate="fast"
-                contentContainerStyle={{ gap: spacing.md, paddingHorizontal: spacing.xl }}
+                contentContainerStyle={{ gap: GRID_GAP, paddingHorizontal: GUTTER }}
                 renderItem={({ item }) => (
-                  <FeaturedCard template={item} onPress={() => openTemplate(item)} />
+                  <TemplateCard
+                    template={item}
+                    onPress={() => openTemplate(item)}
+                    width={FEATURED_CARD_WIDTH}
+                    coverHeight={FEATURED_COVER_HEIGHT}
+                  />
                 )}
               />
             </View>
 
+            {/* `.rescount` */}
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "baseline",
                 justifyContent: "space-between",
-                paddingHorizontal: spacing.xl,
+                gap: 12,
+                paddingHorizontal: GUTTER,
               }}
             >
-              <Txt variant="h3">
+              <CardTitle>
                 {activeOccasion === "all"
-                  ? "The Collection"
+                  ? "The collection"
                   : `${OCCASION_FILTERS.find((f) => f.id === activeOccasion)?.label ?? ""} templates`}
-              </Txt>
-              <Txt variant="body" muted style={{ fontSize: 12.5 }}>
+              </CardTitle>
+              <EdMeta>
                 {filtered.length} {filtered.length === 1 ? "result" : "results"}
-              </Txt>
+              </EdMeta>
             </View>
           </View>
         }
         ListEmptyComponent={
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <Txt variant="body" muted style={{ textAlign: "center" }}>
-              No templates match those filters yet — try clearing one.
-            </Txt>
+          <View style={{ paddingHorizontal: GUTTER }}>
+            <EdEmpty>No templates match those filters yet. Try clearing one.</EdEmpty>
           </View>
         }
       />
-    </Screen>
+    </SafeAreaView>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Shared filter-chip row — occasion (single-select), price (single-select),
-// and style (multi-select) all render through this one component. Selection
-// semantics live in the caller's onToggle (replace vs. toggle-membership).
-// ---------------------------------------------------------------------------
-interface ChipItem {
-  id: string;
-  label: string;
-  emoji?: string;
+/** Section heading at the `.panel h3` size. */
+function CardTitle({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: React.ComponentProps<typeof Text>["style"];
+}) {
+  return (
+    <Text
+      style={[
+        {
+          fontFamily: fonts.heading,
+          fontWeight: "400",
+          fontSize: 19,
+          lineHeight: 19 * LINE_HEIGHT_HEADING_RATIO,
+          letterSpacing: 19 * LETTER_SPACING_HEADING_RATIO,
+          color: palette.ink,
+        },
+        style,
+      ]}
+    >
+      {children}
+    </Text>
+  );
 }
 
+/**
+ * `.chips` — one horizontal scroller per facet. Occasion and price are
+ * single-select, style is multi-select; the difference lives in the caller's
+ * `onToggle`, not here.
+ */
 function ChipRow({
   items,
   activeIds,
   onToggle,
-  accessibilityLabelPrefix,
+  labelPrefix,
 }: {
-  items: ChipItem[];
+  items: { id: string; label: string }[];
   activeIds: string[];
   onToggle: (id: string) => void;
-  accessibilityLabelPrefix: string;
+  labelPrefix: string;
 }) {
   if (items.length === 0) return null;
   return (
@@ -190,160 +231,134 @@ function ChipRow({
       data={items}
       keyExtractor={(f) => f.id}
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: spacing.sm, paddingHorizontal: spacing.xl }}
-      renderItem={({ item }) => {
-        const selected = activeIds.includes(item.id);
-        return (
-          <Pressable
-            onPress={() => onToggle(item.id)}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-            accessibilityLabel={`${accessibilityLabelPrefix}: ${item.label}`}
-            hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
-            style={({ pressed }) => ({
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 6,
-              paddingHorizontal: 14,
-              paddingVertical: 9,
-              borderRadius: radii.pill,
-              borderWidth: 1.5,
-              borderColor: selected ? colors.rose : colors.lightGray,
-              backgroundColor: selected ? colors.roseChipBg : colors.white,
-              transform: [{ scale: pressed ? 0.96 : 1 }],
-            })}
-          >
-            {item.emoji ? <Txt style={{ fontSize: 14 }}>{item.emoji}</Txt> : null}
-            <Txt
-              style={{
-                fontFamily: fonts.bodyMedium,
-                fontSize: 12.5,
-                color: selected ? colors.roseDeep : colors.charcoal,
-                textTransform: item.emoji ? "none" : "capitalize",
-              }}
-            >
-              {item.label}
-            </Txt>
-          </Pressable>
-        );
-      }}
+      contentContainerStyle={{ gap: 8, paddingHorizontal: GUTTER }}
+      renderItem={({ item }) => (
+        <EdChip
+          label={item.label}
+          selected={activeIds.includes(item.id)}
+          onPress={() => onToggle(item.id)}
+          accessibilityLabel={`${labelPrefix}: ${item.label}`}
+        />
+      )}
     />
   );
 }
 
-// ---------------------------------------------------------------------------
-// Featured carousel card — peeking, user-driven snap. No autoplay: mobile
-// carousels are touch-driven, and a 3D coverflow (the web treatment) doesn't
-// translate to a good touch target, so this stays a flat peeking-card row.
-// (FEATURED_CARD_WIDTH / FEATURED_COVER_HEIGHT are declared at the top of the
-// module, above the snapToInterval that consumes the width.)
-// ---------------------------------------------------------------------------
-function FeaturedCard({ template, onPress }: { template: Template; onPress: () => void }) {
+/**
+ * `.tcard` — flat theme wash + glyph cover, then a paper body carrying the
+ * name and the free/premium price note. One card component serves both the
+ * featured rail (fixed width) and the grid (flexed), so the two can never
+ * drift apart.
+ */
+function TemplateCard({
+  template,
+  onPress,
+  width,
+  coverHeight = GRID_COVER_HEIGHT,
+}: {
+  template: Template;
+  onPress: () => void;
+  width?: number;
+  coverHeight?: number;
+}) {
   const theme = getThemeById(template.themeId);
   const occasion = occasions.find((o) => o.id === template.occasionId);
-  const stops = theme ? gradientStops(theme) : [colors.roseLight, colors.rose];
+  // Flat leading stop, not the ramp — the identity bans decorative gradients.
+  const tint = theme ? gradientStops(theme)[0] : palette.pebble;
   const isPremium = template.tier === "premium";
 
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${template.name} — ${isPremium ? "Premium" : "Free"} ${REVEAL_STYLE_LABELS[template.revealType]} template for ${occasion?.label ?? "any occasion"}`}
+      accessibilityLabel={`${template.name} — ${isPremium ? "Premium" : "Free"} ${REVEAL_STYLE_LABELS[template.revealType]} template for ${occasion?.label ?? "any occasion"}. ${template.tagline}`}
       style={({ pressed }) => [
-        { width: FEATURED_CARD_WIDTH, borderRadius: radii.xl, overflow: "hidden", backgroundColor: colors.white },
-        shadows.sm,
-        { transform: [{ scale: pressed ? 0.97 : 1 }] },
+        {
+          width,
+          flex: width == null ? 1 : undefined,
+          borderRadius: radii.md,
+          overflow: "hidden",
+          backgroundColor: palette.paper,
+          borderWidth: 1,
+          borderColor: pressed ? palette.ink : palette.mist,
+        },
       ]}
     >
-      <LinearGradient
-        colors={stops as [string, string, ...string[]]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ height: FEATURED_COVER_HEIGHT, alignItems: "center", justifyContent: "center" }}
+      <View
+        style={{
+          height: coverHeight,
+          backgroundColor: tint,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        <Txt style={{ fontSize: 44 }}>{template.emoji}</Txt>
-      </LinearGradient>
-      <View style={{ padding: spacing.sm, gap: 2 }}>
-        <Txt style={{ fontFamily: fonts.headingSemi, fontSize: 13.5, color: colors.charcoal }} numberOfLines={1}>
-          {template.name}
-        </Txt>
-        <Txt style={{ fontFamily: fonts.body, fontSize: 10.5, color: colors.warmGray }} numberOfLines={1}>
-          {occasion?.label ?? "Any occasion"}
-        </Txt>
-      </View>
-    </Pressable>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Grid card — 2-column collection view.
-// ---------------------------------------------------------------------------
-const GRID_COVER_HEIGHT = 128;
-
-function TemplateCard({ template, onPress }: { template: Template; onPress: () => void }) {
-  const theme = getThemeById(template.themeId);
-  const stops = theme ? gradientStops(theme) : [colors.roseLight, colors.rose];
-  const isPremium = template.tier === "premium";
-
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${template.name} — ${isPremium ? "Premium" : "Free"} ${REVEAL_STYLE_LABELS[template.revealType]} template. ${template.tagline}`}
-      style={({ pressed }) => [
-        { flex: 1, borderRadius: radii.xl, overflow: "hidden", backgroundColor: colors.white },
-        shadows.sm,
-        { transform: [{ scale: pressed ? 0.97 : 1 }] },
-      ]}
-    >
-      <LinearGradient
-        colors={stops as [string, string, ...string[]]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ height: GRID_COVER_HEIGHT, alignItems: "center", justifyContent: "center" }}
-      >
+        {/* `.tcard .img .pv` — reveal style, legible over any theme wash. */}
         <View
           style={{
             position: "absolute",
             top: 8,
             left: 8,
-            backgroundColor: "rgba(255,255,255,0.85)",
+            backgroundColor: palette.paper,
             borderRadius: radii.pill,
             paddingHorizontal: 8,
             paddingVertical: 3,
           }}
         >
-          <Txt style={{ fontFamily: fonts.bodyMedium, fontSize: 9.5, color: colors.charcoal }}>
-            {REVEAL_STYLE_LABELS[template.revealType]}
-          </Txt>
-        </View>
-        <Txt style={{ fontSize: 38 }}>{template.emoji}</Txt>
-      </LinearGradient>
-      <View style={{ padding: spacing.sm, gap: 3 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 4 }}>
-          <Txt style={{ fontFamily: fonts.headingSemi, fontSize: 13, color: colors.charcoal, flex: 1 }} numberOfLines={1}>
-            {template.name}
-          </Txt>
-          <Txt
+          <Text
             style={{
-              fontFamily: fonts.bodyBold,
-              fontSize: 9,
-              letterSpacing: 0.4,
+              fontFamily: fonts.body,
+              fontSize: 9.5,
+              fontWeight: "600",
+              letterSpacing: 9.5 * 0.1,
               textTransform: "uppercase",
-              color: isPremium ? colors.gold : colors.warmGray,
+              color: palette.stone,
+            }}
+          >
+            {REVEAL_STYLE_LABELS[template.revealType]}
+          </Text>
+        </View>
+        <Text style={{ fontSize: 38 }}>{template.emoji}</Text>
+      </View>
+
+      <View style={{ padding: 14, gap: 4 }}>
+        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
+          <Text
+            numberOfLines={1}
+            style={{
+              flex: 1,
+              fontFamily: fonts.heading,
+              fontWeight: "400",
+              fontSize: CARD_TITLE_SIZE,
+              lineHeight: CARD_TITLE_SIZE * LINE_HEIGHT_HEADING_RATIO,
+              letterSpacing: CARD_TITLE_SIZE * LETTER_SPACING_HEADING_RATIO,
+              color: palette.ink,
+            }}
+          >
+            {template.name}
+          </Text>
+          {/* `.tcard .pr` / `.tcard .pr.free` */}
+          <Text
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 12,
+              fontWeight: "600",
+              color: isPremium ? derived.coralDeep : palette.stone,
             }}
           >
             {isPremium ? "Premium" : "Free"}
-          </Txt>
+          </Text>
         </View>
-        <Txt style={{ fontFamily: fonts.hand, fontSize: 13, color: colors.rose }} numberOfLines={2}>
-          {template.tagline}
-        </Txt>
+        <EdMeta>{occasion?.label ?? "Any occasion"}</EdMeta>
       </View>
     </Pressable>
   );
 }
 
-function renderGridItem(onOpen: (t: Template) => void): ListRenderItem<Template> {
-  return ({ item }) => <TemplateCard template={item} onPress={() => onOpen(item)} />;
+function renderGridItem(onOpen: (t: Template) => void): ListRenderItem<Template | null> {
+  return ({ item }) =>
+    item ? (
+      <TemplateCard template={item} onPress={() => onOpen(item)} />
+    ) : (
+      <View style={{ flex: 1 }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
+    );
 }

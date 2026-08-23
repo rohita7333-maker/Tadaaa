@@ -11,7 +11,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import type { StoryConfig } from "@/lib/scroll-story/config";
 import { Txt, fonts, radii } from "@/components/ui";
-import { FINALE_NIGHT, HAND_FONT, SEAM_RSVP_TO_FINALE, particleLayout } from "./shared";
+import { palette } from "@/theme/tokens";
+import { FINALE_NIGHT, SERIF_FONT, SEAM_RSVP_TO_FINALE, particleLayout } from "./shared";
 
 const STAR_COUNT = 30;
 const TICK_MS = 1000;
@@ -62,16 +63,16 @@ export default function FinaleScene({ config, reduced }: FinaleSceneProps) {
   }, [config.countdownTo]);
 
   const units: Array<{ label: string; value: string }> = [
-    { label: "days", value: remaining ? pad(remaining.days) : "00" },
-    { label: "hours", value: remaining ? pad(remaining.hours) : "00" },
-    { label: "mins", value: remaining ? pad(remaining.minutes) : "00" },
-    { label: "secs", value: remaining ? pad(remaining.seconds) : "00" },
+    { label: "Days", value: remaining ? pad(remaining.days) : "00" },
+    { label: "Hrs", value: remaining ? pad(remaining.hours) : "00" },
+    { label: "Min", value: remaining ? pad(remaining.minutes) : "00" },
+    { label: "Sec", value: remaining ? pad(remaining.seconds) : "00" },
   ];
 
   return (
     <LinearGradient
-      colors={[SEAM_RSVP_TO_FINALE, "#3E3330", "#231F1D", FINALE_NIGHT]}
-      locations={[0, 0.26, 0.55, 1]}
+      colors={[SEAM_RSVP_TO_FINALE, "#8A3F35", "#522C28", "#2B2020", FINALE_NIGHT]}
+      locations={[0, 0.2, 0.44, 0.7, 1]}
       style={{ paddingHorizontal: 24, paddingVertical: 112, overflow: "hidden" }}
     >
       {!reduced && (
@@ -86,7 +87,7 @@ export default function FinaleScene({ config, reduced }: FinaleSceneProps) {
                 width: 2,
                 height: 2,
                 borderRadius: 1,
-                backgroundColor: "#FFF8F0",
+                backgroundColor: palette.sand,
                 opacity: 0.3,
               }}
             />
@@ -95,8 +96,8 @@ export default function FinaleScene({ config, reduced }: FinaleSceneProps) {
       )}
 
       <View style={{ alignItems: "center" }}>
-        <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 2.5, textTransform: "uppercase", color: "#C9A96E" }}>
-          the countdown begins
+        <Txt style={{ fontFamily: SERIF_FONT, fontStyle: "italic", fontSize: 17, color: palette.sand }}>
+          The countdown
         </Txt>
 
         {config.countdownTo && (
@@ -110,25 +111,22 @@ export default function FinaleScene({ config, reduced }: FinaleSceneProps) {
                 key={unit.label}
                 style={{
                   flex: 1,
-                  borderRadius: 18,
-                  paddingVertical: 14,
+                  paddingVertical: 6,
                   alignItems: "center",
-                  backgroundColor: "rgba(255,248,240,0.07)",
-                  borderWidth: 1,
-                  borderColor: "rgba(201,169,110,0.4)",
                 }}
               >
                 <Txt
                   style={{
                     fontFamily: fonts.heading,
-                    fontSize: 26,
-                    color: "#E8D5A8",
+                    fontSize: 36,
+                    lineHeight: 38,
+                    color: palette.sand,
                     fontVariant: ["tabular-nums"],
                   }}
                 >
                   {unit.value}
                 </Txt>
-                <Txt style={{ marginTop: 4, fontSize: 10, letterSpacing: 1.5, textTransform: "uppercase", color: "rgba(255,248,240,0.6)" }}>
+                <Txt style={{ marginTop: 6, fontSize: 10, letterSpacing: 1.5, textTransform: "uppercase", color: "rgba(204,172,159,0.75)" }}>
                   {unit.label}
                 </Txt>
               </View>
@@ -136,23 +134,24 @@ export default function FinaleScene({ config, reduced }: FinaleSceneProps) {
           </View>
         )}
 
-        <Txt style={{ marginTop: 56, fontFamily: fonts.heading, fontSize: 36, lineHeight: 40, color: "#FFF8F0" }}>
-          Yaaay! 🎉
+        <Txt style={{ marginTop: 32, fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, letterSpacing: -0.5, color: palette.paper }}>
+          See you there.
         </Txt>
-        <Txt style={{ marginTop: 8, fontFamily: HAND_FONT, fontSize: 22, color: "#E8D5A8" }}>see you there</Txt>
 
         {config.tier === "free" && (
           <Pressable
             onPress={() => router.push("/templates")}
             style={{
               marginTop: 48,
-              backgroundColor: "rgba(0,0,0,0.35)",
-              paddingHorizontal: 18,
-              paddingVertical: 10,
+              backgroundColor: "rgba(26,26,26,0.65)",
+              paddingHorizontal: 16,
+              paddingVertical: 8,
               borderRadius: radii.pill,
             }}
           >
-            <Txt style={{ fontSize: 12, color: "#fff" }}>Made with 🎁 TaDaaaa</Txt>
+            <Txt style={{ fontSize: 11, color: "rgba(255,254,253,0.75)" }}>
+              Made with TaDaaaa · <Txt style={{ color: palette.sand }}>Create your own →</Txt>
+            </Txt>
           </Pressable>
         )}
       </View>

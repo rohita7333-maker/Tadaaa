@@ -1,60 +1,78 @@
-import { Pressable, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Eye, Heart } from "lucide-react-native";
-import { Chip, Txt, colors, radii, shadows } from "@/components/ui";
-import { getThemeById, gradientStops } from "@/lib/themes";
-import { getOccasionById } from "@/lib/themes";
+/**
+ * Invite row — the RN equivalent of the mockup's `.srow`
+ * (`tadaaaa/tadaaaa-editorial.html` L262-270, and the web's `.ed-srow`):
+ * 60px thumb, 17px headline title, a 12px stone meta line carrying the status
+ * pill, and a bottom hairline that the last row drops.
+ *
+ * Status is derived, never read: see `@/lib/invite-status`. The `invites.status`
+ * column is approved but unapplied, so reading it would return undefined.
+ */
+import { EdListRow, EdMeta, EdStatusPill, EdThumb, palette } from "@/components/editorial";
+import { getOccasionById, getThemeById, gradientStops } from "@/lib/themes";
+import { deriveInviteStatus, INVITE_STATUS_LABELS } from "@/lib/invite-status";
 import type { Invite } from "@/lib/db";
 
-export function inviteStatus(invite: Invite): { label: string; tone: "green" | "gold" | "rose" | "neutral" } {
-  if (!invite.is_active) return { label: "Paused", tone: "neutral" };
-  if (invite.expires_at && new Date(invite.expires_at) < new Date())
-    return { label: "Expired", tone: "rose" };
-  if (invite.revealed_at) return { label: "Revealed", tone: "green" };
-  return { label: "Live", tone: "gold" };
+/** Tones the legacy `Chip` accepts, kept for `invite/[id].tsx`. */
+type ChipTone = "green" | "gold" | "rose" | "neutral";
+
+const STATUS_CHIP_TONE: Record<string, ChipTone> = {
+  live: "gold",
+  scheduled: "neutral",
+  expired: "rose",
+  archived: "neutral",
+};
+
+/**
+ * Back-compat shim for `invite/[id].tsx`, which is owned by another phase and
+ * still renders the legacy `Chip`. Same single rule underneath — this only
+ * re-shapes the result, it does not re-derive it.
+ */
+export function inviteStatus(invite: Invite): { label: string; tone: ChipTone } {
+  const status = deriveInviteStatus(invite);
+  return { label: INVITE_STATUS_LABELS[status], tone: STATUS_CHIP_TONE[status] };
 }
 
-export function InviteRow({ invite, onPress }: { invite: Invite; onPress: () => void }) {
+export function InviteRow({
+  invite,
+  onPress,
+  last,
+  rsvpCount,
+}: {
+  invite: Invite;
+  onPress: () => void;
+  last?: boolean;
+  /**
+   * Aggregated from `invite_rsvps` by `@/lib/rsvp-counts`, because
+   * `invites.response_count` counts ANSWERS, not RSVPs. Web keeps the two
+   * numbers apart (`components/dashboard/InviteCard.tsx:144,147`) and so do we.
+   */
+  rsvpCount?: number;
+}) {
   const theme = getThemeById(invite.theme);
   const occasion = getOccasionById(invite.occasion_type);
-  const status = inviteStatus(invite);
-  const stops = theme ? gradientStops(theme) : [colors.roseLight, colors.rose];
+  const status = deriveInviteStatus(invite);
+  // A flat wash of the theme's leading stop, not the ramp: the editorial
+  // identity bans decorative gradients, and one colour still reads the theme.
+  const tint = theme ? gradientStops(theme)[0] : palette.pebble;
+  const views = invite.view_count ?? 0;
+  const answers = invite.response_count ?? 0;
+  const rsvps = rsvpCount ?? 0;
 
   return (
-    <Pressable
+    <EdListRow
+      last={last}
       onPress={onPress}
-      style={({ pressed }) => [
-        {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          padding: 12,
-          borderRadius: radii.lg,
-          backgroundColor: colors.white,
-          borderWidth: 1,
-          borderColor: colors.hair,
-          transform: [{ scale: pressed ? 0.985 : 1 }],
-        },
-        shadows.sm,
-      ]}
-    >
-      <LinearGradient colors={stops as [string, string]} style={{ width: 50, height: 50, borderRadius: radii.md, alignItems: "center", justifyContent: "center" }}>
-        <Txt style={{ fontSize: 22 }}>{occasion?.emoji ?? "💌"}</Txt>
-      </LinearGradient>
-      <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-        <Txt variant="title" numberOfLines={1}>{invite.title}</Txt>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-            <Eye size={13} color={colors.warmGray} />
-            <Txt variant="body" muted style={{ fontSize: 11.5 }}>{invite.view_count ?? 0}</Txt>
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-            <Heart size={13} color={colors.warmGray} />
-            <Txt variant="body" muted style={{ fontSize: 11.5 }}>{invite.response_count ?? 0}</Txt>
-          </View>
-        </View>
-      </View>
-      <Chip label={status.label} tone={status.tone} />
-    </Pressable>
+      title={invite.title}
+      accessibilityLabel={`${invite.title}. ${INVITE_STATUS_LABELS[status]}. ${views} views, ${rsvps} RSVPs, ${answers} answers.`}
+      thumb={<EdThumb tint={tint} glyph={occasion?.emoji ?? "💌"} />}
+      meta={
+        <>
+          <EdStatusPill status={status} />
+          <EdMeta>{views} views</EdMeta>
+          <EdMeta>{rsvps} RSVPs</EdMeta>
+          <EdMeta>{answers} answers</EdMeta>
+        </>
+      }
+    />
   );
 }

@@ -1,8 +1,10 @@
 import { Stack } from "expo-router";
-import { colors } from "@/theme/tokens";
+import { palette } from "@/theme/tokens";
 
 export default function CreateLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.cream } }} />
+    // `--pebble` is the app-chrome ground the wizard sits on; panels inside it
+    // are `--paper`. Matching the stack background stops a paper flash on push.
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: palette.pebble } }} />
   );
 }

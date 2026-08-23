@@ -1,11 +1,34 @@
+/**
+ * `w6` in `tadaaaa/tadaaaa-editorial.html` — "Preview & finalize": the `.mini`
+ * phone still, the `.sumcard` rows, the `.progressbar`, and a `.btn-coral`
+ * block action. Coral is spent here and only here in the wizard, which is what
+ * the identity reserves it for.
+ *
+ * Publish behaviour is unchanged: `onPublish` still owns the premium gate,
+ * Stripe checkout, monthly-limit check, photo commit and question insert.
+ */
 import { useState } from "react";
-import { Pressable, Share, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { Share, Text, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { Check, ExternalLink } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { Button, Txt, colors, fonts, radii, spacing } from "@/components/ui";
-import { getThemeById, gradientStops } from "@/lib/themes";
+import {
+  Body,
+  EdButton,
+  EdProgressBar,
+  EdSummaryCard,
+  Heading,
+  fieldStyles,
+  fonts,
+  palette,
+  radii,
+} from "@/components/editorial";
+import { spacing } from "@/components/ui";
+import StepHead from "@/components/create/StepHead";
+import { getThemeById } from "@/lib/themes";
+// Web reads every reveal label from this one map; so does mobile now. The
+// second, contradicting map that used to live in this file is gone.
+import { REVEAL_STYLE_LABELS } from "@/lib/templates";
 import { ENV } from "@/lib/env";
 
 interface Props {
@@ -34,7 +57,6 @@ export default function PreviewPublish({
   const router = useRouter();
   const [publishedSlug, setPublishedSlug] = useState<string | null>(null);
   const theme = getThemeById(themeId);
-  const stops = theme ? gradientStops(theme) : [colors.roseLight, colors.rose];
   const link = publishedSlug ? `${ENV.siteUrl || "https://tadaaaa.app"}/surprise/${publishedSlug}` : "";
 
   async function handlePublish() {
@@ -44,185 +66,164 @@ export default function PreviewPublish({
 
   if (publishedSlug) {
     return (
-      <View style={{ alignItems: "center", gap: spacing.lg, paddingVertical: spacing.xl }}>
-        <View
-          style={{
-            width: 76,
-            height: 76,
-            borderRadius: radii.pill,
-            backgroundColor: colors.greenChipText,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Check size={36} color="#fff" />
-        </View>
-        <View style={{ gap: 6, alignItems: "center" }}>
-          <Txt variant="h2" style={{ textAlign: "center" }}>
-            Your surprise is ready! ✨
-          </Txt>
-          <Txt variant="body" muted style={{ textAlign: "center", maxWidth: 260 }}>
-            Share this link with the lucky person. They&apos;ll have no idea what&apos;s waiting for them!
-          </Txt>
+      <View style={{ gap: spacing.lg }}>
+        <View style={{ alignItems: "center", gap: spacing.md, paddingTop: spacing.md }}>
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: radii.pill,
+              borderWidth: 1,
+              borderColor: palette.mist,
+              backgroundColor: palette.paper,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Check size={26} color={palette.coral} strokeWidth={1.8} />
+          </View>
+          {/* Web: 30px `Your surprise is live.` */}
+          <Heading size={30} style={{ textAlign: "center" }}>
+            Your surprise is live.
+          </Heading>
+          <Body size={14} style={{ textAlign: "center", maxWidth: 280 }}>
+            Send the link. They will have no idea what is waiting.
+          </Body>
         </View>
 
         <View
           style={{
-            width: "100%",
-            backgroundColor: colors.cream,
+            backgroundColor: palette.paper,
             borderWidth: 1,
-            borderColor: colors.hair,
-            borderRadius: radii.lg,
-            padding: spacing.md,
+            borderColor: palette.mist,
+            borderRadius: radii.md,
+            padding: 16,
             gap: 6,
           }}
         >
-          <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 10, color: colors.warmGray, letterSpacing: 0.6 }}>
-            SHAREABLE LINK
-          </Txt>
-          <Txt style={{ fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.charcoal }}>{link}</Txt>
+          <Text style={fieldStyles.label}>Shareable link</Text>
+          <Text style={{ fontFamily: fonts.body, fontSize: 13, color: palette.ink }}>{link}</Text>
         </View>
 
-        <View style={{ width: "100%", gap: spacing.sm }}>
-          <Button
+        <View style={{ gap: spacing.sm }}>
+          <EdButton
             title="Share"
+            variant="coral"
             onPress={() => {
               Share.share({ message: `${title} — ${link}`, url: link }).catch(() => {});
             }}
           />
-          <Button
+          <EdButton
             title="Copy link"
-            variant="outline"
+            variant="line"
             onPress={() => {
               Clipboard.setStringAsync(link).catch(() => {});
             }}
           />
-          <Pressable
-            onPress={() => router.replace({ pathname: "/surprise/[slug]", params: { slug: publishedSlug } })}
-            style={({ pressed }) => ({
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              height: 44,
-              opacity: pressed ? 0.7 : 1,
-            })}
-          >
-            <ExternalLink size={15} color={colors.charcoal} />
-            <Txt style={{ fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.charcoal }}>Preview it</Txt>
-          </Pressable>
+          <EdButton
+            title="Preview"
+            variant="line"
+            left={<ExternalLink size={15} color={palette.ink} />}
+            onPress={() =>
+              router.replace({ pathname: "/surprise/[slug]", params: { slug: publishedSlug } })
+            }
+          />
         </View>
 
-        {tier === "free" && (
-          <Txt variant="body" muted style={{ textAlign: "center", fontSize: 11, paddingHorizontal: spacing.md }}>
-            This surprise stays live for 28 days after it&apos;s opened. Upgrade to keep it forever.
-          </Txt>
-        )}
+        {tier === "free" ? (
+          <Body size={13} style={{ textAlign: "center" }}>
+            This surprise stays live for 28 days after it is opened. Upgrade to keep it forever.
+          </Body>
+        ) : null}
       </View>
     );
   }
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <View style={{ gap: 4 }}>
-        <Txt variant="h2">Preview &amp; Publish</Txt>
-        <Txt variant="body" muted>
-          Here&apos;s how your surprise will look. Ready to share?
-        </Txt>
-      </View>
+      <StepHead title="Preview & finalize" sub="See it exactly as they will. Then decide." />
 
-      <LinearGradient
-        colors={stops as [string, string, ...string[]]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ borderRadius: radii.xl, padding: spacing.xxl, alignItems: "center", gap: 8, minHeight: 180, justifyContent: "center" }}
-      >
-        <Txt style={{ fontSize: 34 }}>
-          {theme?.revealIcon === "envelope"
-            ? "✉️"
-            : theme?.revealIcon === "gift"
-              ? "🎁"
-              : theme?.revealIcon === "heart"
-                ? "❤️"
-                : theme?.revealIcon === "star"
-                  ? "⭐"
-                  : "🎈"}
-        </Txt>
-        <Txt
-          style={{
-            fontFamily: fonts.headingSemi,
-            fontSize: 17,
-            textAlign: "center",
-            color: theme?.colors.text ?? colors.charcoal,
-          }}
-        >
-          {title || "Your surprise title"}
-        </Txt>
-        <Txt
-          style={{
-            fontFamily: fonts.body,
-            fontSize: 12,
-            textAlign: "center",
-            opacity: 0.75,
-            color: theme?.colors.text ?? colors.charcoal,
-          }}
-          numberOfLines={3}
-        >
-          {message || "Your message will appear here."}
-        </Txt>
-      </LinearGradient>
-
+      {/* `.mini .scr` — the ink-ground still of the reveal. */}
       <View
         style={{
-          backgroundColor: colors.cream,
-          borderRadius: radii.lg,
-          padding: spacing.md,
-          gap: spacing.xs,
+          borderWidth: 1,
+          borderColor: palette.mist,
+          borderRadius: radii.md,
+          padding: 8,
+          backgroundColor: palette.paper,
         }}
       >
-        <SummaryRow label="Theme" value={theme?.name ?? "—"} />
-        <SummaryRow label="Photos" value={String(photoCount)} />
-        <SummaryRow label="Questions" value={String(questionCount)} />
-        <SummaryRow
-          label="Reveal"
-          value={
-            revealType === "tap"
-              ? "Tap to reveal"
-              : revealType === "countdown"
-                ? "Countdown"
-                : "Scroll story"
-          }
-        />
-      </View>
-
-      {tier === "free" && (
         <View
           style={{
-            backgroundColor: "#FFF0E8",
-            borderWidth: 1,
-            borderColor: colors.hair,
             borderRadius: radii.md,
-            padding: spacing.sm,
+            backgroundColor: palette.ink,
+            paddingVertical: 34,
+            paddingHorizontal: 22,
+            alignItems: "center",
+            gap: 8,
           }}
         >
-          <Txt variant="body" muted style={{ fontSize: 11.5 }}>
-            ⏳ Free surprises stay live for 28 days after they&apos;re opened. Upgrade to keep yours forever.
-          </Txt>
+          <Text
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 10,
+              letterSpacing: 1.4,
+              textTransform: "uppercase",
+              color: palette.sand,
+            }}
+          >
+            {theme?.name ?? "TaDaaaa"}
+          </Text>
+          <Text
+            numberOfLines={2}
+            style={{
+              fontFamily: fonts.heading,
+              fontWeight: "400",
+              fontSize: 22,
+              color: palette.paper,
+              textAlign: "center",
+            }}
+          >
+            {title || "Their name"}
+          </Text>
+          <Text
+            numberOfLines={3}
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 12,
+              lineHeight: 19,
+              color: "rgba(255,255,254,0.75)",
+              textAlign: "center",
+            }}
+          >
+            {message || "Your message will appear here."}
+          </Text>
         </View>
-      )}
+      </View>
 
-      <Button title="✨ Publish Your Surprise" onPress={handlePublish} loading={publishing} />
-    </View>
-  );
-}
+      <EdSummaryCard
+        rows={[
+          { key: "Title", value: title || "Untitled" },
+          { key: "Look", value: theme?.name ?? "—" },
+          { key: "Reveal", value: REVEAL_STYLE_LABELS[revealType] },
+          { key: "Photos", value: String(photoCount) },
+          { key: "Questions", value: String(questionCount) },
+        ]}
+      />
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-      <Txt variant="body" muted style={{ fontSize: 12.5 }}>
-        {label}
-      </Txt>
-      <Txt style={{ fontFamily: fonts.bodyMedium, fontSize: 12.5, color: colors.charcoal }}>{value}</Txt>
+      {tier === "free" ? (
+        <Body size={13}>
+          Free surprises stay live for 28 days after they are opened. After that the link expires. Upgrade to keep yours forever.
+        </Body>
+      ) : null}
+
+      <EdButton
+        title={publishing ? "Publishing…" : "Publish your surprise"}
+        variant="coral"
+        loading={publishing}
+        onPress={handlePublish}
+      />
+      {publishing ? <EdProgressBar progress={0.6} /> : null}
     </View>
   );
 }

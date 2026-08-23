@@ -1,5 +1,10 @@
+/**
+ * `w2` in `tadaaaa/tadaaaa-editorial.html` — the `.field` pair plus the `.cc`
+ * character counter under the textarea.
+ */
 import { View } from "react-native";
-import { Field, Txt, colors, spacing } from "@/components/ui";
+import { EdCounter, EdField } from "@/components/editorial";
+import { spacing } from "@/components/ui";
 import { MAX_MESSAGE_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 
 interface Props {
@@ -21,41 +26,29 @@ export default function MessageEditor({
 }: Props) {
   return (
     <View style={{ gap: spacing.lg }}>
-      <View style={{ gap: 4 }}>
-        <Field
-          label="Title"
+      <View>
+        <EdField
+          label="Who's it for?"
           value={title}
           onChangeText={(v) => onTitleChange(v.slice(0, MAX_TITLE_LENGTH))}
-          placeholder="e.g. A little something for you"
+          placeholder="Maya turns thirty"
           error={titleError}
         />
-        <Txt variant="body" muted style={{ fontSize: 10.5, alignSelf: "flex-end" }}>
-          {title.length}/{MAX_TITLE_LENGTH}
-        </Txt>
+        <EdCounter used={title.length} max={MAX_TITLE_LENGTH} />
       </View>
 
-      <View style={{ gap: 4 }}>
-        <Field
-          label="Message"
+      <View>
+        <EdField
+          label="What do you want to say?"
           value={message}
           onChangeText={(v) => onMessageChange(v.slice(0, MAX_MESSAGE_LENGTH))}
-          placeholder="Write the sweet part…"
+          placeholder="The thing you've been meaning to say."
           multiline
           numberOfLines={5}
           style={{ minHeight: 120, textAlignVertical: "top" }}
           error={messageError}
         />
-        <Txt
-          variant="body"
-          muted
-          style={{
-            fontSize: 10.5,
-            alignSelf: "flex-end",
-            color: message.length > MAX_MESSAGE_LENGTH * 0.9 ? colors.rose : colors.warmGray,
-          }}
-        >
-          {message.length}/{MAX_MESSAGE_LENGTH}
-        </Txt>
+        <EdCounter used={message.length} max={MAX_MESSAGE_LENGTH} />
       </View>
     </View>
   );

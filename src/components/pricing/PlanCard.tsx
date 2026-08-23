@@ -1,48 +1,70 @@
 import type { ReactNode } from "react";
 import { View } from "react-native";
-import { Check } from "lucide-react-native";
-import { Button, Card, Chip, Txt, colors, spacing } from "@/components/ui";
+import { Body, EdCard, Heading, Label } from "@/components/editorial";
+import { palette, derived } from "@/theme/tokens";
+import { formatPlanPrice, planPeriodLabel, type ClientPlan } from "@/lib/pricing";
 
 export interface PlanCardProps {
-  name: string;
-  price: string;
-  priceNote?: string;
-  features: string[];
-  isCurrent: boolean;
+  plan: ClientPlan;
+  /** Mirrors web's cadence state. Mobile pins it to yearly — see pricing.tsx. */
+  isYearly: boolean;
   cta?: ReactNode;
-  highlight?: boolean;
 }
 
-/** One pricing tier card — used for Free / Plus / Unlimited on the pricing screen. */
-export function PlanCard({ name, price, priceNote, features, isCurrent, cta, highlight }: PlanCardProps) {
+/**
+ * One pricing tier. A 1:1 mirror of web's card in
+ * `surprise-invite/src/components/pricing/PricingTiers.tsx`:
+ *
+ *   paper ground · `--r-md` · 2px coral border when highlighted else 1px mist
+ *   px-7/py-8 (28/32) · `.label` badge eyebrow (coral-deep when highlighted,
+ *   stone otherwise, blank space when the plan has no badge so every card's
+ *   baseline lines up) · 19px name · 38px headline-face price · 13px period ·
+ *   14px feature rows on pebble hairlines · CTA last.
+ *
+ * Web renders `plan.description` nowhere, so neither does this. Every figure
+ * comes from `src/lib/pricing.ts`; no price literal is written into this markup.
+ */
+export function PlanCard({ plan, isYearly, cta }: PlanCardProps) {
+  const price = (isYearly ? plan.yearlyPrice ?? plan.monthlyPrice : plan.monthlyPrice) ?? 0;
+
   return (
-    <Card
-      style={{
-        gap: spacing.md,
-        borderColor: highlight ? colors.rose : colors.hair,
-        borderWidth: highlight ? 1.5 : 1,
-      }}
-    >
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Txt variant="h3">{name}</Txt>
-        {isCurrent ? <Chip label="Current plan" tone="green" /> : null}
-      </View>
+    <EdCard accent={plan.highlight} style={{ paddingVertical: 32, paddingHorizontal: 28 }}>
+      <Label
+        style={{
+          color: plan.highlight ? derived.coralDeep : palette.stone,
+          marginBottom: 8,
+        }}
+      >
+        {plan.badge ?? " "}
+      </Label>
 
-      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 6 }}>
-        <Txt variant="h1">{price}</Txt>
-        {priceNote ? <Txt variant="body" muted style={{ paddingBottom: 4 }}>{priceNote}</Txt> : null}
-      </View>
+      <Heading size={19} accessibilityRole="header">
+        {plan.name}
+      </Heading>
 
-      <View style={{ gap: 8 }}>
-        {features.map((f) => (
-          <View key={f} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-            <Check size={16} color={colors.rose} style={{ marginTop: 2 }} />
-            <Txt variant="body" style={{ flex: 1 }}>{f}</Txt>
+      <Heading size={38} style={{ marginTop: 10, marginBottom: 2 }}>
+        {formatPlanPrice(price)}
+      </Heading>
+      <Body size={13} style={{ marginBottom: 18 }}>
+        {planPeriodLabel(plan, isYearly)}
+      </Body>
+
+      <View style={{ marginBottom: 22 }}>
+        {plan.features.map((f) => (
+          <View
+            key={f}
+            style={{
+              paddingVertical: 6,
+              borderBottomWidth: 1,
+              borderBottomColor: palette.pebble,
+            }}
+          >
+            <Body size={14}>{f}</Body>
           </View>
         ))}
       </View>
 
       {cta}
-    </Card>
+    </EdCard>
   );
 }

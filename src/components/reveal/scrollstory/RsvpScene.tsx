@@ -14,10 +14,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import type { StoryConfig } from "@/lib/scroll-story/config";
 import { Txt, fonts, radii } from "@/components/ui";
+import { palette, derived } from "@/theme/tokens";
 import { Confetti } from "@/components/reveal/Particles";
 import { recordRsvp } from "@/lib/db";
 import { getThemeById, themes } from "@/lib/themes";
-import { HAND_FONT, SEAM_POLAROID_TO_RSVP, SEAM_RSVP_TO_FINALE } from "./shared";
+import { SERIF_FONT, SEAM_POLAROID_TO_RSVP, SEAM_RSVP_TO_FINALE } from "./shared";
 
 interface RsvpSceneProps {
   config: StoryConfig;
@@ -39,7 +40,9 @@ export default function RsvpScene({ config, inviteId, reduced }: RsvpSceneProps)
   async function handleRsvp() {
     if (isRecorded) return;
     setIsRecorded(true);
-    setStatusMessage("Recorded!");
+    setStatusMessage(
+      config.sender ? `Recorded. ${config.sender} will know.` : "Recorded."
+    );
     setShowConfetti(true);
     if (!reduced) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     if (!inviteId) return; // demo — haptic + confetti only, nothing to record
@@ -53,26 +56,28 @@ export default function RsvpScene({ config, inviteId, reduced }: RsvpSceneProps)
 
   return (
     <LinearGradient
-      colors={[SEAM_POLAROID_TO_RSVP, "#C4686D", SEAM_RSVP_TO_FINALE]}
-      locations={[0, 0.55, 1]}
+      colors={[SEAM_POLAROID_TO_RSVP, "#8F8B87", palette.ink, palette.ink, "#522C28", "#8A3F35", SEAM_RSVP_TO_FINALE]}
+      locations={[0, 0.12, 0.26, 0.58, 0.76, 0.9, 1]}
       style={{ minHeight: 560, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, paddingVertical: 96 }}
     >
       {showConfetti && <Confetti run theme={theme} reduced={reduced} />}
 
       <View style={{ maxWidth: 420, alignItems: "center" }}>
-        <Txt style={{ fontFamily: HAND_FONT, fontSize: 22, color: "#E8D5A8" }}>don&apos;t leave me hanging…</Txt>
+        <Txt style={{ fontFamily: SERIF_FONT, fontStyle: "italic", fontSize: 17, color: palette.sand }}>
+          Don&apos;t leave me hanging
+        </Txt>
         <Txt
           style={{
             marginTop: 8,
             fontFamily: fonts.heading,
-            fontStyle: "italic",
-            fontSize: 40,
-            lineHeight: 44,
-            color: "#FFF8F0",
+            fontSize: 26,
+            lineHeight: 30,
+            letterSpacing: -0.5,
+            color: palette.paper,
             textAlign: "center",
           }}
         >
-          please rsvp
+          Are you in?
         </Txt>
 
         {/* Optional name — turns an anonymous count into a guest list. Skippable
@@ -81,10 +86,10 @@ export default function RsvpScene({ config, inviteId, reduced }: RsvpSceneProps)
           <View style={{ marginTop: 32, alignItems: "center", alignSelf: "stretch" }}>
             <Txt
               style={{
-                fontFamily: fonts.heading,
-                fontStyle: "italic",
-                fontSize: 14,
-                color: "rgba(255,248,240,0.85)",
+                fontSize: 11,
+                letterSpacing: 1.1,
+                textTransform: "uppercase",
+                color: palette.sand,
               }}
             >
               Who&apos;s saying yes?
@@ -94,7 +99,7 @@ export default function RsvpScene({ config, inviteId, reduced }: RsvpSceneProps)
               onChangeText={setName}
               maxLength={NAME_MAX_LENGTH}
               placeholder="Your name (optional)"
-              placeholderTextColor="rgba(255,248,240,0.55)"
+              placeholderTextColor="rgba(255,254,253,0.55)"
               autoCapitalize="words"
               autoCorrect={false}
               returnKeyType="done"
@@ -104,15 +109,15 @@ export default function RsvpScene({ config, inviteId, reduced }: RsvpSceneProps)
                 width: 260,
                 maxWidth: "100%",
                 height: 48,
-                borderRadius: radii.pill,
+                borderRadius: radii.sm,
                 borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.35)",
-                backgroundColor: "rgba(255,255,255,0.15)",
+                borderColor: palette.sand,
+                backgroundColor: "transparent",
                 paddingHorizontal: 20,
                 textAlign: "center",
                 fontFamily: fonts.body,
                 fontSize: 15,
-                color: "#FFF8F0",
+                color: palette.paper,
               }}
             />
           </View>
@@ -122,27 +127,36 @@ export default function RsvpScene({ config, inviteId, reduced }: RsvpSceneProps)
           onPress={handleRsvp}
           disabled={isRecorded}
           style={({ pressed }) => ({
-            marginTop: 24,
+            marginTop: 12,
             transform: [{ scale: pressed ? 0.97 : 1 }],
             opacity: isRecorded ? 0.9 : 1,
           })}
         >
           <View
             style={{
-              backgroundColor: "#fff",
+              // coral-deep, matching web's `.ed-btn-coral`. The label below is
+              // 15px white TEXT: on `palette.coral` that measures 3.96:1, under
+              // the 4.5:1 AA floor. Web was corrected the same way and is pinned
+              // by `surprise-invite/src/app/ed-atoms.test.ts`. Leaving mobile on
+              // plain coral would fail a11y AND diverge from web.
+              backgroundColor: derived.coralDeep,
               paddingHorizontal: 32,
-              paddingVertical: 16,
+              paddingVertical: 15,
               borderRadius: radii.pill,
+              minWidth: 260,
+              alignItems: "center",
             }}
           >
-            <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 16, color: "#9B3D42" }}>
-              {isRecorded ? "You're in! 🎉" : "🎉 Count me in!"}
+            <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 15, letterSpacing: 0.3, color: derived.white }}>
+              {isRecorded ? "You're in" : "Count me in"}
             </Txt>
           </View>
         </Pressable>
 
         {statusMessage ? (
-          <Txt style={{ marginTop: 16, fontSize: 13, color: "rgba(255,248,240,0.85)" }}>{statusMessage}</Txt>
+          <Txt style={{ marginTop: 16, fontFamily: SERIF_FONT, fontStyle: "italic", fontSize: 14, color: palette.sand }}>
+            {statusMessage}
+          </Txt>
         ) : null}
       </View>
     </LinearGradient>

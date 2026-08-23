@@ -27,8 +27,9 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import type { StoryConfig } from "@/lib/scroll-story/config";
 import { Txt, fonts } from "@/components/ui";
+import { palette, derived } from "@/theme/tokens";
 import {
-  BRAND_PARTY_COLORS,
+  SERIF_FONT,
   SEAM_SKY_TO_MESSAGE,
   particleLayout,
 } from "./shared";
@@ -39,12 +40,14 @@ const PARALLAX_FACTOR_A = -0.12;
 const PARALLAX_FACTOR_B = -0.22;
 const HERO_HEIGHT_FACTOR = 1.75; // matches web's min-h-[175vh]
 
+// Editorial re-skin: ink → sand, stepped through documented ink→sand mixes
+// (the same derivation convention `derived` in `@/theme/tokens` uses).
 const SKY_GRADIENT = [
-  "#3E3733",
-  "#6B5E57",
-  "#9B3D42",
-  "#C4686D",
-  "#E8A5A8",
+  palette.ink,
+  "#413A37",
+  "#6C5D57",
+  "#8F7A72",
+  "#AF958A",
   SEAM_SKY_TO_MESSAGE,
 ] as const;
 
@@ -78,7 +81,7 @@ function Star({ x, y, duration, delay, reduced }: { x: number; y: number; durati
   return (
     <Animated.View
       style={[
-        { position: "absolute", left: `${x}%`, top: `${y}%`, width: 2, height: 2, borderRadius: 1, backgroundColor: "#FFF8F0" },
+        { position: "absolute", left: `${x}%`, top: `${y}%`, width: 2, height: 2, borderRadius: 1, backgroundColor: palette.paper },
         style,
       ]}
     />
@@ -109,7 +112,7 @@ function Lantern({ x, y, scale, duration, delay, reduced }: { x: number; y: numb
       ]}
     >
       <LinearGradient
-        colors={["#E8D5A8", "#C9A96E", "rgba(155,61,66,0.85)"]}
+        colors={[derived.sandLight, palette.sand, "rgba(26,26,26,0.55)"]}
         style={{ flex: 1, borderRadius: 7 }}
       />
     </Animated.View>
@@ -169,14 +172,17 @@ export default function SkyHero({ config, scrollY, reduced }: SkyHeroProps) {
 
       {/* Centered hero copy — first viewport */}
       <View style={{ height: windowHeight, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }}>
-        <Txt style={{ fontFamily: fonts.hand, fontSize: 24, color: "#E8D5A8" }}>{config.eyebrow}</Txt>
+        <Txt style={{ fontFamily: SERIF_FONT, fontStyle: "italic", fontSize: 18, color: palette.sand }}>
+          {config.eyebrow}
+        </Txt>
         <Txt
           style={{
-            marginTop: 8,
+            marginTop: 12,
             fontFamily: fonts.heading,
-            fontSize: 56,
-            lineHeight: 58,
-            color: "#FFF8F0",
+            fontSize: 40,
+            lineHeight: 44,
+            letterSpacing: -0.8,
+            color: palette.paper,
             textAlign: "center",
           }}
         >
@@ -184,11 +190,12 @@ export default function SkyHero({ config, scrollY, reduced }: SkyHeroProps) {
         </Txt>
         <Txt
           style={{
-            marginTop: 16,
-            fontSize: 13,
-            letterSpacing: 3,
+            marginTop: 18,
+            fontSize: 12,
+            fontWeight: "600",
+            letterSpacing: 2.6,
             textTransform: "uppercase",
-            color: "#E8A5A8",
+            color: palette.sand,
           }}
         >
           {config.occasionLine}
@@ -200,37 +207,11 @@ export default function SkyHero({ config, scrollY, reduced }: SkyHeroProps) {
         pointerEvents="none"
         style={{ position: "absolute", left: 0, right: 0, top: windowHeight - 84, alignItems: "center" }}
       >
-        <Txt style={{ fontFamily: fonts.hand, fontSize: 20, color: "rgba(255,248,240,0.8)" }}>
-          scroll slowly ↓
+        <Txt style={{ fontSize: 12, letterSpacing: 1.2, color: palette.sand }}>
+          Scroll slowly ↓
         </Txt>
       </View>
 
-      {/* Bunting garland dots across the bottom seam — simplified for native */}
-      <View
-        pointerEvents="none"
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 20,
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          alignItems: "flex-end",
-        }}
-      >
-        {Array.from({ length: 12 }, (_, i) => (
-          <View
-            key={i}
-            style={{
-              width: 12,
-              height: 14,
-              backgroundColor: BRAND_PARTY_COLORS[i % BRAND_PARTY_COLORS.length],
-              borderRadius: 2,
-            }}
-          />
-        ))}
-      </View>
     </View>
   );
 }

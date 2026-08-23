@@ -17,7 +17,7 @@
  * not sound the user explicitly opted into.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Pressable, Text, useWindowDimensions } from "react-native";
+import { AccessibilityInfo, Pressable, Text, View, useWindowDimensions } from "react-native";
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
@@ -28,6 +28,8 @@ import PlanScene from "./PlanScene";
 import PolaroidScene from "./PolaroidScene";
 import RsvpScene from "./RsvpScene";
 import FinaleScene from "./FinaleScene";
+import { FINALE_NIGHT } from "./shared";
+import ReactionBar from "@/components/reveal/ReactionBar";
 
 const CHIME_SOURCE = require("../../../../assets/audio/chime.wav");
 
@@ -35,12 +37,29 @@ interface ScrollStoryRevealProps {
   config: StoryConfig;
   /** Real invite id — when present the RSVP scene records to Supabase. */
   inviteId?: string;
+  /**
+   * C6 renders this against an unpublished draft. RSVPs already no-op without
+   * an `inviteId`; this additionally hides the reaction bar, because a reaction
+   * is keyed by SLUG and the draft slug becomes real at publish — a tap in a
+   * preview would pre-seed a reaction on a surprise nobody has seen yet.
+   */
+  preview?: boolean;
+  /** Slug drives the reaction bar; absent on the demo config. */
+  slug?: string;
+  /** Forwarded so a PIN-locked surprise still accepts a reaction. */
+  pin?: string | null;
 }
 
 const HERO_HEIGHT_FACTOR = 1.75;
 const HAPTIC_SCENE_COUNT = 6;
 
-export default function ScrollStoryReveal({ config, inviteId }: ScrollStoryRevealProps) {
+export default function ScrollStoryReveal({
+  config,
+  inviteId,
+  preview = false,
+  slug,
+  pin = null,
+}: ScrollStoryRevealProps) {
   const { height: windowHeight } = useWindowDimensions();
   const [reduced, setReduced] = useState(false);
   const [musicOn, setMusicOn] = useState(false);
@@ -99,6 +118,26 @@ export default function ScrollStoryReveal({ config, inviteId }: ScrollStoryRevea
     [reduced]
   );
 
+  /**
+   * D2: "Scenes are full-height snap sections (`snapToInterval`,
+   * `decelerationRate: 'fast'`)."
+   *
+   * `sceneBoundaries` above is explicitly NOT layout — it is an approximation
+   * for haptic thresholds, and snapping to it would stop the scroll in the
+   * middle of scenes. The real offsets are measured instead, so snapping lands
+   * on the seams the scenes actually have. Until every scene has reported, the
+   * list is empty and the ScrollView simply does not snap — which is the right
+   * failure: a wrong snap point is worse than none.
+   */
+  const [snapOffsets, setSnapOffsets] = useState<number[]>([]);
+  const measured = useRef<number[]>([]);
+  const onSceneLayout = useCallback((index: number, y: number) => {
+    measured.current[index] = y;
+    if (measured.current.filter((v) => typeof v === "number").length === HAPTIC_SCENE_COUNT) {
+      setSnapOffsets([...measured.current]);
+    }
+  }, []);
+
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       "worklet";
@@ -133,15 +172,41 @@ export default function ScrollStoryReveal({ config, inviteId }: ScrollStoryRevea
         }}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        style={{ flex: 1, backgroundColor: "#181513" }}
+        snapToOffsets={snapOffsets.length === HAPTIC_SCENE_COUNT ? snapOffsets : undefined}
+        decelerationRate="fast"
+        // A scene taller than the viewport must stay scrollable rather than
+        // being yanked to the next seam mid-read.
+        disableIntervalMomentum
+        style={{ flex: 1, backgroundColor: FINALE_NIGHT }}
       >
-        <SkyHero config={config} scrollY={scrollY} reduced={reduced} />
-        <MessageScene config={config} reduced={reduced} />
-        <PlanScene config={config} />
-        <PolaroidScene config={config} />
-        <RsvpScene config={config} inviteId={inviteId} reduced={reduced} />
-        <FinaleScene config={config} reduced={reduced} />
+        <View onLayout={(e) => onSceneLayout(0, e.nativeEvent.layout.y)}>
+          <SkyHero config={config} scrollY={scrollY} reduced={reduced} />
+        </View>
+        <View onLayout={(e) => onSceneLayout(1, e.nativeEvent.layout.y)}>
+          <MessageScene config={config} reduced={reduced} />
+        </View>
+        <View onLayout={(e) => onSceneLayout(2, e.nativeEvent.layout.y)}>
+          <PlanScene config={config} />
+        </View>
+        <View onLayout={(e) => onSceneLayout(3, e.nativeEvent.layout.y)}>
+          <PolaroidScene config={config} />
+        </View>
+        <View onLayout={(e) => onSceneLayout(4, e.nativeEvent.layout.y)}>
+          <RsvpScene config={config} inviteId={inviteId} reduced={reduced} />
+        </View>
+        <View onLayout={(e) => onSceneLayout(5, e.nativeEvent.layout.y)}>
+          <FinaleScene config={config} reduced={reduced} />
+        </View>
       </Animated.ScrollView>
+
+      {/* D2's pinned reaction bar. Only with a real slug — the demo config has
+          nothing to record against, and a bar whose counts never move is worse
+          than no bar. */}
+      {slug ? (
+        <View style={{ position: "absolute", left: 20, bottom: 24 }}>
+          {preview ? null : <ReactionBar slug={slug} pin={pin} reduced={reduced} />}
+        </View>
+      ) : null}
 
       <Pressable
         onPress={toggleMusic}
@@ -166,7 +231,7 @@ export default function ScrollStoryReveal({ config, inviteId }: ScrollStoryRevea
           transform: [{ scale: pressed ? 0.92 : 1 }],
         })}
       >
-        <Text style={{ fontSize: 18 }}>{musicOn ? "⏸" : "🎵"}</Text>
+        <Text style={{ fontSize: 15, color: "#FFFEFD" }}>{musicOn ? "❚❚" : "♪"}</Text>
       </Pressable>
     </>
   );

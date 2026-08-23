@@ -1,0 +1,366 @@
+diff --git a/src/components/reveal/scrollstory/shared.ts b/src/components/reveal/scrollstory/shared.ts
+index 4d7a5d6..7983e06 100644
+--- a/src/components/reveal/scrollstory/shared.ts
++++ b/src/components/reveal/scrollstory/shared.ts
+@@ -8,9 +8,9 @@
+  */
+ import { fonts } from "@/theme/tokens";
+ 
+-/** Serif-ish heading font — reuses the app's Bricolage heading token. */
++/** Editorial headline face — reuses the app's heading token. */
+ export const SERIF_FONT = fonts.heading;
+-/** Handwritten accent font — reuses the app's Caveat token. */
++/** Accent face — the cursive token is retired, so this is the body face. */
+ export const HAND_FONT = fonts.hand;
+ 
+ /** Brand confetti/lantern palette. */
+diff --git a/src/components/ui/index.tsx b/src/components/ui/index.tsx
+index 0428cb4..cf3192c 100644
+--- a/src/components/ui/index.tsx
++++ b/src/components/ui/index.tsx
+@@ -22,7 +22,7 @@ import {
+   type ViewStyle,
+ } from "react-native";
+ import { SafeAreaView, type Edge } from "react-native-safe-area-context";
+-import { colors, fonts, gradients, radii, shadows, spacing } from "@/theme/tokens";
++import { colors, fonts, gradients, palette, radii, shadows, spacing, typography } from "@/theme/tokens";
+ 
+ type TxtVariant =
+   | "h1"
+@@ -266,4 +266,4 @@ export function Field({
+   );
+ }
+ 
+-export { colors, fonts, gradients, radii, shadows, spacing };
++export { colors, fonts, gradients, palette, radii, shadows, spacing, typography };
+diff --git a/src/theme/tokens.ts b/src/theme/tokens.ts
+index 6d44197..25c72b1 100644
+--- a/src/theme/tokens.ts
++++ b/src/theme/tokens.ts
+@@ -1,60 +1,199 @@
+ /**
+- * Design tokens — ported 1:1 from the web brand (globals.css) and the two
+- * mobile mockups (tadaa-mobile-prototype.html / tadaa-mobile-screens-live.html).
+- * One "hand" across web + mobile: warm cream ground, rose primary, gold accent.
++ * Design tokens — editorial identity (P0 of the 2026-08-09 re-theme).
++ *
++ * `palette` (the 8 primitives) plus `derived` (documented mixes of them) are the
++ * ONLY sources of colour truth. Both mirror the web contract in
++ * `surprise-invite/src/lib/design-tokens.ts` verbatim; both platforms hard-code
++ * the same literals in their token tests so drift breaks a suite. The
++ * `@deprecated` alias blocks below hold references only — never a literal.
++ *
++ * Restraint rules that come with this palette: no cursive, no rainbow
++ * gradients, no heavy shadows, ~90% ink/paper/stone with coral reserved for
++ * primary CTAs and active states.
+  */
+ import { Platform } from "react-native";
+ 
+-export const colors = {
+-  cream: "#FFF8F0",
+-  creamDark: "#F5EDE3",
+-  appBg: "#E7DCCD", // mockup body background behind device
+-  rose: "#C4686D",
+-  roseLight: "#E8A5A8",
+-  roseDeep: "#9B3D42",
+-  gold: "#C9A96E",
+-  goldLight: "#E8D5A8",
+-  charcoal: "#2D2926",
+-  warmGray: "#6B5E57",
+-  lightGray: "#D4CBC3",
+-  hair: "#ECE3D8",
++/** Editorial primitives. The contract — do not derive, do not round. */
++export const palette = {
++  ink: "#1A1A1A",
++  paper: "#FFFEFD",
++  stone: "#484848",
++  pebble: "#F5F0ED",
++  mist: "#E8E4E0",
++  coral: "#D45847",
++  sand: "#CCAC9F",
++  kohlrabi: "#994EA8",
++} as const;
++
++/**
++ * Derived extension — primitives-tier, NOT aliases. Every value is a documented
++ * mix/shade of `palette`, so no alias below has to hold its own literal. Shared
++ * verbatim with web (`surprise-invite/src/lib/design-tokens.ts` → `derived`, and
++ * the `--coral-deep …` custom properties in `src/app/globals.css`).
++ *
++ * `coralDeep` is the AA-safe coral for small text. The mockup sanctions a dark
++ * coral (`.btn-coral:hover{background:#c04a3a}`), but we ship #B8412F because
++ * (a) mobile already shipped that exact value and (b) it measures better: on
++ * cream #FFF8F0 it is 5.20:1 vs #c04a3a at 4.66:1. #B8412F clears WCAG AA
++ * (4.5:1) on every ground: #FFF8F0 5.20:1 · #F5EDE3 4.72:1 · #F5F0ED 4.84:1 ·
++ * #FFFEFD 5.43:1.
++ */
++export const derived = {
++  /** coral shaded toward ink */
++  coralDeep: "#B8412F",
++  /** coral ~30% toward paper */
++  coralLight: "#E18A7D",
++  /** sand ~40% toward paper */
++  sandLight: "#E0CDC5",
++  /** sand shaded toward ink */
++  sandDeep: "#B08D7E",
++  /** absolute white, for text on coral fills */
+   white: "#FFFFFF",
++  /** coral ~10% over paper */
++  chipCoralBg: "#FBEDEB",
++  /** coral ~25% over paper */
++  chipCoralBorder: "#F4D4D0",
++  /** sand shaded ~50% toward ink; 5.06:1 on pebble */
++  chipMutedText: "#73635D",
++} as const;
+ 
+-  // chip surfaces
+-  roseChipBg: "#FBEDED",
+-  roseChipBorder: "#F2D6D7",
+-  goldChipBg: "#FAF3E2",
+-  goldChipText: "#8A6D34",
+-  goldChipBorder: "#EAD9B4",
+-  greenChipBg: "#E9F4EC",
+-  greenChipText: "#3B7A52",
+-  greenChipBorder: "#CFE7D6",
++/**
++ * @deprecated — removed in P5. Alias block only: every key below resolves onto
++ * `palette` or `derived` and carries no independent value. New code must read
++ * `palette` / `derived`.
++ */
++export const colors = {
++  cream: palette.paper,
++  creamDark: palette.pebble,
++  appBg: palette.pebble,
++  rose: palette.coral,
++  roseLight: derived.coralLight,
++  roseDeep: derived.coralDeep,
++  gold: palette.sand,
++  goldLight: derived.sandLight,
++  goldDeep: derived.sandDeep,
++  charcoal: palette.ink,
++  warmGray: palette.stone,
++  lightGray: palette.mist,
++  hair: palette.mist,
++  white: derived.white,
++
++  // chip surfaces — neutral grounds, accent text (editorial bans decorative fills)
++  roseChipBg: derived.chipCoralBg,
++  roseChipBorder: derived.chipCoralBorder,
++  goldChipBg: palette.pebble,
++  goldChipText: derived.chipMutedText,
++  goldChipBorder: palette.mist,
++  greenChipBg: palette.pebble,
++  greenChipText: palette.kohlrabi,
++  greenChipBorder: palette.mist,
+ } as const;
+ 
+-/** Primary rose gradient (buttons, FAB, logo). Use with expo-linear-gradient. */
++/**
++ * @deprecated — removed in P5. Two-stop, single-family ramps only; the
++ * editorial identity bans rainbow and heavy gradients.
++ */
+ export const gradients = {
+-  rose: ["#C4686D", "#9B3D42"] as [string, string],
+-  gold: ["#E8D5A8", "#C9A96E"] as [string, string],
++  rose: [palette.coral, derived.coralDeep] as [string, string],
++  gold: [palette.sand, derived.sandDeep] as [string, string],
+ } as const;
+ 
++/** Georgia ships on iOS but not reliably on Android — fall back to the
++ * platform serif there. `undefined` means "platform default sans", which is
++ * the React Native convention for the system body face. */
++const HEAD_FAMILY = Platform.select({ ios: "Georgia", android: "serif", default: "serif" });
++
+ export const fonts = {
+-  /** Bricolage Grotesque — headings. */
+-  heading: "Bricolage_800ExtraBold",
+-  headingSemi: "Bricolage_600SemiBold",
+-  /** DM Sans — body/UI. */
+-  body: "DMSans_400Regular",
+-  bodyMedium: "DMSans_500Medium",
+-  bodyBold: "DMSans_700Bold",
+-  /** Caveat — handwritten accents (eyebrows, polaroid captions). */
+-  hand: "Caveat_700Bold",
++  /** Editorial headline face. Set `fontWeight: "400"` at the call site. */
++  heading: HEAD_FAMILY,
++  /** @deprecated — removed in P5. Alias of `heading`; there is one headline face. */
++  headingSemi: HEAD_FAMILY,
++  /** System body face (platform default). */
++  body: undefined,
++  /** @deprecated — removed in P5. Weight is a style prop, not a family. */
++  bodyMedium: undefined,
++  /** @deprecated — removed in P5. Weight is a style prop, not a family. */
++  bodyBold: undefined,
++  /** @deprecated — removed in P5. Cursive is banned by the identity; body face. */
++  hand: undefined,
++} as const;
++
++/**
++ * Typography presets — the RN equivalent of the mockup's base rules
++ * (`tadaaaa/tadaaaa-editorial.html`):
++ *
++ *   body      → `line-height:1.6` + `color:var(--ink)`
++ *   paragraph → `p{color:var(--stone)}`
++ *   heading   → `h1..h4{font-family:var(--head);font-weight:400;
++ *                letter-spacing:-.02em;line-height:1.1;color:var(--ink)}`
++ *   label     → `.label{font-size:12px;font-weight:600;letter-spacing:.12em;
++ *                text-transform:uppercase;color:var(--stone)}`
++ *   serifItalic → `.serif-i{font-family:var(--head);font-style:italic}`
++ *
++ * React Native has no cascade and no `p` element, so these ship as explicit
++ * style presets rather than global rules. `lineHeight` is absolute in RN, so
++ * the CSS ratios are resolved against `fontSize`; `letterSpacing` is absolute
++ * points, so `-.02em`/`.12em` become `fontSize * ratio`.
++ *
++ * P0 only defines them — applying them across screens is P1–P3 work.
++ */
++export const LINE_HEIGHT_BODY_RATIO = 1.6;
++export const LINE_HEIGHT_HEADING_RATIO = 1.1;
++export const LETTER_SPACING_HEADING_RATIO = -0.02;
++export const LETTER_SPACING_LABEL_RATIO = 0.12;
++
++const BODY_FONT_SIZE = 16;
++const HEADING_FONT_SIZE = 28;
++const LABEL_FONT_SIZE = 12;
++
++export const typography = {
++  /** Document default: system body face, 1.6 leading, ink. */
++  body: {
++    fontFamily: fonts.body,
++    fontSize: BODY_FONT_SIZE,
++    lineHeight: BODY_FONT_SIZE * LINE_HEIGHT_BODY_RATIO, // 25.6
++    color: palette.ink,
++  },
++  /** Paragraph copy — the `p{color:var(--stone)}` rule. */
++  paragraph: {
++    fontFamily: fonts.body,
++    fontSize: BODY_FONT_SIZE,
++    lineHeight: BODY_FONT_SIZE * LINE_HEIGHT_BODY_RATIO, // 25.6
++    color: palette.stone,
++  },
++  /** Headline face — weight 400, tight leading and tracking, ink. */
++  heading: {
++    fontFamily: fonts.heading,
++    fontWeight: "400",
++    fontSize: HEADING_FONT_SIZE,
++    lineHeight: HEADING_FONT_SIZE * LINE_HEIGHT_HEADING_RATIO, // 30.8
++    letterSpacing: HEADING_FONT_SIZE * LETTER_SPACING_HEADING_RATIO, // -0.56
++    color: palette.ink,
++  },
++  /** Eyebrow/label — 12 / 600 / .12em tracking / uppercase / stone. */
++  label: {
++    fontFamily: fonts.body,
++    fontSize: LABEL_FONT_SIZE,
++    fontWeight: "600",
++    letterSpacing: LABEL_FONT_SIZE * LETTER_SPACING_LABEL_RATIO, // 1.44
++    textTransform: "uppercase",
++    color: palette.stone,
++  },
++  /** Serif italic accent — headline face, italic. */
++  serifItalic: {
++    fontFamily: fonts.heading,
++    fontStyle: "italic",
++  },
+ } as const;
+ 
+ export const radii = {
+-  sm: 11,
+-  md: 13,
+-  lg: 16,
+-  xl: 20,
+-  pill: 999,
++  sm: 6,
++  md: 12,
++  /** @deprecated — removed in P5. Alias of `md`; the contract has three radii. */
++  lg: 12,
++  /** @deprecated — removed in P5. Alias of `md`; the contract has three radii. */
++  xl: 12,
++  pill: 100,
+ } as const;
+ 
+ export const spacing = {
+@@ -66,39 +205,52 @@ export const spacing = {
+   xxl: 28,
+ } as const;
+ 
+-/** Cross-platform elevation presets matching the mockup's soft warm shadows. */
++const SHADOW_BASE = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.08,
++    shadowRadius: 3,
++    shadowOffset: { width: 0, height: 1 },
++  },
++  android: { elevation: 1 },
++  default: {},
++});
++
++const SHADOW_CARD = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.06,
++    shadowRadius: 20,
++    shadowOffset: { width: 0, height: 4 },
++  },
++  android: { elevation: 4 },
++  default: {},
++});
++
++const SHADOW_FLOAT = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.1,
++    shadowRadius: 30,
++    shadowOffset: { width: 0, height: 8 },
++  },
++  android: { elevation: 10 },
++  default: {},
++});
++
++/** Cross-platform elevation presets. `base`/`card`/`float` are the contract
++ * names; `sm`/`md`/`lg` are deprecated aliases of the same three objects. */
+ export const shadows = {
+-  sm: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.06,
+-      shadowRadius: 3,
+-      shadowOffset: { width: 0, height: 1 },
+-    },
+-    android: { elevation: 1 },
+-    default: {},
+-  }),
+-  md: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.1,
+-      shadowRadius: 12,
+-      shadowOffset: { width: 0, height: 8 },
+-    },
+-    android: { elevation: 4 },
+-    default: {},
+-  }),
+-  lg: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.18,
+-      shadowRadius: 22,
+-      shadowOffset: { width: 0, height: 14 },
+-    },
+-    android: { elevation: 10 },
+-    default: {},
+-  }),
++  base: SHADOW_BASE,
++  card: SHADOW_CARD,
++  float: SHADOW_FLOAT,
++  /** @deprecated — removed in P5. Alias of `base`. */
++  sm: SHADOW_BASE,
++  /** @deprecated — removed in P5. Alias of `card`. */
++  md: SHADOW_CARD,
++  /** @deprecated — removed in P5. Alias of `float`. */
++  lg: SHADOW_FLOAT,
+ } as const;
+ 
+-export const theme = { colors, gradients, fonts, radii, spacing, shadows } as const;
++export const theme = { palette, derived, colors, gradients, fonts, typography, radii, spacing, shadows } as const;
+ export type AppTheme = typeof theme;

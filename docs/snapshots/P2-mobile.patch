@@ -1,0 +1,3154 @@
+diff --git a/src/app/(auth)/_layout.tsx b/src/app/(auth)/_layout.tsx
+index c0df932..64eb18d 100644
+--- a/src/app/(auth)/_layout.tsx
++++ b/src/app/(auth)/_layout.tsx
+@@ -1,12 +1,14 @@
+ import { Stack } from "expo-router";
+-import { colors } from "@/theme/tokens";
++import { palette } from "@/theme/tokens";
+ 
+ export default function AuthLayout() {
+   return (
+     <Stack
+       screenOptions={{
+         headerShown: false,
+-        contentStyle: { backgroundColor: colors.cream },
++        // Mockup `body{background:var(--paper)}` — the auth card is paper on
++        // paper, separated by its `--mist` hairline.
++        contentStyle: { backgroundColor: palette.paper },
+       }}
+     />
+   );
+diff --git a/src/app/(auth)/sign-in.tsx b/src/app/(auth)/sign-in.tsx
+index 4515450..0c9ec99 100644
+--- a/src/app/(auth)/sign-in.tsx
++++ b/src/app/(auth)/sign-in.tsx
+@@ -1,12 +1,13 @@
+ import { useState } from "react";
+-import { Alert, KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
+-import { Link } from "expo-router";
+-import { LinearGradient } from "expo-linear-gradient";
+-import { Heart } from "lucide-react-native";
+-import { Button, Field, Screen, Txt, colors, gradients, radii } from "@/components/ui";
++import { Alert, KeyboardAvoidingView, Platform, View } from "react-native";
++import { Screen } from "@/components/ui";
++import { Body, EdButton, EdDivider, EdField, TextLink } from "@/components/editorial";
++import { palette } from "@/theme/tokens";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { signInSchema, magicLinkSchema } from "@/lib/schemas";
++import { AuthShell } from "@/components/auth/AuthShell";
+ import { GoogleButton } from "@/components/auth/GoogleButton";
++import { PasswordField } from "@/components/auth/PasswordField";
+ 
+ export default function SignIn() {
+   const { signInWithPassword, signInWithMagicLink } = useAuth();
+@@ -54,74 +55,76 @@ export default function SignIn() {
+   }
+ 
+   return (
+-    <Screen bg={colors.cream} scroll contentStyle={{ gap: 20, paddingTop: 40 }}>
+-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ gap: 20 }}>
+-        <View style={{ alignItems: "center", gap: 10, marginBottom: 8 }}>
+-          <LinearGradient
+-            colors={gradients.rose}
+-            style={{ width: 56, height: 56, borderRadius: radii.lg, alignItems: "center", justifyContent: "center" }}
+-          >
+-            <Heart size={26} color="#fff" fill="#fff" />
+-          </LinearGradient>
+-          <Txt variant="eyebrow">welcome back</Txt>
+-          <Txt variant="h1">TaDaaaa</Txt>
+-          <Txt variant="body" muted style={{ textAlign: "center" }}>
+-            Sign in to craft and manage your surprises.
+-          </Txt>
+-        </View>
++    <Screen
++      bg={palette.paper}
++      scroll
++      contentStyle={{ paddingHorizontal: 20, paddingTop: 32, paddingBottom: 48, gap: 0 }}
++    >
++      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
++        <AuthShell active="in">
++          <GoogleButton />
++          <EdDivider label="or" />
+ 
+-        <Field
+-          label="Email"
+-          value={email}
+-          onChangeText={setEmail}
+-          error={errors.email}
+-          autoCapitalize="none"
+-          keyboardType="email-address"
+-          autoComplete="email"
+-          placeholder="you@example.com"
+-        />
+-
+-        {mode === "password" && (
+-          <Field
+-            label="Password"
+-            value={password}
+-            onChangeText={setPassword}
+-            error={errors.password}
+-            secureTextEntry
+-            placeholder="••••••••"
+-          />
+-        )}
+-
+-        {magicSent ? (
+-          <Txt variant="body" style={{ color: colors.roseDeep, textAlign: "center" }}>
+-            ✨ Check your email for a magic sign-in link.
+-          </Txt>
+-        ) : (
+-          <Button
+-            title={mode === "password" ? "Sign in" : "Send magic link"}
+-            loading={loading}
+-            onPress={mode === "password" ? submitPassword : submitMagic}
++          <EdField
++            label="Email"
++            value={email}
++            onChangeText={setEmail}
++            error={errors.email}
++            autoCapitalize="none"
++            autoCorrect={false}
++            keyboardType="email-address"
++            autoComplete="email"
++            textContentType="emailAddress"
++            placeholder="you@example.com"
+           />
+-        )}
+ 
+-        <GoogleButton />
++          {mode === "password" ? (
++            <PasswordField
++              value={password}
++              onChangeText={setPassword}
++              error={errors.password}
++              autoComplete="current-password"
++              textContentType="password"
++              placeholder="Your password"
++            />
++          ) : null}
+ 
+-        <Pressable onPress={() => { setMode(mode === "password" ? "magic" : "password"); setMagicSent(false); }}>
+-          <Txt variant="body" style={{ color: colors.rose, textAlign: "center" }}>
+-            {mode === "password" ? "Email me a magic link instead" : "Use a password instead"}
+-          </Txt>
+-        </Pressable>
++          {magicSent ? (
++            <View
++              style={{
++                borderWidth: 1,
++                borderColor: palette.mist,
++                backgroundColor: palette.pebble,
++                borderRadius: 6,
++                padding: 14,
++              }}
++            >
++              <Body size={14} accessibilityLiveRegion="polite">
++                Check your email for a magic sign-in link.
++              </Body>
++            </View>
++          ) : (
++            <EdButton
++              title={mode === "password" ? "Sign in" : "Send magic link"}
++              variant="ink"
++              loading={loading}
++              onPress={mode === "password" ? submitPassword : submitMagic}
++            />
++          )}
+ 
+-        <View style={{ flexDirection: "row", justifyContent: "center", gap: 5, marginTop: 4 }}>
+-          <Txt variant="body" muted>New here?</Txt>
+-          <Link href="/(auth)/sign-up" asChild>
+-            <Pressable>
+-              <Txt variant="body" style={{ color: colors.rose, fontFamily: "DMSans_700Bold" }}>
+-                Create an account
+-              </Txt>
+-            </Pressable>
+-          </Link>
+-        </View>
++          <TextLink
++            title={
++              mode === "password"
++                ? "Or sign in with a magic link →"
++                : "Use a password instead"
++            }
++            onPress={() => {
++              setMode(mode === "password" ? "magic" : "password");
++              setMagicSent(false);
++              setErrors({});
++            }}
++          />
++        </AuthShell>
+       </KeyboardAvoidingView>
+     </Screen>
+   );
+diff --git a/src/app/(auth)/sign-up.tsx b/src/app/(auth)/sign-up.tsx
+index 369e9e6..5881255 100644
+--- a/src/app/(auth)/sign-up.tsx
++++ b/src/app/(auth)/sign-up.tsx
+@@ -1,12 +1,16 @@
+ import { useState } from "react";
+-import { Alert, KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
+-import { Link, useRouter } from "expo-router";
+-import { LinearGradient } from "expo-linear-gradient";
+-import { Heart } from "lucide-react-native";
+-import { Button, Field, Screen, Txt, colors, gradients, radii } from "@/components/ui";
++import { Alert, KeyboardAvoidingView, Platform } from "react-native";
++import { useRouter } from "expo-router";
++import { Screen } from "@/components/ui";
++import { EdButton, EdDivider, EdField } from "@/components/editorial";
++import { palette } from "@/theme/tokens";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { signUpSchema } from "@/lib/schemas";
++import { AuthShell } from "@/components/auth/AuthShell";
+ import { GoogleButton } from "@/components/auth/GoogleButton";
++import { PasswordField } from "@/components/auth/PasswordField";
++import { TermsConsent } from "@/components/auth/TermsConsent";
++import { confirmPasswordError } from "@/components/auth/password-match";
+ 
+ export default function SignUp() {
+   const { signUpWithPassword } = useAuth();
+@@ -14,14 +18,39 @@ export default function SignUp() {
+   const [fullName, setFullName] = useState("");
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+-  const [errors, setErrors] = useState<{ fullName?: string; email?: string; password?: string }>({});
++  const [confirmPassword, setConfirmPassword] = useState("");
++  const [acceptedTerms, setAcceptedTerms] = useState(false);
++  const [errors, setErrors] = useState<{
++    fullName?: string;
++    email?: string;
++    password?: string;
++    confirmPassword?: string;
++  }>({});
+   const [loading, setLoading] = useState(false);
+ 
++  /**
++   * Once the confirm field has content it owns its own message, so a match
++   * clears the error the moment the user fixes it instead of waiting for the
++   * next submit. While it is empty there is nothing live to say, so the
++   * submit-time message stands.
++   */
++  const confirmFieldError = confirmPassword
++    ? confirmPasswordError(password, confirmPassword)
++    : errors.confirmPassword;
++
+   async function submit() {
++    // Client-side gates first; `signUpSchema` and the Supabase payload below
++    // are untouched — confirmation and consent never leave this screen.
++    const confirmError = confirmPasswordError(password, confirmPassword);
+     const parsed = signUpSchema.safeParse({ fullName, email, password });
+-    if (!parsed.success) {
+-      const f = parsed.error.flatten().fieldErrors;
+-      setErrors({ fullName: f.fullName?.[0], email: f.email?.[0], password: f.password?.[0] });
++    if (!parsed.success || confirmError) {
++      const f = parsed.success ? {} : parsed.error.flatten().fieldErrors;
++      setErrors({
++        fullName: f.fullName?.[0],
++        email: f.email?.[0],
++        password: f.password?.[0],
++        confirmPassword: confirmError,
++      });
+       return;
+     }
+     setErrors({});
+@@ -44,51 +73,67 @@ export default function SignUp() {
+   }
+ 
+   return (
+-    <Screen bg={colors.cream} scroll contentStyle={{ gap: 18, paddingTop: 40 }}>
+-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ gap: 18 }}>
+-        <View style={{ alignItems: "center", gap: 10, marginBottom: 8 }}>
+-          <LinearGradient
+-            colors={gradients.rose}
+-            style={{ width: 56, height: 56, borderRadius: radii.lg, alignItems: "center", justifyContent: "center" }}
+-          >
+-            <Heart size={26} color="#fff" fill="#fff" />
+-          </LinearGradient>
+-          <Txt variant="eyebrow">let's make magic</Txt>
+-          <Txt variant="h1">Create account</Txt>
+-        </View>
+-
+-        <Field label="Your name" value={fullName} onChangeText={setFullName} error={errors.fullName} placeholder="Alex Rivera" />
+-        <Field
+-          label="Email"
+-          value={email}
+-          onChangeText={setEmail}
+-          error={errors.email}
+-          autoCapitalize="none"
+-          keyboardType="email-address"
+-          autoComplete="email"
+-          placeholder="you@example.com"
+-        />
+-        <Field
+-          label="Password"
+-          value={password}
+-          onChangeText={setPassword}
+-          error={errors.password}
+-          secureTextEntry
+-          placeholder="At least 8 characters"
+-        />
++    <Screen
++      bg={palette.paper}
++      scroll
++      contentStyle={{ paddingHorizontal: 20, paddingTop: 32, paddingBottom: 48, gap: 0 }}
++    >
++      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
++        <AuthShell active="up">
++          <GoogleButton />
++          <EdDivider label="or" />
+ 
+-        <Button title="Create account" loading={loading} onPress={submit} />
++          <EdField
++            label="Full name"
++            value={fullName}
++            onChangeText={setFullName}
++            error={errors.fullName}
++            autoComplete="name"
++            textContentType="name"
++            maxLength={100}
++            placeholder="Dev Sharma"
++          />
++          <EdField
++            label="Email"
++            value={email}
++            onChangeText={setEmail}
++            error={errors.email}
++            autoCapitalize="none"
++            autoCorrect={false}
++            keyboardType="email-address"
++            autoComplete="email"
++            textContentType="emailAddress"
++            placeholder="you@example.com"
++          />
++          <PasswordField
++            value={password}
++            onChangeText={setPassword}
++            error={errors.password}
++            meter
++            autoComplete="new-password"
++            textContentType="newPassword"
++            placeholder="8+ chars, mixed case, number, symbol"
++          />
++          <PasswordField
++            label="Confirm password"
++            value={confirmPassword}
++            onChangeText={setConfirmPassword}
++            error={confirmFieldError}
++            autoComplete="new-password"
++            textContentType="newPassword"
++            placeholder="Type it once more"
++          />
+ 
+-        <GoogleButton />
++          <TermsConsent accepted={acceptedTerms} onChange={setAcceptedTerms} />
+ 
+-        <View style={{ flexDirection: "row", justifyContent: "center", gap: 5, marginTop: 4 }}>
+-          <Txt variant="body" muted>Already have an account?</Txt>
+-          <Link href="/(auth)/sign-in" asChild>
+-            <Pressable>
+-              <Txt variant="body" style={{ color: colors.rose, fontFamily: "DMSans_700Bold" }}>Sign in</Txt>
+-            </Pressable>
+-          </Link>
+-        </View>
++          <EdButton
++            title="Create account"
++            variant="coral"
++            loading={loading}
++            disabled={!acceptedTerms}
++            onPress={submit}
++          />
++        </AuthShell>
+       </KeyboardAvoidingView>
+     </Screen>
+   );
+diff --git a/src/app/(tabs)/_layout.tsx b/src/app/(tabs)/_layout.tsx
+index 36aecf9..23ae243 100644
+--- a/src/app/(tabs)/_layout.tsx
++++ b/src/app/(tabs)/_layout.tsx
+@@ -1,10 +1,23 @@
++/**
++ * Tab chrome — the RN equivalent of the mockup's `.appbar`
++ * (`tadaaaa/tadaaaa-editorial.html` L727 markup, L49-53 CSS):
++ *
++ *   .appbar        paper ground, 1px mist top rule, safe-area bottom padding
++ *   .appbar button column stack, 10px/600/.06em uppercase label, stone
++ *   .appbar .on    ink label, plus a 16x2 coral rule underneath
++ *   .appbar svg    20px, 1.6 stroke, currentColor
++ *
++ * Structure is unchanged from what shipped (Home · Invites · [Create] ·
++ * Activity · Profile) — only the treatment is re-skinned. The centre Create
++ * action keeps its raised affordance but loses the gradient: the editorial
++ * identity allows flat coral fills, not ramps.
++ */
+ import { Tabs, useRouter } from "expo-router";
+-import { Pressable, View } from "react-native";
+-import { LinearGradient } from "expo-linear-gradient";
++import { Pressable, Text, View } from "react-native";
+ import { useSafeAreaInsets } from "react-native-safe-area-context";
+ import { Bell, Home, Plus, Sparkles, User } from "lucide-react-native";
+-import { colors, fonts, gradients, radii, shadows } from "@/theme/tokens";
+-import { Text } from "react-native";
++import { derived, fonts, palette, radii } from "@/theme/tokens";
++import { TOUCH_MIN, useReducedMotion } from "@/components/editorial";
+ 
+ // Structural subset of the tab-bar props we actually use — decoupled from the
+ // bundled @react-navigation types (expo-router ships its own copy, which
+@@ -14,12 +27,23 @@ type TabBarProps = {
+   navigation: { navigate: (name: string) => void };
+ };
+ 
+-const ICONS: Record<string, (active: boolean) => React.ReactNode> = {
+-  index: (a) => <Home size={22} color={a ? colors.rose : colors.warmGray} strokeWidth={a ? 2.4 : 1.9} />,
+-  invites: (a) => <Sparkles size={22} color={a ? colors.rose : colors.warmGray} strokeWidth={a ? 2.4 : 1.9} />,
+-  activity: (a) => <Bell size={22} color={a ? colors.rose : colors.warmGray} strokeWidth={a ? 2.4 : 1.9} />,
+-  profile: (a) => <User size={22} color={a ? colors.rose : colors.warmGray} strokeWidth={a ? 2.4 : 1.9} />,
++/** `.appbar svg { width:20px; height:20px; stroke-width:1.6 }`. */
++const ICON_SIZE = 20;
++const ICON_STROKE = 1.6;
++const LABEL_SIZE = 10;
++/** `.appbar button { letter-spacing:.06em }` resolved against the font size. */
++const LABEL_TRACKING_RATIO = 0.06;
++/** `.appbar button.on::after { width:16px; height:2px }`. */
++const ACTIVE_RULE_WIDTH = 16;
++const ACTIVE_RULE_HEIGHT = 2;
++
++const ICONS: Record<string, (color: string) => React.ReactNode> = {
++  index: (c) => <Home size={ICON_SIZE} color={c} strokeWidth={ICON_STROKE} />,
++  invites: (c) => <Sparkles size={ICON_SIZE} color={c} strokeWidth={ICON_STROKE} />,
++  activity: (c) => <Bell size={ICON_SIZE} color={c} strokeWidth={ICON_STROKE} />,
++  profile: (c) => <User size={ICON_SIZE} color={c} strokeWidth={ICON_STROKE} />,
+ };
++
+ const LABELS: Record<string, string> = {
+   index: "Home",
+   invites: "Invites",
+@@ -27,79 +51,108 @@ const LABELS: Record<string, string> = {
+   profile: "Profile",
+ };
+ 
++const LEFT_TABS = ["index", "invites"];
++const RIGHT_TABS = ["activity", "profile"];
++
+ function TabBar({ state, navigation }: TabBarProps) {
+   const insets = useSafeAreaInsets();
+   const router = useRouter();
+-  // Order: Home, Invites, [FAB], Activity, Profile
+-  const left = state.routes.filter((r: { name: string }) => ["index", "invites"].includes(r.name));
+-  const right = state.routes.filter((r: { name: string }) => ["activity", "profile"].includes(r.name));
++  const reduced = useReducedMotion();
+ 
+   const renderTab = (routeName: string) => {
+-    const routeIndex = state.routes.findIndex((r: { name: string }) => r.name === routeName);
++    const routeIndex = state.routes.findIndex((r) => r.name === routeName);
+     const active = state.index === routeIndex;
++    // `.appbar button { color:var(--stone) }` / `.on { color:var(--ink) }` —
++    // the icon inherits it via `stroke:currentColor`.
++    const tint = active ? palette.ink : palette.stone;
++
+     return (
+       <Pressable
+         key={routeName}
+         onPress={() => navigation.navigate(routeName)}
+-        style={{ flex: 1, alignItems: "center", gap: 4, paddingVertical: 4 }}
++        accessibilityRole="tab"
++        accessibilityState={{ selected: active }}
++        accessibilityLabel={LABELS[routeName]}
++        style={{
++          flex: 1,
++          minWidth: TOUCH_MIN,
++          minHeight: TOUCH_MIN,
++          alignItems: "center",
++          justifyContent: "center",
++          gap: 2,
++          paddingVertical: 6,
++          paddingHorizontal: 10,
++        }}
+       >
+-        {ICONS[routeName](active)}
++        {ICONS[routeName](tint)}
+         <Text
++          numberOfLines={1}
+           style={{
+-            fontFamily: fonts.bodyMedium,
+-            fontSize: 10,
+-            color: active ? colors.rose : colors.warmGray,
++            fontFamily: fonts.body,
++            fontSize: LABEL_SIZE,
++            fontWeight: "600",
++            letterSpacing: LABEL_SIZE * LABEL_TRACKING_RATIO,
++            textTransform: "uppercase",
++            color: tint,
+           }}
+         >
+           {LABELS[routeName]}
+         </Text>
++        {/* `.appbar button.on::after` — the coral underline. Always rendered so
++            the row's height never shifts between states. */}
++        <View
++          style={{
++            width: ACTIVE_RULE_WIDTH,
++            height: ACTIVE_RULE_HEIGHT,
++            marginTop: 2,
++            backgroundColor: active ? palette.coral : "transparent",
++          }}
++        />
+       </Pressable>
+     );
+   };
+ 
+   return (
+     <View
+-      style={[
+-        {
+-          flexDirection: "row",
+-          alignItems: "flex-end",
+-          justifyContent: "space-around",
+-          backgroundColor: "rgba(255,255,255,0.98)",
+-          borderTopWidth: 1,
+-          borderTopColor: colors.hair,
+-          paddingTop: 10,
+-          paddingBottom: Math.max(insets.bottom, 9),
+-          paddingHorizontal: 8,
+-        },
+-      ]}
++      style={{
++        flexDirection: "row",
++        alignItems: "flex-end",
++        justifyContent: "space-around",
++        backgroundColor: palette.paper,
++        borderTopWidth: 1,
++        borderTopColor: palette.mist,
++        paddingTop: 6,
++        // `padding: 6px 4px calc(6px + env(safe-area-inset-bottom))`
++        paddingBottom: insets.bottom + 6,
++        paddingHorizontal: 4,
++      }}
+     >
+-      {left.map((r) => renderTab(r.name))}
++      {LEFT_TABS.map(renderTab)}
+ 
+-      {/* Center FAB → create wizard */}
++      {/* Centre Create. Flat coral, no ramp — the identity bans gradients. */}
+       <View style={{ flex: 1, alignItems: "center" }}>
+-        <Pressable onPress={() => router.push("/create")} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.94 : 1 }] })}>
+-          <LinearGradient
+-            colors={gradients.rose}
+-            style={[
+-              {
+-                width: 54,
+-                height: 54,
+-                borderRadius: 18,
+-                alignItems: "center",
+-                justifyContent: "center",
+-                marginTop: -26,
+-                borderWidth: 3,
+-                borderColor: colors.creamDark,
+-              },
+-              shadows.md,
+-            ]}
+-          >
+-            <Plus size={26} color="#fff" strokeWidth={2.6} />
+-          </LinearGradient>
++        <Pressable
++          onPress={() => router.push("/create")}
++          accessibilityRole="button"
++          accessibilityLabel="Create a surprise"
++          style={({ pressed }) => ({
++            width: 52,
++            height: 52,
++            marginTop: -22,
++            borderRadius: radii.md,
++            alignItems: "center",
++            justifyContent: "center",
++            backgroundColor: palette.coral,
++            borderWidth: 3,
++            borderColor: palette.paper,
++            transform: [{ scale: pressed && !reduced ? 0.96 : 1 }],
++          })}
++        >
++          <Plus size={24} color={derived.white} strokeWidth={2} />
+         </Pressable>
+       </View>
+ 
+-      {right.map((r) => renderTab(r.name))}
++      {RIGHT_TABS.map(renderTab)}
+     </View>
+   );
+ }
+@@ -108,7 +161,7 @@ export default function TabsLayout() {
+   return (
+     <Tabs
+       tabBar={(props) => <TabBar {...props} />}
+-      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.creamDark } }}
++      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: palette.pebble } }}
+     >
+       <Tabs.Screen name="index" />
+       <Tabs.Screen name="invites" />
+diff --git a/src/app/(tabs)/activity.tsx b/src/app/(tabs)/activity.tsx
+index 4304812..6a5dfd5 100644
+--- a/src/app/(tabs)/activity.tsx
++++ b/src/app/(tabs)/activity.tsx
+@@ -1,10 +1,33 @@
++/**
++ * Activity — the "who" behind Home's counters, mirroring the web
++ * `/dashboard/activity` feed: views, RSVPs and answers merged newest-first and
++ * grouped per invite.
++ *
++ * Skin is the mockup's dashboard activity column (`tadaaaa-editorial.html`
++ * L1039-1042): a `.panel` per invite holding `.feedi` rows, with the focus
++ * filter rendered as `.chip` / `.chip.on`.
++ *
++ * Behaviour preserved exactly: the same focus tabs, the same per-invite
++ * grouping, the same creator-scoped reads in db.ts, and the same sanitising +
++ * re-filtering inside buildActivityFeed.
++ */
+ import { useCallback, useMemo, useState } from "react";
+-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
++import { RefreshControl, ScrollView, View } from "react-native";
+ import { useFocusEffect, useRouter } from "expo-router";
+ import { SafeAreaView } from "react-native-safe-area-context";
+ import { formatDistanceToNow } from "date-fns";
+-import { Eye, Heart, MessageCircle, Sparkles } from "lucide-react-native";
+-import { Card, Txt, colors, fonts, radii, spacing } from "@/components/ui";
++import { Eye, Heart, MessageCircle } from "lucide-react-native";
++import {
++  EdChip,
++  EdEmpty,
++  EdFeedItem,
++  EdMeta,
++  EdPageHead,
++  EdPanel,
++  TextLink,
++  derived,
++  palette,
++} from "@/components/editorial";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { getActivityRows } from "@/lib/db";
+ import {
+@@ -31,18 +54,20 @@ const KIND_ICON = {
+   answer: MessageCircle,
+ } as const;
+ 
++/**
++ * Feed glyph tints, on tokens only. The pre-editorial screen used three
++ * off-palette literals (#C9A96E / #C4686D / #6B8F71); these are their
++ * sanctioned equivalents — neutral for a passive open, coral for the primary
++ * action, success green for a written answer.
++ */
+ const KIND_COLOR = {
+-  view: "#C9A96E",
+-  rsvp: "#C4686D",
+-  answer: "#6B8F71",
++  view: palette.stone,
++  rsvp: palette.coral,
++  answer: derived.success,
+ } as const;
+ 
+-/**
+- * Activity — the "who" behind the Home tab's counters, mirroring the web
+- * `/dashboard/activity` feed: views, RSVPs and answers merged newest-first and
+- * grouped per invite. Reads are creator-scoped in db.ts and re-filtered in
+- * buildActivityFeed; guest names are sanitized + capped there too.
+- */
++const FEED_ICON_SIZE = 15;
++
+ export default function Activity() {
+   const { user } = useAuth();
+   const router = useRouter();
+@@ -77,14 +102,14 @@ export default function Activity() {
+   const isCapped = events.length === ACTIVITY_FEED_CAP;
+ 
+   return (
+-    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.creamDark }}>
++    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: palette.pebble }}>
+       <ScrollView
+-        contentContainerStyle={{ padding: spacing.xl, gap: spacing.md, paddingBottom: 40 }}
++        contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: 40 }}
+         showsVerticalScrollIndicator={false}
+         refreshControl={
+           <RefreshControl
+             refreshing={refreshing}
+-            tintColor={colors.rose}
++            tintColor={palette.coral}
+             onRefresh={async () => {
+               setRefreshing(true);
+               await load();
+@@ -93,120 +118,78 @@ export default function Activity() {
+           />
+         }
+       >
+-        <View style={{ gap: 4, marginBottom: spacing.sm }}>
+-          <Txt variant="eyebrow">what&apos;s happening</Txt>
+-          <Txt variant="h1">Activity</Txt>
+-        </View>
++        <EdPageHead title="Activity" sub="Every open, RSVP and answer, newest first." />
+ 
+         {events.length > 0 && (
+           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+             {FOCUS_TABS.map((tab) => {
+               const count =
+                 tab.key === "all" ? events.length : filterByFocus(events, tab.key).length;
+-              const active = tab.key === focus;
+               return (
+-                <Pressable
++                <EdChip
+                   key={tab.key}
++                  label={`${tab.label} ${count}`}
++                  selected={tab.key === focus}
+                   onPress={() => setFocus(tab.key)}
+-                  accessibilityRole="button"
+-                  accessibilityState={{ selected: active }}
+                   accessibilityLabel={`${tab.label}, ${count}`}
+-                  hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+-                  style={({ pressed }) => ({
+-                    height: 34,
+-                    paddingHorizontal: 14,
+-                    borderRadius: radii.pill,
+-                    borderWidth: 1,
+-                    flexDirection: "row",
+-                    alignItems: "center",
+-                    gap: 6,
+-                    borderColor: active ? colors.rose : colors.hair,
+-                    backgroundColor: active ? "#FFF0EE" : "#fff",
+-                    opacity: pressed ? 0.85 : 1,
+-                  })}
+-                >
+-                  <Txt
+-                    style={{
+-                      fontFamily: fonts.bodyBold,
+-                      fontSize: 12,
+-                      color: active ? colors.rose : colors.warmGray,
+-                    }}
+-                  >
+-                    {tab.label}
+-                  </Txt>
+-                  <Txt
+-                    style={{ fontSize: 11, color: active ? colors.rose : colors.warmGray }}
+-                  >
+-                    {count}
+-                  </Txt>
+-                </Pressable>
++                />
+               );
+             })}
+           </View>
+         )}
+ 
+         {events.length === 0 && (
+-          <Card style={{ alignItems: "center", gap: 10, paddingVertical: 28 }}>
+-            <Sparkles size={26} color={colors.rose} />
+-            <Txt variant="title">No activity yet</Txt>
+-            <Txt variant="body" muted style={{ textAlign: "center" }}>
++          <EdPanel title="No activity yet">
++            <EdEmpty>
+               Share a surprise link and every open, RSVP and answer lands here. Your own
+               previews never count.
+-            </Txt>
+-          </Card>
++            </EdEmpty>
++          </EdPanel>
+         )}
+ 
+         {events.length > 0 && visible.length === 0 && (
+-          <Card>
+-            <Txt variant="body" muted style={{ textAlign: "center" }}>
+-              Nothing in this filter yet.
+-            </Txt>
+-          </Card>
++          <EdPanel>
++            <EdEmpty>Nothing in this filter yet.</EdEmpty>
++          </EdPanel>
+         )}
+ 
+         {groups.map((group) => (
+-          <Card key={group.invite.id} style={{ gap: 10 }}>
+-            <Pressable
+-              onPress={() => router.push(`/invite/${group.invite.id}`)}
+-              accessibilityRole="button"
+-              accessibilityLabel={`Open ${group.invite.title}`}
+-            >
+-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+-                <Txt variant="title" numberOfLines={1} style={{ flex: 1 }}>
+-                  {group.invite.title}
+-                </Txt>
+-                <Txt variant="body" muted style={{ fontSize: 11 }}>
+-                  {group.events.length} {group.events.length === 1 ? "moment" : "moments"}
+-                </Txt>
++          <EdPanel
++            key={group.invite.id}
++            title={group.invite.title}
++            right={
++              // `.panel h3 > .tlink` — count stays plain meta, the link is the
++              // explicit affordance so screen readers get a verb.
++              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
++                <EdMeta>
++                  {group.events.length}{" "}
++                  {group.events.length === 1 ? "moment" : "moments"}
++                </EdMeta>
++                <TextLink
++                  title="Open"
++                  align="left"
++                  onPress={() => router.push(`/invite/${group.invite.id}`)}
++                />
+               </View>
+-            </Pressable>
+-
+-            <View style={{ gap: 8 }}>
+-              {group.events.map((event) => {
+-                const Icon = KIND_ICON[event.kind];
+-                return (
+-                  <View
+-                    key={event.id}
+-                    style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+-                  >
+-                    <Icon size={15} color={KIND_COLOR[event.kind]} />
+-                    <Txt variant="body" numberOfLines={1} style={{ flex: 1 }}>
+-                      {describeActivity(event)}
+-                    </Txt>
+-                    <Txt variant="body" muted style={{ fontSize: 11 }}>
+-                      {formatDistanceToNow(new Date(event.at), { addSuffix: true })}
+-                    </Txt>
+-                  </View>
+-                );
+-              })}
+-            </View>
+-          </Card>
++            }
++          >
++            {group.events.map((event, i) => {
++              const Icon = KIND_ICON[event.kind];
++              return (
++                <EdFeedItem
++                  key={event.id}
++                  last={i === group.events.length - 1}
++                  icon={<Icon size={FEED_ICON_SIZE} color={KIND_COLOR[event.kind]} />}
++                  text={describeActivity(event)}
++                  time={formatDistanceToNow(new Date(event.at), { addSuffix: true })}
++                />
++              );
++            })}
++          </EdPanel>
+         ))}
+ 
+         {isCapped && visible.length > 0 && (
+-          <Txt variant="body" muted style={{ textAlign: "center", fontSize: 11 }}>
+-            Showing your {ACTIVITY_FEED_CAP} most recent moments.
+-          </Txt>
++          <EdEmpty>Showing your {ACTIVITY_FEED_CAP} most recent moments.</EdEmpty>
+         )}
+       </ScrollView>
+     </SafeAreaView>
+diff --git a/src/app/(tabs)/index.tsx b/src/app/(tabs)/index.tsx
+index d247566..8e09d8c 100644
+--- a/src/app/(tabs)/index.tsx
++++ b/src/app/(tabs)/index.tsx
+@@ -1,15 +1,34 @@
++/**
++ * Home — the RN equivalent of the mockup's `renderDash()`
++ * (`tadaaaa/tadaaaa-editorial.html` L1023): `.phead` with a coral primary
++ * action, a `.stats4` row of `.stat` tiles, then a `.panel` holding `.srow`
++ * entries.
++ *
++ * Data behaviour is untouched from what shipped — the same creator-scoped
++ * `getMyInvites` / `monthlyInviteCount` reads, the same tier limit, the same
++ * Activity drill-through from the views tile. Only the skin changed.
++ */
+ import { useCallback, useState } from "react";
+-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
++import { RefreshControl, ScrollView, View } from "react-native";
+ import { useFocusEffect, useRouter } from "expo-router";
+ import { SafeAreaView } from "react-native-safe-area-context";
+-import { LinearGradient } from "expo-linear-gradient";
+-import { LayoutGrid, Sparkles } from "lucide-react-native";
+-import { Button, Card, Txt, colors, gradients, radii, spacing } from "@/components/ui";
+ import { InviteRow } from "@/components/InviteRow";
++import {
++  EdButton,
++  EdEmpty,
++  EdPageHead,
++  EdPanel,
++  EdStat,
++  TextLink,
++  palette,
++} from "@/components/editorial";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { getMyInvites, monthlyInviteCount, type Invite } from "@/lib/db";
+ import { getActiveTier, monthlyInviteLimit } from "@/lib/tier";
+ 
++/** How many rows the dashboard panel shows before deferring to the Invites tab. */
++const RECENT_LIMIT = 4;
++
+ export default function Home() {
+   const { user, profile } = useAuth();
+   const router = useRouter();
+@@ -35,139 +54,83 @@ export default function Home() {
+ 
+   const tier = getActiveTier(profile);
+   const limit = monthlyInviteLimit(tier);
+-  const totalViews = invites.reduce((s, i) => s + (i.view_count ?? 0), 0);
+-  const firstName = (profile?.full_name || user?.email || "there").split(" ")[0].split("@")[0];
++  const totalViews = invites.reduce((sum, i) => sum + (i.view_count ?? 0), 0);
++  const firstName = (profile?.full_name || user?.email || "there")
++    .split(" ")[0]
++    .split("@")[0];
++  const recent = invites.slice(0, RECENT_LIMIT);
+ 
+   return (
+-    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.creamDark }}>
++    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: palette.pebble }}>
+       <ScrollView
+-        contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg, paddingBottom: 40 }}
++        contentContainerStyle={{ padding: 20, gap: 22, paddingBottom: 40 }}
+         showsVerticalScrollIndicator={false}
+         refreshControl={
+           <RefreshControl
+             refreshing={refreshing}
++            tintColor={palette.coral}
+             onRefresh={async () => {
+               setRefreshing(true);
+               await load();
+               setRefreshing(false);
+             }}
+-            tintColor={colors.rose}
+           />
+         }
+       >
+-        <View style={{ gap: 4 }}>
+-          <Txt variant="eyebrow">hello {firstName}</Txt>
+-          <Txt variant="h1">Make someone{"\n"}gasp today</Txt>
+-        </View>
+-
+-        <LinearGradient
+-          colors={gradients.rose}
+-          start={{ x: 0, y: 0 }}
+-          end={{ x: 1, y: 1 }}
+-          style={{ borderRadius: radii.xl, padding: 20, gap: 12 }}
+-        >
+-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+-            <Sparkles size={18} color="#fff" />
+-            <Txt style={{ color: "#fff", fontFamily: "DMSans_700Bold", fontSize: 15 }}>
+-              Craft a new surprise
+-            </Txt>
+-          </View>
+-          <Txt style={{ color: "rgba(255,255,255,0.9)", fontSize: 13 }}>
+-            Pick an occasion, add photos, and choreograph a tap-to-reveal moment.
+-          </Txt>
+-          <Button title="Start creating" variant="dark" small onPress={() => router.push("/create")} style={{ alignSelf: "flex-start", marginTop: 4 }} />
+-        </LinearGradient>
++        <EdPageHead
++          title={`Hello, ${firstName}`}
++          sub={`${invites.length} ${invites.length === 1 ? "surprise" : "surprises"} so far`}
++        />
+ 
+-        <Pressable
+-          onPress={() => router.push("/templates")}
+-          accessibilityRole="button"
+-          accessibilityLabel="Start from a template"
+-          style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+-        >
+-          <Card style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+-            <View
+-              style={{
+-                width: 44,
+-                height: 44,
+-                borderRadius: radii.md,
+-                backgroundColor: colors.goldChipBg,
+-                alignItems: "center",
+-                justifyContent: "center",
+-              }}
+-            >
+-              <LayoutGrid size={20} color={colors.goldChipText} />
+-            </View>
+-            <View style={{ flex: 1, gap: 2 }}>
+-              <Txt style={{ fontFamily: "DMSans_700Bold", fontSize: 14, color: colors.charcoal }}>
+-                Start from a template
+-              </Txt>
+-              <Txt variant="body" muted style={{ fontSize: 11.5 }}>
+-                Occasion, theme, and reveal — already picked for you
+-              </Txt>
+-            </View>
+-          </Card>
+-        </Pressable>
++        <EdButton title="New surprise" onPress={() => router.push("/create")} />
+ 
+-        {/* Total views drills into the Activity feed — the number is the hook,
+-            the feed is the "who". */}
+-        <View style={{ flexDirection: "row", gap: spacing.md }}>
+-          <Stat value={String(invites.length)} label="Surprises" />
+-          <Stat
++        {/* `.stats4` — the tile row. Total views drills into Activity: the
++            number is the hook, the feed is the "who". */}
++        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
++          <EdStat value={String(invites.length)} label="Surprises" />
++          <EdStat
+             value={String(totalViews)}
+-            label="Total views"
++            label="Views"
+             onPress={() => router.push("/activity")}
++            accessibilityLabel={`Views, ${totalViews}. See activity`}
+           />
+-          <Stat
++          <EdStat
+             value={limit == null ? "∞" : `${monthCount}/${limit}`}
+             label="This month"
+           />
+         </View>
+ 
+-        <View style={{ gap: spacing.md }}>
+-          <Txt variant="h3">Recent</Txt>
+-          {invites.length === 0 ? (
+-            <Card>
+-              <Txt variant="body" muted style={{ textAlign: "center" }}>
+-                No surprises yet. Tap the + to craft your first one. ✨
+-              </Txt>
+-            </Card>
++        <EdPanel
++          title="Your surprises"
++          right={
++            invites.length > RECENT_LIMIT ? (
++              <TextLink title="See all" align="left" onPress={() => router.push("/invites")} />
++            ) : null
++          }
++        >
++          {recent.length === 0 ? (
++            <EdEmpty>No surprises yet. Tap New surprise to make your first one.</EdEmpty>
+           ) : (
+-            invites.slice(0, 4).map((inv) => (
+-              <InviteRow key={inv.id} invite={inv} onPress={() => router.push(`/invite/${inv.id}`)} />
++            recent.map((invite, i) => (
++              <InviteRow
++                key={invite.id}
++                invite={invite}
++                last={i === recent.length - 1}
++                onPress={() => router.push(`/invite/${invite.id}`)}
++              />
+             ))
+           )}
+-        </View>
++        </EdPanel>
++
++        <EdPanel title="Start from a template">
++          <EdEmpty>A ready-made occasion, theme, and reveal — just add your words.</EdEmpty>
++          <EdButton
++            title="Browse templates"
++            variant="line"
++            onPress={() => router.push("/templates")}
++          />
++        </EdPanel>
+       </ScrollView>
+     </SafeAreaView>
+   );
+ }
+-
+-function Stat({
+-  value,
+-  label,
+-  onPress,
+-}: {
+-  value: string;
+-  label: string;
+-  onPress?: () => void;
+-}) {
+-  const card = (
+-    <Card style={{ flex: 1, padding: 12, gap: 2 }}>
+-      <Txt style={{ fontFamily: "Bricolage_800ExtraBold", fontSize: 22, color: colors.charcoal }}>{value}</Txt>
+-      <Txt variant="body" muted style={{ fontSize: 10.5 }}>{label}</Txt>
+-    </Card>
+-  );
+-
+-  if (!onPress) return card;
+-
+-  return (
+-    <Pressable
+-      onPress={onPress}
+-      accessibilityRole="button"
+-      accessibilityLabel={`${label}, ${value}. See activity`}
+-      style={({ pressed }) => [{ flex: 1, transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+-    >
+-      {card}
+-    </Pressable>
+-  );
+-}
+diff --git a/src/app/(tabs)/invites.tsx b/src/app/(tabs)/invites.tsx
+index f753f55..d97e5fb 100644
+--- a/src/app/(tabs)/invites.tsx
++++ b/src/app/(tabs)/invites.tsx
+@@ -1,9 +1,16 @@
++/**
++ * Invites — the full `.srow` list the Home panel only previews. Same
++ * creator-scoped `getMyInvites` read as before; editorial skin over it.
++ *
++ * Rows sit inside one `.panel` so the hairlines read as a single document
++ * rather than a stack of cards, matching the mockup's dashboard list.
++ */
+ import { useCallback, useState } from "react";
+-import { FlatList, RefreshControl, View } from "react-native";
++import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+ import { useFocusEffect, useRouter } from "expo-router";
+ import { SafeAreaView } from "react-native-safe-area-context";
+-import { Card, Txt, colors, spacing } from "@/components/ui";
+ import { InviteRow } from "@/components/InviteRow";
++import { EdEmpty, EdPageHead, EdPanel, palette, radii } from "@/components/editorial";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { getMyInvites, type Invite } from "@/lib/db";
+ 
+@@ -27,42 +34,88 @@ export default function Invites() {
+   );
+ 
+   return (
+-    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.creamDark }}>
++    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: palette.pebble }}>
+       <FlatList
+         data={invites}
+         keyExtractor={(i) => i.id}
+-        contentContainerStyle={{ padding: spacing.xl, gap: spacing.md, paddingBottom: 40 }}
++        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+         showsVerticalScrollIndicator={false}
+         ListHeaderComponent={
+-          <View style={{ gap: 4, marginBottom: spacing.md }}>
+-            <Txt variant="eyebrow">your work</Txt>
+-            <Txt variant="h1">My Surprises</Txt>
+-          </View>
++          <>
++            <EdPageHead
++              title="My surprises"
++              sub={`${invites.length} ${invites.length === 1 ? "surprise" : "surprises"} so far`}
++              style={{ marginBottom: 22 }}
++            />
++            {invites.length > 0 ? <View style={panelCap.top} /> : null}
++          </>
+         }
+         ListEmptyComponent={
+           loaded ? (
+-            <Card>
+-              <Txt variant="body" muted style={{ textAlign: "center" }}>
++            <EdPanel>
++              <EdEmpty>
+                 Nothing here yet — tap the + below to create your first surprise.
+-              </Txt>
+-            </Card>
++              </EdEmpty>
++            </EdPanel>
+           ) : null
+         }
+-        renderItem={({ item }) => (
+-          <InviteRow invite={item} onPress={() => router.push(`/invite/${item.id}`)} />
++        // The `.panel` is assembled from three pieces rather than wrapping the
++        // list: a cap in the header, bordered sides on each row, and a closing
++        // cap in the footer. Wrapping a FlatList in a bordered View would
++        // defeat virtualisation.
++        renderItem={({ item, index }) => (
++          <View style={panelCap.side}>
++            <InviteRow
++              invite={item}
++              last={index === invites.length - 1}
++              onPress={() => router.push(`/invite/${item.id}`)}
++            />
++          </View>
+         )}
++        ListFooterComponent={
++          invites.length > 0 ? <View style={panelCap.bottom} /> : null
++        }
+         refreshControl={
+           <RefreshControl
+             refreshing={refreshing}
++            tintColor={palette.coral}
+             onRefresh={async () => {
+               setRefreshing(true);
+               await load();
+               setRefreshing(false);
+             }}
+-            tintColor={colors.rose}
+           />
+         }
+       />
+     </SafeAreaView>
+   );
+ }
++
++/** The three pieces that together draw one `.panel` around a virtualised list. */
++const panelCap = StyleSheet.create({
++  top: {
++    height: 8,
++    backgroundColor: palette.paper,
++    borderWidth: 1,
++    borderBottomWidth: 0,
++    borderColor: palette.mist,
++    borderTopLeftRadius: radii.md,
++    borderTopRightRadius: radii.md,
++  },
++  side: {
++    backgroundColor: palette.paper,
++    borderLeftWidth: 1,
++    borderRightWidth: 1,
++    borderColor: palette.mist,
++    paddingHorizontal: 20,
++  },
++  bottom: {
++    height: 8,
++    backgroundColor: palette.paper,
++    borderWidth: 1,
++    borderTopWidth: 0,
++    borderColor: palette.mist,
++    borderBottomLeftRadius: radii.md,
++    borderBottomRightRadius: radii.md,
++  },
++});
+diff --git a/src/app/(tabs)/profile.tsx b/src/app/(tabs)/profile.tsx
+index 4991061..2aeaacf 100644
+--- a/src/app/(tabs)/profile.tsx
++++ b/src/app/(tabs)/profile.tsx
+@@ -1,15 +1,40 @@
++/**
++ * Profile — the account half of the mockup's `renderSettings()`
++ * (`tadaaaa-editorial.html` L1530): identity `.setrow`, plan `.setrow` with a
++ * `btn-ink` upgrade, then the notification switches as `.setrow` + `.sw`.
++ *
++ * Behaviour preserved: the same `updateNotifyPrefs` writes with an optimistic
++ * refresh, the same tier read, the same confirm-before-sign-out.
++ */
+ import { useState } from "react";
+-import { Alert, Switch, View } from "react-native";
++import { Alert, ScrollView, View } from "react-native";
+ import { useRouter } from "expo-router";
+ import { SafeAreaView } from "react-native-safe-area-context";
+-import { LinearGradient } from "expo-linear-gradient";
+-import { Crown, LogOut, Settings } from "lucide-react-native";
+-import { Button, Card, Chip, Txt, colors, gradients, radii, spacing } from "@/components/ui";
++import {
++  EdButton,
++  EdPageHead,
++  EdPanel,
++  EdSetRow,
++  EdSwitch,
++  palette,
++} from "@/components/editorial";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { updateNotifyPrefs } from "@/lib/db";
+ import { getActiveTier } from "@/lib/tier";
+ 
+-const TIER_LABEL: Record<string, string> = { free: "Free", plus: "Plus", unlimited: "Unlimited" };
++const TIER_LABEL: Record<string, string> = {
++  free: "Free",
++  plus: "Plus",
++  unlimited: "Unlimited",
++};
++
++type NotifyKey = "notify_on_view" | "notify_on_answer" | "notify_occasions";
++
++const NOTIFY_ROWS: { key: NotifyKey; title: string }[] = [
++  { key: "notify_on_view", title: "When someone opens a surprise" },
++  { key: "notify_on_answer", title: "When someone answers" },
++  { key: "notify_occasions", title: "Occasion reminders" },
++];
+ 
+ export default function Profile() {
+   const { user, profile, signOut, refreshProfile } = useAuth();
+@@ -19,7 +44,7 @@ export default function Profile() {
+ 
+   const name = profile?.full_name || user?.email?.split("@")[0] || "Friend";
+ 
+-  async function toggle(key: "notify_on_view" | "notify_on_answer" | "notify_occasions", value: boolean) {
++  async function toggle(key: NotifyKey, value: boolean) {
+     if (!user) return;
+     setSaving(true);
+     try {
+@@ -32,62 +57,66 @@ export default function Profile() {
+     }
+   }
+ 
++  function confirmSignOut() {
++    Alert.alert("Sign out?", "You can always sign back in.", [
++      { text: "Cancel", style: "cancel" },
++      { text: "Sign out", style: "destructive", onPress: () => signOut() },
++    ]);
++  }
++
+   return (
+-    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.creamDark }}>
+-      <View style={{ padding: spacing.xl, gap: spacing.lg, flex: 1 }}>
+-        <View style={{ gap: 4 }}>
+-          <Txt variant="eyebrow">your account</Txt>
+-          <Txt variant="h1">{name}</Txt>
+-          <Txt variant="body" muted>{user?.email}</Txt>
+-        </View>
++    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: palette.pebble }}>
++      <ScrollView
++        contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: 40 }}
++        showsVerticalScrollIndicator={false}
++      >
++        <EdPageHead title={name} sub={user?.email ?? undefined} />
+ 
+-        <LinearGradient colors={tier === "free" ? [colors.gold, "#B8922F"] : gradients.rose}
+-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+-          style={{ borderRadius: radii.xl, padding: 18, gap: 10 }}>
+-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+-              <Crown size={20} color="#fff" />
+-              <Txt style={{ color: "#fff", fontFamily: "DMSans_700Bold", fontSize: 16 }}>
+-                {TIER_LABEL[tier]} plan
+-              </Txt>
+-            </View>
+-          </View>
+-          {tier === "free" && (
+-            <>
+-              <Txt style={{ color: "rgba(255,255,255,0.92)", fontSize: 13 }}>
+-                Unlock premium themes, unlimited surprises, and video reveals.
+-              </Txt>
+-              <Button title="See plans" variant="dark" small onPress={() => router.push("/pricing")} style={{ alignSelf: "flex-start", marginTop: 2 }} />
+-            </>
+-          )}
+-        </LinearGradient>
++        <EdPanel title="Plan">
++          <EdSetRow
++            title={`Current plan: ${TIER_LABEL[tier] ?? tier}`}
++            sub={tier === "free" ? "Upgrade anytime." : "Thanks for supporting TaDaaaa."}
++            last
++            right={
++              tier === "free" ? (
++                <EdButton
++                  title="Upgrade"
++                  variant="ink"
++                  small
++                  onPress={() => router.push("/pricing")}
++                />
++              ) : null
++            }
++          />
++        </EdPanel>
+ 
+-        <Card style={{ gap: 4 }}>
+-          <Txt variant="title" style={{ marginBottom: 6 }}>Notifications</Txt>
+-          <ToggleRow label="When someone opens a surprise" value={profile?.notify_on_view ?? true} disabled={saving} onValueChange={(v) => toggle("notify_on_view", v)} />
+-          <ToggleRow label="When someone answers" value={profile?.notify_on_answer ?? true} disabled={saving} onValueChange={(v) => toggle("notify_on_answer", v)} />
+-          <ToggleRow label="Occasion reminders" value={profile?.notify_occasions ?? true} disabled={saving} onValueChange={(v) => toggle("notify_occasions", v)} />
+-        </Card>
++        <EdPanel title="Notifications">
++          {NOTIFY_ROWS.map((row, i) => (
++            <EdSetRow
++              key={row.key}
++              title={row.title}
++              last={i === NOTIFY_ROWS.length - 1}
++              right={
++                <EdSwitch
++                  value={profile?.[row.key] ?? true}
++                  disabled={saving}
++                  accessibilityLabel={row.title}
++                  onValueChange={(v) => toggle(row.key, v)}
++                />
++              }
++            />
++          ))}
++        </EdPanel>
+ 
+-        <View style={{ gap: spacing.md, marginTop: "auto" }}>
+-          <Button title="Settings & privacy" variant="outline" left={<Settings size={18} color={colors.charcoal} />} onPress={() => router.push("/settings")} />
+-          <Button title="Sign out" variant="outline" left={<LogOut size={18} color={colors.roseDeep} />}
+-            onPress={() => Alert.alert("Sign out?", "You can always sign back in.", [
+-              { text: "Cancel", style: "cancel" },
+-              { text: "Sign out", style: "destructive", onPress: () => signOut() },
+-            ])} />
++        <View style={{ gap: 12 }}>
++          <EdButton
++            title="Settings & privacy"
++            variant="line"
++            onPress={() => router.push("/settings")}
++          />
++          <EdButton title="Sign out" variant="line" onPress={confirmSignOut} />
+         </View>
+-      </View>
++      </ScrollView>
+     </SafeAreaView>
+   );
+ }
+-
+-function ToggleRow({ label, value, onValueChange, disabled }: { label: string; value: boolean; onValueChange: (v: boolean) => void; disabled?: boolean }) {
+-  return (
+-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8 }}>
+-      <Txt variant="body" style={{ flex: 1, paddingRight: 12 }}>{label}</Txt>
+-      <Switch value={value} onValueChange={onValueChange} disabled={disabled}
+-        trackColor={{ true: colors.rose, false: colors.lightGray }} thumbColor="#fff" />
+-    </View>
+-  );
+-}
+diff --git a/src/app/pricing.tsx b/src/app/pricing.tsx
+index 0111312..0a335b3 100644
+--- a/src/app/pricing.tsx
++++ b/src/app/pricing.tsx
+@@ -2,9 +2,12 @@ import { useState } from "react";
+ import { Alert, View } from "react-native";
+ import { useRouter } from "expo-router";
+ import * as WebBrowser from "expo-web-browser";
+-import { Button, Chip, Screen, Txt, colors, spacing } from "@/components/ui";
++import { Screen } from "@/components/ui";
++import { Body, EdButton, Heading } from "@/components/editorial";
++import { palette, radii } from "@/theme/tokens";
+ import { ScreenHeader } from "@/components/ui/ScreenHeader";
+ import { PlanCard } from "@/components/pricing/PlanCard";
++import { PricingFAQ } from "@/components/pricing/PricingFAQ";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { getActiveTier } from "@/lib/tier";
+ import { createStripeCheckout, hasBackend, BackendUnavailableError } from "@/lib/api";
+@@ -48,49 +51,53 @@ export default function Pricing() {
+   }
+ 
+   return (
+-    <Screen bg={colors.cream} scroll contentStyle={{ paddingTop: spacing.sm }}>
++    <Screen
++      bg={palette.paper}
++      scroll
++      contentStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 56, gap: 0 }}
++    >
+       <ScreenHeader />
+-      <View style={{ gap: 4 }}>
+-        <Txt variant="eyebrow">upgrade</Txt>
+-        <Txt variant="h1">Plans</Txt>
+-        <Txt variant="body" muted>
+-          Free, Plus, and Unlimited — checkout opens in a secure browser, no in-app purchase.
+-        </Txt>
++
++      {/* Mockup `#pricing .center` — 34px headline, 15px body, 48px to the tiers. */}
++      <View style={{ alignItems: "center", marginTop: 24, marginBottom: 48 }}>
++        <Heading size={34} accessibilityRole="header" style={{ textAlign: "center" }}>
++          Free to start. Pay when you&apos;re happy.
++        </Heading>
++        <Body size={15} style={{ textAlign: "center", maxWidth: 520, marginTop: 12 }}>
++          Free, Plus, and Unlimited. Checkout opens in a secure browser — no in-app purchase.
++        </Body>
+       </View>
+ 
+       {!hasBackend && (
+         <View
+           style={{
+-            backgroundColor: colors.goldChipBg,
+-            borderColor: colors.goldChipBorder,
++            backgroundColor: palette.pebble,
++            borderColor: palette.mist,
+             borderWidth: 1,
+-            borderRadius: 14,
+-            padding: spacing.md,
++            borderRadius: radii.sm,
++            padding: 14,
++            marginBottom: 24,
+           }}
+         >
+-          <Txt variant="body" style={{ color: colors.goldChipText }}>
+-            Upgrades need the TaDaaaa backend connected. Set EXPO_PUBLIC_API_BASE_URL to enable checkout.
+-          </Txt>
++          <Body size={14}>
++            Upgrades need the TaDaaaa backend connected. Set EXPO_PUBLIC_API_BASE_URL to enable
++            checkout.
++          </Body>
+         </View>
+       )}
+ 
+-      <View style={{ gap: spacing.lg }}>
++      <View style={{ gap: 18 }}>
+         <PlanCard
+           name="Free"
+           price="$0"
+-          priceNote="/ forever"
++          priceNote="forever"
+           isCurrent={tier === "free"}
+           features={[
+             `${FREE_INVITE_MONTHLY_LIMIT} surprises a month`,
+             "3 free themes",
+             "Standard reveal links",
+-            `Unlock any premium theme à la carte for $${PREMIUM_THEME_PRICE.toFixed(2)}`,
++            `Any premium theme à la carte for $${PREMIUM_THEME_PRICE.toFixed(2)}`,
+           ]}
+-          cta={
+-            tier === "free" ? (
+-              <Chip label="You're here" />
+-            ) : undefined
+-          }
+         />
+ 
+         <PlanCard
+@@ -106,9 +113,9 @@ export default function Pricing() {
+           ]}
+           cta={
+             tier === "plus" ? undefined : (
+-              <Button
++              <EdButton
+                 title="Unlock themes in Create"
+-                variant="outline"
++                variant="coral"
+                 onPress={() => router.push("/create")}
+               />
+             )
+@@ -127,17 +134,27 @@ export default function Pricing() {
+           ]}
+           cta={
+             tier === "unlimited" ? undefined : (
+-              <Button
++              /* The mockup highlights the middle tier, so Plus keeps the coral
++                 accent border. Unlimited is the real Stripe checkout, so its
++                 CTA is a filled ink button rather than the mockup's lighter
++                 `.btn-line`: solid enough to read as the actionable control
++                 without taking coral off the highlighted tier. It is also no
++                 longer disabled when the backend is unset — `upgrade()` already
++                 explains that case in an alert, and a permanently greyed button
++                 reads as "this plan is unavailable" rather than "not configured
++                 yet". `EdButton` still disables itself while loading. */
++              <EdButton
+                 title="Upgrade to Unlimited"
+-                variant="dark"
++                variant="ink"
+                 onPress={() => upgrade("unlimited")}
+                 loading={loadingMode === "unlimited"}
+-                disabled={!hasBackend || loadingMode !== null}
+               />
+             )
+           }
+         />
+       </View>
++
++      <PricingFAQ />
+     </Screen>
+   );
+ }
+diff --git a/src/app/settings.tsx b/src/app/settings.tsx
+index 3ecf149..a980893 100644
+--- a/src/app/settings.tsx
++++ b/src/app/settings.tsx
+@@ -1,8 +1,16 @@
++/**
++ * Settings — the privacy/data half of the mockup's `renderSettings()`
++ * (`tadaaaa-editorial.html` L1530): a stack of `.setrow` entries, each a label
++ * block plus one trailing control, closing on the `.setrow.danger` delete row.
++ *
++ * Behaviour preserved: the same GDPR export, the same web hand-off for legal
++ * pages and account deletion, the same confirm-before-destructive dialogs.
++ */
+ import { useState } from "react";
+-import { Alert, Share, View } from "react-native";
++import { Alert, ScrollView, Share } from "react-native";
+ import * as WebBrowser from "expo-web-browser";
+-import { Download, FileText, LogOut, Shield, Trash2 } from "lucide-react-native";
+-import { Button, Card, Screen, Txt, colors, spacing } from "@/components/ui";
++import { SafeAreaView } from "react-native-safe-area-context";
++import { EdButton, EdPageHead, EdPanel, EdSetRow, palette } from "@/components/editorial";
+ import { ScreenHeader } from "@/components/ui/ScreenHeader";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { supabase } from "@/lib/supabase";
+@@ -76,52 +84,69 @@ export default function Settings() {
+   }
+ 
+   return (
+-    <Screen bg={colors.cream} scroll contentStyle={{ paddingTop: spacing.sm }}>
++    <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, backgroundColor: palette.pebble }}>
+       <ScreenHeader />
+-      <View style={{ gap: 4 }}>
+-        <Txt variant="eyebrow">preferences</Txt>
+-        <Txt variant="h1">Settings</Txt>
+-        <Txt variant="body" muted>Privacy, data export, and account controls.</Txt>
+-      </View>
++      <ScrollView
++        contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: 40 }}
++        showsVerticalScrollIndicator={false}
++      >
++        <EdPageHead title="Settings" sub="Privacy, data export, and account controls." />
+ 
+-      <Card style={{ gap: spacing.md }}>
+-        <Txt variant="title">Privacy & data</Txt>
+-        <Button
+-          title="Export my data (GDPR)"
+-          variant="outline"
+-          left={<Download size={18} color={colors.charcoal} />}
+-          loading={exporting}
+-          onPress={exportData}
+-        />
+-        <Button
+-          title="Terms of service"
+-          variant="outline"
+-          left={<FileText size={18} color={colors.charcoal} />}
+-          onPress={() => openLegal("/terms")}
+-        />
+-        <Button
+-          title="Privacy policy"
+-          variant="outline"
+-          left={<Shield size={18} color={colors.charcoal} />}
+-          onPress={() => openLegal("/privacy")}
+-        />
+-      </Card>
++        <EdPanel title="Privacy & data">
++          <EdSetRow
++            title="Download your data"
++            sub="Everything we hold, in one file."
++            right={
++              <EdButton
++                title="Export"
++                variant="line"
++                small
++                loading={exporting}
++                onPress={exportData}
++              />
++            }
++          />
++          <EdSetRow
++            title="Terms of service"
++            right={
++              <EdButton
++                title="Read"
++                variant="line"
++                small
++                onPress={() => openLegal("/terms")}
++              />
++            }
++          />
++          <EdSetRow
++            title="Privacy policy"
++            last
++            right={
++              <EdButton
++                title="Read"
++                variant="line"
++                small
++                onPress={() => openLegal("/privacy")}
++              />
++            }
++          />
++        </EdPanel>
+ 
+-      <Card style={{ gap: spacing.md }}>
+-        <Txt variant="title">Account</Txt>
+-        <Button
+-          title="Sign out"
+-          variant="outline"
+-          left={<LogOut size={18} color={colors.roseDeep} />}
+-          onPress={confirmSignOut}
+-        />
+-        <Button
+-          title="Delete account"
+-          variant="outline"
+-          left={<Trash2 size={18} color={colors.roseDeep} />}
+-          onPress={confirmDelete}
+-        />
+-      </Card>
+-    </Screen>
++        <EdPanel title="Account">
++          <EdSetRow
++            title="Sign out"
++            sub="You can always sign back in."
++            right={<EdButton title="Sign out" variant="line" small onPress={confirmSignOut} />}
++          />
++          {/* `.setrow.danger` — coral label, coral-outlined control. */}
++          <EdSetRow
++            title="Delete account"
++            sub="Permanent. No undo."
++            danger
++            last
++            right={<EdButton title="Delete" variant="danger" small onPress={confirmDelete} />}
++          />
++        </EdPanel>
++      </ScrollView>
++    </SafeAreaView>
+   );
+ }
+diff --git a/src/app/templates.tsx b/src/app/templates.tsx
+index 747e489..f28387a 100644
+--- a/src/app/templates.tsx
++++ b/src/app/templates.tsx
+@@ -1,14 +1,30 @@
+ /**
+- * Templates marketplace — mirrors the web /templates page: pick a curated
+- * occasion + theme + reveal-style bundle, then jump into the create wizard
+- * with it preset. Pushed screen (not a modal) so back navigation feels like
+- * browsing, matching /pricing and /settings.
++ * Templates marketplace — the RN equivalent of the mockup's templates screen
++ * (`tadaaaa-editorial.html` L690-697 markup, L282-296 CSS): a `.phead`, a
++ * scrolling `.chips` filter row, a `.rescount` line, then the `.tgrid` of
++ * `.tcard`s.
++ *
++ * Pushed screen (not a modal) so back navigation feels like browsing, matching
++ * /pricing and /settings. Filtering behaviour is unchanged.
+  */
+ import { useMemo, useState } from "react";
+-import { FlatList, Pressable, View, type ListRenderItem } from "react-native";
++import { FlatList, Pressable, Text, View, type ListRenderItem } from "react-native";
+ import { useRouter } from "expo-router";
+-import { LinearGradient } from "expo-linear-gradient";
+-import { Screen, Txt, colors, fonts, radii, shadows, spacing } from "@/components/ui";
++import { SafeAreaView } from "react-native-safe-area-context";
++import {
++  EdChip,
++  EdEmpty,
++  EdMeta,
++  EdPageHead,
++  fonts,
++  palette,
++  radii,
++  derived,
++} from "@/components/editorial";
++import {
++  LETTER_SPACING_HEADING_RATIO,
++  LINE_HEIGHT_HEADING_RATIO,
++} from "@/theme/tokens";
+ import { ScreenHeader } from "@/components/ui/ScreenHeader";
+ import {
+   templates,
+@@ -20,27 +36,26 @@ import {
+ import { occasions, getThemeById, gradientStops } from "@/lib/themes";
+ 
+ const FEATURED_COUNT = 5;
+-const GRID_GAP = spacing.md;
+-// Featured carousel card geometry — declared here (above first use in the
+-// snapToInterval below) rather than beside FeaturedCard further down.
++const GUTTER = 20;
++const GRID_GAP = 12;
+ const FEATURED_CARD_WIDTH = 168;
+ const FEATURED_COVER_HEIGHT = 150;
++/** `.tcard .img { height:150px }`, scaled for the 2-up mobile grid. */
++const GRID_COVER_HEIGHT = 128;
++const CARD_TITLE_SIZE = 17;
+ 
+-const OCCASION_FILTERS: { id: string; label: string; emoji: string }[] = [
+-  { id: "all", label: "All", emoji: "✨" },
+-  ...occasions.map((o) => ({ id: o.id, label: o.label, emoji: o.emoji })),
++const OCCASION_FILTERS: { id: string; label: string }[] = [
++  { id: "all", label: "All" },
++  ...occasions.map((o) => ({ id: o.id, label: o.label })),
+ ];
+ 
+-const PRICE_FILTERS: { id: "all" | "free" | "premium"; label: string; emoji: string }[] = [
+-  { id: "all", label: "Any price", emoji: "💫" },
+-  { id: "free", label: "Free", emoji: "🎁" },
+-  { id: "premium", label: "Premium", emoji: "✨" },
++const PRICE_FILTERS: { id: "all" | "free" | "premium"; label: string }[] = [
++  { id: "all", label: "Any price" },
++  { id: "free", label: "Free" },
++  { id: "premium", label: "Premium" },
+ ];
+ 
+-const STYLE_FILTERS: { id: string; label: string }[] = allStyleTags().map((tag) => ({
+-  id: tag,
+-  label: tag,
+-}));
++const STYLE_FILTERS = allStyleTags().map((tag) => ({ id: tag, label: tag }));
+ 
+ export default function TemplatesScreen() {
+   const router = useRouter();
+@@ -58,6 +73,12 @@ export default function TemplatesScreen() {
+     [activeOccasion, activeTier, activeStyleTags]
+   );
+   const featured = useMemo(() => templates.slice(0, FEATURED_COUNT), []);
++  // A 2-column FlatList stretches a lone trailing card across the full row.
++  // One invisible spacer keeps the last real card at half width.
++  const grid: (Template | null)[] = useMemo(
++    () => (filtered.length % 2 === 1 ? [...filtered, null] : filtered),
++    [filtered]
++  );
+ 
+   function toggleStyleTag(tag: string) {
+     setActiveStyleTags((current) =>
+@@ -70,118 +91,138 @@ export default function TemplatesScreen() {
+   }
+ 
+   return (
+-    <Screen bg={colors.creamDark} scroll={false} contentStyle={{ padding: 0, gap: 0 }}>
+-      <ScreenHeader variant="back" title="Templates" subtitle="find their moment" />
++    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: palette.pebble }}>
++      <ScreenHeader variant="back" title="Templates" />
+ 
+       <FlatList
+-        data={filtered}
+-        keyExtractor={(t) => t.id}
++        data={grid}
++        keyExtractor={(t, i) => t?.id ?? `spacer-${i}`}
+         numColumns={2}
+-        columnWrapperStyle={{ gap: GRID_GAP, paddingHorizontal: spacing.xl }}
++        columnWrapperStyle={{ gap: GRID_GAP, paddingHorizontal: GUTTER }}
+         contentContainerStyle={{ gap: GRID_GAP, paddingBottom: 40 }}
+         showsVerticalScrollIndicator={false}
+         renderItem={renderGridItem(openTemplate)}
+         ListHeaderComponent={
+-          <View style={{ gap: spacing.xxl, paddingBottom: spacing.lg }}>
+-            <View style={{ paddingHorizontal: spacing.xl, gap: 4, paddingTop: spacing.sm }}>
+-              <Txt variant="eyebrow">psst… they have no idea</Txt>
+-              <Txt variant="h1">Find their moment</Txt>
+-              <Txt variant="body" muted>
+-                A ready-made occasion, theme, and reveal — just add your words.
+-              </Txt>
+-            </View>
++          <View style={{ gap: 22, paddingBottom: GRID_GAP }}>
++            <EdPageHead
++              title="Find their moment"
++              sub="A ready-made occasion, theme, and reveal — just add your words."
++              style={{ paddingHorizontal: GUTTER, paddingTop: 8 }}
++            />
+ 
+             <ChipRow
+               items={OCCASION_FILTERS}
+               activeIds={[activeOccasion]}
+               onToggle={setActiveOccasion}
+-              accessibilityLabelPrefix="Filter templates by occasion"
++              labelPrefix="Filter by occasion"
+             />
+-
+             <ChipRow
+               items={PRICE_FILTERS}
+               activeIds={[activeTier]}
+               onToggle={(id) => setActiveTier(id as "all" | "free" | "premium")}
+-              accessibilityLabelPrefix="Filter templates by price"
++              labelPrefix="Filter by price"
+             />
+-
+             <ChipRow
+               items={STYLE_FILTERS}
+               activeIds={activeStyleTags}
+               onToggle={toggleStyleTag}
+-              accessibilityLabelPrefix="Filter templates by style"
++              labelPrefix="Filter by style"
+             />
+ 
+-            <View style={{ gap: spacing.md }}>
+-              <Txt variant="h3" style={{ paddingHorizontal: spacing.xl }}>
+-                Featured
+-              </Txt>
++            <View style={{ gap: GRID_GAP }}>
++              <CardTitle style={{ paddingHorizontal: GUTTER }}>Featured</CardTitle>
+               <FlatList
+                 horizontal
+                 data={featured}
+                 keyExtractor={(t) => t.id}
+                 showsHorizontalScrollIndicator={false}
+-                snapToInterval={FEATURED_CARD_WIDTH + spacing.md}
++                snapToInterval={FEATURED_CARD_WIDTH + GRID_GAP}
+                 decelerationRate="fast"
+-                contentContainerStyle={{ gap: spacing.md, paddingHorizontal: spacing.xl }}
++                contentContainerStyle={{ gap: GRID_GAP, paddingHorizontal: GUTTER }}
+                 renderItem={({ item }) => (
+-                  <FeaturedCard template={item} onPress={() => openTemplate(item)} />
++                  <TemplateCard
++                    template={item}
++                    onPress={() => openTemplate(item)}
++                    width={FEATURED_CARD_WIDTH}
++                    coverHeight={FEATURED_COVER_HEIGHT}
++                  />
+                 )}
+               />
+             </View>
+ 
++            {/* `.rescount` */}
+             <View
+               style={{
+                 flexDirection: "row",
+                 alignItems: "baseline",
+                 justifyContent: "space-between",
+-                paddingHorizontal: spacing.xl,
++                gap: 12,
++                paddingHorizontal: GUTTER,
+               }}
+             >
+-              <Txt variant="h3">
++              <CardTitle>
+                 {activeOccasion === "all"
+-                  ? "The Collection"
++                  ? "The collection"
+                   : `${OCCASION_FILTERS.find((f) => f.id === activeOccasion)?.label ?? ""} templates`}
+-              </Txt>
+-              <Txt variant="body" muted style={{ fontSize: 12.5 }}>
++              </CardTitle>
++              <EdMeta>
+                 {filtered.length} {filtered.length === 1 ? "result" : "results"}
+-              </Txt>
++              </EdMeta>
+             </View>
+           </View>
+         }
+         ListEmptyComponent={
+-          <View style={{ paddingHorizontal: spacing.xl }}>
+-            <Txt variant="body" muted style={{ textAlign: "center" }}>
+-              No templates match those filters yet — try clearing one.
+-            </Txt>
++          <View style={{ paddingHorizontal: GUTTER }}>
++            <EdEmpty>No templates match those filters yet — try clearing one.</EdEmpty>
+           </View>
+         }
+       />
+-    </Screen>
++    </SafeAreaView>
+   );
+ }
+ 
+-// ---------------------------------------------------------------------------
+-// Shared filter-chip row — occasion (single-select), price (single-select),
+-// and style (multi-select) all render through this one component. Selection
+-// semantics live in the caller's onToggle (replace vs. toggle-membership).
+-// ---------------------------------------------------------------------------
+-interface ChipItem {
+-  id: string;
+-  label: string;
+-  emoji?: string;
++/** Section heading at the `.panel h3` size. */
++function CardTitle({
++  children,
++  style,
++}: {
++  children: React.ReactNode;
++  style?: React.ComponentProps<typeof Text>["style"];
++}) {
++  return (
++    <Text
++      style={[
++        {
++          fontFamily: fonts.heading,
++          fontWeight: "400",
++          fontSize: 19,
++          lineHeight: 19 * LINE_HEIGHT_HEADING_RATIO,
++          letterSpacing: 19 * LETTER_SPACING_HEADING_RATIO,
++          color: palette.ink,
++        },
++        style,
++      ]}
++    >
++      {children}
++    </Text>
++  );
+ }
+ 
++/**
++ * `.chips` — one horizontal scroller per facet. Occasion and price are
++ * single-select, style is multi-select; the difference lives in the caller's
++ * `onToggle`, not here.
++ */
+ function ChipRow({
+   items,
+   activeIds,
+   onToggle,
+-  accessibilityLabelPrefix,
++  labelPrefix,
+ }: {
+-  items: ChipItem[];
++  items: { id: string; label: string }[];
+   activeIds: string[];
+   onToggle: (id: string) => void;
+-  accessibilityLabelPrefix: string;
++  labelPrefix: string;
+ }) {
+   if (items.length === 0) return null;
+   return (
+@@ -190,160 +231,134 @@ function ChipRow({
+       data={items}
+       keyExtractor={(f) => f.id}
+       showsHorizontalScrollIndicator={false}
+-      contentContainerStyle={{ gap: spacing.sm, paddingHorizontal: spacing.xl }}
+-      renderItem={({ item }) => {
+-        const selected = activeIds.includes(item.id);
+-        return (
+-          <Pressable
+-            onPress={() => onToggle(item.id)}
+-            accessibilityRole="button"
+-            accessibilityState={{ selected }}
+-            accessibilityLabel={`${accessibilityLabelPrefix}: ${item.label}`}
+-            hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+-            style={({ pressed }) => ({
+-              flexDirection: "row",
+-              alignItems: "center",
+-              gap: 6,
+-              paddingHorizontal: 14,
+-              paddingVertical: 9,
+-              borderRadius: radii.pill,
+-              borderWidth: 1.5,
+-              borderColor: selected ? colors.rose : colors.lightGray,
+-              backgroundColor: selected ? colors.roseChipBg : colors.white,
+-              transform: [{ scale: pressed ? 0.96 : 1 }],
+-            })}
+-          >
+-            {item.emoji ? <Txt style={{ fontSize: 14 }}>{item.emoji}</Txt> : null}
+-            <Txt
+-              style={{
+-                fontFamily: fonts.bodyMedium,
+-                fontSize: 12.5,
+-                color: selected ? colors.roseDeep : colors.charcoal,
+-                textTransform: item.emoji ? "none" : "capitalize",
+-              }}
+-            >
+-              {item.label}
+-            </Txt>
+-          </Pressable>
+-        );
+-      }}
++      contentContainerStyle={{ gap: 8, paddingHorizontal: GUTTER }}
++      renderItem={({ item }) => (
++        <EdChip
++          label={item.label}
++          selected={activeIds.includes(item.id)}
++          onPress={() => onToggle(item.id)}
++          accessibilityLabel={`${labelPrefix}: ${item.label}`}
++        />
++      )}
+     />
+   );
+ }
+ 
+-// ---------------------------------------------------------------------------
+-// Featured carousel card — peeking, user-driven snap. No autoplay: mobile
+-// carousels are touch-driven, and a 3D coverflow (the web treatment) doesn't
+-// translate to a good touch target, so this stays a flat peeking-card row.
+-// (FEATURED_CARD_WIDTH / FEATURED_COVER_HEIGHT are declared at the top of the
+-// module, above the snapToInterval that consumes the width.)
+-// ---------------------------------------------------------------------------
+-function FeaturedCard({ template, onPress }: { template: Template; onPress: () => void }) {
++/**
++ * `.tcard` — flat theme wash + glyph cover, then a paper body carrying the
++ * name and the free/premium price note. One card component serves both the
++ * featured rail (fixed width) and the grid (flexed), so the two can never
++ * drift apart.
++ */
++function TemplateCard({
++  template,
++  onPress,
++  width,
++  coverHeight = GRID_COVER_HEIGHT,
++}: {
++  template: Template;
++  onPress: () => void;
++  width?: number;
++  coverHeight?: number;
++}) {
+   const theme = getThemeById(template.themeId);
+   const occasion = occasions.find((o) => o.id === template.occasionId);
+-  const stops = theme ? gradientStops(theme) : [colors.roseLight, colors.rose];
++  // Flat leading stop, not the ramp — the identity bans decorative gradients.
++  const tint = theme ? gradientStops(theme)[0] : palette.pebble;
+   const isPremium = template.tier === "premium";
+ 
+   return (
+     <Pressable
+       onPress={onPress}
+       accessibilityRole="button"
+-      accessibilityLabel={`${template.name} — ${isPremium ? "Premium" : "Free"} ${REVEAL_STYLE_LABELS[template.revealType]} template for ${occasion?.label ?? "any occasion"}`}
++      accessibilityLabel={`${template.name} — ${isPremium ? "Premium" : "Free"} ${REVEAL_STYLE_LABELS[template.revealType]} template for ${occasion?.label ?? "any occasion"}. ${template.tagline}`}
+       style={({ pressed }) => [
+-        { width: FEATURED_CARD_WIDTH, borderRadius: radii.xl, overflow: "hidden", backgroundColor: colors.white },
+-        shadows.sm,
+-        { transform: [{ scale: pressed ? 0.97 : 1 }] },
++        {
++          width,
++          flex: width == null ? 1 : undefined,
++          borderRadius: radii.md,
++          overflow: "hidden",
++          backgroundColor: palette.paper,
++          borderWidth: 1,
++          borderColor: pressed ? palette.ink : palette.mist,
++        },
+       ]}
+     >
+-      <LinearGradient
+-        colors={stops as [string, string, ...string[]]}
+-        start={{ x: 0, y: 0 }}
+-        end={{ x: 1, y: 1 }}
+-        style={{ height: FEATURED_COVER_HEIGHT, alignItems: "center", justifyContent: "center" }}
+-      >
+-        <Txt style={{ fontSize: 44 }}>{template.emoji}</Txt>
+-      </LinearGradient>
+-      <View style={{ padding: spacing.sm, gap: 2 }}>
+-        <Txt style={{ fontFamily: fonts.headingSemi, fontSize: 13.5, color: colors.charcoal }} numberOfLines={1}>
+-          {template.name}
+-        </Txt>
+-        <Txt style={{ fontFamily: fonts.body, fontSize: 10.5, color: colors.warmGray }} numberOfLines={1}>
+-          {occasion?.label ?? "Any occasion"}
+-        </Txt>
+-      </View>
+-    </Pressable>
+-  );
+-}
+-
+-// ---------------------------------------------------------------------------
+-// Grid card — 2-column collection view.
+-// ---------------------------------------------------------------------------
+-const GRID_COVER_HEIGHT = 128;
+-
+-function TemplateCard({ template, onPress }: { template: Template; onPress: () => void }) {
+-  const theme = getThemeById(template.themeId);
+-  const stops = theme ? gradientStops(theme) : [colors.roseLight, colors.rose];
+-  const isPremium = template.tier === "premium";
+-
+-  return (
+-    <Pressable
+-      onPress={onPress}
+-      accessibilityRole="button"
+-      accessibilityLabel={`${template.name} — ${isPremium ? "Premium" : "Free"} ${REVEAL_STYLE_LABELS[template.revealType]} template. ${template.tagline}`}
+-      style={({ pressed }) => [
+-        { flex: 1, borderRadius: radii.xl, overflow: "hidden", backgroundColor: colors.white },
+-        shadows.sm,
+-        { transform: [{ scale: pressed ? 0.97 : 1 }] },
+-      ]}
+-    >
+-      <LinearGradient
+-        colors={stops as [string, string, ...string[]]}
+-        start={{ x: 0, y: 0 }}
+-        end={{ x: 1, y: 1 }}
+-        style={{ height: GRID_COVER_HEIGHT, alignItems: "center", justifyContent: "center" }}
++      <View
++        style={{
++          height: coverHeight,
++          backgroundColor: tint,
++          alignItems: "center",
++          justifyContent: "center",
++        }}
+       >
++        {/* `.tcard .img .pv` — reveal style, legible over any theme wash. */}
+         <View
+           style={{
+             position: "absolute",
+             top: 8,
+             left: 8,
+-            backgroundColor: "rgba(255,255,255,0.85)",
++            backgroundColor: palette.paper,
+             borderRadius: radii.pill,
+             paddingHorizontal: 8,
+             paddingVertical: 3,
+           }}
+         >
+-          <Txt style={{ fontFamily: fonts.bodyMedium, fontSize: 9.5, color: colors.charcoal }}>
++          <Text
++            style={{
++              fontFamily: fonts.body,
++              fontSize: 9.5,
++              fontWeight: "600",
++              letterSpacing: 9.5 * 0.1,
++              textTransform: "uppercase",
++              color: palette.stone,
++            }}
++          >
+             {REVEAL_STYLE_LABELS[template.revealType]}
+-          </Txt>
++          </Text>
+         </View>
+-        <Txt style={{ fontSize: 38 }}>{template.emoji}</Txt>
+-      </LinearGradient>
+-      <View style={{ padding: spacing.sm, gap: 3 }}>
+-        <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 4 }}>
+-          <Txt style={{ fontFamily: fonts.headingSemi, fontSize: 13, color: colors.charcoal, flex: 1 }} numberOfLines={1}>
++        <Text style={{ fontSize: 38 }}>{template.emoji}</Text>
++      </View>
++
++      <View style={{ padding: 14, gap: 4 }}>
++        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
++          <Text
++            numberOfLines={1}
++            style={{
++              flex: 1,
++              fontFamily: fonts.heading,
++              fontWeight: "400",
++              fontSize: CARD_TITLE_SIZE,
++              lineHeight: CARD_TITLE_SIZE * LINE_HEIGHT_HEADING_RATIO,
++              letterSpacing: CARD_TITLE_SIZE * LETTER_SPACING_HEADING_RATIO,
++              color: palette.ink,
++            }}
++          >
+             {template.name}
+-          </Txt>
+-          <Txt
++          </Text>
++          {/* `.tcard .pr` / `.tcard .pr.free` */}
++          <Text
+             style={{
+-              fontFamily: fonts.bodyBold,
+-              fontSize: 9,
+-              letterSpacing: 0.4,
+-              textTransform: "uppercase",
+-              color: isPremium ? colors.gold : colors.warmGray,
++              fontFamily: fonts.body,
++              fontSize: 12,
++              fontWeight: "600",
++              color: isPremium ? derived.coralDeep : palette.stone,
+             }}
+           >
+             {isPremium ? "Premium" : "Free"}
+-          </Txt>
++          </Text>
+         </View>
+-        <Txt style={{ fontFamily: fonts.hand, fontSize: 13, color: colors.rose }} numberOfLines={2}>
+-          {template.tagline}
+-        </Txt>
++        <EdMeta>{occasion?.label ?? "Any occasion"}</EdMeta>
+       </View>
+     </Pressable>
+   );
+ }
+ 
+-function renderGridItem(onOpen: (t: Template) => void): ListRenderItem<Template> {
+-  return ({ item }) => <TemplateCard template={item} onPress={() => onOpen(item)} />;
++function renderGridItem(onOpen: (t: Template) => void): ListRenderItem<Template | null> {
++  return ({ item }) =>
++    item ? (
++      <TemplateCard template={item} onPress={() => onOpen(item)} />
++    ) : (
++      <View style={{ flex: 1 }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
++    );
+ }
+diff --git a/src/components/InviteRow.tsx b/src/components/InviteRow.tsx
+index 49a87bd..3c9dbc1 100644
+--- a/src/components/InviteRow.tsx
++++ b/src/components/InviteRow.tsx
+@@ -1,60 +1,69 @@
+-import { Pressable, View } from "react-native";
+-import { LinearGradient } from "expo-linear-gradient";
+-import { Eye, Heart } from "lucide-react-native";
+-import { Chip, Txt, colors, radii, shadows } from "@/components/ui";
+-import { getThemeById, gradientStops } from "@/lib/themes";
+-import { getOccasionById } from "@/lib/themes";
++/**
++ * Invite row — the RN equivalent of the mockup's `.srow`
++ * (`tadaaaa/tadaaaa-editorial.html` L262-270, and the web's `.ed-srow`):
++ * 60px thumb, 17px headline title, a 12px stone meta line carrying the status
++ * pill, and a bottom hairline that the last row drops.
++ *
++ * Status is derived, never read: see `@/lib/invite-status`. The `invites.status`
++ * column is approved but unapplied, so reading it would return undefined.
++ */
++import { EdListRow, EdMeta, EdStatusPill, EdThumb, palette } from "@/components/editorial";
++import { getOccasionById, getThemeById, gradientStops } from "@/lib/themes";
++import { deriveInviteStatus, INVITE_STATUS_LABELS } from "@/lib/invite-status";
+ import type { Invite } from "@/lib/db";
+ 
+-export function inviteStatus(invite: Invite): { label: string; tone: "green" | "gold" | "rose" | "neutral" } {
+-  if (!invite.is_active) return { label: "Paused", tone: "neutral" };
+-  if (invite.expires_at && new Date(invite.expires_at) < new Date())
+-    return { label: "Expired", tone: "rose" };
+-  if (invite.revealed_at) return { label: "Revealed", tone: "green" };
+-  return { label: "Live", tone: "gold" };
++/** Tones the legacy `Chip` accepts, kept for `invite/[id].tsx`. */
++type ChipTone = "green" | "gold" | "rose" | "neutral";
++
++const STATUS_CHIP_TONE: Record<string, ChipTone> = {
++  live: "gold",
++  scheduled: "neutral",
++  expired: "rose",
++  archived: "neutral",
++};
++
++/**
++ * Back-compat shim for `invite/[id].tsx`, which is owned by another phase and
++ * still renders the legacy `Chip`. Same single rule underneath — this only
++ * re-shapes the result, it does not re-derive it.
++ */
++export function inviteStatus(invite: Invite): { label: string; tone: ChipTone } {
++  const status = deriveInviteStatus(invite);
++  return { label: INVITE_STATUS_LABELS[status], tone: STATUS_CHIP_TONE[status] };
+ }
+ 
+-export function InviteRow({ invite, onPress }: { invite: Invite; onPress: () => void }) {
++export function InviteRow({
++  invite,
++  onPress,
++  last,
++}: {
++  invite: Invite;
++  onPress: () => void;
++  last?: boolean;
++}) {
+   const theme = getThemeById(invite.theme);
+   const occasion = getOccasionById(invite.occasion_type);
+-  const status = inviteStatus(invite);
+-  const stops = theme ? gradientStops(theme) : [colors.roseLight, colors.rose];
++  const status = deriveInviteStatus(invite);
++  // A flat wash of the theme's leading stop, not the ramp: the editorial
++  // identity bans decorative gradients, and one colour still reads the theme.
++  const tint = theme ? gradientStops(theme)[0] : palette.pebble;
++  const views = invite.view_count ?? 0;
++  const responses = invite.response_count ?? 0;
+ 
+   return (
+-    <Pressable
++    <EdListRow
++      last={last}
+       onPress={onPress}
+-      style={({ pressed }) => [
+-        {
+-          flexDirection: "row",
+-          alignItems: "center",
+-          gap: 12,
+-          padding: 12,
+-          borderRadius: radii.lg,
+-          backgroundColor: colors.white,
+-          borderWidth: 1,
+-          borderColor: colors.hair,
+-          transform: [{ scale: pressed ? 0.985 : 1 }],
+-        },
+-        shadows.sm,
+-      ]}
+-    >
+-      <LinearGradient colors={stops as [string, string]} style={{ width: 50, height: 50, borderRadius: radii.md, alignItems: "center", justifyContent: "center" }}>
+-        <Txt style={{ fontSize: 22 }}>{occasion?.emoji ?? "💌"}</Txt>
+-      </LinearGradient>
+-      <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+-        <Txt variant="title" numberOfLines={1}>{invite.title}</Txt>
+-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+-          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+-            <Eye size={13} color={colors.warmGray} />
+-            <Txt variant="body" muted style={{ fontSize: 11.5 }}>{invite.view_count ?? 0}</Txt>
+-          </View>
+-          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+-            <Heart size={13} color={colors.warmGray} />
+-            <Txt variant="body" muted style={{ fontSize: 11.5 }}>{invite.response_count ?? 0}</Txt>
+-          </View>
+-        </View>
+-      </View>
+-      <Chip label={status.label} tone={status.tone} />
+-    </Pressable>
++      title={invite.title}
++      accessibilityLabel={`${invite.title}. ${INVITE_STATUS_LABELS[status]}. ${views} views, ${responses} RSVPs.`}
++      thumb={<EdThumb tint={tint} glyph={occasion?.emoji ?? "💌"} />}
++      meta={
++        <>
++          <EdStatusPill status={status} />
++          <EdMeta>{views} views</EdMeta>
++          <EdMeta>{responses} RSVPs</EdMeta>
++        </>
++      }
++    />
+   );
+ }
+diff --git a/src/components/auth/GoogleButton.tsx b/src/components/auth/GoogleButton.tsx
+index 52436e9..12ea595 100644
+--- a/src/components/auth/GoogleButton.tsx
++++ b/src/components/auth/GoogleButton.tsx
+@@ -1,16 +1,21 @@
+ /**
+  * "Continue with Google" — reused on sign-in and sign-up. Drives
+  * useAuth().signInWithGoogle (native OAuth reusing the web app's Google creds).
+- * Includes the "or" divider so both screens stay consistent.
++ *
++ * Styled as the mockup's `.gbtn`: full-width, paper ground, mist hairline,
++ * `--r-sm`, 14/600 — not a pill and not uppercase, unlike `.btn`. The mockup
++ * places it above the "or" rule, so the divider now lives in the screens.
+  */
+ import { useState } from "react";
+-import { Alert, View } from "react-native";
+-import { Button, Txt, colors, fonts } from "@/components/ui";
++import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
++import { useReducedMotion } from "@/components/editorial";
++import { fonts, palette, radii } from "@/theme/tokens";
+ import { useAuth } from "@/providers/AuthProvider";
+ 
+ export function GoogleButton() {
+   const { signInWithGoogle } = useAuth();
+   const [loading, setLoading] = useState(false);
++  const reduced = useReducedMotion();
+ 
+   async function onPress() {
+     setLoading(true);
+@@ -24,23 +29,51 @@ export function GoogleButton() {
+   }
+ 
+   return (
+-    <View style={{ gap: 14 }}>
+-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+-        <View style={{ flex: 1, height: 1, backgroundColor: colors.hair }} />
+-        <Txt variant="body" muted style={{ fontSize: 12 }}>or</Txt>
+-        <View style={{ flex: 1, height: 1, backgroundColor: colors.hair }} />
+-      </View>
+-      <Button
+-        title="Continue with Google"
+-        variant="outline"
+-        loading={loading}
+-        onPress={onPress}
+-        left={
+-          <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "#fff", borderWidth: 1, borderColor: colors.hair, alignItems: "center", justifyContent: "center" }}>
+-            <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 13, color: "#4285F4" }}>G</Txt>
++    <Pressable
++      onPress={onPress}
++      disabled={loading}
++      accessibilityRole="button"
++      accessibilityState={{ disabled: loading, busy: loading }}
++      style={({ pressed }) => ({
++        width: "100%",
++        minHeight: 44,
++        flexDirection: "row",
++        alignItems: "center",
++        justifyContent: "center",
++        gap: 10,
++        paddingVertical: 13,
++        paddingHorizontal: 16,
++        borderWidth: 1,
++        borderColor: pressed && !reduced ? palette.ink : palette.mist,
++        borderRadius: radii.sm,
++        backgroundColor: palette.paper,
++        opacity: loading ? 0.55 : 1,
++      })}
++    >
++      {loading ? (
++        <ActivityIndicator color={palette.ink} />
++      ) : (
++        <>
++          <View
++            style={{
++              width: 20,
++              height: 20,
++              borderRadius: 10,
++              borderWidth: 1,
++              borderColor: palette.mist,
++              alignItems: "center",
++              justifyContent: "center",
++            }}
++          >
++            <Text style={{ fontFamily: fonts.heading, fontSize: 12, color: palette.ink }}>G</Text>
+           </View>
+-        }
+-      />
+-    </View>
++          <Text
++            style={{ fontFamily: fonts.body, fontSize: 14, fontWeight: "600", color: palette.ink }}
++          >
++            Continue with Google
++          </Text>
++        </>
++      )}
++    </Pressable>
+   );
+ }
+diff --git a/src/components/invite/PeopleList.tsx b/src/components/invite/PeopleList.tsx
+index 86fbacd..6229f04 100644
+--- a/src/components/invite/PeopleList.tsx
++++ b/src/components/invite/PeopleList.tsx
+@@ -1,6 +1,19 @@
++/**
++ * Who responded — RSVP and contribution lists on the invite detail screen.
++ * Both render as `.setrow`-style hairline rows inside one `.panel`, matching
++ * the mockup's contributors table rather than a stack of cards.
++ */
+ import { View } from "react-native";
+ import { formatDistanceToNow } from "date-fns";
+-import { Card, Txt, colors, spacing } from "@/components/ui";
++import {
++  EdEmpty,
++  EdHairline,
++  EdMeta,
++  EdPanel,
++  EdPill,
++  palette,
++} from "@/components/editorial";
++import { Txt } from "@/components/ui";
+ import type { Tables } from "@/lib/database.types";
+ import type { InviteContribution } from "@/lib/db";
+ 
+@@ -10,34 +23,33 @@ type Rsvp = Tables<"invite_rsvps">;
+ export function RsvpList({ rsvps }: { rsvps: Rsvp[] }) {
+   if (rsvps.length === 0) {
+     return (
+-      <Card>
+-        <Txt variant="body" muted style={{ textAlign: "center" }}>
+-          No responses yet — share the link to get things moving.
+-        </Txt>
+-      </Card>
++      <EdPanel>
++        <EdEmpty>No responses yet — share the link to get things moving.</EdEmpty>
++      </EdPanel>
+     );
+   }
+   return (
+-    <Card style={{ gap: spacing.md }}>
++    <EdPanel>
+       {rsvps.map((r, i) => (
+-        <View
+-          key={r.id}
+-          style={{
+-            flexDirection: "row",
+-            justifyContent: "space-between",
+-            alignItems: "center",
+-            paddingTop: i === 0 ? 0 : spacing.md,
+-            borderTopWidth: i === 0 ? 0 : 1,
+-            borderTopColor: colors.hair,
+-          }}
+-        >
+-          <Txt variant="title">{r.name?.trim() || "Someone"}</Txt>
+-          <Txt variant="body" muted style={{ fontSize: 12 }}>
+-            {safeRelativeTime(r.responded_at)}
+-          </Txt>
++        <View key={r.id}>
++          {i > 0 ? <EdHairline /> : null}
++          <View
++            style={{
++              flexDirection: "row",
++              justifyContent: "space-between",
++              alignItems: "center",
++              gap: 12,
++              paddingVertical: 12,
++            }}
++          >
++            <Txt variant="title" numberOfLines={1} style={{ flex: 1 }}>
++              {r.name?.trim() || "Someone"}
++            </Txt>
++            <EdMeta>{safeRelativeTime(r.responded_at)}</EdMeta>
++          </View>
+         </View>
+       ))}
+-    </Card>
++    </EdPanel>
+   );
+ }
+ 
+@@ -45,42 +57,46 @@ export function RsvpList({ rsvps }: { rsvps: Rsvp[] }) {
+ export function ContributionList({ items }: { items: InviteContribution[] }) {
+   if (items.length === 0) {
+     return (
+-      <Card>
+-        <Txt variant="body" muted style={{ textAlign: "center" }}>
+-          No contributions yet.
+-        </Txt>
+-      </Card>
++      <EdPanel>
++        <EdEmpty>No contributions yet.</EdEmpty>
++      </EdPanel>
+     );
+   }
+   return (
+-    <Card style={{ gap: spacing.md }}>
++    <EdPanel>
+       {items.map((c, i) => (
+-        <View
+-          key={c.id}
+-          style={{
+-            gap: 4,
+-            paddingTop: i === 0 ? 0 : spacing.md,
+-            borderTopWidth: i === 0 ? 0 : 1,
+-            borderTopColor: colors.hair,
+-          }}
+-        >
+-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+-            <Txt variant="title">{c.contributor_name?.trim() || "Someone"}</Txt>
+-            <Txt variant="body" muted style={{ fontSize: 12 }}>
+-              {safeRelativeTime(c.created_at)}
+-            </Txt>
++        <View key={c.id}>
++          {i > 0 ? <EdHairline /> : null}
++          <View style={{ gap: 4, paddingVertical: 12 }}>
++            <View
++              style={{
++                flexDirection: "row",
++                justifyContent: "space-between",
++                alignItems: "center",
++                gap: 12,
++              }}
++            >
++              <Txt variant="title" numberOfLines={1} style={{ flex: 1 }}>
++                {c.contributor_name?.trim() || "Someone"}
++              </Txt>
++              <EdMeta>{safeRelativeTime(c.created_at)}</EdMeta>
++            </View>
++            {c.message ? (
++              <Txt variant="body" style={{ color: palette.stone }}>
++                {c.message}
++              </Txt>
++            ) : null}
++            {/* Moderation state reuses the pill base so it reads like a
++                status, not a warning banner. */}
++            {!c.approved ? (
++              <View style={{ marginTop: 2 }}>
++                <EdPill label="Pending approval" border={palette.sand} />
++              </View>
++            ) : null}
+           </View>
+-          {c.message ? (
+-            <Txt variant="body" muted>{c.message}</Txt>
+-          ) : null}
+-          {!c.approved ? (
+-            <Txt variant="label" style={{ color: colors.goldChipText, fontSize: 10.5, marginTop: 2 }}>
+-              Pending approval
+-            </Txt>
+-          ) : null}
+         </View>
+       ))}
+-    </Card>
++    </EdPanel>
+   );
+ }
+ 
+diff --git a/src/components/invite/QuestionTally.tsx b/src/components/invite/QuestionTally.tsx
+index c915112..4d3d177 100644
+--- a/src/components/invite/QuestionTally.tsx
++++ b/src/components/invite/QuestionTally.tsx
+@@ -1,5 +1,11 @@
++/**
++ * Yes/no split for one invite question — the mockup's `.hbar` treatment
++ * (`tadaaaa-editorial.html` analytics panel): a mist track with a coral fill
++ * and the two counts on a 12px stone line underneath.
++ */
+ import { View } from "react-native";
+-import { Card, Txt, colors, radii, spacing } from "@/components/ui";
++import { EdMeta, EdPanel, palette, radii } from "@/components/editorial";
++import { Txt } from "@/components/ui";
+ 
+ export interface QuestionTallyData {
+   id: string;
+@@ -10,35 +16,41 @@ export interface QuestionTallyData {
+   noCount: number;
+ }
+ 
+-/** Bar showing the yes/no split for a single invite question. */
++const BAR_HEIGHT = 8;
++
+ export function QuestionTally({ q }: { q: QuestionTallyData }) {
+   const total = q.yesCount + q.noCount;
+   const yesPct = total > 0 ? q.yesCount / total : 0;
+ 
+   return (
+-    <Card style={{ gap: 10 }}>
+-      <Txt variant="title" numberOfLines={2}>{q.questionText}</Txt>
++    <EdPanel style={{ gap: 10 }}>
++      <Txt variant="title" numberOfLines={2}>
++        {q.questionText}
++      </Txt>
+       <View
++        accessible
++        accessibilityRole="progressbar"
++        accessibilityLabel={`${q.yesLabel} ${q.yesCount}, ${q.noLabel} ${q.noCount}`}
+         style={{
+-          height: 8,
++          height: BAR_HEIGHT,
+           borderRadius: radii.pill,
+-          backgroundColor: colors.hair,
++          backgroundColor: palette.mist,
+           overflow: "hidden",
+           flexDirection: "row",
+         }}
+       >
+         {total > 0 ? (
+-          <View style={{ width: `${yesPct * 100}%`, backgroundColor: colors.rose }} />
++          <View style={{ width: `${yesPct * 100}%`, backgroundColor: palette.coral }} />
+         ) : null}
+       </View>
+-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+-        <Txt variant="body" muted style={{ fontSize: 12.5 }}>
++      <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
++        <EdMeta>
+           {q.yesLabel} · {q.yesCount}
+-        </Txt>
+-        <Txt variant="body" muted style={{ fontSize: 12.5 }}>
++        </EdMeta>
++        <EdMeta>
+           {q.noLabel} · {q.noCount}
+-        </Txt>
++        </EdMeta>
+       </View>
+-    </Card>
++    </EdPanel>
+   );
+ }
+diff --git a/src/components/invite/StatCard.tsx b/src/components/invite/StatCard.tsx
+index ed291ca..c973bcc 100644
+--- a/src/components/invite/StatCard.tsx
++++ b/src/components/invite/StatCard.tsx
+@@ -1,35 +1,24 @@
+-import { View } from "react-native";
++/**
++ * Invite-detail metric tile — the mockup's `.stat`
++ * (`tadaaaa-editorial.html` L253-256). Thin wrapper over the shared `EdStat`
++ * so the detail screen and the dashboard cannot drift.
++ *
++ * The pre-editorial version carried a leading icon; the mockup's stat is
++ * numeral-over-caption with no glyph, so `icon` is accepted and ignored
++ * rather than breaking the call sites in `invite/[id].tsx`, which another
++ * phase owns.
++ */
+ import type { ReactNode } from "react";
+-import { Txt, colors, radii, spacing } from "@/components/ui";
++import { EdStat } from "@/components/editorial";
+ 
+-/** Small metric tile used in the invite detail stats row. */
+ export function StatCard({
+-  icon,
+   value,
+   label,
+ }: {
+-  icon: ReactNode;
++  /** Accepted for call-site compatibility; the editorial stat has no glyph. */
++  icon?: ReactNode;
+   value: string | number;
+   label: string;
+ }) {
+-  return (
+-    <View
+-      style={{
+-        flex: 1,
+-        alignItems: "center",
+-        gap: 6,
+-        paddingVertical: spacing.lg,
+-        backgroundColor: colors.white,
+-        borderRadius: radii.lg,
+-        borderWidth: 1,
+-        borderColor: colors.hair,
+-      }}
+-    >
+-      {icon}
+-      <Txt variant="h3">{value}</Txt>
+-      <Txt variant="label" muted style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: 0.6 }}>
+-        {label}
+-      </Txt>
+-    </View>
+-  );
++  return <EdStat value={String(value)} label={label} />;
+ }
+diff --git a/src/components/pricing/PlanCard.tsx b/src/components/pricing/PlanCard.tsx
+index 28abcea..ae8b965 100644
+--- a/src/components/pricing/PlanCard.tsx
++++ b/src/components/pricing/PlanCard.tsx
+@@ -1,7 +1,7 @@
+ import type { ReactNode } from "react";
+ import { View } from "react-native";
+-import { Check } from "lucide-react-native";
+-import { Button, Card, Chip, Txt, colors, spacing } from "@/components/ui";
++import { Body, EdCard, Heading, Label } from "@/components/editorial";
++import { palette } from "@/theme/tokens";
+ 
+ export interface PlanCardProps {
+   name: string;
+@@ -13,36 +13,56 @@ export interface PlanCardProps {
+   highlight?: boolean;
+ }
+ 
+-/** One pricing tier card — used for Free / Plus / Unlimited on the pricing screen. */
++/**
++ * One pricing tier — the mockup's `.tier` (and `.tier.mid` when highlighted):
++ * paper ground, `--mist` hairline, `--r-md`, 32/28 padding, headline-face price,
++ * and feature rows separated by `--pebble` rules rather than icons.
++ *
++ * `isCurrent` has no counterpart in the mockup (it fakes a single logged-out
++ * visitor). It renders in the mockup's own `.label` treatment so the real tier
++ * state reads without introducing a new component or colour.
++ */
++/** `.pr` is sized for a short amount ("$0"). Longer strings — the real app shows
++ * "See price at checkout" where Stripe owns the amount — step down so the line
++ * does not wrap into the feature list. */
++const PRICE_SIZE = 38;
++const PRICE_SIZE_LONG = 22;
++const PRICE_SHORT_MAX_CHARS = 8;
++
+ export function PlanCard({ name, price, priceNote, features, isCurrent, cta, highlight }: PlanCardProps) {
++  const priceSize = price.length <= PRICE_SHORT_MAX_CHARS ? PRICE_SIZE : PRICE_SIZE_LONG;
+   return (
+-    <Card
+-      style={{
+-        gap: spacing.md,
+-        borderColor: highlight ? colors.rose : colors.hair,
+-        borderWidth: highlight ? 1.5 : 1,
+-      }}
+-    >
+-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+-        <Txt variant="h3">{name}</Txt>
+-        {isCurrent ? <Chip label="Current plan" tone="green" /> : null}
+-      </View>
++    <EdCard accent={highlight} style={{ paddingVertical: 32, paddingHorizontal: 28 }}>
++      {isCurrent ? (
++        <Label style={{ color: palette.coral, marginBottom: 8 }}>Current plan</Label>
++      ) : null}
+ 
+-      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 6 }}>
+-        <Txt variant="h1">{price}</Txt>
+-        {priceNote ? <Txt variant="body" muted style={{ paddingBottom: 4 }}>{priceNote}</Txt> : null}
+-      </View>
++      <Heading size={19} accessibilityRole="header">
++        {name}
++      </Heading>
++      <Heading size={priceSize} style={{ marginTop: 10, marginBottom: 2 }}>
++        {price}
++      </Heading>
++      <Body size={13} style={{ marginBottom: 18 }}>
++        {priceNote ?? " "}
++      </Body>
+ 
+-      <View style={{ gap: 8 }}>
++      <View style={{ marginBottom: 22 }}>
+         {features.map((f) => (
+-          <View key={f} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+-            <Check size={16} color={colors.rose} style={{ marginTop: 2 }} />
+-            <Txt variant="body" style={{ flex: 1 }}>{f}</Txt>
++          <View
++            key={f}
++            style={{
++              paddingVertical: 6,
++              borderBottomWidth: 1,
++              borderBottomColor: palette.pebble,
++            }}
++          >
++            <Body size={14}>{f}</Body>
+           </View>
+         ))}
+       </View>
+ 
+       {cta}
+-    </Card>
++    </EdCard>
+   );
+ }
+diff --git a/src/components/reveal/scrollstory/shared.ts b/src/components/reveal/scrollstory/shared.ts
+index 4d7a5d6..7983e06 100644
+--- a/src/components/reveal/scrollstory/shared.ts
++++ b/src/components/reveal/scrollstory/shared.ts
+@@ -8,9 +8,9 @@
+  */
+ import { fonts } from "@/theme/tokens";
+ 
+-/** Serif-ish heading font — reuses the app's Bricolage heading token. */
++/** Editorial headline face — reuses the app's heading token. */
+ export const SERIF_FONT = fonts.heading;
+-/** Handwritten accent font — reuses the app's Caveat token. */
++/** Accent face — the cursive token is retired, so this is the body face. */
+ export const HAND_FONT = fonts.hand;
+ 
+ /** Brand confetti/lantern palette. */
+diff --git a/src/components/ui/index.tsx b/src/components/ui/index.tsx
+index 0428cb4..cf3192c 100644
+--- a/src/components/ui/index.tsx
++++ b/src/components/ui/index.tsx
+@@ -22,7 +22,7 @@ import {
+   type ViewStyle,
+ } from "react-native";
+ import { SafeAreaView, type Edge } from "react-native-safe-area-context";
+-import { colors, fonts, gradients, radii, shadows, spacing } from "@/theme/tokens";
++import { colors, fonts, gradients, palette, radii, shadows, spacing, typography } from "@/theme/tokens";
+ 
+ type TxtVariant =
+   | "h1"
+@@ -266,4 +266,4 @@ export function Field({
+   );
+ }
+ 
+-export { colors, fonts, gradients, radii, shadows, spacing };
++export { colors, fonts, gradients, palette, radii, shadows, spacing, typography };
+diff --git a/src/theme/tokens.ts b/src/theme/tokens.ts
+index 6d44197..3560e54 100644
+--- a/src/theme/tokens.ts
++++ b/src/theme/tokens.ts
+@@ -1,60 +1,208 @@
+ /**
+- * Design tokens — ported 1:1 from the web brand (globals.css) and the two
+- * mobile mockups (tadaa-mobile-prototype.html / tadaa-mobile-screens-live.html).
+- * One "hand" across web + mobile: warm cream ground, rose primary, gold accent.
++ * Design tokens — editorial identity (P0 of the 2026-08-09 re-theme).
++ *
++ * `palette` (the 8 primitives) plus `derived` (documented mixes of them) are the
++ * ONLY sources of colour truth. Both mirror the web contract in
++ * `surprise-invite/src/lib/design-tokens.ts` verbatim; both platforms hard-code
++ * the same literals in their token tests so drift breaks a suite. The
++ * `@deprecated` alias blocks below hold references only — never a literal.
++ *
++ * Restraint rules that come with this palette: no cursive, no rainbow
++ * gradients, no heavy shadows, ~90% ink/paper/stone with coral reserved for
++ * primary CTAs and active states.
+  */
+ import { Platform } from "react-native";
+ 
+-export const colors = {
+-  cream: "#FFF8F0",
+-  creamDark: "#F5EDE3",
+-  appBg: "#E7DCCD", // mockup body background behind device
+-  rose: "#C4686D",
+-  roseLight: "#E8A5A8",
+-  roseDeep: "#9B3D42",
+-  gold: "#C9A96E",
+-  goldLight: "#E8D5A8",
+-  charcoal: "#2D2926",
+-  warmGray: "#6B5E57",
+-  lightGray: "#D4CBC3",
+-  hair: "#ECE3D8",
++/** Editorial primitives. The contract — do not derive, do not round. */
++export const palette = {
++  ink: "#1A1A1A",
++  paper: "#FFFEFD",
++  stone: "#484848",
++  pebble: "#F5F0ED",
++  mist: "#E8E4E0",
++  coral: "#D45847",
++  sand: "#CCAC9F",
++  kohlrabi: "#994EA8",
++} as const;
++
++/**
++ * Derived extension — primitives-tier, NOT aliases. Every value is a documented
++ * mix/shade of `palette`, so no alias below has to hold its own literal. Shared
++ * verbatim with web (`surprise-invite/src/lib/design-tokens.ts` → `derived`, and
++ * the `--coral-deep …` custom properties in `src/app/globals.css`).
++ *
++ * `coralDeep` is the AA-safe coral for small text. The mockup sanctions a dark
++ * coral (`.btn-coral:hover{background:#c04a3a}`), but we ship #B8412F because
++ * (a) mobile already shipped that exact value and (b) it measures better: on
++ * cream #FFF8F0 it is 5.20:1 vs #c04a3a at 4.66:1. #B8412F clears WCAG AA
++ * (4.5:1) on every ground: #FFF8F0 5.20:1 · #F5EDE3 4.72:1 · #F5F0ED 4.84:1 ·
++ * #FFFEFD 5.43:1.
++ */
++export const derived = {
++  /** coral shaded toward ink */
++  coralDeep: "#B8412F",
++  /** coral ~30% toward paper */
++  coralLight: "#E18A7D",
++  /** sand ~40% toward paper */
++  sandLight: "#E0CDC5",
++  /** sand shaded toward ink */
++  sandDeep: "#B08D7E",
++  /** absolute white, for text on coral fills */
+   white: "#FFFFFF",
++  /** coral ~10% over paper */
++  chipCoralBg: "#FBEDEB",
++  /** coral ~25% over paper */
++  chipCoralBorder: "#F4D4D0",
++  /** sand shaded ~50% toward ink; 5.06:1 on pebble */
++  chipMutedText: "#73635D",
++  /**
++   * Success green — the mockup's "Strong" password state
++   * (`tadaaaa-editorial.html` `.meter.s3{background:#2e7d4f}`), shaded ~4% per
++   * channel from that `#2e7d4f` so it clears WCAG AA on both editorial grounds.
++   * The mockup value measured 4.46:1 on pebble, under the 4.5:1 floor for
++   * normal text; this one measures 5.35:1 on paper #FFFEFD and 4.76:1 on
++   * pebble #F5F0ED, so it is AA-safe for small text on either.
++   */
++  success: "#2C784C",
++} as const;
+ 
+-  // chip surfaces
+-  roseChipBg: "#FBEDED",
+-  roseChipBorder: "#F2D6D7",
+-  goldChipBg: "#FAF3E2",
+-  goldChipText: "#8A6D34",
+-  goldChipBorder: "#EAD9B4",
+-  greenChipBg: "#E9F4EC",
+-  greenChipText: "#3B7A52",
+-  greenChipBorder: "#CFE7D6",
++/**
++ * @deprecated — removed in P5. Alias block only: every key below resolves onto
++ * `palette` or `derived` and carries no independent value. New code must read
++ * `palette` / `derived`.
++ */
++export const colors = {
++  cream: palette.paper,
++  creamDark: palette.pebble,
++  appBg: palette.pebble,
++  rose: palette.coral,
++  roseLight: derived.coralLight,
++  roseDeep: derived.coralDeep,
++  gold: palette.sand,
++  goldLight: derived.sandLight,
++  goldDeep: derived.sandDeep,
++  charcoal: palette.ink,
++  warmGray: palette.stone,
++  lightGray: palette.mist,
++  hair: palette.mist,
++  white: derived.white,
++
++  // chip surfaces — neutral grounds, accent text (editorial bans decorative fills)
++  roseChipBg: derived.chipCoralBg,
++  roseChipBorder: derived.chipCoralBorder,
++  goldChipBg: palette.pebble,
++  goldChipText: derived.chipMutedText,
++  goldChipBorder: palette.mist,
++  greenChipBg: palette.pebble,
++  greenChipText: palette.kohlrabi,
++  greenChipBorder: palette.mist,
+ } as const;
+ 
+-/** Primary rose gradient (buttons, FAB, logo). Use with expo-linear-gradient. */
++/**
++ * @deprecated — removed in P5. Two-stop, single-family ramps only; the
++ * editorial identity bans rainbow and heavy gradients.
++ */
+ export const gradients = {
+-  rose: ["#C4686D", "#9B3D42"] as [string, string],
+-  gold: ["#E8D5A8", "#C9A96E"] as [string, string],
++  rose: [palette.coral, derived.coralDeep] as [string, string],
++  gold: [palette.sand, derived.sandDeep] as [string, string],
+ } as const;
+ 
++/** Georgia ships on iOS but not reliably on Android — fall back to the
++ * platform serif there. `undefined` means "platform default sans", which is
++ * the React Native convention for the system body face. */
++const HEAD_FAMILY = Platform.select({ ios: "Georgia", android: "serif", default: "serif" });
++
+ export const fonts = {
+-  /** Bricolage Grotesque — headings. */
+-  heading: "Bricolage_800ExtraBold",
+-  headingSemi: "Bricolage_600SemiBold",
+-  /** DM Sans — body/UI. */
+-  body: "DMSans_400Regular",
+-  bodyMedium: "DMSans_500Medium",
+-  bodyBold: "DMSans_700Bold",
+-  /** Caveat — handwritten accents (eyebrows, polaroid captions). */
+-  hand: "Caveat_700Bold",
++  /** Editorial headline face. Set `fontWeight: "400"` at the call site. */
++  heading: HEAD_FAMILY,
++  /** @deprecated — removed in P5. Alias of `heading`; there is one headline face. */
++  headingSemi: HEAD_FAMILY,
++  /** System body face (platform default). */
++  body: undefined,
++  /** @deprecated — removed in P5. Weight is a style prop, not a family. */
++  bodyMedium: undefined,
++  /** @deprecated — removed in P5. Weight is a style prop, not a family. */
++  bodyBold: undefined,
++  /** @deprecated — removed in P5. Cursive is banned by the identity; body face. */
++  hand: undefined,
++} as const;
++
++/**
++ * Typography presets — the RN equivalent of the mockup's base rules
++ * (`tadaaaa/tadaaaa-editorial.html`):
++ *
++ *   body      → `line-height:1.6` + `color:var(--ink)`
++ *   paragraph → `p{color:var(--stone)}`
++ *   heading   → `h1..h4{font-family:var(--head);font-weight:400;
++ *                letter-spacing:-.02em;line-height:1.1;color:var(--ink)}`
++ *   label     → `.label{font-size:12px;font-weight:600;letter-spacing:.12em;
++ *                text-transform:uppercase;color:var(--stone)}`
++ *   serifItalic → `.serif-i{font-family:var(--head);font-style:italic}`
++ *
++ * React Native has no cascade and no `p` element, so these ship as explicit
++ * style presets rather than global rules. `lineHeight` is absolute in RN, so
++ * the CSS ratios are resolved against `fontSize`; `letterSpacing` is absolute
++ * points, so `-.02em`/`.12em` become `fontSize * ratio`.
++ *
++ * P0 only defines them — applying them across screens is P1–P3 work.
++ */
++export const LINE_HEIGHT_BODY_RATIO = 1.6;
++export const LINE_HEIGHT_HEADING_RATIO = 1.1;
++export const LETTER_SPACING_HEADING_RATIO = -0.02;
++export const LETTER_SPACING_LABEL_RATIO = 0.12;
++
++const BODY_FONT_SIZE = 16;
++const HEADING_FONT_SIZE = 28;
++const LABEL_FONT_SIZE = 12;
++
++export const typography = {
++  /** Document default: system body face, 1.6 leading, ink. */
++  body: {
++    fontFamily: fonts.body,
++    fontSize: BODY_FONT_SIZE,
++    lineHeight: BODY_FONT_SIZE * LINE_HEIGHT_BODY_RATIO, // 25.6
++    color: palette.ink,
++  },
++  /** Paragraph copy — the `p{color:var(--stone)}` rule. */
++  paragraph: {
++    fontFamily: fonts.body,
++    fontSize: BODY_FONT_SIZE,
++    lineHeight: BODY_FONT_SIZE * LINE_HEIGHT_BODY_RATIO, // 25.6
++    color: palette.stone,
++  },
++  /** Headline face — weight 400, tight leading and tracking, ink. */
++  heading: {
++    fontFamily: fonts.heading,
++    fontWeight: "400",
++    fontSize: HEADING_FONT_SIZE,
++    lineHeight: HEADING_FONT_SIZE * LINE_HEIGHT_HEADING_RATIO, // 30.8
++    letterSpacing: HEADING_FONT_SIZE * LETTER_SPACING_HEADING_RATIO, // -0.56
++    color: palette.ink,
++  },
++  /** Eyebrow/label — 12 / 600 / .12em tracking / uppercase / stone. */
++  label: {
++    fontFamily: fonts.body,
++    fontSize: LABEL_FONT_SIZE,
++    fontWeight: "600",
++    letterSpacing: LABEL_FONT_SIZE * LETTER_SPACING_LABEL_RATIO, // 1.44
++    textTransform: "uppercase",
++    color: palette.stone,
++  },
++  /** Serif italic accent — headline face, italic. */
++  serifItalic: {
++    fontFamily: fonts.heading,
++    fontStyle: "italic",
++  },
+ } as const;
+ 
+ export const radii = {
+-  sm: 11,
+-  md: 13,
+-  lg: 16,
+-  xl: 20,
+-  pill: 999,
++  sm: 6,
++  md: 12,
++  /** @deprecated — removed in P5. Alias of `md`; the contract has three radii. */
++  lg: 12,
++  /** @deprecated — removed in P5. Alias of `md`; the contract has three radii. */
++  xl: 12,
++  pill: 100,
+ } as const;
+ 
+ export const spacing = {
+@@ -66,39 +214,52 @@ export const spacing = {
+   xxl: 28,
+ } as const;
+ 
+-/** Cross-platform elevation presets matching the mockup's soft warm shadows. */
++const SHADOW_BASE = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.08,
++    shadowRadius: 3,
++    shadowOffset: { width: 0, height: 1 },
++  },
++  android: { elevation: 1 },
++  default: {},
++});
++
++const SHADOW_CARD = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.06,
++    shadowRadius: 20,
++    shadowOffset: { width: 0, height: 4 },
++  },
++  android: { elevation: 4 },
++  default: {},
++});
++
++const SHADOW_FLOAT = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.1,
++    shadowRadius: 30,
++    shadowOffset: { width: 0, height: 8 },
++  },
++  android: { elevation: 10 },
++  default: {},
++});
++
++/** Cross-platform elevation presets. `base`/`card`/`float` are the contract
++ * names; `sm`/`md`/`lg` are deprecated aliases of the same three objects. */
+ export const shadows = {
+-  sm: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.06,
+-      shadowRadius: 3,
+-      shadowOffset: { width: 0, height: 1 },
+-    },
+-    android: { elevation: 1 },
+-    default: {},
+-  }),
+-  md: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.1,
+-      shadowRadius: 12,
+-      shadowOffset: { width: 0, height: 8 },
+-    },
+-    android: { elevation: 4 },
+-    default: {},
+-  }),
+-  lg: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.18,
+-      shadowRadius: 22,
+-      shadowOffset: { width: 0, height: 14 },
+-    },
+-    android: { elevation: 10 },
+-    default: {},
+-  }),
++  base: SHADOW_BASE,
++  card: SHADOW_CARD,
++  float: SHADOW_FLOAT,
++  /** @deprecated — removed in P5. Alias of `base`. */
++  sm: SHADOW_BASE,
++  /** @deprecated — removed in P5. Alias of `card`. */
++  md: SHADOW_CARD,
++  /** @deprecated — removed in P5. Alias of `float`. */
++  lg: SHADOW_FLOAT,
+ } as const;
+ 
+-export const theme = { colors, gradients, fonts, radii, spacing, shadows } as const;
++export const theme = { palette, derived, colors, gradients, fonts, typography, radii, spacing, shadows } as const;
+ export type AppTheme = typeof theme;

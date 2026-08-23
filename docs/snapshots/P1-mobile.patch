@@ -1,0 +1,1066 @@
+diff --git a/src/app/(auth)/_layout.tsx b/src/app/(auth)/_layout.tsx
+index c0df932..64eb18d 100644
+--- a/src/app/(auth)/_layout.tsx
++++ b/src/app/(auth)/_layout.tsx
+@@ -1,12 +1,14 @@
+ import { Stack } from "expo-router";
+-import { colors } from "@/theme/tokens";
++import { palette } from "@/theme/tokens";
+ 
+ export default function AuthLayout() {
+   return (
+     <Stack
+       screenOptions={{
+         headerShown: false,
+-        contentStyle: { backgroundColor: colors.cream },
++        // Mockup `body{background:var(--paper)}` — the auth card is paper on
++        // paper, separated by its `--mist` hairline.
++        contentStyle: { backgroundColor: palette.paper },
+       }}
+     />
+   );
+diff --git a/src/app/(auth)/sign-in.tsx b/src/app/(auth)/sign-in.tsx
+index 4515450..0c9ec99 100644
+--- a/src/app/(auth)/sign-in.tsx
++++ b/src/app/(auth)/sign-in.tsx
+@@ -1,12 +1,13 @@
+ import { useState } from "react";
+-import { Alert, KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
+-import { Link } from "expo-router";
+-import { LinearGradient } from "expo-linear-gradient";
+-import { Heart } from "lucide-react-native";
+-import { Button, Field, Screen, Txt, colors, gradients, radii } from "@/components/ui";
++import { Alert, KeyboardAvoidingView, Platform, View } from "react-native";
++import { Screen } from "@/components/ui";
++import { Body, EdButton, EdDivider, EdField, TextLink } from "@/components/editorial";
++import { palette } from "@/theme/tokens";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { signInSchema, magicLinkSchema } from "@/lib/schemas";
++import { AuthShell } from "@/components/auth/AuthShell";
+ import { GoogleButton } from "@/components/auth/GoogleButton";
++import { PasswordField } from "@/components/auth/PasswordField";
+ 
+ export default function SignIn() {
+   const { signInWithPassword, signInWithMagicLink } = useAuth();
+@@ -54,74 +55,76 @@ export default function SignIn() {
+   }
+ 
+   return (
+-    <Screen bg={colors.cream} scroll contentStyle={{ gap: 20, paddingTop: 40 }}>
+-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ gap: 20 }}>
+-        <View style={{ alignItems: "center", gap: 10, marginBottom: 8 }}>
+-          <LinearGradient
+-            colors={gradients.rose}
+-            style={{ width: 56, height: 56, borderRadius: radii.lg, alignItems: "center", justifyContent: "center" }}
+-          >
+-            <Heart size={26} color="#fff" fill="#fff" />
+-          </LinearGradient>
+-          <Txt variant="eyebrow">welcome back</Txt>
+-          <Txt variant="h1">TaDaaaa</Txt>
+-          <Txt variant="body" muted style={{ textAlign: "center" }}>
+-            Sign in to craft and manage your surprises.
+-          </Txt>
+-        </View>
++    <Screen
++      bg={palette.paper}
++      scroll
++      contentStyle={{ paddingHorizontal: 20, paddingTop: 32, paddingBottom: 48, gap: 0 }}
++    >
++      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
++        <AuthShell active="in">
++          <GoogleButton />
++          <EdDivider label="or" />
+ 
+-        <Field
+-          label="Email"
+-          value={email}
+-          onChangeText={setEmail}
+-          error={errors.email}
+-          autoCapitalize="none"
+-          keyboardType="email-address"
+-          autoComplete="email"
+-          placeholder="you@example.com"
+-        />
+-
+-        {mode === "password" && (
+-          <Field
+-            label="Password"
+-            value={password}
+-            onChangeText={setPassword}
+-            error={errors.password}
+-            secureTextEntry
+-            placeholder="••••••••"
+-          />
+-        )}
+-
+-        {magicSent ? (
+-          <Txt variant="body" style={{ color: colors.roseDeep, textAlign: "center" }}>
+-            ✨ Check your email for a magic sign-in link.
+-          </Txt>
+-        ) : (
+-          <Button
+-            title={mode === "password" ? "Sign in" : "Send magic link"}
+-            loading={loading}
+-            onPress={mode === "password" ? submitPassword : submitMagic}
++          <EdField
++            label="Email"
++            value={email}
++            onChangeText={setEmail}
++            error={errors.email}
++            autoCapitalize="none"
++            autoCorrect={false}
++            keyboardType="email-address"
++            autoComplete="email"
++            textContentType="emailAddress"
++            placeholder="you@example.com"
+           />
+-        )}
+ 
+-        <GoogleButton />
++          {mode === "password" ? (
++            <PasswordField
++              value={password}
++              onChangeText={setPassword}
++              error={errors.password}
++              autoComplete="current-password"
++              textContentType="password"
++              placeholder="Your password"
++            />
++          ) : null}
+ 
+-        <Pressable onPress={() => { setMode(mode === "password" ? "magic" : "password"); setMagicSent(false); }}>
+-          <Txt variant="body" style={{ color: colors.rose, textAlign: "center" }}>
+-            {mode === "password" ? "Email me a magic link instead" : "Use a password instead"}
+-          </Txt>
+-        </Pressable>
++          {magicSent ? (
++            <View
++              style={{
++                borderWidth: 1,
++                borderColor: palette.mist,
++                backgroundColor: palette.pebble,
++                borderRadius: 6,
++                padding: 14,
++              }}
++            >
++              <Body size={14} accessibilityLiveRegion="polite">
++                Check your email for a magic sign-in link.
++              </Body>
++            </View>
++          ) : (
++            <EdButton
++              title={mode === "password" ? "Sign in" : "Send magic link"}
++              variant="ink"
++              loading={loading}
++              onPress={mode === "password" ? submitPassword : submitMagic}
++            />
++          )}
+ 
+-        <View style={{ flexDirection: "row", justifyContent: "center", gap: 5, marginTop: 4 }}>
+-          <Txt variant="body" muted>New here?</Txt>
+-          <Link href="/(auth)/sign-up" asChild>
+-            <Pressable>
+-              <Txt variant="body" style={{ color: colors.rose, fontFamily: "DMSans_700Bold" }}>
+-                Create an account
+-              </Txt>
+-            </Pressable>
+-          </Link>
+-        </View>
++          <TextLink
++            title={
++              mode === "password"
++                ? "Or sign in with a magic link →"
++                : "Use a password instead"
++            }
++            onPress={() => {
++              setMode(mode === "password" ? "magic" : "password");
++              setMagicSent(false);
++              setErrors({});
++            }}
++          />
++        </AuthShell>
+       </KeyboardAvoidingView>
+     </Screen>
+   );
+diff --git a/src/app/(auth)/sign-up.tsx b/src/app/(auth)/sign-up.tsx
+index 369e9e6..5881255 100644
+--- a/src/app/(auth)/sign-up.tsx
++++ b/src/app/(auth)/sign-up.tsx
+@@ -1,12 +1,16 @@
+ import { useState } from "react";
+-import { Alert, KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
+-import { Link, useRouter } from "expo-router";
+-import { LinearGradient } from "expo-linear-gradient";
+-import { Heart } from "lucide-react-native";
+-import { Button, Field, Screen, Txt, colors, gradients, radii } from "@/components/ui";
++import { Alert, KeyboardAvoidingView, Platform } from "react-native";
++import { useRouter } from "expo-router";
++import { Screen } from "@/components/ui";
++import { EdButton, EdDivider, EdField } from "@/components/editorial";
++import { palette } from "@/theme/tokens";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { signUpSchema } from "@/lib/schemas";
++import { AuthShell } from "@/components/auth/AuthShell";
+ import { GoogleButton } from "@/components/auth/GoogleButton";
++import { PasswordField } from "@/components/auth/PasswordField";
++import { TermsConsent } from "@/components/auth/TermsConsent";
++import { confirmPasswordError } from "@/components/auth/password-match";
+ 
+ export default function SignUp() {
+   const { signUpWithPassword } = useAuth();
+@@ -14,14 +18,39 @@ export default function SignUp() {
+   const [fullName, setFullName] = useState("");
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+-  const [errors, setErrors] = useState<{ fullName?: string; email?: string; password?: string }>({});
++  const [confirmPassword, setConfirmPassword] = useState("");
++  const [acceptedTerms, setAcceptedTerms] = useState(false);
++  const [errors, setErrors] = useState<{
++    fullName?: string;
++    email?: string;
++    password?: string;
++    confirmPassword?: string;
++  }>({});
+   const [loading, setLoading] = useState(false);
+ 
++  /**
++   * Once the confirm field has content it owns its own message, so a match
++   * clears the error the moment the user fixes it instead of waiting for the
++   * next submit. While it is empty there is nothing live to say, so the
++   * submit-time message stands.
++   */
++  const confirmFieldError = confirmPassword
++    ? confirmPasswordError(password, confirmPassword)
++    : errors.confirmPassword;
++
+   async function submit() {
++    // Client-side gates first; `signUpSchema` and the Supabase payload below
++    // are untouched — confirmation and consent never leave this screen.
++    const confirmError = confirmPasswordError(password, confirmPassword);
+     const parsed = signUpSchema.safeParse({ fullName, email, password });
+-    if (!parsed.success) {
+-      const f = parsed.error.flatten().fieldErrors;
+-      setErrors({ fullName: f.fullName?.[0], email: f.email?.[0], password: f.password?.[0] });
++    if (!parsed.success || confirmError) {
++      const f = parsed.success ? {} : parsed.error.flatten().fieldErrors;
++      setErrors({
++        fullName: f.fullName?.[0],
++        email: f.email?.[0],
++        password: f.password?.[0],
++        confirmPassword: confirmError,
++      });
+       return;
+     }
+     setErrors({});
+@@ -44,51 +73,67 @@ export default function SignUp() {
+   }
+ 
+   return (
+-    <Screen bg={colors.cream} scroll contentStyle={{ gap: 18, paddingTop: 40 }}>
+-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ gap: 18 }}>
+-        <View style={{ alignItems: "center", gap: 10, marginBottom: 8 }}>
+-          <LinearGradient
+-            colors={gradients.rose}
+-            style={{ width: 56, height: 56, borderRadius: radii.lg, alignItems: "center", justifyContent: "center" }}
+-          >
+-            <Heart size={26} color="#fff" fill="#fff" />
+-          </LinearGradient>
+-          <Txt variant="eyebrow">let's make magic</Txt>
+-          <Txt variant="h1">Create account</Txt>
+-        </View>
+-
+-        <Field label="Your name" value={fullName} onChangeText={setFullName} error={errors.fullName} placeholder="Alex Rivera" />
+-        <Field
+-          label="Email"
+-          value={email}
+-          onChangeText={setEmail}
+-          error={errors.email}
+-          autoCapitalize="none"
+-          keyboardType="email-address"
+-          autoComplete="email"
+-          placeholder="you@example.com"
+-        />
+-        <Field
+-          label="Password"
+-          value={password}
+-          onChangeText={setPassword}
+-          error={errors.password}
+-          secureTextEntry
+-          placeholder="At least 8 characters"
+-        />
++    <Screen
++      bg={palette.paper}
++      scroll
++      contentStyle={{ paddingHorizontal: 20, paddingTop: 32, paddingBottom: 48, gap: 0 }}
++    >
++      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
++        <AuthShell active="up">
++          <GoogleButton />
++          <EdDivider label="or" />
+ 
+-        <Button title="Create account" loading={loading} onPress={submit} />
++          <EdField
++            label="Full name"
++            value={fullName}
++            onChangeText={setFullName}
++            error={errors.fullName}
++            autoComplete="name"
++            textContentType="name"
++            maxLength={100}
++            placeholder="Dev Sharma"
++          />
++          <EdField
++            label="Email"
++            value={email}
++            onChangeText={setEmail}
++            error={errors.email}
++            autoCapitalize="none"
++            autoCorrect={false}
++            keyboardType="email-address"
++            autoComplete="email"
++            textContentType="emailAddress"
++            placeholder="you@example.com"
++          />
++          <PasswordField
++            value={password}
++            onChangeText={setPassword}
++            error={errors.password}
++            meter
++            autoComplete="new-password"
++            textContentType="newPassword"
++            placeholder="8+ chars, mixed case, number, symbol"
++          />
++          <PasswordField
++            label="Confirm password"
++            value={confirmPassword}
++            onChangeText={setConfirmPassword}
++            error={confirmFieldError}
++            autoComplete="new-password"
++            textContentType="newPassword"
++            placeholder="Type it once more"
++          />
+ 
+-        <GoogleButton />
++          <TermsConsent accepted={acceptedTerms} onChange={setAcceptedTerms} />
+ 
+-        <View style={{ flexDirection: "row", justifyContent: "center", gap: 5, marginTop: 4 }}>
+-          <Txt variant="body" muted>Already have an account?</Txt>
+-          <Link href="/(auth)/sign-in" asChild>
+-            <Pressable>
+-              <Txt variant="body" style={{ color: colors.rose, fontFamily: "DMSans_700Bold" }}>Sign in</Txt>
+-            </Pressable>
+-          </Link>
+-        </View>
++          <EdButton
++            title="Create account"
++            variant="coral"
++            loading={loading}
++            disabled={!acceptedTerms}
++            onPress={submit}
++          />
++        </AuthShell>
+       </KeyboardAvoidingView>
+     </Screen>
+   );
+diff --git a/src/app/pricing.tsx b/src/app/pricing.tsx
+index 0111312..0a335b3 100644
+--- a/src/app/pricing.tsx
++++ b/src/app/pricing.tsx
+@@ -2,9 +2,12 @@ import { useState } from "react";
+ import { Alert, View } from "react-native";
+ import { useRouter } from "expo-router";
+ import * as WebBrowser from "expo-web-browser";
+-import { Button, Chip, Screen, Txt, colors, spacing } from "@/components/ui";
++import { Screen } from "@/components/ui";
++import { Body, EdButton, Heading } from "@/components/editorial";
++import { palette, radii } from "@/theme/tokens";
+ import { ScreenHeader } from "@/components/ui/ScreenHeader";
+ import { PlanCard } from "@/components/pricing/PlanCard";
++import { PricingFAQ } from "@/components/pricing/PricingFAQ";
+ import { useAuth } from "@/providers/AuthProvider";
+ import { getActiveTier } from "@/lib/tier";
+ import { createStripeCheckout, hasBackend, BackendUnavailableError } from "@/lib/api";
+@@ -48,49 +51,53 @@ export default function Pricing() {
+   }
+ 
+   return (
+-    <Screen bg={colors.cream} scroll contentStyle={{ paddingTop: spacing.sm }}>
++    <Screen
++      bg={palette.paper}
++      scroll
++      contentStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 56, gap: 0 }}
++    >
+       <ScreenHeader />
+-      <View style={{ gap: 4 }}>
+-        <Txt variant="eyebrow">upgrade</Txt>
+-        <Txt variant="h1">Plans</Txt>
+-        <Txt variant="body" muted>
+-          Free, Plus, and Unlimited — checkout opens in a secure browser, no in-app purchase.
+-        </Txt>
++
++      {/* Mockup `#pricing .center` — 34px headline, 15px body, 48px to the tiers. */}
++      <View style={{ alignItems: "center", marginTop: 24, marginBottom: 48 }}>
++        <Heading size={34} accessibilityRole="header" style={{ textAlign: "center" }}>
++          Free to start. Pay when you&apos;re happy.
++        </Heading>
++        <Body size={15} style={{ textAlign: "center", maxWidth: 520, marginTop: 12 }}>
++          Free, Plus, and Unlimited. Checkout opens in a secure browser — no in-app purchase.
++        </Body>
+       </View>
+ 
+       {!hasBackend && (
+         <View
+           style={{
+-            backgroundColor: colors.goldChipBg,
+-            borderColor: colors.goldChipBorder,
++            backgroundColor: palette.pebble,
++            borderColor: palette.mist,
+             borderWidth: 1,
+-            borderRadius: 14,
+-            padding: spacing.md,
++            borderRadius: radii.sm,
++            padding: 14,
++            marginBottom: 24,
+           }}
+         >
+-          <Txt variant="body" style={{ color: colors.goldChipText }}>
+-            Upgrades need the TaDaaaa backend connected. Set EXPO_PUBLIC_API_BASE_URL to enable checkout.
+-          </Txt>
++          <Body size={14}>
++            Upgrades need the TaDaaaa backend connected. Set EXPO_PUBLIC_API_BASE_URL to enable
++            checkout.
++          </Body>
+         </View>
+       )}
+ 
+-      <View style={{ gap: spacing.lg }}>
++      <View style={{ gap: 18 }}>
+         <PlanCard
+           name="Free"
+           price="$0"
+-          priceNote="/ forever"
++          priceNote="forever"
+           isCurrent={tier === "free"}
+           features={[
+             `${FREE_INVITE_MONTHLY_LIMIT} surprises a month`,
+             "3 free themes",
+             "Standard reveal links",
+-            `Unlock any premium theme à la carte for $${PREMIUM_THEME_PRICE.toFixed(2)}`,
++            `Any premium theme à la carte for $${PREMIUM_THEME_PRICE.toFixed(2)}`,
+           ]}
+-          cta={
+-            tier === "free" ? (
+-              <Chip label="You're here" />
+-            ) : undefined
+-          }
+         />
+ 
+         <PlanCard
+@@ -106,9 +113,9 @@ export default function Pricing() {
+           ]}
+           cta={
+             tier === "plus" ? undefined : (
+-              <Button
++              <EdButton
+                 title="Unlock themes in Create"
+-                variant="outline"
++                variant="coral"
+                 onPress={() => router.push("/create")}
+               />
+             )
+@@ -127,17 +134,27 @@ export default function Pricing() {
+           ]}
+           cta={
+             tier === "unlimited" ? undefined : (
+-              <Button
++              /* The mockup highlights the middle tier, so Plus keeps the coral
++                 accent border. Unlimited is the real Stripe checkout, so its
++                 CTA is a filled ink button rather than the mockup's lighter
++                 `.btn-line`: solid enough to read as the actionable control
++                 without taking coral off the highlighted tier. It is also no
++                 longer disabled when the backend is unset — `upgrade()` already
++                 explains that case in an alert, and a permanently greyed button
++                 reads as "this plan is unavailable" rather than "not configured
++                 yet". `EdButton` still disables itself while loading. */
++              <EdButton
+                 title="Upgrade to Unlimited"
+-                variant="dark"
++                variant="ink"
+                 onPress={() => upgrade("unlimited")}
+                 loading={loadingMode === "unlimited"}
+-                disabled={!hasBackend || loadingMode !== null}
+               />
+             )
+           }
+         />
+       </View>
++
++      <PricingFAQ />
+     </Screen>
+   );
+ }
+diff --git a/src/components/auth/GoogleButton.tsx b/src/components/auth/GoogleButton.tsx
+index 52436e9..12ea595 100644
+--- a/src/components/auth/GoogleButton.tsx
++++ b/src/components/auth/GoogleButton.tsx
+@@ -1,16 +1,21 @@
+ /**
+  * "Continue with Google" — reused on sign-in and sign-up. Drives
+  * useAuth().signInWithGoogle (native OAuth reusing the web app's Google creds).
+- * Includes the "or" divider so both screens stay consistent.
++ *
++ * Styled as the mockup's `.gbtn`: full-width, paper ground, mist hairline,
++ * `--r-sm`, 14/600 — not a pill and not uppercase, unlike `.btn`. The mockup
++ * places it above the "or" rule, so the divider now lives in the screens.
+  */
+ import { useState } from "react";
+-import { Alert, View } from "react-native";
+-import { Button, Txt, colors, fonts } from "@/components/ui";
++import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
++import { useReducedMotion } from "@/components/editorial";
++import { fonts, palette, radii } from "@/theme/tokens";
+ import { useAuth } from "@/providers/AuthProvider";
+ 
+ export function GoogleButton() {
+   const { signInWithGoogle } = useAuth();
+   const [loading, setLoading] = useState(false);
++  const reduced = useReducedMotion();
+ 
+   async function onPress() {
+     setLoading(true);
+@@ -24,23 +29,51 @@ export function GoogleButton() {
+   }
+ 
+   return (
+-    <View style={{ gap: 14 }}>
+-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+-        <View style={{ flex: 1, height: 1, backgroundColor: colors.hair }} />
+-        <Txt variant="body" muted style={{ fontSize: 12 }}>or</Txt>
+-        <View style={{ flex: 1, height: 1, backgroundColor: colors.hair }} />
+-      </View>
+-      <Button
+-        title="Continue with Google"
+-        variant="outline"
+-        loading={loading}
+-        onPress={onPress}
+-        left={
+-          <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "#fff", borderWidth: 1, borderColor: colors.hair, alignItems: "center", justifyContent: "center" }}>
+-            <Txt style={{ fontFamily: fonts.bodyBold, fontSize: 13, color: "#4285F4" }}>G</Txt>
++    <Pressable
++      onPress={onPress}
++      disabled={loading}
++      accessibilityRole="button"
++      accessibilityState={{ disabled: loading, busy: loading }}
++      style={({ pressed }) => ({
++        width: "100%",
++        minHeight: 44,
++        flexDirection: "row",
++        alignItems: "center",
++        justifyContent: "center",
++        gap: 10,
++        paddingVertical: 13,
++        paddingHorizontal: 16,
++        borderWidth: 1,
++        borderColor: pressed && !reduced ? palette.ink : palette.mist,
++        borderRadius: radii.sm,
++        backgroundColor: palette.paper,
++        opacity: loading ? 0.55 : 1,
++      })}
++    >
++      {loading ? (
++        <ActivityIndicator color={palette.ink} />
++      ) : (
++        <>
++          <View
++            style={{
++              width: 20,
++              height: 20,
++              borderRadius: 10,
++              borderWidth: 1,
++              borderColor: palette.mist,
++              alignItems: "center",
++              justifyContent: "center",
++            }}
++          >
++            <Text style={{ fontFamily: fonts.heading, fontSize: 12, color: palette.ink }}>G</Text>
+           </View>
+-        }
+-      />
+-    </View>
++          <Text
++            style={{ fontFamily: fonts.body, fontSize: 14, fontWeight: "600", color: palette.ink }}
++          >
++            Continue with Google
++          </Text>
++        </>
++      )}
++    </Pressable>
+   );
+ }
+diff --git a/src/components/pricing/PlanCard.tsx b/src/components/pricing/PlanCard.tsx
+index 28abcea..ae8b965 100644
+--- a/src/components/pricing/PlanCard.tsx
++++ b/src/components/pricing/PlanCard.tsx
+@@ -1,7 +1,7 @@
+ import type { ReactNode } from "react";
+ import { View } from "react-native";
+-import { Check } from "lucide-react-native";
+-import { Button, Card, Chip, Txt, colors, spacing } from "@/components/ui";
++import { Body, EdCard, Heading, Label } from "@/components/editorial";
++import { palette } from "@/theme/tokens";
+ 
+ export interface PlanCardProps {
+   name: string;
+@@ -13,36 +13,56 @@ export interface PlanCardProps {
+   highlight?: boolean;
+ }
+ 
+-/** One pricing tier card — used for Free / Plus / Unlimited on the pricing screen. */
++/**
++ * One pricing tier — the mockup's `.tier` (and `.tier.mid` when highlighted):
++ * paper ground, `--mist` hairline, `--r-md`, 32/28 padding, headline-face price,
++ * and feature rows separated by `--pebble` rules rather than icons.
++ *
++ * `isCurrent` has no counterpart in the mockup (it fakes a single logged-out
++ * visitor). It renders in the mockup's own `.label` treatment so the real tier
++ * state reads without introducing a new component or colour.
++ */
++/** `.pr` is sized for a short amount ("$0"). Longer strings — the real app shows
++ * "See price at checkout" where Stripe owns the amount — step down so the line
++ * does not wrap into the feature list. */
++const PRICE_SIZE = 38;
++const PRICE_SIZE_LONG = 22;
++const PRICE_SHORT_MAX_CHARS = 8;
++
+ export function PlanCard({ name, price, priceNote, features, isCurrent, cta, highlight }: PlanCardProps) {
++  const priceSize = price.length <= PRICE_SHORT_MAX_CHARS ? PRICE_SIZE : PRICE_SIZE_LONG;
+   return (
+-    <Card
+-      style={{
+-        gap: spacing.md,
+-        borderColor: highlight ? colors.rose : colors.hair,
+-        borderWidth: highlight ? 1.5 : 1,
+-      }}
+-    >
+-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+-        <Txt variant="h3">{name}</Txt>
+-        {isCurrent ? <Chip label="Current plan" tone="green" /> : null}
+-      </View>
++    <EdCard accent={highlight} style={{ paddingVertical: 32, paddingHorizontal: 28 }}>
++      {isCurrent ? (
++        <Label style={{ color: palette.coral, marginBottom: 8 }}>Current plan</Label>
++      ) : null}
+ 
+-      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 6 }}>
+-        <Txt variant="h1">{price}</Txt>
+-        {priceNote ? <Txt variant="body" muted style={{ paddingBottom: 4 }}>{priceNote}</Txt> : null}
+-      </View>
++      <Heading size={19} accessibilityRole="header">
++        {name}
++      </Heading>
++      <Heading size={priceSize} style={{ marginTop: 10, marginBottom: 2 }}>
++        {price}
++      </Heading>
++      <Body size={13} style={{ marginBottom: 18 }}>
++        {priceNote ?? " "}
++      </Body>
+ 
+-      <View style={{ gap: 8 }}>
++      <View style={{ marginBottom: 22 }}>
+         {features.map((f) => (
+-          <View key={f} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+-            <Check size={16} color={colors.rose} style={{ marginTop: 2 }} />
+-            <Txt variant="body" style={{ flex: 1 }}>{f}</Txt>
++          <View
++            key={f}
++            style={{
++              paddingVertical: 6,
++              borderBottomWidth: 1,
++              borderBottomColor: palette.pebble,
++            }}
++          >
++            <Body size={14}>{f}</Body>
+           </View>
+         ))}
+       </View>
+ 
+       {cta}
+-    </Card>
++    </EdCard>
+   );
+ }
+diff --git a/src/components/reveal/scrollstory/shared.ts b/src/components/reveal/scrollstory/shared.ts
+index 4d7a5d6..7983e06 100644
+--- a/src/components/reveal/scrollstory/shared.ts
++++ b/src/components/reveal/scrollstory/shared.ts
+@@ -8,9 +8,9 @@
+  */
+ import { fonts } from "@/theme/tokens";
+ 
+-/** Serif-ish heading font — reuses the app's Bricolage heading token. */
++/** Editorial headline face — reuses the app's heading token. */
+ export const SERIF_FONT = fonts.heading;
+-/** Handwritten accent font — reuses the app's Caveat token. */
++/** Accent face — the cursive token is retired, so this is the body face. */
+ export const HAND_FONT = fonts.hand;
+ 
+ /** Brand confetti/lantern palette. */
+diff --git a/src/components/ui/index.tsx b/src/components/ui/index.tsx
+index 0428cb4..cf3192c 100644
+--- a/src/components/ui/index.tsx
++++ b/src/components/ui/index.tsx
+@@ -22,7 +22,7 @@ import {
+   type ViewStyle,
+ } from "react-native";
+ import { SafeAreaView, type Edge } from "react-native-safe-area-context";
+-import { colors, fonts, gradients, radii, shadows, spacing } from "@/theme/tokens";
++import { colors, fonts, gradients, palette, radii, shadows, spacing, typography } from "@/theme/tokens";
+ 
+ type TxtVariant =
+   | "h1"
+@@ -266,4 +266,4 @@ export function Field({
+   );
+ }
+ 
+-export { colors, fonts, gradients, radii, shadows, spacing };
++export { colors, fonts, gradients, palette, radii, shadows, spacing, typography };
+diff --git a/src/theme/tokens.ts b/src/theme/tokens.ts
+index 6d44197..3560e54 100644
+--- a/src/theme/tokens.ts
++++ b/src/theme/tokens.ts
+@@ -1,60 +1,208 @@
+ /**
+- * Design tokens — ported 1:1 from the web brand (globals.css) and the two
+- * mobile mockups (tadaa-mobile-prototype.html / tadaa-mobile-screens-live.html).
+- * One "hand" across web + mobile: warm cream ground, rose primary, gold accent.
++ * Design tokens — editorial identity (P0 of the 2026-08-09 re-theme).
++ *
++ * `palette` (the 8 primitives) plus `derived` (documented mixes of them) are the
++ * ONLY sources of colour truth. Both mirror the web contract in
++ * `surprise-invite/src/lib/design-tokens.ts` verbatim; both platforms hard-code
++ * the same literals in their token tests so drift breaks a suite. The
++ * `@deprecated` alias blocks below hold references only — never a literal.
++ *
++ * Restraint rules that come with this palette: no cursive, no rainbow
++ * gradients, no heavy shadows, ~90% ink/paper/stone with coral reserved for
++ * primary CTAs and active states.
+  */
+ import { Platform } from "react-native";
+ 
+-export const colors = {
+-  cream: "#FFF8F0",
+-  creamDark: "#F5EDE3",
+-  appBg: "#E7DCCD", // mockup body background behind device
+-  rose: "#C4686D",
+-  roseLight: "#E8A5A8",
+-  roseDeep: "#9B3D42",
+-  gold: "#C9A96E",
+-  goldLight: "#E8D5A8",
+-  charcoal: "#2D2926",
+-  warmGray: "#6B5E57",
+-  lightGray: "#D4CBC3",
+-  hair: "#ECE3D8",
++/** Editorial primitives. The contract — do not derive, do not round. */
++export const palette = {
++  ink: "#1A1A1A",
++  paper: "#FFFEFD",
++  stone: "#484848",
++  pebble: "#F5F0ED",
++  mist: "#E8E4E0",
++  coral: "#D45847",
++  sand: "#CCAC9F",
++  kohlrabi: "#994EA8",
++} as const;
++
++/**
++ * Derived extension — primitives-tier, NOT aliases. Every value is a documented
++ * mix/shade of `palette`, so no alias below has to hold its own literal. Shared
++ * verbatim with web (`surprise-invite/src/lib/design-tokens.ts` → `derived`, and
++ * the `--coral-deep …` custom properties in `src/app/globals.css`).
++ *
++ * `coralDeep` is the AA-safe coral for small text. The mockup sanctions a dark
++ * coral (`.btn-coral:hover{background:#c04a3a}`), but we ship #B8412F because
++ * (a) mobile already shipped that exact value and (b) it measures better: on
++ * cream #FFF8F0 it is 5.20:1 vs #c04a3a at 4.66:1. #B8412F clears WCAG AA
++ * (4.5:1) on every ground: #FFF8F0 5.20:1 · #F5EDE3 4.72:1 · #F5F0ED 4.84:1 ·
++ * #FFFEFD 5.43:1.
++ */
++export const derived = {
++  /** coral shaded toward ink */
++  coralDeep: "#B8412F",
++  /** coral ~30% toward paper */
++  coralLight: "#E18A7D",
++  /** sand ~40% toward paper */
++  sandLight: "#E0CDC5",
++  /** sand shaded toward ink */
++  sandDeep: "#B08D7E",
++  /** absolute white, for text on coral fills */
+   white: "#FFFFFF",
++  /** coral ~10% over paper */
++  chipCoralBg: "#FBEDEB",
++  /** coral ~25% over paper */
++  chipCoralBorder: "#F4D4D0",
++  /** sand shaded ~50% toward ink; 5.06:1 on pebble */
++  chipMutedText: "#73635D",
++  /**
++   * Success green — the mockup's "Strong" password state
++   * (`tadaaaa-editorial.html` `.meter.s3{background:#2e7d4f}`), shaded ~4% per
++   * channel from that `#2e7d4f` so it clears WCAG AA on both editorial grounds.
++   * The mockup value measured 4.46:1 on pebble, under the 4.5:1 floor for
++   * normal text; this one measures 5.35:1 on paper #FFFEFD and 4.76:1 on
++   * pebble #F5F0ED, so it is AA-safe for small text on either.
++   */
++  success: "#2C784C",
++} as const;
+ 
+-  // chip surfaces
+-  roseChipBg: "#FBEDED",
+-  roseChipBorder: "#F2D6D7",
+-  goldChipBg: "#FAF3E2",
+-  goldChipText: "#8A6D34",
+-  goldChipBorder: "#EAD9B4",
+-  greenChipBg: "#E9F4EC",
+-  greenChipText: "#3B7A52",
+-  greenChipBorder: "#CFE7D6",
++/**
++ * @deprecated — removed in P5. Alias block only: every key below resolves onto
++ * `palette` or `derived` and carries no independent value. New code must read
++ * `palette` / `derived`.
++ */
++export const colors = {
++  cream: palette.paper,
++  creamDark: palette.pebble,
++  appBg: palette.pebble,
++  rose: palette.coral,
++  roseLight: derived.coralLight,
++  roseDeep: derived.coralDeep,
++  gold: palette.sand,
++  goldLight: derived.sandLight,
++  goldDeep: derived.sandDeep,
++  charcoal: palette.ink,
++  warmGray: palette.stone,
++  lightGray: palette.mist,
++  hair: palette.mist,
++  white: derived.white,
++
++  // chip surfaces — neutral grounds, accent text (editorial bans decorative fills)
++  roseChipBg: derived.chipCoralBg,
++  roseChipBorder: derived.chipCoralBorder,
++  goldChipBg: palette.pebble,
++  goldChipText: derived.chipMutedText,
++  goldChipBorder: palette.mist,
++  greenChipBg: palette.pebble,
++  greenChipText: palette.kohlrabi,
++  greenChipBorder: palette.mist,
+ } as const;
+ 
+-/** Primary rose gradient (buttons, FAB, logo). Use with expo-linear-gradient. */
++/**
++ * @deprecated — removed in P5. Two-stop, single-family ramps only; the
++ * editorial identity bans rainbow and heavy gradients.
++ */
+ export const gradients = {
+-  rose: ["#C4686D", "#9B3D42"] as [string, string],
+-  gold: ["#E8D5A8", "#C9A96E"] as [string, string],
++  rose: [palette.coral, derived.coralDeep] as [string, string],
++  gold: [palette.sand, derived.sandDeep] as [string, string],
+ } as const;
+ 
++/** Georgia ships on iOS but not reliably on Android — fall back to the
++ * platform serif there. `undefined` means "platform default sans", which is
++ * the React Native convention for the system body face. */
++const HEAD_FAMILY = Platform.select({ ios: "Georgia", android: "serif", default: "serif" });
++
+ export const fonts = {
+-  /** Bricolage Grotesque — headings. */
+-  heading: "Bricolage_800ExtraBold",
+-  headingSemi: "Bricolage_600SemiBold",
+-  /** DM Sans — body/UI. */
+-  body: "DMSans_400Regular",
+-  bodyMedium: "DMSans_500Medium",
+-  bodyBold: "DMSans_700Bold",
+-  /** Caveat — handwritten accents (eyebrows, polaroid captions). */
+-  hand: "Caveat_700Bold",
++  /** Editorial headline face. Set `fontWeight: "400"` at the call site. */
++  heading: HEAD_FAMILY,
++  /** @deprecated — removed in P5. Alias of `heading`; there is one headline face. */
++  headingSemi: HEAD_FAMILY,
++  /** System body face (platform default). */
++  body: undefined,
++  /** @deprecated — removed in P5. Weight is a style prop, not a family. */
++  bodyMedium: undefined,
++  /** @deprecated — removed in P5. Weight is a style prop, not a family. */
++  bodyBold: undefined,
++  /** @deprecated — removed in P5. Cursive is banned by the identity; body face. */
++  hand: undefined,
++} as const;
++
++/**
++ * Typography presets — the RN equivalent of the mockup's base rules
++ * (`tadaaaa/tadaaaa-editorial.html`):
++ *
++ *   body      → `line-height:1.6` + `color:var(--ink)`
++ *   paragraph → `p{color:var(--stone)}`
++ *   heading   → `h1..h4{font-family:var(--head);font-weight:400;
++ *                letter-spacing:-.02em;line-height:1.1;color:var(--ink)}`
++ *   label     → `.label{font-size:12px;font-weight:600;letter-spacing:.12em;
++ *                text-transform:uppercase;color:var(--stone)}`
++ *   serifItalic → `.serif-i{font-family:var(--head);font-style:italic}`
++ *
++ * React Native has no cascade and no `p` element, so these ship as explicit
++ * style presets rather than global rules. `lineHeight` is absolute in RN, so
++ * the CSS ratios are resolved against `fontSize`; `letterSpacing` is absolute
++ * points, so `-.02em`/`.12em` become `fontSize * ratio`.
++ *
++ * P0 only defines them — applying them across screens is P1–P3 work.
++ */
++export const LINE_HEIGHT_BODY_RATIO = 1.6;
++export const LINE_HEIGHT_HEADING_RATIO = 1.1;
++export const LETTER_SPACING_HEADING_RATIO = -0.02;
++export const LETTER_SPACING_LABEL_RATIO = 0.12;
++
++const BODY_FONT_SIZE = 16;
++const HEADING_FONT_SIZE = 28;
++const LABEL_FONT_SIZE = 12;
++
++export const typography = {
++  /** Document default: system body face, 1.6 leading, ink. */
++  body: {
++    fontFamily: fonts.body,
++    fontSize: BODY_FONT_SIZE,
++    lineHeight: BODY_FONT_SIZE * LINE_HEIGHT_BODY_RATIO, // 25.6
++    color: palette.ink,
++  },
++  /** Paragraph copy — the `p{color:var(--stone)}` rule. */
++  paragraph: {
++    fontFamily: fonts.body,
++    fontSize: BODY_FONT_SIZE,
++    lineHeight: BODY_FONT_SIZE * LINE_HEIGHT_BODY_RATIO, // 25.6
++    color: palette.stone,
++  },
++  /** Headline face — weight 400, tight leading and tracking, ink. */
++  heading: {
++    fontFamily: fonts.heading,
++    fontWeight: "400",
++    fontSize: HEADING_FONT_SIZE,
++    lineHeight: HEADING_FONT_SIZE * LINE_HEIGHT_HEADING_RATIO, // 30.8
++    letterSpacing: HEADING_FONT_SIZE * LETTER_SPACING_HEADING_RATIO, // -0.56
++    color: palette.ink,
++  },
++  /** Eyebrow/label — 12 / 600 / .12em tracking / uppercase / stone. */
++  label: {
++    fontFamily: fonts.body,
++    fontSize: LABEL_FONT_SIZE,
++    fontWeight: "600",
++    letterSpacing: LABEL_FONT_SIZE * LETTER_SPACING_LABEL_RATIO, // 1.44
++    textTransform: "uppercase",
++    color: palette.stone,
++  },
++  /** Serif italic accent — headline face, italic. */
++  serifItalic: {
++    fontFamily: fonts.heading,
++    fontStyle: "italic",
++  },
+ } as const;
+ 
+ export const radii = {
+-  sm: 11,
+-  md: 13,
+-  lg: 16,
+-  xl: 20,
+-  pill: 999,
++  sm: 6,
++  md: 12,
++  /** @deprecated — removed in P5. Alias of `md`; the contract has three radii. */
++  lg: 12,
++  /** @deprecated — removed in P5. Alias of `md`; the contract has three radii. */
++  xl: 12,
++  pill: 100,
+ } as const;
+ 
+ export const spacing = {
+@@ -66,39 +214,52 @@ export const spacing = {
+   xxl: 28,
+ } as const;
+ 
+-/** Cross-platform elevation presets matching the mockup's soft warm shadows. */
++const SHADOW_BASE = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.08,
++    shadowRadius: 3,
++    shadowOffset: { width: 0, height: 1 },
++  },
++  android: { elevation: 1 },
++  default: {},
++});
++
++const SHADOW_CARD = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.06,
++    shadowRadius: 20,
++    shadowOffset: { width: 0, height: 4 },
++  },
++  android: { elevation: 4 },
++  default: {},
++});
++
++const SHADOW_FLOAT = Platform.select({
++  ios: {
++    shadowColor: palette.ink,
++    shadowOpacity: 0.1,
++    shadowRadius: 30,
++    shadowOffset: { width: 0, height: 8 },
++  },
++  android: { elevation: 10 },
++  default: {},
++});
++
++/** Cross-platform elevation presets. `base`/`card`/`float` are the contract
++ * names; `sm`/`md`/`lg` are deprecated aliases of the same three objects. */
+ export const shadows = {
+-  sm: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.06,
+-      shadowRadius: 3,
+-      shadowOffset: { width: 0, height: 1 },
+-    },
+-    android: { elevation: 1 },
+-    default: {},
+-  }),
+-  md: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.1,
+-      shadowRadius: 12,
+-      shadowOffset: { width: 0, height: 8 },
+-    },
+-    android: { elevation: 4 },
+-    default: {},
+-  }),
+-  lg: Platform.select({
+-    ios: {
+-      shadowColor: "#2D2926",
+-      shadowOpacity: 0.18,
+-      shadowRadius: 22,
+-      shadowOffset: { width: 0, height: 14 },
+-    },
+-    android: { elevation: 10 },
+-    default: {},
+-  }),
++  base: SHADOW_BASE,
++  card: SHADOW_CARD,
++  float: SHADOW_FLOAT,
++  /** @deprecated — removed in P5. Alias of `base`. */
++  sm: SHADOW_BASE,
++  /** @deprecated — removed in P5. Alias of `card`. */
++  md: SHADOW_CARD,
++  /** @deprecated — removed in P5. Alias of `float`. */
++  lg: SHADOW_FLOAT,
+ } as const;
+ 
+-export const theme = { colors, gradients, fonts, radii, spacing, shadows } as const;
++export const theme = { palette, derived, colors, gradients, fonts, typography, radii, spacing, shadows } as const;
+ export type AppTheme = typeof theme;

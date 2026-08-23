@@ -44,3 +44,7 @@ next-env.d.ts
 # graphify caches (regenerated)
 graphify-out/cache/
 src/graphify-out/
+
+# graphify cache (regenerated)
+graphify-out/cache/
+src/graphify-out/

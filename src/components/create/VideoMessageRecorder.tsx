@@ -121,6 +121,14 @@ export default function VideoMessageRecorder({ video, onVideoChange }: VideoMess
     recorder.onstop = () => {
       clearTimer();
       const blob = new Blob(chunks, { type: mimeType });
+      stopStream();
+      // A dying camera/mic track stops the recorder with no data — surface
+      // that instead of handing an unplayable empty file to the publish flow.
+      if (blob.size < 2048) {
+        setErrorMsg("The recording came out empty. Check your camera and microphone, then try again.");
+        setPhase("error");
+        return;
+      }
       const ext: "webm" | "mp4" = mimeType.includes("mp4") ? "mp4" : "webm";
       onVideoChange({
         blob,
@@ -129,7 +137,6 @@ export default function VideoMessageRecorder({ video, onVideoChange }: VideoMess
         previewUrl: URL.createObjectURL(blob),
         durationSec: elapsedRef.current,
       });
-      stopStream();
       setPhase("idle");
     };
     recorderRef.current = recorder;

@@ -371,6 +371,7 @@ export default function CreatePage() {
       events,
       templateId: templateMode?.id ?? null,
       stripeSessionId,
+      musicTrack,
     };
   }
 

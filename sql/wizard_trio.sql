@@ -1,9 +1,14 @@
--- wizard-trio persistence: music + video message (additive, never-drop rule).
+-- wizard-trio persistence: music (additive, never-drop rule).
 -- CONFIRM-GATED: do not apply without explicit user yes.
--- Rollback: both columns are nullable and unread until app code ships; leave in place per never-drop.
+-- Rollback: column is nullable and unread until app code ships; leave in place per never-drop.
+--
+-- Video message needs NO migration: the recorder reuses the existing
+-- invites.video_storage_path + video_status columns (already read by
+-- getInviteBySlug, cleaned by purge-deleted/account-delete, played by
+-- TapToReveal/CountdownReveal). A recorded message and an AI-generated
+-- video share the slot — last writer wins.
 
 alter table invites add column if not exists music_track text;
-alter table invites add column if not exists video_message_path text;
 
 -- Anonymous reveal pages need the track id; get_invite_by_slug's RETURNS TABLE
 -- is frozen (see project traps), so a separate narrow reader per precedent.

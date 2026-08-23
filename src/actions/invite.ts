@@ -358,7 +358,8 @@ export interface PhotoDescriptor {
 
 export async function finalizeInvite(
   inviteId: string,
-  photos: PhotoDescriptor[]
+  photos: PhotoDescriptor[],
+  videoPendingPath?: string | null
 ) {
   const supabase = await createClient();
   const adminClient = createAdminClient();
@@ -389,7 +390,22 @@ export async function finalizeInvite(
     }
   }
 
-  const uploadedPaths = safePhotos.map((p) => p.path);
+  // The recorded video message rides the same pending/ pipeline under a fixed
+  // filename — anything else (traversal, foreign prefix, photo slots) is
+  // rejected before any storage call.
+  if (videoPendingPath != null) {
+    const remainder = videoPendingPath.startsWith(allowedPrefix)
+      ? videoPendingPath.slice(allowedPrefix.length)
+      : null;
+    if (!remainder || !/^video-message\.(webm|mp4)$/.test(remainder)) {
+      return { error: "Invalid video path" };
+    }
+  }
+
+  const uploadedPaths = [
+    ...safePhotos.map((p) => p.path),
+    ...(videoPendingPath ? [videoPendingPath] : []),
+  ];
   const photoRecords: {
     invite_id: string;
     storage_path: string;
@@ -475,12 +491,46 @@ export async function finalizeInvite(
     });
   }
 
+  // Move the video message to its canonical location. No Sightengine pass —
+  // the moderation stack is image-only today (video frame-sampling is a known
+  // gap). Reuses the AI-video columns, so the reveal pipeline (signing,
+  // playback, purge crons) picks it up with no schema change; a later AI
+  // generate overwrites it (last writer wins).
+  let videoCanonicalPath: string | null = null;
+  if (videoPendingPath) {
+    const canonicalVideoPath = videoPendingPath.replace(/^pending\//, "");
+    const { error: videoCopyError } = await adminClient.storage
+      .from(STORAGE_BUCKET)
+      .copy(videoPendingPath, canonicalVideoPath);
+
+    if (videoCopyError) {
+      console.error("[finalizeInvite] Failed to copy pending video:", videoCopyError);
+      await adminClient.storage.from(STORAGE_BUCKET).remove([
+        ...uploadedPaths,
+        ...canonicalPaths,
+      ]);
+      await supabase.from("invites").delete().eq("id", inviteId);
+      return { error: "Failed to process video message. Please try again." };
+    }
+
+    await adminClient.storage.from(STORAGE_BUCKET).remove([videoPendingPath]);
+    videoCanonicalPath = canonicalVideoPath;
+  }
+
   if (photoRecords.length > 0) {
     await supabase.from("invite_photos").insert(photoRecords);
   }
 
   // Activate the invite — only reachable after all photos pass moderation.
-  await supabase.from("invites").update({ is_active: true }).eq("id", inviteId);
+  await supabase
+    .from("invites")
+    .update({
+      is_active: true,
+      ...(videoCanonicalPath
+        ? { video_storage_path: videoCanonicalPath, video_status: "ready" }
+        : {}),
+    })
+    .eq("id", inviteId);
 
   revalidatePath("/dashboard");
   return { slug: invite.slug as string, inviteId };

@@ -227,6 +227,49 @@ describe("finalizeInvite", () => {
     expect(capturedUpdatePayload).not.toBeNull();
     expect((capturedUpdatePayload as Record<string, unknown>).is_active).toBe(true);
   });
+
+  it("leaves video columns untouched when no video message is passed", async () => {
+    await finalizeInvite("invite-abc", [
+      { path: "pending/user-test/invite-abc/0.jpg", caption: "", rotation_deg: 0 },
+    ]);
+    expect(capturedUpdatePayload).not.toBeNull();
+    expect(capturedUpdatePayload).not.toHaveProperty("video_storage_path");
+    expect(capturedUpdatePayload).not.toHaveProperty("video_status");
+  });
+
+  it("moves video message to canonical path and marks video ready", async () => {
+    const result = await finalizeInvite(
+      "invite-abc",
+      [{ path: "pending/user-test/invite-abc/0.jpg", caption: "", rotation_deg: 0 }],
+      "pending/user-test/invite-abc/video-message.webm"
+    );
+    expect(result).not.toHaveProperty("error");
+    expect(capturedUpdatePayload).not.toBeNull();
+    const payload = capturedUpdatePayload as Record<string, unknown>;
+    expect(payload.is_active).toBe(true);
+    expect(payload.video_storage_path).toBe("user-test/invite-abc/video-message.webm");
+    expect(payload.video_status).toBe("ready");
+  });
+
+  it("rejects video path outside this invite's pending prefix", async () => {
+    const result = await finalizeInvite(
+      "invite-abc",
+      [{ path: "pending/user-test/invite-abc/0.jpg", caption: "", rotation_deg: 0 }],
+      "pending/other-user/invite-abc/video-message.webm"
+    );
+    expect(result).toHaveProperty("error");
+    expect(result.error).toContain("Invalid video path");
+  });
+
+  it("rejects video path whose filename is not the fixed video-message name", async () => {
+    const result = await finalizeInvite(
+      "invite-abc",
+      [{ path: "pending/user-test/invite-abc/0.jpg", caption: "", rotation_deg: 0 }],
+      "pending/user-test/invite-abc/../sneaky/video-message.webm"
+    );
+    expect(result).toHaveProperty("error");
+    expect(result.error).toContain("Invalid video path");
+  });
 });
 
 // ── Premium theme paid via one-off Stripe checkout ────────────────────────────

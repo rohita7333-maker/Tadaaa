@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  let body: { inviteId?: string; index?: number; ext?: string };
+  let body: { inviteId?: string; index?: number; ext?: string; kind?: string };
   try {
     body = await request.json();
   } catch {
@@ -37,14 +37,28 @@ export async function POST(request: NextRequest) {
   }
 
   const { inviteId, index, ext: rawExt } = body;
+  const kind = body.kind ?? "photo";
 
   if (!inviteId || typeof inviteId !== "string" || inviteId.length > 64) {
     return NextResponse.json({ error: "Invalid inviteId" }, { status: 400 });
   }
-  if (typeof index !== "number" || index < 0 || index > 7) {
+  if (kind !== "photo" && kind !== "video") {
+    return NextResponse.json({ error: "Invalid kind" }, { status: 400 });
+  }
+  // Photos land in numbered slots; the single video message has a fixed name,
+  // so index only applies to photos.
+  if (kind === "photo" && (typeof index !== "number" || index < 0 || index > 7)) {
     return NextResponse.json({ error: "Invalid index" }, { status: 400 });
   }
+  // Both switches return hardcoded literals — the user string never reaches
+  // the storage path.
   const ext = (() => {
+    if (kind === "video") {
+      switch ((rawExt ?? "").toLowerCase()) {
+        case "mp4": return "mp4";
+        default: return "webm";
+      }
+    }
     switch ((rawExt ?? "").toLowerCase()) {
       case "jpg": return "jpg";
       case "jpeg": return "jpeg";
@@ -67,7 +81,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invite not found" }, { status: 404 });
   }
 
-  const path = `pending/${user.id}/${inviteId}/${index}.${ext}`;
+  const path =
+    kind === "video"
+      ? `pending/${user.id}/${inviteId}/video-message.${ext}`
+      : `pending/${user.id}/${inviteId}/${index}.${ext}`;
 
   // 10-minute TTL is enough for the upload even on a slow connection.
   const { data, error } = await adminClient.storage

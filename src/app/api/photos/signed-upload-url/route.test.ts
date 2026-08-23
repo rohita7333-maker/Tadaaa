@@ -117,4 +117,41 @@ describe("POST /api/photos/signed-upload-url", () => {
     expect(body.path).toMatch(/\.jpg$/);
     expect(body.path).not.toContain("..");
   });
+
+  describe("kind=video (video message upload)", () => {
+    it("returns fixed video-message path, no index required", async () => {
+      const res = await POST(makeRequest({ inviteId: "invite-abc", ext: "webm", kind: "video" }));
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.path).toBe("pending/user-123/invite-abc/video-message.webm");
+    });
+
+    it("allows mp4 for Safari MediaRecorder", async () => {
+      const res = await POST(makeRequest({ inviteId: "invite-abc", ext: "mp4", kind: "video" }));
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.path).toBe("pending/user-123/invite-abc/video-message.mp4");
+    });
+
+    it("defaults unknown or traversal ext to webm literal", async () => {
+      const res = await POST(makeRequest({ inviteId: "invite-abc", ext: "../etc/passwd", kind: "video" }));
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.path).toBe("pending/user-123/invite-abc/video-message.webm");
+      expect(body.path).not.toContain("..");
+    });
+
+    it("rejects image ext masquerading under video kind", async () => {
+      const res = await POST(makeRequest({ inviteId: "invite-abc", ext: "jpg", kind: "video" }));
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      // jpg is not a valid video container — falls to the webm literal
+      expect(body.path).toBe("pending/user-123/invite-abc/video-message.webm");
+    });
+  });
+
+  it("returns 400 for unknown kind", async () => {
+    const res = await POST(makeRequest({ inviteId: "invite-abc", index: 0, ext: "jpg", kind: "gif" }));
+    expect(res.status).toBe(400);
+  });
 });

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, DM_Sans, Caveat } from "next/font/google";
+import { Figtree } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -7,31 +7,17 @@ import { Ribbons } from "@/components/fx/Ribbons";
 import { ConfettiCanvas } from "@/components/fx/ConfettiCanvas";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
+const figtree = Figtree({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-bricolage",
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-dm-sans",
-  display: "swap",
-});
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-caveat",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-figtree",
   display: "swap",
 });
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#FFF8F0",
+  themeColor: "#FAF9F6",
 };
 
 export const metadata: Metadata = {
@@ -58,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${dmSans.variable} ${caveat.variable}`}>
+    <html lang="en" className={figtree.variable}>
       <body className="antialiased">
         <Ribbons />
         <ConfettiCanvas />

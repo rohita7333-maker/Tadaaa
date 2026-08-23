@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-dm-sans);
-  --font-heading: var(--font-bricolage);
-  --font-handwritten: var(--font-caveat);
+  --font-sans: var(--font-figtree);
+  --font-heading: var(--font-figtree);
+  --font-handwritten: var(--font-figtree);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -43,52 +43,59 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* SurpriseInvite brand colors */
-  --color-cream: #FFF8F0;
-  --color-cream-dark: #F5EDE3;
-  --color-rose: #C4686D;
-  --color-rose-light: #E8A5A8;
-  --color-rose-deep: #9B3D42;
-  --color-gold: #C9A96E;
-  --color-gold-light: #E8D5A8;
-  --color-charcoal: #2D2926;
-  --color-warm-gray: #6B5E57;
-  --color-light-gray: #D4CBC3;
+  /* TaDaaaa brand colors — pine identity (retheme 2026-08-23).
+     Token NAMES kept so every bg-cream/text-rose/etc. utility re-skins
+     without component edits; only the VALUES changed. */
+  --color-cream: #FAF9F6;
+  --color-cream-dark: #F1EFE9;
+  --color-rose: #3E6B5C;
+  --color-rose-light: #A8C3B4;
+  --color-rose-deep: #2E5145;
+  --color-gold: #8A6F35;
+  --color-gold-light: #E8D9BD;
+  --color-charcoal: #1A1B18;
+  --color-warm-gray: #6F6E68;
+  --color-light-gray: #E9E6DF;
 }
 
 :root {
-  --background: #FFF8F0;
-  --foreground: #2D2926;
-  --card: #FFFFFF;
-  --card-foreground: #2D2926;
-  --popover: #FFFFFF;
-  --popover-foreground: #2D2926;
-  --primary: #C4686D;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F5EDE3;
-  --secondary-foreground: #2D2926;
-  --muted: #F5EDE3;
-  --muted-foreground: #6B5E57;
-  --accent: #C9A96E;
-  --accent-foreground: #2D2926;
-  --destructive: #C4686D;
-  --border: #D4CBC3;
-  --input: #D4CBC3;
-  --ring: #C4686D;
-  --radius: 0.75rem;
-  --sidebar: #FFF8F0;
-  --sidebar-foreground: #2D2926;
-  --sidebar-primary: #C4686D;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F5EDE3;
-  --sidebar-accent-foreground: #2D2926;
-  --sidebar-border: #D4CBC3;
-  --sidebar-ring: #C4686D;
+  /* Old font handles → Figtree, so any direct var() consumer keeps resolving */
+  --font-bricolage: var(--font-figtree);
+  --font-dm-sans: var(--font-figtree);
+  --font-caveat: var(--font-figtree);
 
-  /* Phase 1 modernization tokens — supporting tints */
-  --rose-glow: #F4D5D7;
-  --midnight: #1F1B19;
-  --cream-deep: #F0E5D8;
+  --background: #FAF9F6;
+  --foreground: #1A1B18;
+  --card: #FFFFFF;
+  --card-foreground: #1A1B18;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1B18;
+  --primary: #3E6B5C;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1EFE9;
+  --secondary-foreground: #1A1B18;
+  --muted: #F1EFE9;
+  --muted-foreground: #6F6E68;
+  --accent: #E7EFEA;
+  --accent-foreground: #2E5145;
+  --destructive: #B04A3A;
+  --border: #E9E6DF;
+  --input: #E9E6DF;
+  --ring: #3E6B5C;
+  --radius: 0.75rem;
+  --sidebar: #FAF9F6;
+  --sidebar-foreground: #1A1B18;
+  --sidebar-primary: #3E6B5C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F1EFE9;
+  --sidebar-accent-foreground: #1A1B18;
+  --sidebar-border: #E9E6DF;
+  --sidebar-ring: #3E6B5C;
+
+  /* Supporting tints — pine equivalents of the old rose tints */
+  --rose-glow: #DCE8E2;
+  --midnight: #141513;
+  --cream-deep: #ECE9E2;
 
   /* P0 motion easing tokens — one "hand" across all surfaces */
   --ease-entrance: cubic-bezier(0.22, 1, 0.36, 1);
@@ -100,10 +107,10 @@
   --r: 16px;
   --r-lg: 24px;
   --r-xl: 32px;
-  --sh: 0 8px 30px rgba(45, 41, 38, 0.08);
-  --sh-lg: 0 24px 60px rgba(45, 41, 38, 0.16);
-  --grad: linear-gradient(135deg, #C4686D 0%, #9B3D42 100%);
-  --grad-gold: linear-gradient(135deg, #E8D5A8 0%, #C9A96E 100%);
+  --sh: 0 8px 30px rgba(26, 27, 24, 0.08);
+  --sh-lg: 0 24px 60px rgba(26, 27, 24, 0.16);
+  --grad: linear-gradient(135deg, #3E6B5C 0%, #2E5145 100%);
+  --grad-gold: linear-gradient(135deg, #E8D9BD 0%, #C98A2D 100%);
   /* Reveal/curtain choreography easings */
   --ease-curtain: cubic-bezier(0.77, 0, 0.18, 1);
   --ease-polaroid: cubic-bezier(0.2, 1.2, 0.3, 1);
@@ -118,13 +125,13 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-family: var(--font-figtree), system-ui, sans-serif;
   }
   h1, h2, h3 {
-    font-family: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;
+    font-family: var(--font-figtree), "Segoe UI", system-ui, sans-serif;
     font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.02;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
   }
 }
 

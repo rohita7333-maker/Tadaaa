@@ -17,6 +17,7 @@ import QuestionBuilder, { type Question } from "@/components/create/QuestionBuil
 import PreviewPublish from "@/components/create/PreviewPublish";
 import TemplateSummaryChip from "@/components/create/TemplateSummaryChip";
 import MusicPicker from "@/components/create/MusicPicker";
+import VideoMessageRecorder, { type RecordedVideo } from "@/components/create/VideoMessageRecorder";
 import { LivePreviewPhone, LivePreviewOverlay } from "@/components/create/LivePreview";
 import { AIDraftButton } from "@/components/create/AIDraftButton";
 import { getThemeById } from "@/lib/themes";
@@ -179,6 +180,9 @@ export default function CreatePage() {
   // Reveal soundtrack track id ("" = no music). Persisted server-side once the
   // music_track migration lands; until then it drives preview only.
   const [musicTrack, setMusicTrack] = useState("");
+  // Recorded video message. Like photos it holds a Blob, so it cannot survive
+  // the draft round-trip — the restore toast already says to re-add media.
+  const [videoMessage, setVideoMessage] = useState<RecordedVideo | null>(null);
   const [countdownDate, setCountdownDate] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [hasExpiry, setHasExpiry] = useState(false);
@@ -480,8 +484,33 @@ export default function CreatePage() {
       photoDescriptors.push({ path, caption: p.caption, rotation_deg: p.rotation_deg });
     }
 
+    // Optional video message rides the same signed-URL pipeline as photos.
+    let videoPendingPath: string | null = null;
+    if (videoMessage) {
+      const urlRes = await fetch("/api/photos/signed-upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteId: shell.inviteId, ext: videoMessage.ext, kind: "video" }),
+      });
+      if (!urlRes.ok) {
+        toast.error("Failed to prepare video upload. Please try again.");
+        return null;
+      }
+      const { path, signedUrl } = await urlRes.json() as { path: string; signedUrl: string };
+      const uploadRes = await fetch(signedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": videoMessage.mimeType },
+        body: videoMessage.blob,
+      });
+      if (!uploadRes.ok) {
+        toast.error("Failed to upload your video message. Please try again.");
+        return null;
+      }
+      videoPendingPath = path;
+    }
+
     // Phase 3: finalize — server runs moderation + inserts invite_photos rows.
-    const result = await finalizeInvite(shell.inviteId, photoDescriptors);
+    const result = await finalizeInvite(shell.inviteId, photoDescriptors, videoPendingPath);
     if (result?.error) {
       toast.error(result.error);
       return null;
@@ -629,6 +658,7 @@ export default function CreatePage() {
                     <EventsEditor events={events} onEventsChange={setEvents} />
                   )}
                   <MusicPicker selected={musicTrack} onSelect={setMusicTrack} />
+                  <VideoMessageRecorder video={videoMessage} onVideoChange={setVideoMessage} />
                 </div>
               )}
 

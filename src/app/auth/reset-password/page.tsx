@@ -49,27 +49,27 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FFF8F0] px-6 py-12">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF9F6] px-6 py-12">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 mb-10">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center">
           <Heart className="w-4 h-4 fill-white text-white" />
         </div>
-        <span className="font-heading text-xl text-[#2D2926]">TaDaaaa</span>
+        <span className="font-heading text-xl text-[#1A1B18]">TaDaaaa</span>
       </Link>
 
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-[0_4px_24px_rgba(45,41,38,0.08)] border border-[#D4CBC3]/30 p-8">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-[0_4px_24px_rgba(26, 27, 24,0.08)] border border-[#E9E6DF]/30 p-8">
         <div className="space-y-6">
           <div>
-            <h1 className="font-heading text-2xl text-[#2D2926]">Set new password</h1>
-            <p className="text-[#6B5E57] text-sm mt-1.5">
+            <h1 className="font-heading text-2xl text-[#1A1B18]">Set new password</h1>
+            <p className="text-[#6F6E68] text-sm mt-1.5">
               Choose a strong password for your account.
             </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-[#2D2926] text-sm font-medium">
+              <Label htmlFor="password" className="text-[#1A1B18] text-sm font-medium">
                 New password
               </Label>
               <div className="relative">
@@ -77,42 +77,42 @@ export default function ResetPasswordPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Min. 8 characters"
-                  className="h-12 rounded-2xl border-[#D4CBC3] bg-white focus-visible:ring-[#C4686D] focus-visible:border-[#C4686D] transition-colors pr-10"
+                  className="h-12 rounded-2xl border-[#E9E6DF] bg-white focus-visible:ring-[#3E6B5C] focus-visible:border-[#3E6B5C] transition-colors pr-10"
                   {...register("password")}
                 />
                 <button
                   type="button"
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6B5E57] hover:text-[#2D2926] transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6F6E68] hover:text-[#1A1B18] transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-[#C4686D] text-xs">{errors.password.message}</p>
+                <p className="text-[#3E6B5C] text-xs">{errors.password.message}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="confirm" className="text-[#2D2926] text-sm font-medium">
+              <Label htmlFor="confirm" className="text-[#1A1B18] text-sm font-medium">
                 Confirm password
               </Label>
               <Input
                 id="confirm"
                 type={showPassword ? "text" : "password"}
                 placeholder="Repeat password"
-                className="h-12 rounded-2xl border-[#D4CBC3] bg-white focus-visible:ring-[#C4686D] focus-visible:border-[#C4686D] transition-colors"
+                className="h-12 rounded-2xl border-[#E9E6DF] bg-white focus-visible:ring-[#3E6B5C] focus-visible:border-[#3E6B5C] transition-colors"
                 {...register("confirm")}
               />
               {errors.confirm && (
-                <p className="text-[#C4686D] text-xs">{errors.confirm.message}</p>
+                <p className="text-[#3E6B5C] text-xs">{errors.confirm.message}</p>
               )}
             </div>
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-semibold transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/25 mt-2"
+              className="w-full h-12 rounded-2xl bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] text-white font-semibold transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#3E6B5C]/25 mt-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               Update password

@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Create magical surprise invites for the people you love",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#FFF8F0",
-    theme_color: "#C4686D",
+    background_color: "#FAF9F6",
+    theme_color: "#3E6B5C",
     icons: [
       {
         src: "/icon1",

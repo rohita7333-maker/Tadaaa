@@ -27,7 +27,7 @@ export default function OccasionSelector({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-[#2D2926] font-medium text-sm mb-3">Occasion</p>
+        <p className="text-[#1A1B18] font-medium text-sm mb-3">Occasion</p>
         <div className="grid grid-cols-3 gap-2">
           {occasions.map((occ) => (
             <motion.button
@@ -40,12 +40,12 @@ export default function OccasionSelector({
               transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
               className={`py-3 px-2 rounded-2xl border-2 text-center transition-colors ${
                 selected === occ.id
-                  ? "border-[#C4686D] bg-[#FFF0EE]"
-                  : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
+                  ? "border-[#3E6B5C] bg-[#FFF0EE]"
+                  : "border-[#E9E6DF] bg-white hover:border-[#3E6B5C]/40"
               }`}
             >
               <div className="text-2xl mb-1">{occ.emoji}</div>
-              <div className="text-[11px] font-medium text-[#2D2926] leading-tight">{occ.label}</div>
+              <div className="text-[11px] font-medium text-[#1A1B18] leading-tight">{occ.label}</div>
             </motion.button>
           ))}
         </div>
@@ -57,7 +57,7 @@ export default function OccasionSelector({
         <div className="space-y-3">
           {hasChips && (
             <div>
-              <p className="text-xs text-[#6B5E57] mb-2">Quick-fill suggestions:</p>
+              <p className="text-xs text-[#6F6E68] mb-2">Quick-fill suggestions:</p>
               <div className="flex flex-wrap gap-2">
                 {selectedOcc.prompts.map((p) => {
                   const isSelected = selectedPrompt.trim() === p;
@@ -72,8 +72,8 @@ export default function OccasionSelector({
                       aria-pressed={isSelected}
                       className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors ${
                         isSelected
-                          ? "border-[#C4686D] bg-[#FFF0EE] text-[#C4686D] font-medium"
-                          : "border-[#D4CBC3] bg-white text-[#6B5E57] hover:border-[#C4686D] hover:text-[#C4686D]"
+                          ? "border-[#3E6B5C] bg-[#FFF0EE] text-[#3E6B5C] font-medium"
+                          : "border-[#E9E6DF] bg-white text-[#6F6E68] hover:border-[#3E6B5C] hover:text-[#3E6B5C]"
                       }`}
                     >
                       {isSelected && <Check className="w-3 h-3" />}
@@ -90,7 +90,7 @@ export default function OccasionSelector({
           <div>
             <label
               htmlFor="occasion-custom-fill"
-              className="flex items-center gap-1.5 text-xs text-[#6B5E57] mb-2"
+              className="flex items-center gap-1.5 text-xs text-[#6F6E68] mb-2"
             >
               <PenLine className="w-3 h-3" />
               {isCustom ? "Write your own message" : hasChips ? "Or write your own" : "Write your own message"}
@@ -101,7 +101,7 @@ export default function OccasionSelector({
               value={selectedPrompt}
               onChange={(e) => onPromptSelect(e.target.value)}
               placeholder={isCustom ? "e.g. Will you be my maid of honor?" : "Type your own line…"}
-              className="w-full rounded-xl border-2 border-[#D4CBC3] bg-white px-3 py-2.5 text-sm text-[#2D2926] placeholder:text-[#9C8E87] focus:outline-none focus:border-[#C4686D] transition-colors"
+              className="w-full rounded-xl border-2 border-[#E9E6DF] bg-white px-3 py-2.5 text-sm text-[#1A1B18] placeholder:text-[#9C8E87] focus:outline-none focus:border-[#3E6B5C] transition-colors"
             />
           </div>
         </div>

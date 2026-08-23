@@ -28,8 +28,8 @@ export default function ThemeSelector({
   const unlockedSet = unlockedPremiumThemes ?? [];
   return (
     <div className="w-full">
-      <h2 className="font-heading text-2xl text-[#2D2926] mb-2">Choose a theme</h2>
-      <p className="text-[#6B5E57] mb-6">
+      <h2 className="font-heading text-2xl text-[#1A1B18] mb-2">Choose a theme</h2>
+      <p className="text-[#6F6E68] mb-6">
         Pick the vibe that matches your surprise. 3 free themes included.
       </p>
 
@@ -50,8 +50,8 @@ export default function ThemeSelector({
               className={cn(
                 "relative rounded-2xl overflow-hidden border-2 transition-colors text-left group",
                 isSelected
-                  ? "border-[#C4686D] shadow-[0_0_0_4px_rgba(196,104,109,0.15)]"
-                  : "border-transparent hover:border-[#D4CBC3] hover:shadow-[0_4px_16px_rgba(45,41,38,0.08)]"
+                  ? "border-[#3E6B5C] shadow-[0_0_0_4px_rgba(62, 107, 92,0.15)]"
+                  : "border-transparent hover:border-[#E9E6DF] hover:shadow-[0_4px_16px_rgba(26, 27, 24,0.08)]"
               )}
             >
               {/* Preview gradient */}
@@ -77,15 +77,15 @@ export default function ThemeSelector({
               <div className="p-3 bg-white">
                 <div className="flex items-start justify-between gap-1">
                   <div>
-                    <p className="font-medium text-[#2D2926] text-sm leading-tight">
+                    <p className="font-medium text-[#1A1B18] text-sm leading-tight">
                       {theme.name}
                     </p>
-                    <p className="text-[#6B5E57] text-xs mt-0.5 leading-tight">
+                    <p className="text-[#6F6E68] text-xs mt-0.5 leading-tight">
                       {theme.description}
                     </p>
                   </div>
                   {theme.isPremium && !isUnlocked && (
-                    <div className="shrink-0 flex items-center gap-0.5 bg-[#C9A96E]/10 text-[#8A6F35] text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-[#C9A96E]/20">
+                    <div className="shrink-0 flex items-center gap-0.5 bg-[#8A6F35]/10 text-[#8A6F35] text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-[#8A6F35]/20">
                       <Sparkles className="w-2.5 h-2.5" />
                       Premium
                     </div>
@@ -100,7 +100,7 @@ export default function ThemeSelector({
 
               {/* Selected ring */}
               {isSelected && (
-                <div className="absolute inset-0 border-2 border-[#C4686D] rounded-2xl pointer-events-none" />
+                <div className="absolute inset-0 border-2 border-[#3E6B5C] rounded-2xl pointer-events-none" />
               )}
             </motion.button>
           );

@@ -86,14 +86,14 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
     : "active";
 
   return (
-    <SpotlightCard bare className="bg-white rounded-3xl border border-[#D4CBC3]/20 overflow-hidden group">
+    <SpotlightCard bare className="bg-white rounded-3xl border border-[#E9E6DF]/20 overflow-hidden group">
       {/* Thumbnail preview — click opens preview */}
       <Link
         href={`/surprise/${invite.slug}`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Open ${invite.title} preview`}
-        className="block h-28 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40"
+        className="block h-28 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40"
         style={{
           background: theme?.colors.background
             ? `linear-gradient(135deg, ${theme.colors.background} 0%, ${theme.colors.accent}22 100%)`
@@ -103,14 +103,14 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
         <div className="flex items-center justify-center gap-3 w-full h-full">
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300"
-            style={{ background: theme?.colors.accent || "#C4686D" }}
+            style={{ background: theme?.colors.accent || "#3E6B5C" }}
           >
             <Heart className="w-7 h-7 fill-white text-white" />
           </div>
         </div>
         <div
           className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-semibold pointer-events-none"
-          style={{ background: `${theme?.colors.accent || "#C4686D"}20`, color: theme?.colors.accent || "#C4686D" }}
+          style={{ background: `${theme?.colors.accent || "#3E6B5C"}20`, color: theme?.colors.accent || "#3E6B5C" }}
           title={invite.reveal_type === "tap" ? "Recipient taps to reveal" : "Counts down to reveal time"}
         >
           {invite.reveal_type === "tap" ? "✨ Tap to reveal" : "⏱ Countdown"}
@@ -127,11 +127,11 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
               rel="noopener noreferrer"
               className="block focus:outline-none focus:underline"
             >
-              <h3 className="font-heading text-lg text-[#2D2926] truncate group-hover:text-[#C4686D] transition-colors">
+              <h3 className="font-heading text-lg text-[#1A1B18] truncate group-hover:text-[#3E6B5C] transition-colors">
                 {invite.title}
               </h3>
             </Link>
-            <p className="text-[#6B5E57] text-xs mt-0.5">
+            <p className="text-[#6F6E68] text-xs mt-0.5">
               {theme?.name || invite.theme}
             </p>
           </div>
@@ -139,7 +139,7 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             className={`ml-2 shrink-0 text-xs rounded-full px-2.5 ${
               status === "active"
                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                : "bg-[#D4CBC3]/40 text-[#6B5E57] border-[#D4CBC3]"
+                : "bg-[#E9E6DF]/40 text-[#6F6E68] border-[#E9E6DF]"
             }`}
             variant="outline"
           >
@@ -148,32 +148,32 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
         </div>
 
         {/* Stats */}
-        <div className="mb-1 bg-[#FFF8F0] rounded-xl px-3 py-2">
-          <div className="flex items-center gap-3 text-sm text-[#6B5E57]">
+        <div className="mb-1 bg-[#FAF9F6] rounded-xl px-3 py-2">
+          <div className="flex items-center gap-3 text-sm text-[#6F6E68]">
             <span
               className="flex items-center gap-1.5"
               title="How many times this surprise page was opened (creator previews don't count)"
             >
-              <Eye className="w-3.5 h-3.5 text-[#C4686D]" />
-              <span className="font-semibold text-[#2D2926]">{formatViewCount(invite.view_count)}</span>
+              <Eye className="w-3.5 h-3.5 text-[#3E6B5C]" />
+              <span className="font-semibold text-[#1A1B18]">{formatViewCount(invite.view_count)}</span>
               <span className="text-xs">views</span>
             </span>
-            <div className="w-px h-3.5 bg-[#D4CBC3]" />
+            <div className="w-px h-3.5 bg-[#E9E6DF]" />
             <span
               className="flex items-center gap-1.5"
               title="Guests who tapped “I'm in!” to confirm they're coming"
             >
-              <Heart className="w-3.5 h-3.5 text-[#C4686D]" />
-              <span className="font-semibold text-[#2D2926]">{invite.rsvp_count ?? 0}</span>
+              <Heart className="w-3.5 h-3.5 text-[#3E6B5C]" />
+              <span className="font-semibold text-[#1A1B18]">{invite.rsvp_count ?? 0}</span>
               <span className="text-xs">RSVPs</span>
             </span>
-            <div className="w-px h-3.5 bg-[#D4CBC3]" />
+            <div className="w-px h-3.5 bg-[#E9E6DF]" />
             <span
               className="flex items-center gap-1.5"
               title="Answers guests gave to the yes/no questions you added"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[#C9A96E]" />
-              <span className="font-semibold text-[#2D2926]">{invite.response_count ?? 0}</span>
+              <MessageCircle className="w-3.5 h-3.5 text-[#8A6F35]" />
+              <span className="font-semibold text-[#1A1B18]">{invite.response_count ?? 0}</span>
               <span className="text-xs">responses</span>
             </span>
           </div>
@@ -182,7 +182,7 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             {invite.revealed_at && (
               <span title="When this surprise was first opened — the 28-day clock starts here">
                 {" · "}
-                <span className="text-[#C4686D] font-medium">
+                <span className="text-[#3E6B5C] font-medium">
                   Opened {formatDistanceToNow(new Date(invite.revealed_at), { addSuffix: true })}
                 </span>
               </span>
@@ -198,12 +198,12 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             onClick={() => setResponsesOpen(true)}
             size="sm"
             title="See who opened, who RSVP'd, and what they answered"
-            className="flex-1 h-9 rounded-full text-xs font-semibold bg-[#FFF0EE] text-[#C4686D] border border-[#C4686D]/40 shadow-none hover:bg-[#FFE4E1] hover:border-[#C4686D] transition-all duration-300"
+            className="flex-1 h-9 rounded-full text-xs font-semibold bg-[#FFF0EE] text-[#3E6B5C] border border-[#3E6B5C]/40 shadow-none hover:bg-[#FFE4E1] hover:border-[#3E6B5C] transition-all duration-300"
           >
             <MessageCircleQuestion className="w-3.5 h-3.5 mr-1" />
             See responses
             {engagementCount > 0 && (
-              <span className="ml-1.5 rounded-full bg-[#C4686D] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+              <span className="ml-1.5 rounded-full bg-[#3E6B5C] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
                 {engagementCount}
               </span>
             )}
@@ -214,8 +214,8 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             size="sm"
             className={`h-9 px-3 rounded-full text-xs transition-all duration-300 ${
               shareOpen
-                ? "bg-[#FFF0EE] border-[#C4686D] text-[#C4686D]"
-                : "border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0]"
+                ? "bg-[#FFF0EE] border-[#3E6B5C] text-[#3E6B5C]"
+                : "border-[#E9E6DF] text-[#1A1B18] hover:bg-[#FAF9F6]"
             }`}
           >
             <Share2 className="w-3.5 h-3.5 mr-1" />
@@ -227,7 +227,7 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             rel="noopener noreferrer"
             aria-label={`Open live preview of ${invite.title}`}
             title="Open live preview"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4686D] focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-[#E9E6DF] text-[#1A1B18] hover:bg-[#FAF9F6] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2"
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
@@ -247,8 +247,8 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             }
             className={
               deleteLocked
-                ? "h-9 w-9 rounded-full border-[#D4CBC3]/60 text-[#C0B5AD] bg-[#F7F2EC] p-0 cursor-not-allowed"
-                : "h-9 w-9 rounded-full border-[#D4CBC3] text-[#C4686D] hover:bg-[#FFF0EE] p-0 transition-all duration-300"
+                ? "h-9 w-9 rounded-full border-[#E9E6DF]/60 text-[#C0B5AD] bg-[#F7F2EC] p-0 cursor-not-allowed"
+                : "h-9 w-9 rounded-full border-[#E9E6DF] text-[#3E6B5C] hover:bg-[#FFF0EE] p-0 transition-all duration-300"
             }
           >
             {deleteLocked ? <Lock className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
@@ -265,8 +265,8 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
                 onClick={() => setStyle(v)}
                 className={`px-2 py-0.5 rounded-full text-[11px] font-medium border transition capitalize ${
                   style === v
-                    ? "bg-[#C4686D] text-white border-[#C4686D]"
-                    : "bg-white text-[#6B5E57] border-[#D4CBC3] hover:border-[#C4686D]"
+                    ? "bg-[#3E6B5C] text-white border-[#3E6B5C]"
+                    : "bg-white text-[#6F6E68] border-[#E9E6DF] hover:border-[#3E6B5C]"
                 }`}
               >
                 {v}
@@ -289,11 +289,11 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             {countdownTo ? (
               <span>
                 Deletable in{" "}
-                <span className="font-medium text-[#6B5E57]">
+                <span className="font-medium text-[#6F6E68]">
                   {formatDistanceToNow(new Date(countdownTo))}
                 </span>{" "}
                 · or{" "}
-                <Link href="/pricing" className="text-[#C4686D] hover:underline">
+                <Link href="/pricing" className="text-[#3E6B5C] hover:underline">
                   upgrade
                 </Link>{" "}
                 to delete now
@@ -301,7 +301,7 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
             ) : (
               <span>
                 Deletable 28 days after it&apos;s opened ·{" "}
-                <Link href="/pricing" className="text-[#C4686D] hover:underline">
+                <Link href="/pricing" className="text-[#3E6B5C] hover:underline">
                   upgrade
                 </Link>{" "}
                 to delete anytime
@@ -323,7 +323,7 @@ export default function InviteCard({ invite, creatorName, tier = "free", onDelet
               })}
               className="overflow-hidden"
             >
-              <div className="pt-4 border-t border-[#D4CBC3]/40 mt-4">
+              <div className="pt-4 border-t border-[#E9E6DF]/40 mt-4">
                 <ShareButtons
                   slug={invite.slug}
                   title={invite.title}

@@ -60,22 +60,22 @@ export default function ReportButton({ inviteId }: ReportButtonProps) {
             {done ? (
               <div className="text-center py-4">
                 <p className="text-2xl mb-3">✅</p>
-                <h3 className="font-heading text-xl text-[#2D2926] mb-2">Report submitted</h3>
-                <p className="text-sm text-[#6B5E57] mb-4">
+                <h3 className="font-heading text-xl text-[#1A1B18] mb-2">Report submitted</h3>
+                <p className="text-sm text-[#6F6E68] mb-4">
                   Thanks for helping keep TaDaaaa safe.
                 </p>
                 <button
                   onClick={() => setOpen(false)}
                   aria-label="Close report confirmation"
-                  className="h-10 px-6 rounded-full bg-[#F5EDE3] text-[#6B5E57] text-sm"
+                  className="h-10 px-6 rounded-full bg-[#F1EFE9] text-[#6F6E68] text-sm"
                 >
                   Close
                 </button>
               </div>
             ) : (
               <>
-                <h3 className="font-heading text-xl text-[#2D2926] mb-1">Report content</h3>
-                <p className="text-sm text-[#6B5E57] mb-5">
+                <h3 className="font-heading text-xl text-[#1A1B18] mb-1">Report content</h3>
+                <p className="text-sm text-[#6F6E68] mb-5">
                   Select a reason and we&apos;ll review this surprise.
                 </p>
 
@@ -85,8 +85,8 @@ export default function ReportButton({ inviteId }: ReportButtonProps) {
                       key={r.value}
                       className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
                         reason === r.value
-                          ? "border-[#C4686D] bg-[#FFF0E8]"
-                          : "border-[#D4CBC3]/50 hover:border-[#C4686D]/40"
+                          ? "border-[#3E6B5C] bg-[#FFF0E8]"
+                          : "border-[#E9E6DF]/50 hover:border-[#3E6B5C]/40"
                       }`}
                     >
                       <input
@@ -95,9 +95,9 @@ export default function ReportButton({ inviteId }: ReportButtonProps) {
                         value={r.value}
                         checked={reason === r.value}
                         onChange={() => setReason(r.value)}
-                        className="accent-[#C4686D]"
+                        className="accent-[#3E6B5C]"
                       />
-                      <span className="text-sm text-[#2D2926]">{r.label}</span>
+                      <span className="text-sm text-[#1A1B18]">{r.label}</span>
                     </label>
                   ))}
                 </div>
@@ -108,7 +108,7 @@ export default function ReportButton({ inviteId }: ReportButtonProps) {
                     onChange={(e) => setDetails(e.target.value)}
                     placeholder="Tell us more (optional)"
                     rows={3}
-                    className="w-full px-4 py-3 rounded-xl border border-[#D4CBC3] text-sm resize-none outline-none focus:border-[#C4686D] transition-colors mb-4"
+                    className="w-full px-4 py-3 rounded-xl border border-[#E9E6DF] text-sm resize-none outline-none focus:border-[#3E6B5C] transition-colors mb-4"
                   />
                 )}
 
@@ -116,14 +116,14 @@ export default function ReportButton({ inviteId }: ReportButtonProps) {
                   <button
                     onClick={() => setOpen(false)}
                     aria-label="Cancel report"
-                    className="flex-1 h-11 rounded-full border border-[#D4CBC3] text-[#6B5E57] text-sm hover:bg-[#FFF0E8] transition-colors"
+                    className="flex-1 h-11 rounded-full border border-[#E9E6DF] text-[#6F6E68] text-sm hover:bg-[#FFF0E8] transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSubmit}
                     disabled={!reason || loading}
-                    className="flex-1 h-11 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-medium disabled:opacity-40 transition-opacity"
+                    className="flex-1 h-11 rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white text-sm font-medium disabled:opacity-40 transition-opacity"
                   >
                     {loading ? "Sending…" : "Submit report"}
                   </button>

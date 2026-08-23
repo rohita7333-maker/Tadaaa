@@ -10,8 +10,8 @@ function htmlPage(title: string, body: string, status: number) {
   return new NextResponse(
     `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
 <meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#FFF8F0;margin:0;padding:40px 24px;color:#2D2926;">
-<main style="max-width:480px;margin:40px auto;background:#fff;border-radius:24px;padding:32px;border:1px solid #D4CBC380;text-align:center">
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#FAF9F6;margin:0;padding:40px 24px;color:#1A1B18;">
+<main style="max-width:480px;margin:40px auto;background:#fff;border-radius:24px;padding:32px;border:1px solid #E9E6DF80;text-align:center">
 <h1 style="font-size:22px;margin:0 0 12px">${title}</h1>
 ${body}
 </main></body></html>`,
@@ -35,13 +35,13 @@ async function handle(userId: string, list: string, token: string, day: string) 
   if (error || !data) {
     return htmlPage(
       "We couldn't unsubscribe you",
-      `<p>Something went wrong. Please try again or change settings in your <a href="/settings" style="color:#C4686D">account</a>.</p>`,
+      `<p>Something went wrong. Please try again or change settings in your <a href="/settings" style="color:#3E6B5C">account</a>.</p>`,
       500
     );
   }
   return htmlPage(
     "You're unsubscribed",
-    `<p style="color:#6B5E57;line-height:1.6">We won't send you any more of these emails. You can re-enable them anytime in <a href="/settings" style="color:#C4686D">notification settings</a>.</p>`,
+    `<p style="color:#6F6E68;line-height:1.6">We won't send you any more of these emails. You can re-enable them anytime in <a href="/settings" style="color:#3E6B5C">notification settings</a>.</p>`,
     200
   );
 }

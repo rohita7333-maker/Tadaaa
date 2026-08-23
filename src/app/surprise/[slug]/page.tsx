@@ -43,12 +43,12 @@ export default async function SurprisePage({ params }: Props) {
 
   if (!invite) {
     return (
-      <div className="min-h-screen bg-[#FFF8F0] flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center px-6 text-center">
         <span className="text-6xl mb-6">🔍</span>
-        <h1 className="font-heading text-3xl text-[#2D2926] mb-3">
+        <h1 className="font-heading text-3xl text-[#1A1B18] mb-3">
           This surprise doesn&apos;t exist
         </h1>
-        <p className="text-[#6B5E57] mb-8">
+        <p className="text-[#6F6E68] mb-8">
           The link may be invalid or the surprise was deleted.
         </p>
         <Link href="/" aria-label="Create your own surprise">
@@ -63,12 +63,12 @@ export default async function SurprisePage({ params }: Props) {
 
   if (!invite.is_active) {
     return (
-      <div className="min-h-screen bg-[#FFF8F0] flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center px-6 text-center">
         <span className="text-6xl mb-6">💌</span>
-        <h1 className="font-heading text-3xl text-[#2D2926] mb-3">
+        <h1 className="font-heading text-3xl text-[#1A1B18] mb-3">
           This surprise is no longer available
         </h1>
-        <p className="text-[#6B5E57]">
+        <p className="text-[#6F6E68]">
           The creator has deactivated this page.
         </p>
       </div>
@@ -77,12 +77,12 @@ export default async function SurprisePage({ params }: Props) {
 
   if (isExpired(invite.expires_at)) {
     return (
-      <div className="min-h-screen bg-[#FFF8F0] flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center px-6 text-center">
         <span className="text-6xl mb-6">⏰</span>
-        <h1 className="font-heading text-3xl text-[#2D2926] mb-3">
+        <h1 className="font-heading text-3xl text-[#1A1B18] mb-3">
           This surprise has expired
         </h1>
-        <p className="text-[#6B5E57] mb-8">
+        <p className="text-[#6F6E68] mb-8">
           The moment has passed, but the memory lives on.
         </p>
         <Link href="/" aria-label="Create a new surprise">

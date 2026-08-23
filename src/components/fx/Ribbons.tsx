@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-const COLS = ["#C4686D", "#E8A5A8", "#C9A96E", "#E8D5A8", "#9B3D42", "#FFFFFF"];
+const COLS = ["#3E6B5C", "#A8C3B4", "#8A6F35", "#E8D9BD", "#2E5145", "#FFFFFF"];
 
 /**
  * Ambient falling ribbons — a fixed full-screen layer of ~26 small colored

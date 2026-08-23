@@ -31,7 +31,7 @@ export default function VideoPlayer({ videoUrl, onComplete }: VideoPlayerProps) 
           </p>
           <button
             onClick={() => onComplete?.()}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-white text-[#2D2926] text-sm font-semibold hover:bg-white/90 transition-colors"
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-white text-[#1A1B18] text-sm font-semibold hover:bg-white/90 transition-colors"
           >
             <SkipForward className="w-3.5 h-3.5" />
             Skip ahead

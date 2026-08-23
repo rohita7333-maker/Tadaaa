@@ -59,11 +59,11 @@ export default function MessageEditor({
             placeholder=" "
             aria-label="Title"
             aria-invalid={!!titleError}
-            className="peer w-full h-14 rounded-xl border border-[#D4CBC3] bg-white px-3 pt-5 pb-1.5 pr-20 text-[#2D2926] placeholder:text-transparent focus:border-[#C4686D] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/20 transition-colors"
+            className="peer w-full h-14 rounded-xl border border-[#E9E6DF] bg-white px-3 pt-5 pb-1.5 pr-20 text-[#1A1B18] placeholder:text-transparent focus:border-[#3E6B5C] focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/20 transition-colors"
           />
           <label
             htmlFor="msg-title"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6B5E57] text-sm transition-all duration-200 peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#C4686D] peer-focus:font-medium peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:translate-y-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:font-medium"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6F6E68] text-sm transition-all duration-200 peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#3E6B5C] peer-focus:font-medium peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:translate-y-0 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:font-medium"
           >
             Title
           </label>
@@ -75,11 +75,11 @@ export default function MessageEditor({
               }
             />
           </div>
-          <span className="absolute right-3 bottom-1.5 text-[10px] text-[#6B5E57]">
+          <span className="absolute right-3 bottom-1.5 text-[10px] text-[#6F6E68]">
             {title.length}/{MAX_TITLE_LENGTH}
           </span>
         </div>
-        {titleError && <p className="text-[#C4686D] text-xs mt-1">{titleError}</p>}
+        {titleError && <p className="text-[#3E6B5C] text-xs mt-1">{titleError}</p>}
       </div>
 
       {/* Message — floating label */}
@@ -95,11 +95,11 @@ export default function MessageEditor({
             placeholder=" "
             aria-label="Message"
             aria-invalid={!!messageError}
-            className="peer w-full min-h-[160px] rounded-xl border border-[#D4CBC3] bg-white px-3 pt-6 pb-6 text-[#2D2926] placeholder:text-transparent focus:border-[#C4686D] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/20 resize-none leading-relaxed transition-colors"
+            className="peer w-full min-h-[160px] rounded-xl border border-[#E9E6DF] bg-white px-3 pt-6 pb-6 text-[#1A1B18] placeholder:text-transparent focus:border-[#3E6B5C] focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/20 resize-none leading-relaxed transition-colors"
           />
           <label
             htmlFor="msg-message"
-            className="pointer-events-none absolute left-3 top-4 text-[#6B5E57] text-sm transition-all duration-200 peer-focus:top-2 peer-focus:text-xs peer-focus:text-[#C4686D] peer-focus:font-medium peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:font-medium"
+            className="pointer-events-none absolute left-3 top-4 text-[#6F6E68] text-sm transition-all duration-200 peer-focus:top-2 peer-focus:text-xs peer-focus:text-[#3E6B5C] peer-focus:font-medium peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:font-medium"
           >
             Message
           </label>
@@ -119,13 +119,13 @@ export default function MessageEditor({
           </div>
           <span
             className={`absolute right-3 bottom-2 text-[10px] ${
-              message.length > MAX_MESSAGE_LENGTH * 0.9 ? "text-[#C4686D]" : "text-[#6B5E57]"
+              message.length > MAX_MESSAGE_LENGTH * 0.9 ? "text-[#3E6B5C]" : "text-[#6F6E68]"
             }`}
           >
             {message.length}/{MAX_MESSAGE_LENGTH}
           </span>
         </div>
-        {messageError && <p className="text-[#C4686D] text-xs mt-1">{messageError}</p>}
+        {messageError && <p className="text-[#3E6B5C] text-xs mt-1">{messageError}</p>}
       </div>
     </div>
   );

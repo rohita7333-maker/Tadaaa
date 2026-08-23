@@ -168,10 +168,10 @@
 /* Pulse glow for CTA buttons */
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(196, 104, 109, 0.4);
+    box-shadow: 0 0 0 0 rgba(62, 107, 92, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 12px rgba(196, 104, 109, 0);
+    box-shadow: 0 0 0 12px rgba(62, 107, 92, 0);
   }
 }
 
@@ -181,7 +181,7 @@
 
 /* Gradient text utility */
 .text-gradient {
-  background: linear-gradient(135deg, #C4686D 0%, #C9A96E 100%);
+  background: linear-gradient(135deg, #3E6B5C 0%, #8A6F35 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -189,7 +189,7 @@
 
 /* Warm noise overlay */
 .bg-warm-noise {
-  background-color: #FFF8F0;
+  background-color: #FAF9F6;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
@@ -302,11 +302,11 @@
 .shimmer-text-gradient {
   background: linear-gradient(
     90deg,
-    var(--rose-deep, #9B3D42) 0%,
-    var(--rose, #C4686D) 25%,
-    var(--gold, #C9A96E) 50%,
-    var(--rose, #C4686D) 75%,
-    var(--rose-deep, #9B3D42) 100%
+    var(--rose-deep, #2E5145) 0%,
+    var(--rose, #3E6B5C) 25%,
+    var(--gold, #8A6F35) 50%,
+    var(--rose, #3E6B5C) 75%,
+    var(--rose-deep, #2E5145) 100%
   );
   background-size: 200% auto;
   background-clip: text;
@@ -338,19 +338,19 @@
 .btn-pri {
   background: var(--grad);
   color: #fff;
-  box-shadow: 0 10px 26px rgba(196, 104, 109, 0.34);
+  box-shadow: 0 10px 26px rgba(62, 107, 92, 0.34);
 }
 .btn-pri:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(196, 104, 109, 0.44);
+  box-shadow: 0 16px 34px rgba(62, 107, 92, 0.44);
 }
 .btn-pri:active {
   transform: translateY(0);
 }
 .btn-sec {
   background: #fff;
-  color: var(--charcoal, #2D2926);
-  border: 1px solid var(--light-gray, #D4CBC3);
+  color: var(--charcoal, #1A1B18);
+  border: 1px solid var(--light-gray, #E9E6DF);
   box-shadow: var(--sh);
 }
 .btn-sec:hover {
@@ -368,8 +368,8 @@
   padding: 5px 12px;
   border-radius: 30px;
   background: #fff;
-  border: 1px solid var(--light-gray, #D4CBC3);
-  color: var(--warm-gray, #6B5E57);
+  border: 1px solid var(--light-gray, #E9E6DF);
+  color: var(--warm-gray, #6F6E68);
 }
 
 /* Ambient falling ribbons — mockup .ribbons */
@@ -452,7 +452,7 @@
   border-radius: 14px;
   padding: 9px;
   box-shadow: var(--sh);
-  border: 1px solid var(--light-gray, #D4CBC3);
+  border: 1px solid var(--light-gray, #E9E6DF);
   animation: floaty 6s ease-in-out infinite;
 }
 .occard:nth-child(1) { --rot: -6deg; transform: rotate(-6deg); animation-delay: 0s; z-index: 2; }
@@ -460,13 +460,13 @@
 .occard:nth-child(3) { --rot: 7deg; transform: rotate(7deg); animation-delay: 1.4s; z-index: 1; }
 .occard .stage { aspect-ratio: 1; border-radius: 10px; position: relative; overflow: hidden; }
 .occard .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.bg-bday { background: radial-gradient(120% 100% at 50% 0%, #FFF1DA, #F7D9B0 70%, #E8A5A8); }
-.bg-mom { background: radial-gradient(120% 100% at 50% 10%, #FCE7E9, #F0B9BC 70%, #C4686D); }
-.bg-anniv { background: radial-gradient(120% 100% at 50% 0%, #FBF0D2, #EBD6A6 65%, #C9A96E); }
+.bg-bday { background: radial-gradient(120% 100% at 50% 0%, #FFF1DA, #F7D9B0 70%, #A8C3B4); }
+.bg-mom { background: radial-gradient(120% 100% at 50% 10%, #FCE7E9, #F0B9BC 70%, #3E6B5C); }
+.bg-anniv { background: radial-gradient(120% 100% at 50% 0%, #FBF0D2, #EBD6A6 65%, #8A6F35); }
 .occard .cap {
   font-family: var(--font-caveat), cursive;
   font-size: 16px;
-  color: var(--charcoal, #2D2926);
+  color: var(--charcoal, #1A1B18);
   text-align: center;
   margin-top: 6px;
 }

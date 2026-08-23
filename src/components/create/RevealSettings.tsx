@@ -45,7 +45,7 @@ export default function RevealSettings({
     <div className="space-y-5">
       {/* Reveal type */}
       <div>
-        <Label className="text-[#2D2926] font-medium text-sm mb-3 block">
+        <Label className="text-[#1A1B18] font-medium text-sm mb-3 block">
           Reveal mechanic
         </Label>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -59,20 +59,20 @@ export default function RevealSettings({
             className={cn(
               "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
               revealType === "tap"
-                ? "border-[#C4686D] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(196,104,109,0.1)]"
-                : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
+                ? "border-[#3E6B5C] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(62, 107, 92,0.1)]"
+                : "border-[#E9E6DF] bg-white hover:border-[#3E6B5C]/40"
             )}
           >
             <Hand
-              className={`w-6 h-6 ${revealType === "tap" ? "text-[#C4686D]" : "text-[#6B5E57]"}`}
+              className={`w-6 h-6 ${revealType === "tap" ? "text-[#3E6B5C]" : "text-[#6F6E68]"}`}
             />
             <div>
               <p
-                className={`font-medium text-sm ${revealType === "tap" ? "text-[#C4686D]" : "text-[#2D2926]"}`}
+                className={`font-medium text-sm ${revealType === "tap" ? "text-[#3E6B5C]" : "text-[#1A1B18]"}`}
               >
                 Tap to Reveal
               </p>
-              <p className="text-[#6B5E57] text-xs mt-0.5">They tap to open</p>
+              <p className="text-[#6F6E68] text-xs mt-0.5">They tap to open</p>
             </div>
           </motion.button>
 
@@ -86,20 +86,20 @@ export default function RevealSettings({
             className={cn(
               "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
               revealType === "countdown"
-                ? "border-[#C4686D] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(196,104,109,0.1)]"
-                : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
+                ? "border-[#3E6B5C] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(62, 107, 92,0.1)]"
+                : "border-[#E9E6DF] bg-white hover:border-[#3E6B5C]/40"
             )}
           >
             <Clock
-              className={`w-6 h-6 ${revealType === "countdown" ? "text-[#C4686D]" : "text-[#6B5E57]"}`}
+              className={`w-6 h-6 ${revealType === "countdown" ? "text-[#3E6B5C]" : "text-[#6F6E68]"}`}
             />
             <div>
               <p
-                className={`font-medium text-sm ${revealType === "countdown" ? "text-[#C4686D]" : "text-[#2D2926]"}`}
+                className={`font-medium text-sm ${revealType === "countdown" ? "text-[#3E6B5C]" : "text-[#1A1B18]"}`}
               >
                 Countdown
               </p>
-              <p className="text-[#6B5E57] text-xs mt-0.5">Build anticipation</p>
+              <p className="text-[#6F6E68] text-xs mt-0.5">Build anticipation</p>
             </div>
           </motion.button>
 
@@ -113,23 +113,23 @@ export default function RevealSettings({
             className={cn(
               "relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
               revealType === "scroll_story"
-                ? "border-[#C4686D] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(196,104,109,0.1)]"
-                : "border-[#D4CBC3] bg-white hover:border-[#C4686D]/40"
+                ? "border-[#3E6B5C] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(62, 107, 92,0.1)]"
+                : "border-[#E9E6DF] bg-white hover:border-[#3E6B5C]/40"
             )}
           >
-            <span className="absolute right-2 top-2 rounded-full bg-[#C4686D] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+            <span className="absolute right-2 top-2 rounded-full bg-[#3E6B5C] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
               New
             </span>
             <Moon
-              className={`w-6 h-6 ${revealType === "scroll_story" ? "text-[#C4686D]" : "text-[#6B5E57]"}`}
+              className={`w-6 h-6 ${revealType === "scroll_story" ? "text-[#3E6B5C]" : "text-[#6F6E68]"}`}
             />
             <div>
               <p
-                className={`font-medium text-sm ${revealType === "scroll_story" ? "text-[#C4686D]" : "text-[#2D2926]"}`}
+                className={`font-medium text-sm ${revealType === "scroll_story" ? "text-[#3E6B5C]" : "text-[#1A1B18]"}`}
               >
                 Scroll Story
               </p>
-              <p className="text-[#6B5E57] text-xs mt-0.5">A cinematic scroll</p>
+              <p className="text-[#6F6E68] text-xs mt-0.5">A cinematic scroll</p>
             </div>
           </motion.button>
         </div>
@@ -147,7 +147,7 @@ export default function RevealSettings({
             exit={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
             transition={conditionalFieldTransition(shouldReduce)}
           >
-            <Label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
+            <Label className="text-[#1A1B18] font-medium text-sm mb-1.5 block">
               Reveal date &amp; time
             </Label>
             <input
@@ -155,10 +155,10 @@ export default function RevealSettings({
               value={countdownDate}
               min={minDateStr}
               onChange={(e) => onCountdownDateChange(e.target.value)}
-              className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] text-sm bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
+              className="w-full h-12 rounded-xl border border-[#E9E6DF] px-3 text-[#1A1B18] text-sm bg-white focus:outline-none focus:border-[#3E6B5C] focus:ring-1 focus:ring-[#3E6B5C] transition-colors"
             />
             {revealType === "scroll_story" && (
-              <p className="text-[#6B5E57] text-xs mt-1.5">
+              <p className="text-[#6F6E68] text-xs mt-1.5">
                 The big day — powers the finale countdown ✨
               </p>
             )}
@@ -167,17 +167,17 @@ export default function RevealSettings({
       </AnimatePresence>
 
       {/* Expiry toggle */}
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FFF8F0] border border-[#D4CBC3]/40">
+      <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FAF9F6] border border-[#E9E6DF]/40">
         <div>
-          <p className="text-[#2D2926] font-medium text-sm">Set expiry date</p>
-          <p className="text-[#6B5E57] text-xs mt-0.5">
+          <p className="text-[#1A1B18] font-medium text-sm">Set expiry date</p>
+          <p className="text-[#6F6E68] text-xs mt-0.5">
             Surprise auto-expires on this date
           </p>
         </div>
         <Switch
           checked={hasExpiry}
           onCheckedChange={onHasExpiryChange}
-          className="data-[state=checked]:bg-[#C4686D]"
+          className="data-[state=checked]:bg-[#3E6B5C]"
         />
       </div>
 
@@ -191,7 +191,7 @@ export default function RevealSettings({
             exit={{ opacity: 0, y: shouldReduce ? 0 : -6 }}
             transition={conditionalFieldTransition(shouldReduce)}
           >
-            <Label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
+            <Label className="text-[#1A1B18] font-medium text-sm mb-1.5 block">
               Expiry date
             </Label>
             <input
@@ -199,7 +199,7 @@ export default function RevealSettings({
               value={expiresAt}
               min={minDateStr}
               onChange={(e) => onExpiresAtChange(e.target.value)}
-              className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] text-sm bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
+              className="w-full h-12 rounded-xl border border-[#E9E6DF] px-3 text-[#1A1B18] text-sm bg-white focus:outline-none focus:border-[#3E6B5C] focus:ring-1 focus:ring-[#3E6B5C] transition-colors"
             />
           </motion.div>
         )}
@@ -208,19 +208,19 @@ export default function RevealSettings({
       {/* Contributions toggle — collaborative memory invites (Task B2). When
           on, the dashboard exposes a /contribute/<slug> link and family
           members can drop a photo + note before the reveal. */}
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FFF8F0] border border-[#D4CBC3]/40">
+      <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FAF9F6] border border-[#E9E6DF]/40">
         <div className="pr-3">
-          <p className="text-[#2D2926] font-medium text-sm">
+          <p className="text-[#1A1B18] font-medium text-sm">
             Let family contribute photos/messages
           </p>
-          <p className="text-[#6B5E57] text-xs mt-0.5">
+          <p className="text-[#6F6E68] text-xs mt-0.5">
             Get a second link to send to people who want to add memories
           </p>
         </div>
         <Switch
           checked={acceptContributions}
           onCheckedChange={onAcceptContributionsChange}
-          className="data-[state=checked]:bg-[#C4686D]"
+          className="data-[state=checked]:bg-[#3E6B5C]"
         />
       </div>
     </div>

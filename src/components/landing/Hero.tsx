@@ -38,7 +38,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 25% 35%, rgba(196,104,109,0.1) 0%, transparent 55%), radial-gradient(ellipse at 75% 65%, rgba(201,169,110,0.08) 0%, transparent 55%), #FFF8F0",
+            "radial-gradient(ellipse at 25% 35%, rgba(62, 107, 92,0.1) 0%, transparent 55%), radial-gradient(ellipse at 75% 65%, rgba(138, 111, 53,0.08) 0%, transparent 55%), #FAF9F6",
         }}
       />
       <GridPattern variant="grid" cellSize={48} opacity={0.35} />
@@ -56,7 +56,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
                 delay: T.badge,
               })}
             >
-              <span className="inline-flex items-center gap-2 bg-white text-[#C4686D] text-xs font-semibold px-4 py-2 rounded-full mb-5 border border-[#E8A5A8]/40 shadow-sm uppercase tracking-widest">
+              <span className="inline-flex items-center gap-2 bg-white text-[#3E6B5C] text-xs font-semibold px-4 py-2 rounded-full mb-5 border border-[#A8C3B4]/40 shadow-sm uppercase tracking-widest">
                 <Sparkles className="w-3 h-3 fill-current" />
                 New: AI-drafted surprises
               </span>
@@ -72,13 +72,13 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
                 delay: T.subtitle,
               })}
             >
-              <span className="inline-flex items-center gap-2 bg-[#FFF8F0] text-[#6B5E57] text-[11px] font-medium px-3 py-1 rounded-full mb-6 border border-[#D4CBC3]/60">
+              <span className="inline-flex items-center gap-2 bg-[#FAF9F6] text-[#6F6E68] text-[11px] font-medium px-3 py-1 rounded-full mb-6 border border-[#E9E6DF]/60">
                 ✨ Surprise invite builder
               </span>
             </motion.div>
 
             {/* Headline — word-by-word blur reveal (hero beat — loudest) */}
-            <h1 className="font-heading text-6xl md:text-7xl text-[#2D2926] leading-[1.05] mb-6">
+            <h1 className="font-heading text-6xl md:text-7xl text-[#1A1B18] leading-[1.05] mb-6">
               {reducedMotion ? (
                 <motion.span
                   initial={{ opacity: 0 }}
@@ -157,7 +157,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
 
             {/* Subcopy — quieter rise, starts while headline tail comes in */}
             <motion.p
-              className="text-[#6B5E57] text-lg leading-relaxed mb-10 max-w-md"
+              className="text-[#6F6E68] text-lg leading-relaxed mb-10 max-w-md"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={makeReducedMotionTransition(reducedMotion, {
@@ -190,16 +190,16 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               </Link>
               <Link
                 href="#how-it-works"
-                className="inline-flex items-center justify-center h-14 px-8 rounded-2xl border border-[#D4CBC3] text-[#2D2926] hover:bg-white hover:border-[#C4686D]/30 text-base transition-all duration-300 bg-white/70 font-medium"
+                className="inline-flex items-center justify-center h-14 px-8 rounded-2xl border border-[#E9E6DF] text-[#1A1B18] hover:bg-white hover:border-[#3E6B5C]/30 text-base transition-all duration-300 bg-white/70 font-medium"
               >
-                <Play className="w-4 h-4 mr-2 text-[#C4686D]" />
+                <Play className="w-4 h-4 mr-2 text-[#3E6B5C]" />
                 See how it works
               </Link>
             </motion.div>
 
             {/* Stats — horizontal slide L→R (reading direction, not another y:12 drip) */}
             <motion.div
-              className="flex gap-6 pt-8 border-t border-[#D4CBC3]/50"
+              className="flex gap-6 pt-8 border-t border-[#E9E6DF]/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={makeReducedMotionTransition(reducedMotion, {
@@ -231,7 +231,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
-                  className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#D4CBC3]/20 shadow-[0_2px_12px_rgba(45,41,38,0.04)]"
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#E9E6DF]/20 shadow-[0_2px_12px_rgba(26, 27, 24,0.04)]"
                   initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={makeReducedMotionTransition(reducedMotion, {
@@ -240,10 +240,10 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
                     delay: T.statsStart + i * staggers.detail,
                   })}
                 >
-                  <p className="font-heading text-2xl text-[#2D2926] font-bold leading-none">
+                  <p className="font-heading text-2xl text-[#1A1B18] font-bold leading-none">
                     {stat.content}
                   </p>
-                  <p className="text-[#6B5E57] text-[11px] mt-1">{stat.label}</p>
+                  <p className="text-[#6F6E68] text-[11px] mt-1">{stat.label}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -262,9 +262,9 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
             <OccasionCards />
             <Link
               href="/surprise/demo"
-              className="btn-pill inline-flex items-center gap-1.5 text-sm font-semibold text-[#C4686D] bg-white border border-[#E8A5A8]/40 shadow-sm hover:border-[#C4686D]/40 transition-all"
+              className="btn-pill inline-flex items-center gap-1.5 text-sm font-semibold text-[#3E6B5C] bg-white border border-[#A8C3B4]/40 shadow-sm hover:border-[#3E6B5C]/40 transition-all"
             >
-              <Star className="w-3.5 h-3.5 fill-[#C9A96E] text-[#C9A96E]" />
+              <Star className="w-3.5 h-3.5 fill-[#8A6F35] text-[#8A6F35]" />
               Try the live demo
             </Link>
           </motion.div>

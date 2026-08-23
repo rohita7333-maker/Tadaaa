@@ -57,13 +57,13 @@ export default function ResponsesModal({ inviteId, open, onClose }: ResponsesMod
     <Dialog open={open} onClose={onClose}>
       <DialogHeader onClose={onClose}>
         <div className="flex items-center gap-2">
-          <MessageCircleQuestion className="w-4 h-4 text-[#C4686D]" />
+          <MessageCircleQuestion className="w-4 h-4 text-[#3E6B5C]" />
           <DialogTitle>Insights</DialogTitle>
         </div>
       </DialogHeader>
 
       {/* Tab strip */}
-      <div className="px-5 pt-1 pb-3 flex items-center gap-1 border-b border-[#D4CBC3]/30">
+      <div className="px-5 pt-1 pb-3 flex items-center gap-1 border-b border-[#E9E6DF]/30">
         <TabButton current={tab} value="activity" onClick={() => setTab("activity")} icon={Activity} label="Activity" />
         <TabButton current={tab} value="responses" onClick={() => setTab("responses")} icon={MessageCircleQuestion} label="Responses" />
       </div>
@@ -72,7 +72,7 @@ export default function ResponsesModal({ inviteId, open, onClose }: ResponsesMod
         {loading && (
           <div className="flex items-center justify-center py-10">
             <div
-              className="w-6 h-6 rounded-full border-2 border-[#D4CBC3] border-t-[#C4686D] animate-spin"
+              className="w-6 h-6 rounded-full border-2 border-[#E9E6DF] border-t-[#3E6B5C] animate-spin"
               aria-label="Loading"
             />
           </div>
@@ -110,8 +110,8 @@ function TabButton({
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all ${
         active
-          ? "bg-[#FFF0EE] text-[#C4686D]"
-          : "text-[#6B5E57] hover:bg-[#FFF8F0]"
+          ? "bg-[#FFF0EE] text-[#3E6B5C]"
+          : "text-[#6F6E68] hover:bg-[#FAF9F6]"
       }`}
       aria-pressed={active}
     >
@@ -124,7 +124,7 @@ function TabButton({
 function ActivityTab({ insights }: { insights: InviteInsights | null }) {
   if (!insights) {
     return (
-      <p className="py-6 text-center text-sm text-[#6B5E57]">
+      <p className="py-6 text-center text-sm text-[#6F6E68]">
         Couldn&apos;t load activity. Try again later.
       </p>
     );
@@ -134,25 +134,25 @@ function ActivityTab({ insights }: { insights: InviteInsights | null }) {
     <div className="space-y-5">
       {/* Counters */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-[#FFF8F0] rounded-2xl p-4 border border-[#D4CBC3]/30">
+        <div className="bg-[#FAF9F6] rounded-2xl p-4 border border-[#E9E6DF]/30">
           <div className="flex items-center gap-2 mb-1.5">
             <div className="w-7 h-7 rounded-lg bg-[#FFE9C2] flex items-center justify-center">
               <Eye className="w-3.5 h-3.5 text-[#B6802A]" />
             </div>
-            <p className="text-xs text-[#6B5E57] font-medium">Views</p>
+            <p className="text-xs text-[#6F6E68] font-medium">Views</p>
           </div>
-          <p className="font-heading text-2xl text-[#2D2926] font-bold">
+          <p className="font-heading text-2xl text-[#1A1B18] font-bold">
             {insights.viewCount.toLocaleString()}
           </p>
         </div>
-        <div className="bg-[#FFF8F0] rounded-2xl p-4 border border-[#D4CBC3]/30">
+        <div className="bg-[#FAF9F6] rounded-2xl p-4 border border-[#E9E6DF]/30">
           <div className="flex items-center gap-2 mb-1.5">
             <div className="w-7 h-7 rounded-lg bg-[#FFE7D9] flex items-center justify-center">
               <Heart className="w-3.5 h-3.5 text-[#B33A45]" />
             </div>
-            <p className="text-xs text-[#6B5E57] font-medium">RSVPs</p>
+            <p className="text-xs text-[#6F6E68] font-medium">RSVPs</p>
           </div>
-          <p className="font-heading text-2xl text-[#2D2926] font-bold">
+          <p className="font-heading text-2xl text-[#1A1B18] font-bold">
             {insights.rsvpCount.toLocaleString()}
           </p>
         </div>
@@ -160,14 +160,14 @@ function ActivityTab({ insights }: { insights: InviteInsights | null }) {
 
       {/* RSVP timeline */}
       <div>
-        <p className="text-xs text-[#6B5E57] font-semibold uppercase tracking-wider mb-2">
+        <p className="text-xs text-[#6F6E68] font-semibold uppercase tracking-wider mb-2">
           Recent RSVPs
         </p>
         {insights.rsvps.length === 0 ? (
-          <div className="bg-[#FFF8F0] rounded-2xl p-5 text-center border border-[#D4CBC3]/30">
-            <Heart className="w-7 h-7 text-[#D4CBC3] mx-auto mb-2" />
-            <p className="text-sm text-[#6B5E57] font-medium">No RSVPs yet</p>
-            <p className="text-xs text-[#D4CBC3] mt-1">
+          <div className="bg-[#FAF9F6] rounded-2xl p-5 text-center border border-[#E9E6DF]/30">
+            <Heart className="w-7 h-7 text-[#E9E6DF] mx-auto mb-2" />
+            <p className="text-sm text-[#6F6E68] font-medium">No RSVPs yet</p>
+            <p className="text-xs text-[#E9E6DF] mt-1">
               Share your invite to start collecting responses.
             </p>
           </div>
@@ -176,21 +176,21 @@ function ActivityTab({ insights }: { insights: InviteInsights | null }) {
             {insights.rsvps.slice(0, 20).map((r, i) => (
               <li
                 key={i}
-                className="flex items-center justify-between bg-[#FFF8F0] rounded-xl px-4 py-2.5 border border-[#D4CBC3]/30"
+                className="flex items-center justify-between bg-[#FAF9F6] rounded-xl px-4 py-2.5 border border-[#E9E6DF]/30"
               >
-                <span className="flex items-center gap-2.5 text-sm text-[#2D2926]">
+                <span className="flex items-center gap-2.5 text-sm text-[#1A1B18]">
                   <span className="w-7 h-7 rounded-full bg-[#FFE7D9] flex items-center justify-center text-xs font-bold text-[#B33A45] uppercase">
                     {r.name ? r.name.charAt(0) : i + 1}
                   </span>
                   <span className="font-medium">{r.name || `Guest ${i + 1}`}</span>
                 </span>
-                <span className="text-xs text-[#6B5E57]">
+                <span className="text-xs text-[#6F6E68]">
                   {formatDistanceToNow(new Date(r.responded_at), { addSuffix: true })}
                 </span>
               </li>
             ))}
             {insights.rsvps.length > 20 && (
-              <li className="text-xs text-center text-[#6B5E57] pt-2">
+              <li className="text-xs text-center text-[#6F6E68] pt-2">
                 + {insights.rsvps.length - 20} more
               </li>
             )}
@@ -199,10 +199,10 @@ function ActivityTab({ insights }: { insights: InviteInsights | null }) {
       </div>
 
       {/* Privacy note */}
-      <div className="flex items-start gap-2.5 bg-[#FFF8F0] rounded-2xl p-4 border border-[#D4CBC3]/30">
-        <Shield className="w-4 h-4 text-[#6B5E57] mt-0.5 flex-shrink-0" />
-        <p className="text-xs text-[#6B5E57] leading-relaxed">
-          <span className="font-semibold text-[#2D2926]">Privacy by design.</span>{" "}
+      <div className="flex items-start gap-2.5 bg-[#FAF9F6] rounded-2xl p-4 border border-[#E9E6DF]/30">
+        <Shield className="w-4 h-4 text-[#6F6E68] mt-0.5 flex-shrink-0" />
+        <p className="text-xs text-[#6F6E68] leading-relaxed">
+          <span className="font-semibold text-[#1A1B18]">Privacy by design.</span>{" "}
           Views and RSVPs are anonymous — recipients can RSVP without signing in. Names
           show only when a guest chooses to add one; otherwise you see counts and timestamps.
         </p>
@@ -215,9 +215,9 @@ function ResponsesTab({ questions }: { questions: QuestionWithAnswers[] | null }
   if (!questions || questions.length === 0) {
     return (
       <div className="text-center py-10">
-        <MessageCircleQuestion className="w-10 h-10 text-[#D4CBC3] mx-auto mb-3" />
-        <p className="text-sm text-[#6B5E57] font-medium">No questions yet</p>
-        <p className="text-xs text-[#D4CBC3] mt-1">
+        <MessageCircleQuestion className="w-10 h-10 text-[#E9E6DF] mx-auto mb-3" />
+        <p className="text-sm text-[#6F6E68] font-medium">No questions yet</p>
+        <p className="text-xs text-[#E9E6DF] mt-1">
           Add questions in your invite to collect responses.
         </p>
       </div>
@@ -236,51 +236,51 @@ function ResponsesTab({ questions }: { questions: QuestionWithAnswers[] | null }
         return (
           <div
             key={q.id}
-            className="bg-[#FFF8F0] rounded-2xl border border-[#D4CBC3]/40 p-4"
+            className="bg-[#FAF9F6] rounded-2xl border border-[#E9E6DF]/40 p-4"
           >
-            <p className="text-sm font-medium text-[#2D2926] mb-3 leading-snug">
+            <p className="text-sm font-medium text-[#1A1B18] mb-3 leading-snug">
               {q.question_text}
             </p>
 
             {total === 0 ? (
-              <p className="text-xs text-[#D4CBC3]">No responses yet</p>
+              <p className="text-xs text-[#E9E6DF]">No responses yet</p>
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5 w-16 shrink-0">
                     <ThumbsUp className="w-3 h-3 text-[#5aaa69]" />
-                    <span className="text-xs font-medium text-[#2D2926]">Yes</span>
+                    <span className="text-xs font-medium text-[#1A1B18]">Yes</span>
                   </div>
-                  <div className="flex-1 h-2 bg-[#D4CBC3]/30 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-[#E9E6DF]/30 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{ width: `${yesPercent}%`, backgroundColor: "#5aaa69" }}
                     />
                   </div>
-                  <span className="text-xs text-[#6B5E57] w-12 text-right shrink-0">
+                  <span className="text-xs text-[#6F6E68] w-12 text-right shrink-0">
                     {yesCount} ({yesPercent}%)
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5 w-16 shrink-0">
-                    <ThumbsDown className="w-3 h-3 text-[#C4686D]" />
-                    <span className="text-xs font-medium text-[#2D2926]">No</span>
+                    <ThumbsDown className="w-3 h-3 text-[#3E6B5C]" />
+                    <span className="text-xs font-medium text-[#1A1B18]">No</span>
                   </div>
-                  <div className="flex-1 h-2 bg-[#D4CBC3]/30 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-[#E9E6DF]/30 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${noPercent}%`, backgroundColor: "#C4686D" }}
+                      style={{ width: `${noPercent}%`, backgroundColor: "#3E6B5C" }}
                     />
                   </div>
-                  <span className="text-xs text-[#6B5E57] w-12 text-right shrink-0">
+                  <span className="text-xs text-[#6F6E68] w-12 text-right shrink-0">
                     {noCount} ({noPercent}%)
                   </span>
                 </div>
 
                 <div className="flex items-center gap-1.5 pt-1">
-                  <Users className="w-3 h-3 text-[#D4CBC3]" />
-                  <span className="text-xs text-[#D4CBC3]">
+                  <Users className="w-3 h-3 text-[#E9E6DF]" />
+                  <span className="text-xs text-[#E9E6DF]">
                     {total} {total === 1 ? "response" : "responses"}
                   </span>
                 </div>

@@ -54,7 +54,7 @@ export default function DeleteConfirmModal({
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-[#2D2926]/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-[#1A1B18]/40 backdrop-blur-sm"
             onClick={() => !deleting && onClose()}
             aria-hidden
           />
@@ -68,25 +68,25 @@ export default function DeleteConfirmModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }}
             transition={makeReducedMotionTransition(shouldReduce, springs.weighty)}
-            className="relative w-full max-w-sm bg-white rounded-3xl border border-[#D4CBC3]/40 shadow-[0_24px_64px_rgba(45,41,38,0.24)] p-6 text-center"
+            className="relative w-full max-w-sm bg-white rounded-3xl border border-[#E9E6DF]/40 shadow-[0_24px_64px_rgba(26, 27, 24,0.24)] p-6 text-center"
           >
             <button
               onClick={() => !deleting && onClose()}
               aria-label="Close"
-              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-[#9B8E87] hover:bg-[#FFF8F0] hover:text-[#2D2926] transition-colors"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-[#9B8E87] hover:bg-[#FAF9F6] hover:text-[#1A1B18] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="w-14 h-14 rounded-2xl bg-[#FFF0EE] flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-6 h-6 text-[#C4686D]" />
+              <Trash2 className="w-6 h-6 text-[#3E6B5C]" />
             </div>
 
-            <h2 id="del-title" className="font-heading text-xl text-[#2D2926] mb-2">
+            <h2 id="del-title" className="font-heading text-xl text-[#1A1B18] mb-2">
               Take down this surprise?
             </h2>
-            <p className="text-sm text-[#6B5E57] leading-relaxed mb-6 px-1">
-              <span className="font-medium text-[#2D2926]">“{title}”</span> will
+            <p className="text-sm text-[#6F6E68] leading-relaxed mb-6 px-1">
+              <span className="font-medium text-[#1A1B18]">“{title}”</span> will
               disappear from your dashboard and its share link will stop working.
               This one&apos;s permanent — make sure you&apos;ve saved anything you
               want to keep. 💛
@@ -97,7 +97,7 @@ export default function DeleteConfirmModal({
                 onClick={onClose}
                 disabled={deleting}
                 variant="outline"
-                className="flex-1 h-11 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0] font-medium"
+                className="flex-1 h-11 rounded-full border-[#E9E6DF] text-[#1A1B18] hover:bg-[#FAF9F6] font-medium"
               >
                 Keep it
               </Button>
@@ -105,7 +105,7 @@ export default function DeleteConfirmModal({
                 ref={confirmRef}
                 onClick={onConfirm}
                 disabled={deleting}
-                className="flex-1 h-11 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-medium shadow-md shadow-[#C4686D]/25"
+                className="flex-1 h-11 rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] text-white font-medium shadow-md shadow-[#3E6B5C]/25"
               >
                 {deleting ? "Deleting…" : "Yes, delete"}
               </Button>

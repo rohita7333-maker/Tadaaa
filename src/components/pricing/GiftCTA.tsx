@@ -64,19 +64,19 @@ export default function GiftCTA({ label, className }: GiftCTAProps) {
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 relative animate-in fade-in zoom-in-95 duration-200">
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-5 right-5 text-[#6B5E57] hover:text-[#2D2926] transition-colors"
+              className="absolute top-5 right-5 text-[#6F6E68] hover:text-[#1A1B18] transition-colors"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center">
                 <Gift className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="font-heading text-xl text-[#2D2926]">Send a gift invite</h2>
-                <p className="text-sm text-[#6B5E57]">$5 · one TaDaaaa invite</p>
+                <h2 className="font-heading text-xl text-[#1A1B18]">Send a gift invite</h2>
+                <p className="text-sm text-[#6F6E68]">$5 · one TaDaaaa invite</p>
               </div>
             </div>
 
@@ -84,9 +84,9 @@ export default function GiftCTA({ label, className }: GiftCTAProps) {
               <div>
                 <label
                   htmlFor="gift-recipient"
-                  className="block text-sm font-medium text-[#2D2926] mb-1.5"
+                  className="block text-sm font-medium text-[#1A1B18] mb-1.5"
                 >
-                  Recipient&apos;s email <span className="text-[#C4686D]">*</span>
+                  Recipient&apos;s email <span className="text-[#3E6B5C]">*</span>
                 </label>
                 <input
                   id="gift-recipient"
@@ -95,14 +95,14 @@ export default function GiftCTA({ label, className }: GiftCTAProps) {
                   value={recipientEmail}
                   onChange={(e) => setRecipientEmail(e.target.value)}
                   placeholder="friend@example.com"
-                  className="w-full h-11 px-4 rounded-xl border border-[#D4CBC3] text-[#2D2926] placeholder:text-[#B5A9A3] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 focus:border-[#C4686D] text-sm transition-colors"
+                  className="w-full h-11 px-4 rounded-xl border border-[#E9E6DF] text-[#1A1B18] placeholder:text-[#B5A9A3] focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/30 focus:border-[#3E6B5C] text-sm transition-colors"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="gift-sender"
-                  className="block text-sm font-medium text-[#2D2926] mb-1.5"
+                  className="block text-sm font-medium text-[#1A1B18] mb-1.5"
                 >
                   Your name <span className="text-[#B5A9A3] font-normal">(optional)</span>
                 </label>
@@ -113,14 +113,14 @@ export default function GiftCTA({ label, className }: GiftCTAProps) {
                   onChange={(e) => setSenderName(e.target.value)}
                   placeholder="Alice"
                   maxLength={100}
-                  className="w-full h-11 px-4 rounded-xl border border-[#D4CBC3] text-[#2D2926] placeholder:text-[#B5A9A3] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 focus:border-[#C4686D] text-sm transition-colors"
+                  className="w-full h-11 px-4 rounded-xl border border-[#E9E6DF] text-[#1A1B18] placeholder:text-[#B5A9A3] focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/30 focus:border-[#3E6B5C] text-sm transition-colors"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="gift-message"
-                  className="block text-sm font-medium text-[#2D2926] mb-1.5"
+                  className="block text-sm font-medium text-[#1A1B18] mb-1.5"
                 >
                   Personal message <span className="text-[#B5A9A3] font-normal">(optional)</span>
                 </label>
@@ -131,7 +131,7 @@ export default function GiftCTA({ label, className }: GiftCTAProps) {
                   placeholder="Happy birthday! Thought you'd love making one of these for someone special…"
                   maxLength={500}
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-[#D4CBC3] text-[#2D2926] placeholder:text-[#B5A9A3] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 focus:border-[#C4686D] text-sm transition-colors resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-[#E9E6DF] text-[#1A1B18] placeholder:text-[#B5A9A3] focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/30 focus:border-[#3E6B5C] text-sm transition-colors resize-none"
                 />
                 <p className="text-xs text-[#B5A9A3] mt-1 text-right">
                   {giftMessage.length}/500
@@ -141,7 +141,7 @@ export default function GiftCTA({ label, className }: GiftCTAProps) {
               <button
                 type="submit"
                 disabled={loading || !recipientEmail}
-                className="w-full h-12 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white font-semibold text-sm flex items-center justify-center hover:from-[#9B3D42] hover:to-[#C4686D] transition-all duration-300 shadow-md shadow-[#C4686D]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full h-12 rounded-2xl bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white font-semibold text-sm flex items-center justify-center hover:from-[#2E5145] hover:to-[#3E6B5C] transition-all duration-300 shadow-md shadow-[#3E6B5C]/20 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

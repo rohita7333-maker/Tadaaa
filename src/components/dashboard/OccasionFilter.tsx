@@ -24,8 +24,8 @@ export default function OccasionFilter({ current }: { current: string | null }) 
         onClick={() => setFilter(null)}
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
           !current
-            ? "bg-[#C4686D] text-white border-[#C4686D] shadow-sm shadow-[#C4686D]/20"
-            : "bg-white text-[#6B5E57] border-[#D4CBC3] hover:border-[#C4686D]/40 hover:text-[#C4686D]"
+            ? "bg-[#3E6B5C] text-white border-[#3E6B5C] shadow-sm shadow-[#3E6B5C]/20"
+            : "bg-white text-[#6F6E68] border-[#E9E6DF] hover:border-[#3E6B5C]/40 hover:text-[#3E6B5C]"
         }`}
       >
         All
@@ -36,8 +36,8 @@ export default function OccasionFilter({ current }: { current: string | null }) 
           onClick={() => setFilter(occ.id)}
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
             current === occ.id
-              ? "bg-[#C4686D] text-white border-[#C4686D] shadow-sm shadow-[#C4686D]/20"
-              : "bg-white text-[#6B5E57] border-[#D4CBC3] hover:border-[#C4686D]/40 hover:text-[#C4686D]"
+              ? "bg-[#3E6B5C] text-white border-[#3E6B5C] shadow-sm shadow-[#3E6B5C]/20"
+              : "bg-white text-[#6F6E68] border-[#E9E6DF] hover:border-[#3E6B5C]/40 hover:text-[#3E6B5C]"
           }`}
         >
           <span>{occ.emoji}</span>

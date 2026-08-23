@@ -6,8 +6,8 @@ export default function DashboardLoading() {
       {/* Header placeholder */}
       <div className="flex items-start justify-between mb-8">
         <div className="space-y-2">
-          <div className="h-8 w-48 rounded-xl bg-[#F0E5D8] animate-shimmer" />
-          <div className="h-4 w-32 rounded-md bg-[#F0E5D8] animate-shimmer" />
+          <div className="h-8 w-48 rounded-xl bg-[#ECE9E2] animate-shimmer" />
+          <div className="h-4 w-32 rounded-md bg-[#ECE9E2] animate-shimmer" />
         </div>
       </div>
 

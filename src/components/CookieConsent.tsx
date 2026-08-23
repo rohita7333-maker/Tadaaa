@@ -50,16 +50,16 @@ export function CookieConsent() {
           exit={shouldReduce ? { opacity: 0 } : { y: 24, opacity: 0 }}
           transition={makeReducedMotionTransition(shouldReduce, { type: "spring", stiffness: 280, damping: 26 }, { duration: durations.instant })}
         >
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-[#D4CBC3]/60 shadow-[0_20px_60px_rgba(45,41,38,0.18)] p-5">
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-[#E9E6DF]/60 shadow-[0_20px_60px_rgba(26, 27, 24,0.18)] p-5">
             <p
               id="cookie-consent-title"
-              className="text-sm leading-relaxed text-[#2D2926]"
+              className="text-sm leading-relaxed text-[#1A1B18]"
             >
               We use a sprinkle of cookies for analytics to make TaDaaaa better.
               No ads, ever.{" "}
               <Link
                 href="/privacy"
-                className="text-[#C4686D] underline underline-offset-2 hover:text-[#9B3D42] transition-colors"
+                className="text-[#3E6B5C] underline underline-offset-2 hover:text-[#2E5145] transition-colors"
               >
                 Privacy policy
               </Link>
@@ -69,14 +69,14 @@ export function CookieConsent() {
               <button
                 type="button"
                 onClick={deny}
-                className="text-xs font-medium px-4 py-2 rounded-full text-[#6B5E57] hover:text-[#2D2926] hover:bg-[#FFF8F0] transition-colors"
+                className="text-xs font-medium px-4 py-2 rounded-full text-[#6F6E68] hover:text-[#1A1B18] hover:bg-[#FAF9F6] transition-colors"
               >
                 Decline
               </button>
               <button
                 type="button"
                 onClick={accept}
-                className="text-xs font-semibold px-4 py-2 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white hover:from-[#9B3D42] hover:to-[#C4686D] transition-all shadow-md shadow-[#C4686D]/25"
+                className="text-xs font-semibold px-4 py-2 rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white hover:from-[#2E5145] hover:to-[#3E6B5C] transition-all shadow-md shadow-[#3E6B5C]/25"
               >
                 Accept
               </button>

@@ -18,12 +18,12 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[52%] relative bg-[#2D2926] flex-col overflow-hidden">
+      <div className="hidden lg:flex lg:w-[52%] relative bg-[#1A1B18] flex-col overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at 20% 30%, rgba(196,104,109,0.3) 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, rgba(201,169,110,0.2) 0%, transparent 55%)",
+              "radial-gradient(ellipse at 20% 30%, rgba(62, 107, 92,0.3) 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, rgba(138, 111, 53,0.2) 0%, transparent 55%)",
           }}
         />
         {polaroids.map((p, i) => (
@@ -32,7 +32,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             className="absolute bg-white shadow-2xl p-3 pb-8 w-32"
             style={{ transform: `rotate(${p.rotate})`, top: p.top, left: p.left, right: p.right, bottom: p.bottom, borderRadius: "4px" }}
           >
-            <div className="w-full aspect-square bg-gradient-to-br from-[#FFF0E8] to-[#F5EDE3] rounded-sm flex items-center justify-center text-3xl">
+            <div className="w-full aspect-square bg-gradient-to-br from-[#FFF0E8] to-[#F1EFE9] rounded-sm flex items-center justify-center text-3xl">
               {p.emoji}
             </div>
             <p className="text-center text-[#4a4a4a] mt-2 leading-tight" style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "13px" }}>
@@ -41,8 +41,8 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </div>
         ))}
         <div className="relative z-10 flex flex-col justify-center items-center flex-1 px-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#C4686D]/20 border border-[#C4686D]/30 flex items-center justify-center mb-6">
-            <Heart className="w-8 h-8 fill-[#C4686D] text-[#C4686D]" />
+          <div className="w-16 h-16 rounded-2xl bg-[#3E6B5C]/20 border border-[#3E6B5C]/30 flex items-center justify-center mb-6">
+            <Heart className="w-8 h-8 fill-[#3E6B5C] text-[#3E6B5C]" />
           </div>
           <h2 className="font-heading text-4xl text-white leading-tight mb-4">
             Turn moments
@@ -64,7 +64,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         <div className="relative z-10 px-10 pb-10">
           <div className="bg-white/8 border border-white/10 rounded-2xl p-5">
             <div className="flex gap-1 mb-3">
-              {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-[#C9A96E] text-[#C9A96E]" />)}
+              {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-[#8A6F35] text-[#8A6F35]" />)}
             </div>
             <p className="text-white/80 text-sm italic leading-relaxed">
               &ldquo;My mom literally cried happy tears. She said it was the most thoughtful gift she&apos;d ever received.&rdquo;
@@ -77,20 +77,20 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       {/* Right panel */}
       <div className="flex-1 flex flex-col items-center justify-center bg-white px-6 py-12">
         <Link href="/" className="flex items-center gap-2 mb-10 lg:hidden">
-          <Heart className="w-5 h-5 fill-[#C4686D] text-[#C4686D]" />
-          <span className="font-heading text-xl text-[#2D2926]">TaDaaaa</span>
+          <Heart className="w-5 h-5 fill-[#3E6B5C] text-[#3E6B5C]" />
+          <span className="font-heading text-xl text-[#1A1B18]">TaDaaaa</span>
         </Link>
         <div className="hidden lg:flex items-center gap-2 self-start mb-10 w-full max-w-md">
-          <Heart className="w-5 h-5 fill-[#C4686D] text-[#C4686D]" />
-          <span className="font-heading text-xl text-[#2D2926]">TaDaaaa</span>
+          <Heart className="w-5 h-5 fill-[#3E6B5C] text-[#3E6B5C]" />
+          <span className="font-heading text-xl text-[#1A1B18]">TaDaaaa</span>
         </div>
         <div className="w-full max-w-md">
           <AuthForm mode="signin" next={next} />
         </div>
-        <p className="text-xs text-[#6B5E57]/60 mt-10 text-center max-w-xs">
+        <p className="text-xs text-[#6F6E68]/60 mt-10 text-center max-w-xs">
           By signing in you agree to our{" "}
-          <Link href="/terms" className="underline hover:text-[#C4686D] transition-colors">Terms</Link>{" "}and{" "}
-          <Link href="/privacy" className="underline hover:text-[#C4686D] transition-colors">Privacy Policy</Link>.
+          <Link href="/terms" className="underline hover:text-[#3E6B5C] transition-colors">Terms</Link>{" "}and{" "}
+          <Link href="/privacy" className="underline hover:text-[#3E6B5C] transition-colors">Privacy Policy</Link>.
         </p>
       </div>
     </div>

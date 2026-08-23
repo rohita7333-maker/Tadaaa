@@ -97,14 +97,14 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-[#D4CBC3]/30 shadow-[0_4px_24px_rgba(45,41,38,0.06)]">
+    <div className="bg-white rounded-2xl p-5 border border-[#E9E6DF]/30 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)]">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-9 h-9 rounded-xl bg-[#FFF0E8] flex items-center justify-center">
-          <Film className="w-4.5 h-4.5 text-[#C4686D]" />
+          <Film className="w-4.5 h-4.5 text-[#3E6B5C]" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-[#2D2926]">AI Video</p>
-          <p className="text-xs text-[#6B5E57]">Ken Burns slideshow with your photos & message</p>
+          <p className="text-sm font-semibold text-[#1A1B18]">AI Video</p>
+          <p className="text-xs text-[#6F6E68]">Ken Burns slideshow with your photos & message</p>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="w-full h-11 rounded-xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Film className="w-4 h-4" />
               Generate Video
@@ -141,11 +141,11 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
               animate={shouldReduce ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.6, 1] }}
               transition={{ repeat: Infinity, duration: durations.slow, ease: "linear" }}
             >
-              <Film className="w-5 h-5 text-[#C4686D]" />
+              <Film className="w-5 h-5 text-[#3E6B5C]" />
             </motion.div>
             <div>
-              <p className="text-sm font-medium text-[#2D2926]">Generating your video...</p>
-              <p className="text-xs text-[#6B5E57]">This may take 30–60 seconds</p>
+              <p className="text-sm font-medium text-[#1A1B18]">Generating your video...</p>
+              <p className="text-xs text-[#6F6E68]">This may take 30–60 seconds</p>
             </div>
           </motion.div>
         )}
@@ -171,7 +171,7 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
             <video
               src={videoUrl}
               controls
-              className="w-full rounded-xl border border-[#D4CBC3]/40"
+              className="w-full rounded-xl border border-[#E9E6DF]/40"
               style={{ maxHeight: 300 }}
             />
           </motion.div>
@@ -191,7 +191,7 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
               <p className="text-sm font-medium text-red-700">Generation failed</p>
               <button
                 onClick={handleGenerate}
-                className="text-xs text-[#C4686D] hover:underline font-medium mt-1"
+                className="text-xs text-[#3E6B5C] hover:underline font-medium mt-1"
               >
                 Try again
               </button>

@@ -16,9 +16,9 @@ export default function TemplateCard({ template }: Props) {
   return (
     <Link
       href={`/create?template=${template.id}`}
-      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
+      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F6]"
     >
-      <article className="overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(45,41,38,0.06)] transition-[transform,box-shadow] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-[0_16px_40px_rgba(45,41,38,0.15)]">
+      <article className="overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(26, 27, 24,0.06)] transition-[transform,box-shadow] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-[0_16px_40px_rgba(26, 27, 24,0.15)]">
         <div
           className="relative flex items-center justify-center bg-cover bg-center"
           style={{
@@ -29,11 +29,11 @@ export default function TemplateCard({ template }: Props) {
             background: !template.art?.cover
               ? theme
                 ? coverBackground(theme)
-                : "#FFF8F0"
+                : "#FAF9F6"
               : undefined,
           }}
         >
-          <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-[11px] font-semibold text-[#2D2926] backdrop-blur-sm">
+          <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-[11px] font-semibold text-[#1A1B18] backdrop-blur-sm">
             {REVEAL_STYLE_LABELS[template.revealType]}
           </span>
           {/* Cover art replaces the emoji glyph — it already carries the mood. */}
@@ -48,20 +48,20 @@ export default function TemplateCard({ template }: Props) {
         </div>
         <div className="flex items-start justify-between gap-3 p-4">
           <div className="min-w-0">
-            <h3 className="font-heading text-lg leading-tight text-[#2D2926]">
+            <h3 className="font-heading text-lg leading-tight text-[#1A1B18]">
               {template.name}
             </h3>
             {/* rose-deep: 4.5:1 small-text contrast on white (a11y) */}
-            <p className="mt-0.5 font-handwritten text-base leading-snug text-[#9B3D42]">
+            <p className="mt-0.5 font-handwritten text-base leading-snug text-[#2E5145]">
               {template.tagline}
             </p>
           </div>
-          {/* #8A6F35 not #C9A96E: the lighter gold fails WCAG AA (2.24:1) at this
+          {/* #8A6F35 not #8A6F35: the lighter gold fails WCAG AA (2.24:1) at this
               text-xs weight — same darker gold already used for the premium
               badge text in TemplateSummaryChip (5.87:1). */}
           <span
             className={`shrink-0 pt-0.5 text-xs font-semibold uppercase tracking-wider ${
-              isPremium ? "text-[#8A6F35]" : "text-[#6B5E57]"
+              isPremium ? "text-[#8A6F35]" : "text-[#6F6E68]"
             }`}
           >
             {tierLabel}

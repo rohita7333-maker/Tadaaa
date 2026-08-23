@@ -110,8 +110,8 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-[#2D2926] font-medium text-sm">Photos</label>
-        <span className="text-[#6B5E57] text-xs">
+        <label className="text-[#1A1B18] font-medium text-sm">Photos</label>
+        <span className="text-[#6F6E68] text-xs">
           {photos.length}/{MAX_PHOTOS} · drag to reorder
         </span>
       </div>
@@ -121,8 +121,8 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
         <div
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 ${
             isDragging
-              ? "border-[#C4686D] bg-[var(--rose-glow,#F4D5D7)]/60 scale-[1.01]"
-              : "border-[#D4CBC3] bg-[#FFF8F0] hover:border-[#C4686D]/50 hover:bg-[#FFF5F0]"
+              ? "border-[#3E6B5C] bg-[var(--rose-glow,#DCE8E2)]/60 scale-[1.01]"
+              : "border-[#E9E6DF] bg-[#FAF9F6] hover:border-[#3E6B5C]/50 hover:bg-[#FFF5F0]"
           }`}
           onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -139,7 +139,7 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
                 transition={{ duration: durations.instant }}
                 className="absolute inset-0 flex items-center justify-center pointer-events-none"
               >
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-lg border border-[#C4686D]/30 text-[#C4686D] font-semibold text-sm">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-lg border border-[#3E6B5C]/30 text-[#3E6B5C] font-semibold text-sm">
                   <Sparkles className="w-4 h-4" />
                   Drop photos here
                 </div>
@@ -160,17 +160,17 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
                 animate={shouldReduce ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.6, 1] }}
                 transition={{ repeat: Infinity, duration: durations.slow, ease: "linear" }}
               >
-                <ImagePlus className="w-8 h-8 text-[#C4686D]" />
+                <ImagePlus className="w-8 h-8 text-[#3E6B5C]" />
               </motion.div>
-              <p className="text-[#6B5E57] text-sm">Optimising photos…</p>
+              <p className="text-[#6F6E68] text-sm">Optimising photos…</p>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <ImagePlus className="w-8 h-8 text-[#C4686D]" />
-              <p className="text-[#2D2926] font-medium text-sm">
-                Drop photos here or <span className="text-[#C4686D] underline">browse</span>
+              <ImagePlus className="w-8 h-8 text-[#3E6B5C]" />
+              <p className="text-[#1A1B18] font-medium text-sm">
+                Drop photos here or <span className="text-[#3E6B5C] underline">browse</span>
               </p>
-              <p className="text-[#6B5E57] text-xs">JPEG, PNG, WebP · Max 10MB each</p>
+              <p className="text-[#6F6E68] text-xs">JPEG, PNG, WebP · Max 10MB each</p>
             </div>
           )}
         </div>
@@ -192,12 +192,12 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
                 onDragStart={() => setDragIdx(idx)}
                 onDragOver={(e) => { e.preventDefault(); setOverIdx(idx); }}
                 onDragEnd={handleDragEnd}
-                className={`flex gap-3 bg-white rounded-2xl border border-[#D4CBC3]/40 p-3 ${
-                  overIdx === idx && dragIdx !== idx ? "ring-2 ring-[#C4686D]" : ""
+                className={`flex gap-3 bg-white rounded-2xl border border-[#E9E6DF]/40 p-3 ${
+                  overIdx === idx && dragIdx !== idx ? "ring-2 ring-[#3E6B5C]" : ""
                 }`}
               >
                 {/* Drag handle */}
-                <div className="flex items-center text-[#D4CBC3] cursor-grab active:cursor-grabbing">
+                <div className="flex items-center text-[#E9E6DF] cursor-grab active:cursor-grabbing">
                   <GripVertical className="w-4 h-4" />
                 </div>
 
@@ -223,21 +223,21 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
                 {/* Caption input */}
                 <div className="flex-1 flex flex-col justify-center">
                   {idx === 0 && (
-                    <span className="text-[9px] font-semibold text-[#C4686D] uppercase tracking-wider mb-1">
+                    <span className="text-[9px] font-semibold text-[#3E6B5C] uppercase tracking-wider mb-1">
                       Cover photo
                     </span>
                   )}
-                  <label className="text-[10px] text-[#6B5E57] mb-1">Polaroid caption</label>
+                  <label className="text-[10px] text-[#6F6E68] mb-1">Polaroid caption</label>
                   <textarea
                     value={photo.caption}
                     onChange={(e) => updateCaption(photo.id, e.target.value)}
                     placeholder="Write something sweet…"
                     maxLength={120}
                     rows={2}
-                    className="w-full px-3 py-2 rounded-xl border border-[#D4CBC3] bg-[#FFF8F0] text-[#2D2926] placeholder:text-[#6B5E57]/40 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 focus:border-[#C4686D] resize-none"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E9E6DF] bg-[#FAF9F6] text-[#1A1B18] placeholder:text-[#6F6E68]/40 focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/30 focus:border-[#3E6B5C] resize-none"
                     style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1rem" }}
                   />
-                  <p className="text-right text-[10px] text-[#6B5E57] mt-0.5">
+                  <p className="text-right text-[10px] text-[#6F6E68] mt-0.5">
                     {photo.caption.length}/120
                   </p>
                 </div>
@@ -245,7 +245,7 @@ export default function PhotoUploader({ photos, onPhotosChange }: PhotoUploaderP
                 {/* Remove */}
                 <button
                   onClick={() => removePhoto(photo.id)}
-                  className="self-start mt-1 w-6 h-6 rounded-full bg-[#FFF0EE] text-[#C4686D] flex items-center justify-center hover:bg-[#C4686D] hover:text-white transition-colors flex-shrink-0"
+                  className="self-start mt-1 w-6 h-6 rounded-full bg-[#FFF0EE] text-[#3E6B5C] flex items-center justify-center hover:bg-[#3E6B5C] hover:text-white transition-colors flex-shrink-0"
                 >
                   <X className="w-3 h-3" />
                 </button>

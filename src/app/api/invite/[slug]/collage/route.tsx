@@ -125,7 +125,7 @@ function renderTemplateCollage(
             style={{
               width: 14,
               height: 14,
-              background: "#C4686D",
+              background: "#3E6B5C",
               transform: "rotate(45deg)",
               marginBottom: 12,
               display: "flex",

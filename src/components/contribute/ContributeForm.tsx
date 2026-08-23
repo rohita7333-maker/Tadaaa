@@ -131,14 +131,14 @@ export function ContributeForm({ slug }: ContributeFormProps) {
 
   if (done) {
     return (
-      <div className="mt-8 bg-white rounded-2xl border border-[#D4CBC3]/40 shadow-[0_4px_24px_rgba(45,41,38,0.06)] p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center mx-auto mb-4 shadow-[0_4px_24px_rgba(196,104,109,0.3)]">
+      <div className="mt-8 bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] p-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center mx-auto mb-4 shadow-[0_4px_24px_rgba(62, 107, 92,0.3)]">
           <Heart className="w-8 h-8 fill-white text-white" />
         </div>
-        <h2 className="font-heading text-2xl text-[#2D2926] mb-2">
+        <h2 className="font-heading text-2xl text-[#1A1B18] mb-2">
           Memory saved.
         </h2>
-        <p className="text-[#6B5E57] text-sm">
+        <p className="text-[#6F6E68] text-sm">
           Thank you for being part of this surprise. Your note will show up
           in the reveal.
         </p>
@@ -149,10 +149,10 @@ export function ContributeForm({ slug }: ContributeFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-8 bg-white rounded-2xl border border-[#D4CBC3]/40 shadow-[0_4px_24px_rgba(45,41,38,0.06)] p-6 space-y-5"
+      className="mt-8 bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] p-6 space-y-5"
     >
       <div>
-        <label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
+        <label className="text-[#1A1B18] font-medium text-sm mb-1.5 block">
           Your name
         </label>
         <input
@@ -162,13 +162,13 @@ export function ContributeForm({ slug }: ContributeFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Your name"
-          className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
+          className="w-full h-12 rounded-xl border border-[#E9E6DF] px-3 text-[#1A1B18] bg-white focus:outline-none focus:border-[#3E6B5C] focus:ring-1 focus:ring-[#3E6B5C] transition-colors"
         />
       </div>
 
       <div>
-        <label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
-          Email <span className="text-[#6B5E57] font-normal">(optional)</span>
+        <label className="text-[#1A1B18] font-medium text-sm mb-1.5 block">
+          Email <span className="text-[#6F6E68] font-normal">(optional)</span>
         </label>
         <input
           type="email"
@@ -176,12 +176,12 @@ export function ContributeForm({ slug }: ContributeFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="So they can thank you later"
-          className="w-full h-12 rounded-xl border border-[#D4CBC3] px-3 text-[#2D2926] bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors"
+          className="w-full h-12 rounded-xl border border-[#E9E6DF] px-3 text-[#1A1B18] bg-white focus:outline-none focus:border-[#3E6B5C] focus:ring-1 focus:ring-[#3E6B5C] transition-colors"
         />
       </div>
 
       <div>
-        <label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
+        <label className="text-[#1A1B18] font-medium text-sm mb-1.5 block">
           A short note
         </label>
         <textarea
@@ -190,17 +190,17 @@ export function ContributeForm({ slug }: ContributeFormProps) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Say something sweet…"
-          className="w-full rounded-xl border border-[#D4CBC3] px-3 py-3 text-[#2D2926] bg-white focus:outline-none focus:border-[#C4686D] focus:ring-1 focus:ring-[#C4686D] transition-colors resize-none"
+          className="w-full rounded-xl border border-[#E9E6DF] px-3 py-3 text-[#1A1B18] bg-white focus:outline-none focus:border-[#3E6B5C] focus:ring-1 focus:ring-[#3E6B5C] transition-colors resize-none"
           style={{ fontFamily: "var(--font-caveat), cursive", fontSize: "1.1rem" }}
         />
-        <p className="text-right text-[10px] text-[#6B5E57] mt-1">
+        <p className="text-right text-[10px] text-[#6F6E68] mt-1">
           {message.length}/500
         </p>
       </div>
 
       <div>
-        <label className="text-[#2D2926] font-medium text-sm mb-1.5 block">
-          Add a photo <span className="text-[#6B5E57] font-normal">(optional)</span>
+        <label className="text-[#1A1B18] font-medium text-sm mb-1.5 block">
+          Add a photo <span className="text-[#6F6E68] font-normal">(optional)</span>
         </label>
         {preview ? (
           <div className="relative inline-block">
@@ -208,24 +208,24 @@ export function ContributeForm({ slug }: ContributeFormProps) {
             <img
               src={preview}
               alt="Photo preview"
-              className="w-32 h-32 object-cover rounded-xl border border-[#D4CBC3]"
+              className="w-32 h-32 object-cover rounded-xl border border-[#E9E6DF]"
             />
             <button
               type="button"
               onClick={clearPhoto}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#C4686D] text-white flex items-center justify-center shadow-md hover:bg-[#9B3D42] transition-colors"
+              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#3E6B5C] text-white flex items-center justify-center shadow-md hover:bg-[#2E5145] transition-colors"
               aria-label="Remove photo"
             >
               <X className="w-3 h-3" />
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center gap-2 border-2 border-dashed border-[#D4CBC3] rounded-2xl p-6 cursor-pointer bg-[#FFF8F0] hover:border-[#C4686D]/60 transition-colors">
-            <ImagePlus className="w-8 h-8 text-[#C4686D]" />
-            <span className="text-[#2D2926] text-sm font-medium">
+          <label className="flex flex-col items-center gap-2 border-2 border-dashed border-[#E9E6DF] rounded-2xl p-6 cursor-pointer bg-[#FAF9F6] hover:border-[#3E6B5C]/60 transition-colors">
+            <ImagePlus className="w-8 h-8 text-[#3E6B5C]" />
+            <span className="text-[#1A1B18] text-sm font-medium">
               Tap to choose a photo
             </span>
-            <span className="text-[#6B5E57] text-xs">JPEG, PNG, or WebP</span>
+            <span className="text-[#6F6E68] text-xs">JPEG, PNG, or WebP</span>
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -239,7 +239,7 @@ export function ContributeForm({ slug }: ContributeFormProps) {
       <Button
         type="submit"
         disabled={submitting}
-        className="w-full h-12 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-medium transition-all duration-300 shadow-md"
+        className="w-full h-12 rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] text-white font-medium transition-all duration-300 shadow-md"
       >
         {submitting ? (
           <>
@@ -250,7 +250,7 @@ export function ContributeForm({ slug }: ContributeFormProps) {
           "Send memory ✨"
         )}
       </Button>
-      <p className="text-center text-xs text-[#6B5E57] opacity-70">
+      <p className="text-center text-xs text-[#6F6E68] opacity-70">
         We never share your email. It only goes to the surprise&apos;s creator.
       </p>
     </form>

@@ -44,7 +44,7 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
         <div
           role="radiogroup"
           aria-label="Billing cadence"
-          className="inline-flex items-center gap-1 p-1 rounded-full bg-white border border-[#D4CBC3]/40 shadow-sm"
+          className="inline-flex items-center gap-1 p-1 rounded-full bg-white border border-[#E9E6DF]/40 shadow-sm"
         >
           <button
             type="button"
@@ -53,8 +53,8 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
             onClick={() => setIsYearly(false)}
             className={`px-5 py-2 text-xs font-semibold rounded-full transition-colors ${
               !isYearly
-                ? "bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white shadow"
-                : "text-[#6B5E57] hover:text-[#2D2926]"
+                ? "bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white shadow"
+                : "text-[#6F6E68] hover:text-[#1A1B18]"
             }`}
           >
             Monthly
@@ -66,14 +66,14 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
             onClick={() => setIsYearly(true)}
             className={`px-5 py-2 text-xs font-semibold rounded-full transition-colors flex items-center gap-1.5 ${
               isYearly
-                ? "bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white shadow"
-                : "text-[#6B5E57] hover:text-[#2D2926]"
+                ? "bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white shadow"
+                : "text-[#6F6E68] hover:text-[#1A1B18]"
             }`}
           >
             Yearly
             <span
               className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                isYearly ? "bg-white/25 text-white" : "bg-[#C9A96E]/15 text-[#C9A96E]"
+                isYearly ? "bg-white/25 text-white" : "bg-[#8A6F35]/15 text-[#8A6F35]"
               }`}
             >
               2 mo free
@@ -97,8 +97,8 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
               bare
               className={`rounded-3xl flex flex-col relative overflow-hidden ${
                 plan.highlight
-                  ? "bg-gradient-to-br from-[#C4686D] to-[#9B3D42] text-white shadow-[0_12px_48px_rgba(196,104,109,0.35)]"
-                  : "bg-white shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/30"
+                  ? "bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] text-white shadow-[0_12px_48px_rgba(62, 107, 92,0.35)]"
+                  : "bg-white shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] border border-[#E9E6DF]/30"
               }`}
               spotlightColor={
                 plan.highlight
@@ -123,7 +123,7 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
                     className={`absolute top-5 right-5 text-xs font-bold px-2.5 py-1 rounded-full ${
                       plan.highlight
                         ? "bg-white/20 text-white"
-                        : "bg-[#C9A96E]/15 text-[#C9A96E]"
+                        : "bg-[#8A6F35]/15 text-[#8A6F35]"
                     }`}
                   >
                     {plan.badge}
@@ -133,7 +133,7 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
                 <div className="mb-7">
                   <h2
                     className={`font-heading text-xl mb-3 ${
-                      plan.highlight ? "text-white" : "text-[#2D2926]"
+                      plan.highlight ? "text-white" : "text-[#1A1B18]"
                     }`}
                   >
                     {plan.name}
@@ -142,7 +142,7 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
                     {showNumeric && price !== null ? (
                       <span
                         className={`font-heading text-5xl font-bold leading-none ${
-                          plan.highlight ? "text-white" : "text-[#2D2926]"
+                          plan.highlight ? "text-white" : "text-[#1A1B18]"
                         }`}
                       >
                         <NumberFlow
@@ -158,7 +158,7 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
                     ) : (
                       <span
                         className={`font-heading text-5xl font-bold leading-none ${
-                          plan.highlight ? "text-white" : "text-[#2D2926]"
+                          plan.highlight ? "text-white" : "text-[#1A1B18]"
                         }`}
                       >
                         $0
@@ -166,7 +166,7 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
                     )}
                     <span
                       className={`text-sm mb-1.5 ${
-                        plan.highlight ? "opacity-60" : "text-[#6B5E57]"
+                        plan.highlight ? "opacity-60" : "text-[#6F6E68]"
                       }`}
                     >
                       /{periodLabel}
@@ -174,7 +174,7 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
                   </div>
                   <p
                     className={`text-sm leading-relaxed ${
-                      plan.highlight ? "opacity-70" : "text-[#6B5E57]"
+                      plan.highlight ? "opacity-70" : "text-[#6F6E68]"
                     }`}
                   >
                     {plan.description}
@@ -196,12 +196,12 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
                     >
                       <Check
                         className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                          plan.highlight ? "text-white/80" : "text-[#C4686D]"
+                          plan.highlight ? "text-white/80" : "text-[#3E6B5C]"
                         }`}
                       />
                       <span
                         className={
-                          plan.highlight ? "text-white/90" : "text-[#2D2926]"
+                          plan.highlight ? "text-white/90" : "text-[#1A1B18]"
                         }
                       >
                         {f}
@@ -271,7 +271,7 @@ function PlanCTA({
 
   // Preserve light/dark CTA variant. Highlight card uses inverted (white bg / rose text).
   const className = plan.highlight
-    ? "w-full bg-white text-[#C4686D] hover:bg-[#FFF0E8] shadow-lg from-white to-white"
+    ? "w-full bg-white text-[#3E6B5C] hover:bg-[#FFF0E8] shadow-lg from-white to-white"
     : "w-full";
 
   // Gift needs a recipient email before checkout can start — GiftCTA owns

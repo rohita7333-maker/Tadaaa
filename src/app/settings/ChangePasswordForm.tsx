@@ -26,19 +26,19 @@ export default function ChangePasswordForm() {
   return (
     <form id="changePasswordForm" action={onSubmit} className="space-y-3">
       <div>
-        <label className="text-xs text-[#6B5E57] uppercase tracking-wider font-medium block mb-1">
+        <label className="text-xs text-[#6F6E68] uppercase tracking-wider font-medium block mb-1">
           Current password
         </label>
         <input
           type={showCurrent ? "text" : "password"}
           name="currentPassword"
           required
-          className="w-full h-11 px-4 rounded-2xl border border-[#D4CBC3] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#C4686D] focus:border-[#C4686D]"
+          className="w-full h-11 px-4 rounded-2xl border border-[#E9E6DF] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3E6B5C] focus:border-[#3E6B5C]"
           autoComplete="current-password"
         />
       </div>
       <div>
-        <label className="text-xs text-[#6B5E57] uppercase tracking-wider font-medium block mb-1">
+        <label className="text-xs text-[#6F6E68] uppercase tracking-wider font-medium block mb-1">
           New password
         </label>
         <input
@@ -46,18 +46,18 @@ export default function ChangePasswordForm() {
           name="password"
           required
           minLength={8}
-          className="w-full h-11 px-4 rounded-2xl border border-[#D4CBC3] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#C4686D] focus:border-[#C4686D]"
+          className="w-full h-11 px-4 rounded-2xl border border-[#E9E6DF] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#3E6B5C] focus:border-[#3E6B5C]"
           autoComplete="new-password"
         />
-        <p className="text-[11px] text-[#6B5E57] mt-1">At least 8 characters.</p>
+        <p className="text-[11px] text-[#6F6E68] mt-1">At least 8 characters.</p>
       </div>
-      <div className="flex items-center gap-3 text-xs text-[#6B5E57]">
+      <div className="flex items-center gap-3 text-xs text-[#6F6E68]">
         <label className="inline-flex items-center gap-1.5 cursor-pointer">
           <input
             type="checkbox"
             checked={showCurrent}
             onChange={(e) => setShowCurrent(e.target.checked)}
-            className="w-3.5 h-3.5 accent-[#C4686D]"
+            className="w-3.5 h-3.5 accent-[#3E6B5C]"
           />
           Show current
         </label>
@@ -66,7 +66,7 @@ export default function ChangePasswordForm() {
             type="checkbox"
             checked={showNew}
             onChange={(e) => setShowNew(e.target.checked)}
-            className="w-3.5 h-3.5 accent-[#C4686D]"
+            className="w-3.5 h-3.5 accent-[#3E6B5C]"
           />
           Show new
         </label>
@@ -74,7 +74,7 @@ export default function ChangePasswordForm() {
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/20 disabled:opacity-60"
+        className="mt-2 inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white text-sm font-semibold hover:from-[#2E5145] hover:to-[#3E6B5C] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#3E6B5C]/20 disabled:opacity-60"
       >
         <Lock className="w-3.5 h-3.5" />
         {pending ? "Updating…" : "Update password"}

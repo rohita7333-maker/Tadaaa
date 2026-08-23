@@ -80,14 +80,14 @@ export default function TestSurprisePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0] flex flex-col items-center justify-center p-8">
-      <h1 className="font-heading text-3xl text-[#2D2926] mb-2">Surprise Page — Test</h1>
-      <p className="text-[#6B5E57] mb-8 text-sm">Pick theme + mode, then preview the full experience</p>
+    <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-8">
+      <h1 className="font-heading text-3xl text-[#1A1B18] mb-2">Surprise Page — Test</h1>
+      <p className="text-[#6F6E68] mb-8 text-sm">Pick theme + mode, then preview the full experience</p>
 
-      <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(45,41,38,0.08)] p-8 w-full max-w-md space-y-6">
+      <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(26, 27, 24,0.08)] p-8 w-full max-w-md space-y-6">
         {/* Theme picker */}
         <div>
-          <p className="text-[#2D2926] font-medium text-sm mb-3">Theme</p>
+          <p className="text-[#1A1B18] font-medium text-sm mb-3">Theme</p>
           <div className="grid grid-cols-3 gap-2">
             {THEMES.map((id) => {
               const t = getThemeById(id)!;
@@ -96,11 +96,11 @@ export default function TestSurprisePage() {
                   key={id}
                   onClick={() => setThemeId(id)}
                   className={`rounded-xl overflow-hidden border-2 transition-all ${
-                    themeId === id ? "border-[#C4686D]" : "border-transparent"
+                    themeId === id ? "border-[#3E6B5C]" : "border-transparent"
                   }`}
                 >
                   <div className="h-10" style={{ background: t.colors.background }} />
-                  <p className="text-[10px] text-[#6B5E57] py-1 px-1 truncate bg-white">{t.name}</p>
+                  <p className="text-[10px] text-[#6F6E68] py-1 px-1 truncate bg-white">{t.name}</p>
                 </button>
               );
             })}
@@ -109,7 +109,7 @@ export default function TestSurprisePage() {
 
         {/* Mode picker */}
         <div>
-          <p className="text-[#2D2926] font-medium text-sm mb-3">Reveal mode</p>
+          <p className="text-[#1A1B18] font-medium text-sm mb-3">Reveal mode</p>
           <div className="grid grid-cols-2 gap-3">
             {MODES.map((m) => (
               <button
@@ -117,8 +117,8 @@ export default function TestSurprisePage() {
                 onClick={() => setMode(m)}
                 className={`py-3 rounded-xl border-2 text-sm font-medium transition-all capitalize ${
                   mode === m
-                    ? "border-[#C4686D] bg-[#FFF0EE] text-[#C4686D]"
-                    : "border-[#D4CBC3] text-[#6B5E57]"
+                    ? "border-[#3E6B5C] bg-[#FFF0EE] text-[#3E6B5C]"
+                    : "border-[#E9E6DF] text-[#6F6E68]"
                 }`}
               >
                 {m === "tap" ? "👆 Tap to reveal" : m === "countdown" ? "⏱ Countdown (30s)" : "📜 Scroll story"}
@@ -132,7 +132,7 @@ export default function TestSurprisePage() {
             setCountdownDate(new Date(Date.now() + 30 * 1000).toISOString());
             setStarted(true);
           }}
-          className="w-full h-12 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white font-medium text-sm hover:opacity-90 transition-opacity"
+          className="w-full h-12 rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white font-medium text-sm hover:opacity-90 transition-opacity"
         >
           Preview Surprise ✨
         </button>

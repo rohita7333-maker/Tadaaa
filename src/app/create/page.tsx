@@ -506,12 +506,12 @@ export default function CreatePage() {
       <div className="mb-6 flex items-center justify-between">
         <Link
           href="/dashboard"
-          className="group inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors"
+          className="group inline-flex items-center gap-1.5 text-sm text-[#6F6E68] hover:text-[#3E6B5C] transition-colors"
         >
           <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
           Dashboard
         </Link>
-        <span className="text-[#6B5E57] text-sm">Step {step} of 4</span>
+        <span className="text-[#6F6E68] text-sm">Step {step} of 4</span>
       </div>
 
         <div className="mb-8">
@@ -536,10 +536,10 @@ export default function CreatePage() {
                 <div className="space-y-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h2 className="font-heading text-2xl text-[#2D2926] mb-1">
+                      <h2 className="font-heading text-2xl text-[#1A1B18] mb-1">
                         {templateMode ? "Your template" : "What's the occasion?"}
                       </h2>
-                      <p className="text-sm text-[#6B5E57]">
+                      <p className="text-sm text-[#6F6E68]">
                         {templateMode
                           ? "Occasion, theme and reveal are already set — change them any time."
                           : "Pick a type — or let AI draft the whole invite for you"}
@@ -623,10 +623,10 @@ export default function CreatePage() {
               {step === 3 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="font-heading text-2xl text-[#2D2926] mb-1">
+                    <h2 className="font-heading text-2xl text-[#1A1B18] mb-1">
                       The big question
                     </h2>
-                    <p className="text-sm text-[#6B5E57]">Add a YES/NO question with custom labels and a dodging No button</p>
+                    <p className="text-sm text-[#6F6E68]">Add a YES/NO question with custom labels and a dodging No button</p>
                   </div>
                   <QuestionBuilder questions={questions} onQuestionsChange={setQuestions} />
                 </div>
@@ -656,7 +656,7 @@ export default function CreatePage() {
               <Button
                 onClick={goBack}
                 variant="outline"
-                className="h-12 px-6 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0]"
+                className="h-12 px-6 rounded-full border-[#E9E6DF] text-[#1A1B18] hover:bg-[#FAF9F6]"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
@@ -666,7 +666,7 @@ export default function CreatePage() {
             )}
             <Button
               onClick={goNext}
-              className="h-12 px-8 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-medium transition-all duration-300 shadow-md"
+              className="h-12 px-8 rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] text-white font-medium transition-all duration-300 shadow-md"
             >
               {step === 3 ? "Preview" : "Next"}
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -681,7 +681,7 @@ export default function CreatePage() {
             <Button
               onClick={goBack}
               variant="outline"
-              className="h-12 px-6 rounded-full border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0]"
+              className="h-12 px-6 rounded-full border-[#E9E6DF] text-[#1A1B18] hover:bg-[#FAF9F6]"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to edit

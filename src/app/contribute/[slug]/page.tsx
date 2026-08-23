@@ -33,17 +33,17 @@ export default async function ContributePage({ params }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFF8F0] flex items-start justify-center px-6 py-12">
+    <main className="min-h-screen bg-[#FAF9F6] flex items-start justify-center px-6 py-12">
       <div className="max-w-md w-full">
         <Link href="/" className="inline-flex items-center gap-2 mb-8">
-          <Heart className="w-5 h-5 fill-[#C4686D] text-[#C4686D]" />
-          <span className="font-heading text-lg text-[#2D2926]">TaDaaaa</span>
+          <Heart className="w-5 h-5 fill-[#3E6B5C] text-[#3E6B5C]" />
+          <span className="font-heading text-lg text-[#1A1B18]">TaDaaaa</span>
         </Link>
 
-        <h1 className="font-heading text-3xl text-[#2D2926]">
+        <h1 className="font-heading text-3xl text-[#1A1B18]">
           Add to &ldquo;{invite.title}&rdquo;
         </h1>
-        <p className="mt-2 text-[#6B5E57] text-sm">
+        <p className="mt-2 text-[#6F6E68] text-sm">
           Drop a photo or short message — it&apos;ll appear in the reveal.
         </p>
 

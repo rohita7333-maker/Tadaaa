@@ -30,7 +30,7 @@ const EMPTY_EVENT: StoryEventDraft = {
 };
 
 const inputClass =
-  "w-full h-10 bg-white rounded-xl border border-[#D4CBC3] px-3 text-sm text-[#2D2926] placeholder:text-[#D4CBC3] focus:outline-none focus:border-[#C4686D] focus-visible:ring-2 focus-visible:ring-[#C4686D]/20 transition-all";
+  "w-full h-10 bg-white rounded-xl border border-[#E9E6DF] px-3 text-sm text-[#1A1B18] placeholder:text-[#E9E6DF] focus:outline-none focus:border-[#3E6B5C] focus-visible:ring-2 focus-visible:ring-[#3E6B5C]/20 transition-all";
 
 export default function EventsEditor({ events, onEventsChange }: EventsEditorProps) {
   const shouldReduce = useReducedMotion();
@@ -49,12 +49,12 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#D4CBC3]/40 shadow-[0_4px_16px_rgba(45,41,38,0.04)] p-6">
+    <div className="bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_16px_rgba(26, 27, 24,0.04)] p-6">
       <div className="flex items-center gap-2 mb-1">
-        <MapPin className="w-4 h-4 text-[#C4686D]" />
-        <h3 className="font-heading text-base text-[#2D2926]">The plan (optional)</h3>
+        <MapPin className="w-4 h-4 text-[#3E6B5C]" />
+        <h3 className="font-heading text-base text-[#1A1B18]">The plan (optional)</h3>
       </div>
-      <p className="text-xs text-[#6B5E57] mb-5">
+      <p className="text-xs text-[#6F6E68] mb-5">
         Add up to 4 plaques to the cinematic scroll — the when, the where, the
         little details. Leave it empty and the story shows a single countdown
         plaque instead. ✨
@@ -69,14 +69,14 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={shouldReduce ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.97 }}
               transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
-              className="bg-[#FFF8F0] rounded-2xl border border-[#D4CBC3]/50 p-4 space-y-3"
+              className="bg-[#FAF9F6] rounded-2xl border border-[#E9E6DF]/50 p-4 space-y-3"
             >
               {/* Label + remove */}
               <div className="flex gap-2">
                 <div className="flex-1">
                   <Label
                     htmlFor={`event-label-${i}`}
-                    className="block text-[10px] font-semibold text-[#C4686D] uppercase tracking-wider mb-1"
+                    className="block text-[10px] font-semibold text-[#3E6B5C] uppercase tracking-wider mb-1"
                   >
                     Label
                   </Label>
@@ -96,7 +96,7 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
                   type="button"
                   onClick={() => removeEvent(i)}
                   aria-label={`Remove plaque ${i + 1}`}
-                  className="mt-6 h-10 w-10 rounded-full border border-[#D4CBC3] text-[#C4686D] hover:bg-[#FFF0EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4686D]/40 flex items-center justify-center transition-all shrink-0"
+                  className="mt-6 h-10 w-10 rounded-full border border-[#E9E6DF] text-[#3E6B5C] hover:bg-[#FFF0EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3E6B5C]/40 flex items-center justify-center transition-all shrink-0"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -106,7 +106,7 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
               <div>
                 <Label
                   htmlFor={`event-title-${i}`}
-                  className="block text-[10px] font-semibold text-[#6B5E57] uppercase tracking-wider mb-1"
+                  className="block text-[10px] font-semibold text-[#6F6E68] uppercase tracking-wider mb-1"
                 >
                   Title
                 </Label>
@@ -127,7 +127,7 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
               <div>
                 <Label
                   htmlFor={`event-detail-${i}`}
-                  className="block text-[10px] font-semibold text-[#6B5E57] uppercase tracking-wider mb-1"
+                  className="block text-[10px] font-semibold text-[#6F6E68] uppercase tracking-wider mb-1"
                 >
                   Detail (optional)
                 </Label>
@@ -148,7 +148,7 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
               <div>
                 <Label
                   htmlFor={`event-maps-${i}`}
-                  className="block text-[10px] font-semibold text-[#6B5E57] uppercase tracking-wider mb-1"
+                  className="block text-[10px] font-semibold text-[#6F6E68] uppercase tracking-wider mb-1"
                 >
                   Map location (optional)
                 </Label>
@@ -174,12 +174,12 @@ export default function EventsEditor({ events, onEventsChange }: EventsEditorPro
           type="button"
           onClick={addEvent}
           variant="outline"
-          className="mt-4 w-full h-10 rounded-full border-dashed border-[#C4686D]/50 text-[#C4686D] hover:bg-[#FFF0EE] hover:border-[#C4686D] text-sm font-medium transition-all"
+          className="mt-4 w-full h-10 rounded-full border-dashed border-[#3E6B5C]/50 text-[#3E6B5C] hover:bg-[#FFF0EE] hover:border-[#3E6B5C] text-sm font-medium transition-all"
         >
           <Plus className="w-4 h-4 mr-1.5" />
           Add plaque
           {events.length > 0 && (
-            <span className="ml-auto text-xs text-[#D4CBC3]">
+            <span className="ml-auto text-xs text-[#E9E6DF]">
               {events.length}/{MAX_EVENTS}
             </span>
           )}

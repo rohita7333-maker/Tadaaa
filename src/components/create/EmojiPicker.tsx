@@ -54,7 +54,7 @@ export default function EmojiPicker({
         aria-controls={panelId}
         aria-label={label}
         title={label}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#6B5E57] hover:text-[#C4686D] hover:bg-[#FFF0EE] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 transition-colors"
+        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#6F6E68] hover:text-[#3E6B5C] hover:bg-[#FFF0EE] focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/30 transition-colors"
       >
         <Smile className="w-4 h-4" />
       </button>
@@ -69,7 +69,7 @@ export default function EmojiPicker({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: -6 }}
             transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
-            className="absolute right-0 z-50 mt-2 w-64 max-h-72 overflow-y-auto rounded-xl border border-[#D4CBC3] bg-white p-3 shadow-lg"
+            className="absolute right-0 z-50 mt-2 w-64 max-h-72 overflow-y-auto rounded-xl border border-[#E9E6DF] bg-white p-3 shadow-lg"
           >
             {EMOJI_GROUPS.map((group) => (
               <div key={group.label} className="mb-2 last:mb-0">
@@ -90,7 +90,7 @@ export default function EmojiPicker({
                         duration: durations.quick,
                       })}
                       aria-label={`Insert ${emoji}`}
-                      className="flex items-center justify-center h-8 rounded-lg text-lg hover:bg-[#FFF0EE] focus:outline-none focus:ring-2 focus:ring-[#C4686D]/30 transition-colors"
+                      className="flex items-center justify-center h-8 rounded-lg text-lg hover:bg-[#FFF0EE] focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/30 transition-colors"
                     >
                       {emoji}
                     </motion.button>

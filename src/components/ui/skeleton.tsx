@@ -14,7 +14,7 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div
       className={cn(
-        "animate-shimmer rounded-xl bg-[#F0E5D8]",
+        "animate-shimmer rounded-xl bg-[#ECE9E2]",
         className,
       )}
       aria-hidden="true"
@@ -26,9 +26,9 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
 /** Invite card skeleton — matches InviteCard shape so layout doesn't shift on load. */
 export function InviteCardSkeleton() {
   return (
-    <div className="bg-white rounded-3xl border border-[#D4CBC3]/20 overflow-hidden"
+    <div className="bg-white rounded-3xl border border-[#E9E6DF]/20 overflow-hidden"
       style={{
-        boxShadow: "0 2px 4px rgba(45,41,38,0.04), 0 8px 24px rgba(45,41,38,0.08)",
+        boxShadow: "0 2px 4px rgba(26, 27, 24,0.04), 0 8px 24px rgba(26, 27, 24,0.08)",
       }}
     >
       <Skeleton className="h-28 rounded-none" />
@@ -53,7 +53,7 @@ export function InviteCardSkeleton() {
 /** Stat tile skeleton — for dashboard hero stats. */
 export function StatTileSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-[#D4CBC3]/30 p-4 flex items-center gap-3">
+    <div className="bg-white rounded-2xl border border-[#E9E6DF]/30 p-4 flex items-center gap-3">
       <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
       <div className="flex-1 space-y-1.5">
         <Skeleton className="h-5 w-12" />

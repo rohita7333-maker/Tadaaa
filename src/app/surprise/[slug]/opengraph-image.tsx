@@ -62,11 +62,11 @@ export default async function InviteOGImage({
   // byte-identical: their background + title color are unchanged.
   const isScrollStory = invite?.reveal_type === "scroll_story";
   const cardBackground = isScrollStory
-    ? "linear-gradient(135deg, #3E3733 0%, #9B3D42 55%, #E8A5A8 100%)"
+    ? "linear-gradient(135deg, #3E3733 0%, #2E5145 55%, #A8C3B4 100%)"
     : paid
       ? tpl.background
-      : "linear-gradient(135deg, #FFF8F0 0%, #F5E6E0 100%)";
-  const titleColor = isScrollStory ? "#FFF6F2" : paid ? tpl.accent : "#2D2926";
+      : "linear-gradient(135deg, #FAF9F6 0%, #F5E6E0 100%)";
+  const titleColor = isScrollStory ? "#FFF6F2" : paid ? tpl.accent : "#1A1B18";
 
   return new ImageResponse(
     (
@@ -92,7 +92,7 @@ export default async function InviteOGImage({
             right: 0,
             bottom: 0,
             background:
-              "radial-gradient(ellipse at 30% 40%, rgba(196,104,109,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(201,169,110,0.08) 0%, transparent 60%)",
+              "radial-gradient(ellipse at 30% 40%, rgba(62, 107, 92,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(138, 111, 53,0.08) 0%, transparent 60%)",
           }}
         />
 
@@ -118,7 +118,7 @@ export default async function InviteOGImage({
         <div
           style={{
             fontSize: 24,
-            color: isScrollStory ? "rgba(255,246,242,0.82)" : "#6B5E57",
+            color: isScrollStory ? "rgba(255,246,242,0.82)" : "#6F6E68",
             textAlign: "center",
           }}
         >
@@ -129,7 +129,7 @@ export default async function InviteOGImage({
         <div
           style={{
             marginTop: 32,
-            background: "linear-gradient(135deg, #C4686D 0%, #9B3D42 100%)",
+            background: "linear-gradient(135deg, #3E6B5C 0%, #2E5145 100%)",
             color: "white",
             fontSize: 22,
             fontWeight: 600,
@@ -155,7 +155,7 @@ export default async function InviteOGImage({
               width: 24,
               height: 24,
               borderRadius: 6,
-              background: "linear-gradient(135deg, #C4686D 0%, #9B3D42 100%)",
+              background: "linear-gradient(135deg, #3E6B5C 0%, #2E5145 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -165,7 +165,7 @@ export default async function InviteOGImage({
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </div>
-          <div style={{ fontSize: 16, color: "#C4686D", fontWeight: 600 }}>
+          <div style={{ fontSize: 16, color: "#3E6B5C", fontWeight: 600 }}>
             Made with TaDaaaa
           </div>
         </div>

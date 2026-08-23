@@ -19,9 +19,9 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
   return (
     <div className="w-full">
       {/* Sticky top progress bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-[#D4CBC3]/30 z-[60] pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 h-1 bg-[#E9E6DF]/30 z-[60] pointer-events-none">
         <motion.div
-          className="h-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42]"
+          className="h-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145]"
           initial={false}
           animate={{ width: `${topBarPct}%` }}
           transition={getReducedMotionTransition(shouldReduce, { duration: 0.5, ease: easings.entrance })}
@@ -30,9 +30,9 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
 
       <div className="relative flex items-start justify-between">
         {/* Connecting line (sits between circle centers) */}
-        <div className="absolute top-3.5 left-3.5 right-3.5 h-0.5 bg-[#D4CBC3]/50 -z-0" aria-hidden="true">
+        <div className="absolute top-3.5 left-3.5 right-3.5 h-0.5 bg-[#E9E6DF]/50 -z-0" aria-hidden="true">
           <motion.div
-            className="h-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42]"
+            className="h-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145]"
             initial={false}
             animate={{ width: `${pct}%` }}
             transition={getReducedMotionTransition(shouldReduce, { duration: 0.45, ease: easings.entrance })}
@@ -49,10 +49,10 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border-2 ${
                   isCompleted
-                    ? "bg-[#C4686D] border-[#C4686D] text-white"
+                    ? "bg-[#3E6B5C] border-[#3E6B5C] text-white"
                     : isActive
-                    ? "bg-white border-[#C4686D] text-[#C4686D] ring-4 ring-[#C4686D]/15"
-                    : "bg-white border-[#D4CBC3] text-[#6B5E57]"
+                    ? "bg-white border-[#3E6B5C] text-[#3E6B5C] ring-4 ring-[#3E6B5C]/15"
+                    : "bg-white border-[#E9E6DF] text-[#6F6E68]"
                 }`}
                 aria-current={isActive ? "step" : undefined}
               >
@@ -60,7 +60,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
               </div>
               <span
                 className={`text-[10px] hidden sm:block transition-colors whitespace-nowrap ${
-                  isActive ? "text-[#C4686D] font-semibold" : "text-[#6B5E57]"
+                  isActive ? "text-[#3E6B5C] font-semibold" : "text-[#6F6E68]"
                 }`}
               >
                 {label}

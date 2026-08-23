@@ -9,14 +9,14 @@ function esc(str: string): string {
 }
 
 const BRAND = {
-  bg: "#FFF8F0",
+  bg: "#FAF9F6",
   card: "#FFFFFF",
-  text: "#2D2926",
-  muted: "#6B5E57",
-  accent: "#C4686D",
-  accentDark: "#9B3D42",
-  border: "#D4CBC3",
-  gold: "#C9A96E",
+  text: "#1A1B18",
+  muted: "#6F6E68",
+  accent: "#3E6B5C",
+  accentDark: "#2E5145",
+  border: "#E9E6DF",
+  gold: "#8A6F35",
 };
 
 function layout(content: string, preheader = "", unsubscribeUrl?: string) {
@@ -32,7 +32,7 @@ ${preheader ? `<!--[if !mso]><!--><span style="display:none;max-height:0;overflo
 <body style="margin:0;padding:0;background:${BRAND.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg}">
 <tr><td align="center" style="padding:40px 20px">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:${BRAND.card};border-radius:24px;border:1px solid ${BRAND.border}30;box-shadow:0 4px 24px rgba(45,41,38,0.06)">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:${BRAND.card};border-radius:24px;border:1px solid ${BRAND.border}30;box-shadow:0 4px 24px rgba(26, 27, 24,0.06)">
 <tr><td style="padding:40px 32px">
 <!-- Logo -->
 <table role="presentation" cellspacing="0" cellpadding="0"><tr>

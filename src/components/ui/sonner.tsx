@@ -40,11 +40,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
       offset={16}
       toastOptions={{
         classNames: {
-          toast: "font-sans text-sm rounded-2xl shadow-[0_8px_32px_rgba(45,41,38,0.12)] border border-[#D4CBC3]/60",
-          success: "bg-white text-[#2D2926] border-[#D4CBC3]/60",
-          error: "bg-white text-[#2D2926] border-[#F4D5D7]/80",
-          info: "bg-white text-[#2D2926] border-[#D4CBC3]/60",
-          warning: "bg-white text-[#2D2926] border-amber-200/60",
+          toast: "font-sans text-sm rounded-2xl shadow-[0_8px_32px_rgba(26, 27, 24,0.12)] border border-[#E9E6DF]/60",
+          success: "bg-white text-[#1A1B18] border-[#E9E6DF]/60",
+          error: "bg-white text-[#1A1B18] border-[#DCE8E2]/80",
+          info: "bg-white text-[#1A1B18] border-[#E9E6DF]/60",
+          warning: "bg-white text-[#1A1B18] border-amber-200/60",
         },
       }}
       {...props}

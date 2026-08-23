@@ -27,8 +27,8 @@ const FOCUS_TABS: { key: ActivityFocus; label: string }[] = [
 ];
 
 const KIND_STYLE = {
-  view: { icon: Eye, color: "#C9A96E", tint: "#C9A96E15" },
-  rsvp: { icon: Heart, color: "#C4686D", tint: "#C4686D15" },
+  view: { icon: Eye, color: "#8A6F35", tint: "#8A6F3515" },
+  rsvp: { icon: Heart, color: "#3E6B5C", tint: "#3E6B5C15" },
   answer: { icon: MessageCircle, color: "#6B8F71", tint: "#6B8F7115" },
 } as const;
 
@@ -120,15 +120,15 @@ export default async function ActivityPage({ searchParams }: Props) {
     <div>
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-[#6B5E57] hover:text-[#C4686D] transition-colors mb-5 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 rounded-lg"
+        className="inline-flex items-center gap-1.5 text-sm text-[#6F6E68] hover:text-[#3E6B5C] transition-colors mb-5 focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40 rounded-lg"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Dashboard
       </Link>
 
       <div className="mb-6">
-        <h1 className="font-heading text-3xl text-[#2D2926]">Activity</h1>
-        <p className="text-[#6B5E57] mt-1 text-sm">
+        <h1 className="font-heading text-3xl text-[#1A1B18]">Activity</h1>
+        <p className="text-[#6F6E68] mt-1 text-sm">
           {events.length === 0
             ? "Nothing yet — the moment someone opens a surprise, it lands here."
             : "Who opened, who's coming, and what they answered — newest first."}
@@ -147,14 +147,14 @@ export default async function ActivityPage({ searchParams }: Props) {
                 key={tab.key}
                 href={tab.key === "all" ? "/dashboard/activity" : `/dashboard/activity?focus=${tab.key}`}
                 aria-current={active ? "page" : undefined}
-                className={`inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C4686D]/40 ${
+                className={`inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40 ${
                   active
-                    ? "bg-[#FFF0EE] border-[#C4686D] text-[#C4686D]"
-                    : "bg-white border-[#D4CBC3]/60 text-[#6B5E57] hover:border-[#C4686D]/40 hover:text-[#2D2926]"
+                    ? "bg-[#FFF0EE] border-[#3E6B5C] text-[#3E6B5C]"
+                    : "bg-white border-[#E9E6DF]/60 text-[#6F6E68] hover:border-[#3E6B5C]/40 hover:text-[#1A1B18]"
                 }`}
               >
                 {tab.label}
-                <span className={active ? "text-[#C4686D]/70" : "text-[#9B8E87]"}>{count}</span>
+                <span className={active ? "text-[#3E6B5C]/70" : "text-[#9B8E87]"}>{count}</span>
               </Link>
             );
           })}
@@ -164,17 +164,17 @@ export default async function ActivityPage({ searchParams }: Props) {
       {/* Empty — nothing anywhere */}
       {events.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#FFF0E8] to-[#F5EDE3] flex items-center justify-center mb-5 shadow-[0_8px_32px_rgba(196,104,109,0.15)]">
-            <Sparkles className="w-8 h-8 text-[#C4686D]" />
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#FFF0E8] to-[#F1EFE9] flex items-center justify-center mb-5 shadow-[0_8px_32px_rgba(62, 107, 92,0.15)]">
+            <Sparkles className="w-8 h-8 text-[#3E6B5C]" />
           </div>
-          <h2 className="font-heading text-xl text-[#2D2926] mb-2">No activity yet</h2>
-          <p className="text-[#6B5E57] max-w-sm text-sm leading-relaxed mb-6">
+          <h2 className="font-heading text-xl text-[#1A1B18] mb-2">No activity yet</h2>
+          <p className="text-[#6F6E68] max-w-sm text-sm leading-relaxed mb-6">
             Share a surprise link and every open, RSVP and answer shows up here — your
             own previews never count.
           </p>
           <Link
             href="/dashboard"
-            className="inline-flex items-center h-11 px-6 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white font-semibold text-sm transition-all duration-300 hover:scale-[1.02] shadow-md shadow-[#C4686D]/20"
+            className="inline-flex items-center h-11 px-6 rounded-2xl bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white font-semibold text-sm transition-all duration-300 hover:scale-[1.02] shadow-md shadow-[#3E6B5C]/20"
           >
             Back to your surprises
           </Link>
@@ -184,10 +184,10 @@ export default async function ActivityPage({ searchParams }: Props) {
       {/* Empty — this filter only */}
       {events.length > 0 && visible.length === 0 && (
         <div className="flex flex-col items-center justify-center py-14 text-center">
-          <p className="text-[#6B5E57] text-sm">Nothing in this filter yet.</p>
+          <p className="text-[#6F6E68] text-sm">Nothing in this filter yet.</p>
           <Link
             href="/dashboard/activity"
-            className="text-[#C4686D] text-sm hover:underline mt-2 font-medium"
+            className="text-[#3E6B5C] text-sm hover:underline mt-2 font-medium"
           >
             Show everything
           </Link>
@@ -199,14 +199,14 @@ export default async function ActivityPage({ searchParams }: Props) {
         {groups.map((group) => (
           <section
             key={group.invite.id}
-            className="bg-white rounded-2xl border border-[#D4CBC3]/30 shadow-[0_2px_12px_rgba(45,41,38,0.04)] overflow-hidden"
+            className="bg-white rounded-2xl border border-[#E9E6DF]/30 shadow-[0_2px_12px_rgba(26, 27, 24,0.04)] overflow-hidden"
           >
-            <header className="flex items-baseline justify-between gap-3 px-5 pt-4 pb-3 border-b border-[#D4CBC3]/30">
+            <header className="flex items-baseline justify-between gap-3 px-5 pt-4 pb-3 border-b border-[#E9E6DF]/30">
               <Link
                 href={`/surprise/${group.invite.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-heading text-lg text-[#2D2926] hover:text-[#C4686D] transition-colors truncate focus:outline-none focus:underline"
+                className="font-heading text-lg text-[#1A1B18] hover:text-[#3E6B5C] transition-colors truncate focus:outline-none focus:underline"
               >
                 {group.invite.title}
               </Link>
@@ -215,7 +215,7 @@ export default async function ActivityPage({ searchParams }: Props) {
               </span>
             </header>
 
-            <ul className="divide-y divide-[#D4CBC3]/20">
+            <ul className="divide-y divide-[#E9E6DF]/20">
               {group.events.map((event) => {
                 const style = KIND_STYLE[event.kind];
                 const Icon = style.icon;
@@ -228,7 +228,7 @@ export default async function ActivityPage({ searchParams }: Props) {
                     >
                       <Icon className="w-3.5 h-3.5" style={{ color: style.color }} />
                     </span>
-                    <p className="flex-1 min-w-0 text-sm text-[#2D2926] truncate">
+                    <p className="flex-1 min-w-0 text-sm text-[#1A1B18] truncate">
                       {describeActivity(event)}
                     </p>
                     <time

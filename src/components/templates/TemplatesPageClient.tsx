@@ -56,7 +56,7 @@ function planPriceLines(plan: ClientPlan): { main: string; sub: string | null } 
 }
 
 const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2";
 
 interface TemplatesPageClientProps {
   /** Signed-in rendering. Two effects:
@@ -129,29 +129,29 @@ export default function TemplatesPageClient({
         {/* Hero renders statically visible: JS-gated entrance animation here delayed
             LCP by ~5s on throttled devices (H1 held at opacity 0 until hydration).
             Motion stays on below-fold sections only. */}
-        <p className="mb-3 font-handwritten text-2xl text-[#C4686D]">
+        <p className="mb-3 font-handwritten text-2xl text-[#3E6B5C]">
           psst… they have no idea
         </p>
         <h1
           id="templates-hero-heading"
-          className="mx-auto max-w-3xl font-heading text-5xl leading-[1.05] text-[#2D2926] md:text-6xl"
+          className="mx-auto max-w-3xl font-heading text-5xl leading-[1.05] text-[#1A1B18] md:text-6xl"
         >
-          Reveal templates for <em className="text-[#C4686D]">every occasion</em>
+          Reveal templates for <em className="text-[#3E6B5C]">every occasion</em>
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-[#6B5E57]">
+        <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-[#6F6E68]">
           Pick a template, add your words and photos, send one link. They open it —
           and the moment unfolds like a tiny film.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#collection"
-            className={`rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] px-7 py-3 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(196,104,109,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_4px_20px_rgba(196,104,109,0.5)] ${FOCUS_RING} focus-visible:ring-offset-[#FFF8F0]`}
+            className={`rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] px-7 py-3 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(62, 107, 92,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_4px_20px_rgba(62, 107, 92,0.5)] ${FOCUS_RING} focus-visible:ring-offset-[#FAF9F6]`}
           >
             Choose a template
           </a>
           <Link
             href="/surprise/demo"
-            className={`rounded-full border border-[#2D2926]/25 px-7 py-3 text-sm font-semibold text-[#2D2926] transition-colors duration-300 hover:border-[#C4686D] hover:text-[#C4686D] ${FOCUS_RING} focus-visible:ring-offset-[#FFF8F0]`}
+            className={`rounded-full border border-[#1A1B18]/25 px-7 py-3 text-sm font-semibold text-[#1A1B18] transition-colors duration-300 hover:border-[#3E6B5C] hover:text-[#3E6B5C] ${FOCUS_RING} focus-visible:ring-offset-[#FAF9F6]`}
           >
             Watch a live reveal
           </Link>
@@ -173,14 +173,14 @@ export default function TemplatesPageClient({
       >
         <div className="mx-auto max-w-6xl">
           <motion.div {...enter(staggers.lead)} className="mb-8">
-            <span className="mb-3 block text-xs font-bold uppercase tracking-widest text-[#C4686D]">
+            <span className="mb-3 block text-xs font-bold uppercase tracking-widest text-[#3E6B5C]">
               The Collection
             </span>
             <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
-              <h2 id="collection-heading" className="font-heading text-4xl text-[#2D2926] md:text-5xl">
+              <h2 id="collection-heading" className="font-heading text-4xl text-[#1A1B18] md:text-5xl">
                 Find their moment
               </h2>
-              <p aria-hidden="true" className="pb-1 font-handwritten text-xl text-[#C9A96E]">
+              <p aria-hidden="true" className="pb-1 font-handwritten text-xl text-[#8A6F35]">
                 every one animates ✨
               </p>
             </div>
@@ -194,13 +194,13 @@ export default function TemplatesPageClient({
 
           <p
             aria-live="polite"
-            className="mb-6 text-sm font-medium text-[#6B5E57]"
+            className="mb-6 text-sm font-medium text-[#6F6E68]"
           >
             {resultLabel}
           </p>
 
           {filtered.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-[#D4CBC3] bg-white/60 px-6 py-12 text-center text-[#6B5E57]">
+            <p className="rounded-2xl border border-dashed border-[#E9E6DF] bg-white/60 px-6 py-12 text-center text-[#6F6E68]">
               No templates match those filters yet — try clearing one.
             </p>
           ) : (
@@ -212,7 +212,7 @@ export default function TemplatesPageClient({
               <button
                 type="button"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-                className={`rounded-full border border-[#D4CBC3] bg-white px-6 py-2.5 text-sm font-semibold text-[#2D2926] transition-colors duration-300 hover:border-[#C4686D] hover:text-[#C4686D] ${FOCUS_RING} focus-visible:ring-offset-[#FFF8F0]`}
+                className={`rounded-full border border-[#E9E6DF] bg-white px-6 py-2.5 text-sm font-semibold text-[#1A1B18] transition-colors duration-300 hover:border-[#3E6B5C] hover:text-[#3E6B5C] ${FOCUS_RING} focus-visible:ring-offset-[#FAF9F6]`}
               >
                 Load more templates
               </button>
@@ -229,8 +229,8 @@ export default function TemplatesPageClient({
       <section aria-labelledby="templates-how-heading" className="px-6 pb-24">
         <div className="mx-auto max-w-6xl rounded-[32px] bg-[#F6EADB] px-6 py-14 md:px-14 md:py-16">
           <motion.div {...enter(staggers.lead)} className="mb-12 text-center">
-            <p className="mb-2 font-handwritten text-2xl text-[#C4686D]">easy, promise</p>
-            <h2 id="templates-how-heading" className="font-heading text-4xl text-[#2D2926] md:text-5xl">
+            <p className="mb-2 font-handwritten text-2xl text-[#3E6B5C]">easy, promise</p>
+            <h2 id="templates-how-heading" className="font-heading text-4xl text-[#1A1B18] md:text-5xl">
               Four steps to a happy cry
             </h2>
           </motion.div>
@@ -239,13 +239,13 @@ export default function TemplatesPageClient({
               <motion.div
                 key={step.title}
                 {...enter(staggers.support + index * staggers.detail)}
-                className="rounded-2xl bg-white p-6 shadow-[0_4px_16px_rgba(45,41,38,0.05)]"
+                className="rounded-2xl bg-white p-6 shadow-[0_4px_16px_rgba(26, 27, 24,0.05)]"
               >
-                <span aria-hidden="true" className="block font-handwritten text-4xl text-[#C9A96E]">
+                <span aria-hidden="true" className="block font-handwritten text-4xl text-[#8A6F35]">
                   {index + 1}
                 </span>
-                <h3 className="mt-3 font-heading text-lg text-[#2D2926]">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#6B5E57]">{step.body}</p>
+                <h3 className="mt-3 font-heading text-lg text-[#1A1B18]">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#6F6E68]">{step.body}</p>
               </motion.div>
             ))}
           </div>
@@ -256,10 +256,10 @@ export default function TemplatesPageClient({
       <section aria-labelledby="templates-pricing-heading" className="px-6 pb-24">
         <motion.div
           {...enter(staggers.lead)}
-          className="mx-auto grid max-w-6xl gap-10 rounded-[32px] bg-[#2D2926] px-6 py-14 min-[760px]:grid-cols-2 md:px-14 md:py-16"
+          className="mx-auto grid max-w-6xl gap-10 rounded-[32px] bg-[#1A1B18] px-6 py-14 min-[760px]:grid-cols-2 md:px-14 md:py-16"
         >
           <div>
-            <span className="mb-3 block text-xs font-bold uppercase tracking-widest text-[#C9A96E]">
+            <span className="mb-3 block text-xs font-bold uppercase tracking-widest text-[#8A6F35]">
               Simple, Honest Pricing
             </span>
             <h2 id="templates-pricing-heading" className="font-heading text-4xl leading-tight text-white md:text-5xl">
@@ -270,7 +270,7 @@ export default function TemplatesPageClient({
             </p>
             <Link
               href="/create"
-              className={`mt-8 inline-block rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] px-7 py-3 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(196,104,109,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_4px_20px_rgba(196,104,109,0.5)] ${FOCUS_RING} focus-visible:ring-offset-[#2D2926]`}
+              className={`mt-8 inline-block rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] px-7 py-3 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(62, 107, 92,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_4px_20px_rgba(62, 107, 92,0.5)] ${FOCUS_RING} focus-visible:ring-offset-[#1A1B18]`}
             >
               Make someone&apos;s day
             </Link>
@@ -285,9 +285,9 @@ export default function TemplatesPageClient({
                     <p className="mt-1 text-sm leading-snug text-white/60">{plan.description}</p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <span className="font-heading text-lg text-[#C9A96E]">{price.main}</span>
+                    <span className="font-heading text-lg text-[#8A6F35]">{price.main}</span>
                     {price.sub && (
-                      <span className="block text-xs text-[#E8D5A8]/80">{price.sub}</span>
+                      <span className="block text-xs text-[#E8D9BD]/80">{price.sub}</span>
                     )}
                   </div>
                 </li>

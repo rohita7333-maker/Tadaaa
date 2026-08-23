@@ -128,7 +128,7 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
             transition={getReducedMotionTransition(shouldReduce, { duration: 0.45, ease: "easeOut" as const })}
             className="cursor-grab active:cursor-grabbing select-none"
             style={{
-              filter: "drop-shadow(0 12px 32px rgba(45,41,38,0.22))",
+              filter: "drop-shadow(0 12px 32px rgba(26, 27, 24,0.22))",
             }}
           >
             {/* Polaroid frame */}
@@ -154,7 +154,7 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
                     fontFamily: "var(--font-caveat, cursive)",
                     fontSize: "15px",
                     lineHeight: "1.3",
-                    color: "#6B5E57",
+                    color: "#6F6E68",
                     height: "36px",
                     overflow: "hidden",
                     display: "flex",

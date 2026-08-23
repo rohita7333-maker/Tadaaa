@@ -21,15 +21,15 @@ export default async function CreateLayout({
   const user = await getDashboardUser();
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0]">
+    <div className="min-h-screen bg-[#FAF9F6]">
       {user ? (
         <DashboardNavServer activeRoute="create" />
       ) : (
-        <header className="bg-white border-b border-[#D4CBC3]/40 px-6 py-4 sticky top-0 z-40">
+        <header className="bg-white border-b border-[#E9E6DF]/40 px-6 py-4 sticky top-0 z-40">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <Heart className="w-5 h-5 fill-[#C4686D] text-[#C4686D]" />
-              <span className="font-heading text-lg text-[#2D2926]">TaDaaaa</span>
+              <Heart className="w-5 h-5 fill-[#3E6B5C] text-[#3E6B5C]" />
+              <span className="font-heading text-lg text-[#1A1B18]">TaDaaaa</span>
             </Link>
             <CreateSignInLink />
           </div>

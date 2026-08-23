@@ -40,7 +40,7 @@ export default function Testimonials() {
   const reducedMotion = useReducedMotion();
 
   return (
-    <section className="py-24 px-6 bg-[#FFF8F0]">
+    <section className="py-24 px-6 bg-[#FAF9F6]">
       <div className="max-w-5xl mx-auto">
         {/* Section header */}
         <motion.div
@@ -53,10 +53,10 @@ export default function Testimonials() {
             ease: easings.entrance,
           })}
         >
-          <span className="text-[#C4686D] text-sm font-medium uppercase tracking-widest mb-3 block">
+          <span className="text-[#3E6B5C] text-sm font-medium uppercase tracking-widest mb-3 block">
             Real stories
           </span>
-          <h2 className="font-heading text-4xl md:text-5xl text-[#2D2926]">
+          <h2 className="font-heading text-4xl md:text-5xl text-[#1A1B18]">
             Moments that mattered
           </h2>
         </motion.div>
@@ -66,7 +66,7 @@ export default function Testimonials() {
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
-              className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgba(45,41,38,0.06)] border border-[#D4CBC3]/40"
+              className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] border border-[#E9E6DF]/40"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -78,19 +78,19 @@ export default function Testimonials() {
             >
               <div className="flex gap-1 mb-4">
                 {[...Array(t.rating)].map((_, j) => (
-                  <Star key={j} className="w-4 h-4 fill-[#C9A96E] text-[#C9A96E]" />
+                  <Star key={j} className="w-4 h-4 fill-[#8A6F35] text-[#8A6F35]" />
                 ))}
               </div>
-              <p className="text-[#2D2926] leading-relaxed mb-6 italic">
+              <p className="text-[#1A1B18] leading-relaxed mb-6 italic">
                 &ldquo;{t.quote}&rdquo;
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center text-white font-bold text-sm">
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="font-medium text-[#2D2926] text-sm">{t.name}</p>
-                  <p className="text-[#6B5E57] text-xs">{t.role}</p>
+                  <p className="font-medium text-[#1A1B18] text-sm">{t.name}</p>
+                  <p className="text-[#6F6E68] text-xs">{t.role}</p>
                 </div>
               </div>
             </motion.div>

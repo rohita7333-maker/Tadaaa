@@ -42,7 +42,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
       {phase === "craft" && (
         <motion.div
           className="fixed inset-0 z-[100] flex items-center justify-center"
-          style={{ background: "#FFF8F0" }}
+          style={{ background: "#FAF9F6" }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
@@ -51,7 +51,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
             className="absolute inset-0"
             style={{
               background:
-                "radial-gradient(circle at 50% 45%, rgba(196,104,109,0.08) 0%, transparent 60%)",
+                "radial-gradient(circle at 50% 45%, rgba(62, 107, 92,0.08) 0%, transparent 60%)",
             }}
           />
 
@@ -74,7 +74,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: 0.4, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
                 >
-                  <Heart className="w-14 h-14 fill-[#C4686D] text-[#C4686D]" />
+                  <Heart className="w-14 h-14 fill-[#3E6B5C] text-[#3E6B5C]" />
                 </motion.div>
               </div>
 
@@ -96,7 +96,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1.2, duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
               >
-                <Sparkles className="w-6 h-6 text-[#C9A96E]" />
+                <Sparkles className="w-6 h-6 text-[#8A6F35]" />
               </motion.div>
 
               {/* Sparkle trace bottom-left */}
@@ -106,13 +106,13 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
                 animate={{ opacity: [0, 1, 0.7] }}
                 transition={{ delay: 1.5, duration: 0.4 }}
               >
-                <Sparkles className="w-4 h-4 text-[#E8A5A8]" />
+                <Sparkles className="w-4 h-4 text-[#A8C3B4]" />
               </motion.div>
             </motion.div>
 
             {/* "Crafting your experience..." text */}
             <motion.p
-              className="mt-6 text-sm text-[#6B5E57] tracking-wide"
+              className="mt-6 text-sm text-[#6F6E68] tracking-wide"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.0, duration: 0.4 }}
@@ -125,7 +125,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-1.5 h-1.5 rounded-full bg-[#C4686D]"
+                  className="w-1.5 h-1.5 rounded-full bg-[#3E6B5C]"
                   initial={{ opacity: 0.3 }}
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{
@@ -140,7 +140,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
 
             {/* Skip button */}
             <motion.button
-              className="mt-6 text-xs text-[#6B5E57]/50 hover:text-[#6B5E57] transition-colors"
+              className="mt-6 text-xs text-[#6F6E68]/50 hover:text-[#6F6E68] transition-colors"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.5 }}

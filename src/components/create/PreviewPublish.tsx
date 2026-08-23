@@ -96,7 +96,7 @@ export default function PreviewPublish({
               duration: durations.base,
               delay: shouldReduce ? 0 : durations.instant,
             })}
-            className="font-heading text-3xl text-[#2D2926] mb-2"
+            className="font-heading text-3xl text-[#1A1B18] mb-2"
           >
             Your surprise is ready! ✨
           </motion.h2>
@@ -107,17 +107,17 @@ export default function PreviewPublish({
               duration: durations.base,
               delay: shouldReduce ? 0 : durations.quick,
             })}
-            className="text-[#6B5E57] mb-8 max-w-xs mx-auto"
+            className="text-[#6F6E68] mb-8 max-w-xs mx-auto"
           >
             Share this link with the lucky person. They&apos;ll have no idea what&apos;s waiting for them!
           </motion.p>
 
           {/* Link box */}
-          <div className="bg-[#FFF8F0] border border-[#D4CBC3]/60 rounded-2xl p-4 mb-6 max-w-sm mx-auto">
-            <p className="text-[#6B5E57] text-xs mb-2 font-medium uppercase tracking-wider">
+          <div className="bg-[#FAF9F6] border border-[#E9E6DF]/60 rounded-2xl p-4 mb-6 max-w-sm mx-auto">
+            <p className="text-[#6F6E68] text-xs mb-2 font-medium uppercase tracking-wider">
               Shareable link
             </p>
-            <p className="text-[#2D2926] text-sm font-medium break-all">{link}</p>
+            <p className="text-[#1A1B18] text-sm font-medium break-all">{link}</p>
           </div>
 
           <div className="max-w-sm mx-auto mb-4">
@@ -140,7 +140,7 @@ export default function PreviewPublish({
               href={link}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center h-10 px-5 rounded-full border border-[#D4CBC3] text-[#2D2926] hover:bg-[#FFF8F0] transition-all duration-300 text-sm font-medium"
+              className="inline-flex items-center h-10 px-5 rounded-full border border-[#E9E6DF] text-[#1A1B18] hover:bg-[#FAF9F6] transition-all duration-300 text-sm font-medium"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               Preview
@@ -150,13 +150,13 @@ export default function PreviewPublish({
           {tier === "free" && (
             <p className="text-xs text-[#9B8E87] mt-5 px-4">
               ⏳ This surprise stays live for 28 days after it&apos;s opened.{" "}
-              <a href="/pricing" className="text-[#C4686D] hover:underline">Upgrade</a> to keep it forever.
+              <a href="/pricing" className="text-[#3E6B5C] hover:underline">Upgrade</a> to keep it forever.
             </p>
           )}
 
           <a
             href="/dashboard"
-            className="block mt-3 text-[#6B5E57] hover:text-[#2D2926] text-sm text-center transition-colors"
+            className="block mt-3 text-[#6F6E68] hover:text-[#1A1B18] text-sm text-center transition-colors"
           >
             ← Back to dashboard
           </a>
@@ -168,8 +168,8 @@ export default function PreviewPublish({
           exit={{ opacity: 0 }}
           transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
         >
-          <h2 className="font-heading text-2xl text-[#2D2926] mb-2">Preview & Publish</h2>
-          <p className="text-[#6B5E57] mb-8">
+          <h2 className="font-heading text-2xl text-[#1A1B18] mb-2">Preview & Publish</h2>
+          <p className="text-[#6F6E68] mb-8">
             Here&apos;s how your surprise will look. Ready to share?
           </p>
 
@@ -183,7 +183,7 @@ export default function PreviewPublish({
               <div className="absolute -left-[3px] top-[102px] w-[3px] h-6 bg-[#c0c0c0] rounded-l-sm" />
               {/* Device shell — titanium-ish gradient */}
               <div
-                className="rounded-[44px] p-2 shadow-[0_32px_80px_rgba(45,41,38,0.28)]"
+                className="rounded-[44px] p-2 shadow-[0_32px_80px_rgba(26, 27, 24,0.28)]"
                 style={{
                   background: "linear-gradient(to bottom, #e8e8e8, #d0d0d0, #b8b8b8)",
                 }}
@@ -246,28 +246,28 @@ export default function PreviewPublish({
           </div>
 
           {/* Summary */}
-          <div className="bg-[#FFF8F0] rounded-2xl p-5 mb-6 space-y-2 text-sm">
+          <div className="bg-[#FAF9F6] rounded-2xl p-5 mb-6 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-[#6B5E57]">Theme</span>
-              <span className="text-[#2D2926] font-medium">{themeData?.name}</span>
+              <span className="text-[#6F6E68]">Theme</span>
+              <span className="text-[#1A1B18] font-medium">{themeData?.name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#6B5E57]">Photos</span>
-              <span className="text-[#2D2926] font-medium">{photos.length}</span>
+              <span className="text-[#6F6E68]">Photos</span>
+              <span className="text-[#1A1B18] font-medium">{photos.length}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#6B5E57]">Reveal</span>
-              <span className="text-[#2D2926] font-medium">{REVEAL_STYLE_LABELS[revealType]}</span>
+              <span className="text-[#6F6E68]">Reveal</span>
+              <span className="text-[#1A1B18] font-medium">{REVEAL_STYLE_LABELS[revealType]}</span>
             </div>
           </div>
 
           {/* Free-tier expiry notice */}
           {tier === "free" && (
-            <div className="flex items-start gap-2 bg-[#FFF0E8] border border-[#D4CBC3]/50 rounded-xl px-4 py-3 mb-5 text-xs text-[#6B5E57]">
+            <div className="flex items-start gap-2 bg-[#FFF0E8] border border-[#E9E6DF]/50 rounded-xl px-4 py-3 mb-5 text-xs text-[#6F6E68]">
               <span className="text-base leading-none mt-0.5">⏳</span>
               <span>
-                Free surprises stay live for <strong className="text-[#2D2926]">28 days after they&apos;re opened</strong>. After that, the link expires.{" "}
-                <a href="/pricing" className="text-[#C4686D] font-medium hover:underline">Upgrade</a> to keep yours forever.
+                Free surprises stay live for <strong className="text-[#1A1B18]">28 days after they&apos;re opened</strong>. After that, the link expires.{" "}
+                <a href="/pricing" className="text-[#3E6B5C] font-medium hover:underline">Upgrade</a> to keep yours forever.
               </span>
             </div>
           )}
@@ -283,18 +283,18 @@ export default function PreviewPublish({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={makeReducedMotionTransition(shouldReduce, { duration: durations.quick })}
-                className="rounded-2xl border border-[#C9A96E]/40 bg-gradient-to-br from-[#FFF8F0] to-[#FDF1E3] p-5"
+                className="rounded-2xl border border-[#8A6F35]/40 bg-gradient-to-br from-[#FAF9F6] to-[#FDF1E3] p-5"
               >
                 <div className="flex items-start gap-3">
-                  <span className="shrink-0 grid place-items-center w-10 h-10 rounded-xl bg-white/70 border border-[#C9A96E]/25">
-                    <Sparkles className="w-5 h-5 text-[#C9A96E]" />
+                  <span className="shrink-0 grid place-items-center w-10 h-10 rounded-xl bg-white/70 border border-[#8A6F35]/25">
+                    <Sparkles className="w-5 h-5 text-[#8A6F35]" />
                   </span>
                   <div className="min-w-0">
-                    <p className="font-heading text-lg text-[#2D2926] leading-tight">
+                    <p className="font-heading text-lg text-[#1A1B18] leading-tight">
                       Premium surprise — ${PREMIUM_THEME_PRICE.toFixed(2)}
                     </p>
-                    <p className="mt-1 text-sm text-[#6B5E57] leading-snug">
-                      <span className="font-medium text-[#2D2926]">
+                    <p className="mt-1 text-sm text-[#6F6E68] leading-snug">
+                      <span className="font-medium text-[#1A1B18]">
                         {themeData?.name}
                       </span>{" "}
                       is a premium theme. Unlock it once, or get every premium
@@ -307,13 +307,13 @@ export default function PreviewPublish({
                   <Button
                     onClick={onUnlockTheme}
                     disabled={!onUnlockTheme}
-                    className="flex-1 h-12 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-medium transition-colors shadow-md"
+                    className="flex-1 h-12 rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] text-white font-medium transition-colors shadow-md"
                   >
                     Unlock for ${PREMIUM_THEME_PRICE.toFixed(2)}
                   </Button>
                   <a
                     href="/pricing"
-                    className="flex-1 inline-flex items-center justify-center h-12 rounded-full border border-[#C9A96E]/50 text-[#8A6F35] hover:bg-[#C9A96E]/10 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
+                    className="flex-1 inline-flex items-center justify-center h-12 rounded-full border border-[#8A6F35]/50 text-[#8A6F35] hover:bg-[#8A6F35]/10 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F6]"
                   >
                     Go Unlimited
                   </a>
@@ -336,7 +336,7 @@ export default function PreviewPublish({
                   <Button
                     onClick={handlePublish}
                     disabled={publishing}
-                    className="w-full h-14 rounded-full bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white text-base font-medium transition-colors shadow-lg pulse-glow"
+                    className="w-full h-14 rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] text-white text-base font-medium transition-colors shadow-lg pulse-glow"
                   >
                     {publishing ? (
                       <span className="flex items-center gap-2">

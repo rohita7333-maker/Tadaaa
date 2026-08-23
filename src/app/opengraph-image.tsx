@@ -11,7 +11,7 @@ export default function OGImage() {
         style={{
           width: 1200,
           height: 630,
-          background: "linear-gradient(135deg, #FFF8F0 0%, #F5E6E0 100%)",
+          background: "linear-gradient(135deg, #FAF9F6 0%, #F5E6E0 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -29,7 +29,7 @@ export default function OGImage() {
             width: 300,
             height: 300,
             borderRadius: "50%",
-            background: "rgba(196,104,109,0.1)",
+            background: "rgba(62, 107, 92,0.1)",
           }}
         />
         <div
@@ -40,7 +40,7 @@ export default function OGImage() {
             width: 200,
             height: 200,
             borderRadius: "50%",
-            background: "rgba(201,169,110,0.1)",
+            background: "rgba(138, 111, 53,0.1)",
           }}
         />
 
@@ -50,7 +50,7 @@ export default function OGImage() {
             width: 80,
             height: 80,
             borderRadius: 20,
-            background: "linear-gradient(135deg, #C4686D 0%, #9B3D42 100%)",
+            background: "linear-gradient(135deg, #3E6B5C 0%, #2E5145 100%)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -67,7 +67,7 @@ export default function OGImage() {
           style={{
             fontSize: 64,
             fontWeight: 700,
-            color: "#2D2926",
+            color: "#1A1B18",
             textAlign: "center",
             lineHeight: 1.1,
             marginBottom: 16,
@@ -80,7 +80,7 @@ export default function OGImage() {
         <div
           style={{
             fontSize: 28,
-            color: "#6B5E57",
+            color: "#6F6E68",
             textAlign: "center",
             maxWidth: 600,
           }}
@@ -94,7 +94,7 @@ export default function OGImage() {
             position: "absolute",
             bottom: 40,
             fontSize: 18,
-            color: "#C4686D",
+            color: "#3E6B5C",
             fontWeight: 600,
           }}
         >

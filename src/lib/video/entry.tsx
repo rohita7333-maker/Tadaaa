@@ -16,9 +16,9 @@ function Root() {
         title: "Your Surprise",
         message: "A special message for you",
         themeColors: {
-          background: "#FFF8F0",
-          text: "#2D2926",
-          accent: "#C4686D",
+          background: "#FAF9F6",
+          text: "#1A1B18",
+          accent: "#3E6B5C",
         },
       }}
     />

@@ -34,7 +34,7 @@ export default async function SettingsPage() {
       ? "bg-amber-50 text-amber-800 border border-amber-200"
       : tier === "plus"
       ? "bg-rose-50 text-rose-700 border border-rose-200"
-      : "bg-[#F5EDE3] text-[#6B5E57] border border-[#D4CBC3]";
+      : "bg-[#F1EFE9] text-[#6F6E68] border border-[#E9E6DF]";
 
   const notifItems = [
     { name: "notify_on_view", label: "Someone views your surprise", sub: "Get notified when your link gets opened", defaultChecked: profile?.notify_on_view ?? false },
@@ -43,7 +43,7 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0]">
+    <div className="min-h-screen bg-[#FAF9F6]">
       {/* Same authenticated bar as every other product surface — it carries the
           logo and Dashboard link, so the page needs no separate back link. */}
       <DashboardNavServer activeRoute="settings" />
@@ -70,14 +70,14 @@ export default async function SettingsPage() {
         {/* Hero */}
         <SettingsSection index={0}>
           <div className="mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 border border-[#D4CBC3]/60 shadow-sm backdrop-blur-sm mb-4">
-              <Sparkles className="w-3.5 h-3.5 text-[#C4686D]" />
-              <span className="text-xs font-medium text-[#6B5E57]">Your account</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 border border-[#E9E6DF]/60 shadow-sm backdrop-blur-sm mb-4">
+              <Sparkles className="w-3.5 h-3.5 text-[#3E6B5C]" />
+              <span className="text-xs font-medium text-[#6F6E68]">Your account</span>
             </div>
-            <h1 className="font-heading text-4xl sm:text-5xl text-[#2D2926] tracking-tight">
+            <h1 className="font-heading text-4xl sm:text-5xl text-[#1A1B18] tracking-tight">
               Settings
             </h1>
-            <p className="text-[#6B5E57] mt-2 text-sm leading-relaxed max-w-md">
+            <p className="text-[#6F6E68] mt-2 text-sm leading-relaxed max-w-md">
               Make TaDaaaa feel like you. Tweak your profile, notifications, and privacy
               from one calm place.
             </p>
@@ -87,40 +87,40 @@ export default async function SettingsPage() {
         {/* Account */}
         <SettingsSection
           index={1}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
-              <User className="w-4 h-4 text-[#C4686D]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#DCE8E2] to-[#FAF9F6] flex items-center justify-center">
+              <User className="w-4 h-4 text-[#3E6B5C]" />
             </div>
-            <h2 className="font-heading text-lg text-[#2D2926]">Account</h2>
+            <h2 className="font-heading text-lg text-[#1A1B18]">Account</h2>
           </div>
           <div className="space-y-4">
-            <div className="bg-[#FFF8F0] rounded-2xl p-4">
+            <div className="bg-[#FAF9F6] rounded-2xl p-4">
               <AvatarUpload currentUrl={avatarUrl} userInitial={initial} />
             </div>
-            <div className="bg-[#FFF8F0] rounded-2xl p-4">
-              <p className="text-xs text-[#6B5E57] uppercase tracking-wider mb-1 font-medium">Email</p>
-              <p className="text-[#2D2926] font-medium text-sm">{user.email}</p>
+            <div className="bg-[#FAF9F6] rounded-2xl p-4">
+              <p className="text-xs text-[#6F6E68] uppercase tracking-wider mb-1 font-medium">Email</p>
+              <p className="text-[#1A1B18] font-medium text-sm">{user.email}</p>
             </div>
-            <div className="bg-[#FFF8F0] rounded-2xl p-4">
-              <p className="text-xs text-[#6B5E57] uppercase tracking-wider mb-2 font-medium">Plan</p>
+            <div className="bg-[#FAF9F6] rounded-2xl p-4">
+              <p className="text-xs text-[#6F6E68] uppercase tracking-wider mb-2 font-medium">Plan</p>
               <div className="flex items-center gap-3">
                 <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${tierColor}`}>
                   {tier !== "free" && <Crown className="w-3 h-3" />}
                   {tierLabel}
                 </span>
                 {tier === "free" && (
-                  <Link href="/pricing" className="text-xs text-[#C4686D] hover:underline font-semibold">
+                  <Link href="/pricing" className="text-xs text-[#3E6B5C] hover:underline font-semibold">
                     Upgrade →
                   </Link>
                 )}
               </div>
             </div>
             {profile?.subscription_expires_at && (
-              <div className="bg-[#FFF8F0] rounded-2xl p-4">
-                <p className="text-xs text-[#6B5E57] uppercase tracking-wider mb-1 font-medium">Renews</p>
-                <p className="text-[#2D2926] text-sm font-medium">
+              <div className="bg-[#FAF9F6] rounded-2xl p-4">
+                <p className="text-xs text-[#6F6E68] uppercase tracking-wider mb-1 font-medium">Renews</p>
+                <p className="text-[#1A1B18] text-sm font-medium">
                   {new Date(profile.subscription_expires_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                 </p>
               </div>
@@ -131,13 +131,13 @@ export default async function SettingsPage() {
         {/* Notifications */}
         <SettingsSection
           index={2}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
-              <Bell className="w-4 h-4 text-[#C4686D]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#DCE8E2] to-[#FAF9F6] flex items-center justify-center">
+              <Bell className="w-4 h-4 text-[#3E6B5C]" />
             </div>
-            <h2 className="font-heading text-lg text-[#2D2926]">Notifications</h2>
+            <h2 className="font-heading text-lg text-[#1A1B18]">Notifications</h2>
           </div>
           <form action={updateNotifications} className="space-y-1.5">
             {notifItems.map((item) => (
@@ -156,13 +156,13 @@ export default async function SettingsPage() {
         {/* Security */}
         <SettingsSection
           index={3}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
-              <Lock className="w-4 h-4 text-[#C4686D]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#DCE8E2] to-[#FAF9F6] flex items-center justify-center">
+              <Lock className="w-4 h-4 text-[#3E6B5C]" />
             </div>
-            <h2 className="font-heading text-lg text-[#2D2926]">Security</h2>
+            <h2 className="font-heading text-lg text-[#1A1B18]">Security</h2>
           </div>
           <ChangePasswordForm />
         </SettingsSection>
@@ -170,20 +170,20 @@ export default async function SettingsPage() {
         {/* Your Data */}
         <SettingsSection
           index={4}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-white/60 mb-5"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F4D5D7] to-[#FFF8F0] flex items-center justify-center">
-              <Download className="w-4 h-4 text-[#C4686D]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#DCE8E2] to-[#FAF9F6] flex items-center justify-center">
+              <Download className="w-4 h-4 text-[#3E6B5C]" />
             </div>
-            <h2 className="font-heading text-lg text-[#2D2926]">Your Data</h2>
+            <h2 className="font-heading text-lg text-[#1A1B18]">Your Data</h2>
           </div>
-          <p className="text-sm text-[#6B5E57] mb-4 leading-relaxed">
+          <p className="text-sm text-[#6F6E68] mb-4 leading-relaxed">
             Download a JSON copy of everything we store about you.
           </p>
           <Link
             href="/settings/data"
-            className="inline-flex items-center gap-1.5 text-sm text-[#C4686D] hover:underline font-semibold"
+            className="inline-flex items-center gap-1.5 text-sm text-[#3E6B5C] hover:underline font-semibold"
           >
             Export my data →
           </Link>
@@ -192,7 +192,7 @@ export default async function SettingsPage() {
         {/* Danger zone */}
         <SettingsSection
           index={5}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(45,41,38,0.08)] border border-red-100"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-red-100"
         >
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
@@ -200,7 +200,7 @@ export default async function SettingsPage() {
             </div>
             <h2 className="font-heading text-lg text-red-600">Danger zone</h2>
           </div>
-          <p className="text-sm text-[#6B5E57] mb-5 leading-relaxed">
+          <p className="text-sm text-[#6F6E68] mb-5 leading-relaxed">
             Permanently delete your account and all surprises. This cannot be undone.
           </p>
           <DeleteAccountButton />

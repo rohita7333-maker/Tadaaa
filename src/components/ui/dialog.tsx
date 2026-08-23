@@ -41,7 +41,7 @@ function Dialog({ open, onClose, children, className }: DialogProps) {
           ref={overlayRef}
           onClick={handleOverlayClick}
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          style={{ backgroundColor: "rgba(45,41,38,0.5)" }}
+          style={{ backgroundColor: "rgba(26, 27, 24,0.5)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -49,7 +49,7 @@ function Dialog({ open, onClose, children, className }: DialogProps) {
         >
           <motion.div
             className={cn(
-              "relative w-full max-w-lg bg-white rounded-2xl shadow-[0_24px_80px_rgba(45,41,38,0.18)] overflow-hidden",
+              "relative w-full max-w-lg bg-white rounded-2xl shadow-[0_24px_80px_rgba(26, 27, 24,0.18)] overflow-hidden",
               className
             )}
             initial={{ scale: 0.95, opacity: 0, y: 16 }}
@@ -75,7 +75,7 @@ function DialogHeader({ children, onClose, className }: DialogHeaderProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-6 py-5 border-b border-[#D4CBC3]/40",
+        "flex items-center justify-between px-6 py-5 border-b border-[#E9E6DF]/40",
         className
       )}
     >
@@ -83,7 +83,7 @@ function DialogHeader({ children, onClose, className }: DialogHeaderProps) {
       {onClose && (
         <button
           onClick={onClose}
-          className="ml-4 h-8 w-8 rounded-full border border-[#D4CBC3] text-[#6B5E57] hover:bg-[#FFF8F0] flex items-center justify-center transition-all shrink-0"
+          className="ml-4 h-8 w-8 rounded-full border border-[#E9E6DF] text-[#6F6E68] hover:bg-[#FAF9F6] flex items-center justify-center transition-all shrink-0"
           aria-label="Close dialog"
         >
           <X className="w-3.5 h-3.5" />
@@ -95,7 +95,7 @@ function DialogHeader({ children, onClose, className }: DialogHeaderProps) {
 
 function DialogTitle({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <h2 className={cn("font-heading text-lg text-[#2D2926]", className)}>{children}</h2>
+    <h2 className={cn("font-heading text-lg text-[#1A1B18]", className)}>{children}</h2>
   );
 }
 

@@ -47,14 +47,14 @@ export default function Navbar({
   const firstName = greetingName?.split(" ")[0];
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md border-b border-[#D4CBC3]/40 px-6 py-3.5 sticky top-0 z-40">
+    <nav className="bg-white/80 backdrop-blur-md border-b border-[#E9E6DF]/40 px-6 py-3.5 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center group-hover:scale-105 transition-transform">
               <Heart className="w-4 h-4 fill-white text-white" />
             </div>
-            <span className="font-heading text-lg text-[#2D2926]">TaDaaaa</span>
+            <span className="font-heading text-lg text-[#1A1B18]">TaDaaaa</span>
           </Link>
           {/* Product nav. Hidden under sm so the logo + greeting + avatar row
               never overflows a 375px viewport; the logo still returns home. */}
@@ -64,7 +64,7 @@ export default function Navbar({
                 <span
                   key={item.key}
                   aria-current="page"
-                  className="relative text-[#2D2926] text-sm font-semibold after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[#C4686D] after:content-['']"
+                  className="relative text-[#1A1B18] text-sm font-semibold after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[#3E6B5C] after:content-['']"
                 >
                   {item.label}
                 </span>
@@ -72,7 +72,7 @@ export default function Navbar({
                 <Link
                   key={item.key}
                   href={item.href}
-                  className="text-[#6B5E57] hover:text-[#2D2926] text-sm font-medium transition-colors"
+                  className="text-[#6F6E68] hover:text-[#1A1B18] text-sm font-medium transition-colors"
                 >
                   {item.label}
                 </Link>
@@ -84,13 +84,13 @@ export default function Navbar({
         {/* Middle: greeting + streak/counter */}
         <div className="hidden md:flex flex-1 items-center justify-center gap-3 px-6">
           {firstName && (
-            <span className="text-sm text-[#6B5E57]">
+            <span className="text-sm text-[#6F6E68]">
               Good {timeOfDay},{" "}
-              <span className="font-semibold text-[#2D2926]">{firstName}</span>
+              <span className="font-semibold text-[#1A1B18]">{firstName}</span>
             </span>
           )}
           {inviteCount > 0 && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#9B3D42] bg-[#FFF0EE] px-3 py-1 rounded-full">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#2E5145] bg-[#FFF0EE] px-3 py-1 rounded-full">
               <Sparkles className="w-3 h-3" />
               {inviteCount} surprise{inviteCount !== 1 ? "s" : ""} crafted
             </span>
@@ -107,7 +107,7 @@ export default function Navbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Account menu"
-              className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C4686D] to-[#9B3D42] flex items-center justify-center text-white text-sm font-bold hover:opacity-90 transition-opacity outline-none overflow-hidden focus-visible:ring-2 focus-visible:ring-[#C4686D] focus-visible:ring-offset-2"
+              className="w-9 h-9 rounded-full bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center text-white text-sm font-bold hover:opacity-90 transition-opacity outline-none overflow-hidden focus-visible:ring-2 focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
@@ -117,7 +117,7 @@ export default function Navbar({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               {userEmail && (
-                <div className="px-2 py-1.5 text-xs text-[#6B5E57] border-b border-[#D4CBC3]/40 mb-1">
+                <div className="px-2 py-1.5 text-xs text-[#6F6E68] border-b border-[#E9E6DF]/40 mb-1">
                   {userEmail}
                 </div>
               )}
@@ -127,7 +127,7 @@ export default function Navbar({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => signOut()}
-                className="text-[#C4686D] cursor-pointer"
+                className="text-[#3E6B5C] cursor-pointer"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign out

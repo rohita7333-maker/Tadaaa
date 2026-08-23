@@ -23,7 +23,7 @@ export function PerksList({ perks }: PerksListProps) {
               : { duration: 0.4, delay: 0.1 * i, ease: [0.22, 1, 0.36, 1] }
           }
         >
-          <CheckCircle2 className="w-4 h-4 text-[#C9A96E] flex-shrink-0" />
+          <CheckCircle2 className="w-4 h-4 text-[#8A6F35] flex-shrink-0" />
           <span className="text-white/70 text-sm">{perk}</span>
         </motion.li>
       ))}

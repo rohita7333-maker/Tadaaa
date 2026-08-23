@@ -108,7 +108,7 @@ export default function CoverflowFan() {
         onPointerCancel={() => {
           dragStartX.current = null;
         }}
-        className="relative w-full select-none cursor-grab active:cursor-grabbing rounded-3xl outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
+        className="relative w-full select-none cursor-grab active:cursor-grabbing rounded-3xl outline-none focus-visible:ring-[3px] focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F6]"
         style={{
           height: "clamp(320px, 44vw, 430px)",
           perspective: "1300px",
@@ -126,7 +126,7 @@ export default function CoverflowFan() {
             <div
               key={template.id}
               aria-hidden={!slot.visible}
-              className="absolute left-1/2 top-1/2 overflow-hidden rounded-[18px] bg-cover bg-center shadow-[0_18px_50px_rgba(45,41,38,0.22)]"
+              className="absolute left-1/2 top-1/2 overflow-hidden rounded-[18px] bg-cover bg-center shadow-[0_18px_50px_rgba(26, 27, 24,0.22)]"
               style={{
                 width: "clamp(160px, 22vw, 218px)",
                 aspectRatio: "3 / 4.25",
@@ -141,7 +141,7 @@ export default function CoverflowFan() {
                 background: !template.art?.cover
                   ? theme
                     ? coverBackground(theme)
-                    : "#FFF8F0"
+                    : "#FAF9F6"
                   : undefined,
               }}
             >
@@ -157,7 +157,7 @@ export default function CoverflowFan() {
               <span
                 className="absolute inset-x-0 bottom-0 px-4 pb-3.5 pt-10 text-white"
                 style={{
-                  background: `linear-gradient(to top, ${theme?.colors.overlay ?? "rgba(45,41,38,0.5)"}, transparent)`,
+                  background: `linear-gradient(to top, ${theme?.colors.overlay ?? "rgba(26, 27, 24,0.5)"}, transparent)`,
                 }}
               >
                 <span className="block font-heading text-base leading-tight">
@@ -188,14 +188,14 @@ export default function CoverflowFan() {
               aria-label={`Show ${template.name}`}
               aria-current={isActive ? "true" : undefined}
               /* p-2 gives a >=24px hit target (WCAG target-size); the inner span stays a small visual dot */
-              className="group/dot rounded-full p-2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#C4686D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8F0]"
+              className="group/dot rounded-full p-2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F6]"
             >
               <span
                 aria-hidden="true"
                 className={`block h-2.5 rounded-full transition-all duration-300 ${
                   isActive
-                    ? "w-6 bg-[#C4686D]"
-                    : "w-2.5 bg-[#D4CBC3] group-hover/dot:bg-[#C4686D]/60"
+                    ? "w-6 bg-[#3E6B5C]"
+                    : "w-2.5 bg-[#E9E6DF] group-hover/dot:bg-[#3E6B5C]/60"
                 }`}
               />
             </button>

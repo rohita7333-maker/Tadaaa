@@ -55,7 +55,7 @@ export function SpotlightCard({
       onMouseLeave={(e) => { setHovered(false); userOnLeave?.(e); }}
       className={cn(
         "relative overflow-hidden",
-        !bare && "bg-white rounded-3xl border border-[#D4CBC3]/20",
+        !bare && "bg-white rounded-3xl border border-[#E9E6DF]/20",
         className,
       )}
       {...rest}

@@ -63,7 +63,7 @@ export function DesignerArtButton({
       <Link
         href={buildHref(slug, type, style)}
         download
-        className={`${base} ${size} bg-[#C4686D] text-white hover:bg-[#a8555a]`}
+        className={`${base} ${size} bg-[#3E6B5C] text-white hover:bg-[#a8555a]`}
       >
         <Download className="w-4 h-4" />
         {cfg.label}
@@ -74,7 +74,7 @@ export function DesignerArtButton({
   return (
     <Link
       href="/pricing"
-      className={`${base} ${size} bg-[#F1E3DA] text-[#6B5E57] hover:bg-[#e9d6ca]`}
+      className={`${base} ${size} bg-[#F1E3DA] text-[#6F6E68] hover:bg-[#e9d6ca]`}
     >
       <Lock className="w-4 h-4" />
       {cfg.lockedLabel}

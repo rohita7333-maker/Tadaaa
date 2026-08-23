@@ -154,10 +154,10 @@ export default function PolaroidCarousel({
             {notes.map((n, i) => (
               <div
                 key={`n-${i}`}
-                className="bg-white rounded-2xl p-5 shadow-[0_10px_28px_rgba(45,41,38,0.16)]"
+                className="bg-white rounded-2xl p-5 shadow-[0_10px_28px_rgba(26, 27, 24,0.16)]"
               >
                 <p
-                  className="text-[#2D2926] leading-relaxed"
+                  className="text-[#1A1B18] leading-relaxed"
                   style={{
                     fontFamily: "var(--font-caveat, cursive)",
                     fontSize: "1.15rem",
@@ -166,7 +166,7 @@ export default function PolaroidCarousel({
                 >
                   {n.message}
                 </p>
-                <p className="mt-3 text-right text-xs text-[#6B5E57]">
+                <p className="mt-3 text-right text-xs text-[#6F6E68]">
                   — {n.contributor_name}
                 </p>
               </div>
@@ -333,7 +333,7 @@ export default function PolaroidCarousel({
                 transition: shouldReduce
                   ? "opacity 0.3s ease"
                   : `transform 0.8s ${cssEasings.springBouncy}, opacity 0.5s ease`,
-                filter: "drop-shadow(0 18px 36px rgba(45,41,38,0.25))",
+                filter: "drop-shadow(0 18px 36px rgba(26, 27, 24,0.25))",
               }}
             >
               <div
@@ -344,7 +344,7 @@ export default function PolaroidCarousel({
                 }}
               >
                 <div
-                  className="overflow-hidden bg-[#F5EDE3]"
+                  className="overflow-hidden bg-[#F1EFE9]"
                   style={{ width: "100%", aspectRatio: "1/1" }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}

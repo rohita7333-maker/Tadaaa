@@ -16,7 +16,7 @@ const steps = [
     step: "01",
     title: "Add photos & a message",
     description: "Upload up to 8 photos as polaroids, write captions, and craft a heartfelt message. Add a playful yes/no question too.",
-    color: "#C9A96E",
+    color: "#8A6F35",
     bg: "#FFF8E8",
     span: 2,
   },
@@ -25,7 +25,7 @@ const steps = [
     step: "02",
     title: "Pick your occasion",
     description: "Birthday, anniversary, proposal, Mother's Day — 6 occasion types with matching themes.",
-    color: "#C4686D",
+    color: "#3E6B5C",
     bg: "#FFF0E8",
     span: 1,
   },
@@ -61,7 +61,7 @@ export default function HowItWorks() {
 
   return (
     <section id="how-it-works" className="py-28 px-6 bg-white relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(196,104,109,0.04)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(62, 107, 92,0.04)_0%,transparent_70%)]" />
 
       <div className="max-w-5xl mx-auto relative">
         {/* Section header — simple, not competing with hero */}
@@ -75,10 +75,10 @@ export default function HowItWorks() {
             ease: easings.entrance,
           })}
         >
-          <span className="text-[#C4686D] text-xs font-bold uppercase tracking-widest mb-4 block">
+          <span className="text-[#3E6B5C] text-xs font-bold uppercase tracking-widest mb-4 block">
             How it works
           </span>
-          <h2 className="font-heading text-5xl md:text-6xl text-[#2D2926]">
+          <h2 className="font-heading text-5xl md:text-6xl text-[#1A1B18]">
             Three steps to magic
           </h2>
         </motion.div>
@@ -103,7 +103,7 @@ export default function HowItWorks() {
                 })}
               >
                 <SpotlightCard
-                  className="h-full bg-[#FFF8F0] hover:border-[#D4CBC3]/50 hover:shadow-[0_8px_32px_rgba(45,41,38,0.08)] transition-all duration-300 group"
+                  className="h-full bg-[#FAF9F6] hover:border-[#E9E6DF]/50 hover:shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] transition-all duration-300 group"
                 >
                   <div className="p-7 h-full flex flex-col">
                     <div className="flex items-center gap-3 mb-5">
@@ -120,8 +120,8 @@ export default function HowItWorks() {
                         {step.step}
                       </span>
                     </div>
-                    <h3 className="font-heading text-xl text-[#2D2926] mb-3">{step.title}</h3>
-                    <p className="text-[#6B5E57] text-sm leading-relaxed">{step.description}</p>
+                    <h3 className="font-heading text-xl text-[#1A1B18] mb-3">{step.title}</h3>
+                    <p className="text-[#6F6E68] text-sm leading-relaxed">{step.description}</p>
                   </div>
                 </SpotlightCard>
               </motion.div>

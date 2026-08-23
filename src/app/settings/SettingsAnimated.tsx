@@ -47,10 +47,10 @@ interface ToggleProps {
  */
 export function ToggleRow({ name, defaultChecked, label, sub }: ToggleProps) {
   return (
-    <label className="flex items-start justify-between gap-4 cursor-pointer p-4 rounded-2xl hover:bg-[#FFF8F0] transition-colors group select-none">
+    <label className="flex items-start justify-between gap-4 cursor-pointer p-4 rounded-2xl hover:bg-[#FAF9F6] transition-colors group select-none">
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-[#2D2926] font-medium">{label}</p>
-        <p className="text-xs text-[#6B5E57] mt-0.5">{sub}</p>
+        <p className="text-sm text-[#1A1B18] font-medium">{label}</p>
+        <p className="text-xs text-[#6F6E68] mt-0.5">{sub}</p>
       </div>
       <div className="flex-shrink-0 pt-0.5 relative w-11 h-6">
         <input
@@ -63,7 +63,7 @@ export function ToggleRow({ name, defaultChecked, label, sub }: ToggleProps) {
         {/* Track — peer-checked changes bg color */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 rounded-full bg-[#D4CBC3] peer-checked:bg-[#C4686D] peer-focus-visible:ring-2 peer-focus-visible:ring-[#C4686D]/40 transition-colors duration-300"
+          className="absolute inset-0 rounded-full bg-[#E9E6DF] peer-checked:bg-[#3E6B5C] peer-focus-visible:ring-2 peer-focus-visible:ring-[#3E6B5C]/40 transition-colors duration-300"
         />
         {/* Thumb — peer sibling of checkbox, slides on peer-checked.
             Spring micro-bounce on tap via active: scale (CSS-driven to avoid
@@ -108,7 +108,7 @@ export function SavePreferencesButton() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-4 w-full h-11 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] text-white text-sm font-semibold hover:from-[#9B3D42] hover:to-[#C4686D] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#C4686D]/20 disabled:opacity-80 relative overflow-hidden"
+      className="mt-4 w-full h-11 rounded-2xl bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white text-sm font-semibold hover:from-[#2E5145] hover:to-[#3E6B5C] transition-all duration-300 hover:scale-[1.01] shadow-md shadow-[#3E6B5C]/20 disabled:opacity-80 relative overflow-hidden"
     >
       <AnimatePresence mode="wait" initial={false}>
         {justSaved ? (

@@ -143,25 +143,25 @@ export default function CommandPalette({ occasionsInUse }: Props) {
   }
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} className="max-w-xl bg-[#FFF8F0]">
+    <Dialog open={open} onClose={() => setOpen(false)} className="max-w-xl bg-[#FAF9F6]">
       <div onKeyDown={handleKey} className="flex flex-col">
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-[#D4CBC3]/40">
-          <SearchIcon className="w-4 h-4 text-[#6B5E57]" />
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[#E9E6DF]/40">
+          <SearchIcon className="w-4 h-4 text-[#6F6E68]" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a command…"
             aria-label="Command palette search"
-            className="flex-1 bg-transparent outline-none text-sm text-[#2D2926] placeholder:text-[#9C8E87]"
+            className="flex-1 bg-transparent outline-none text-sm text-[#1A1B18] placeholder:text-[#9C8E87]"
           />
-          <kbd className="text-[10px] text-[#6B5E57] border border-[#D4CBC3] rounded px-1.5 py-0.5">
+          <kbd className="text-[10px] text-[#6F6E68] border border-[#E9E6DF] rounded px-1.5 py-0.5">
             Esc
           </kbd>
         </div>
         <ul role="listbox" className="max-h-80 overflow-y-auto py-2">
           {filtered.length === 0 && (
-            <li className="px-5 py-6 text-center text-[#6B5E57] text-sm">
+            <li className="px-5 py-6 text-center text-[#6F6E68] text-sm">
               No commands match.
             </li>
           )}
@@ -177,29 +177,29 @@ export default function CommandPalette({ occasionsInUse }: Props) {
                 onClick={() => execute(cmd)}
                 className={`flex items-center gap-3 px-5 py-2.5 cursor-pointer text-sm transition-colors ${
                   active
-                    ? "bg-[#FFF0EE] text-[#C4686D]"
-                    : "text-[#2D2926] hover:bg-[#F5EDE3]"
+                    ? "bg-[#FFF0EE] text-[#3E6B5C]"
+                    : "text-[#1A1B18] hover:bg-[#F1EFE9]"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${active ? "text-[#C4686D]" : "text-[#6B5E57]"}`} />
+                <Icon className={`w-4 h-4 ${active ? "text-[#3E6B5C]" : "text-[#6F6E68]"}`} />
                 <span className="flex-1">{cmd.label}</span>
                 {cmd.hint && (
-                  <span className="text-xs text-[#6B5E57]">{cmd.hint}</span>
+                  <span className="text-xs text-[#6F6E68]">{cmd.hint}</span>
                 )}
               </li>
             );
           })}
         </ul>
-        <div className="px-5 py-2 border-t border-[#D4CBC3]/40 flex items-center justify-between text-[10px] text-[#6B5E57]">
+        <div className="px-5 py-2 border-t border-[#E9E6DF]/40 flex items-center justify-between text-[10px] text-[#6F6E68]">
           <span>
-            <kbd className="border border-[#D4CBC3] rounded px-1">↑</kbd>{" "}
-            <kbd className="border border-[#D4CBC3] rounded px-1">↓</kbd> navigate
+            <kbd className="border border-[#E9E6DF] rounded px-1">↑</kbd>{" "}
+            <kbd className="border border-[#E9E6DF] rounded px-1">↓</kbd> navigate
           </span>
           <span>
-            <kbd className="border border-[#D4CBC3] rounded px-1">↵</kbd> select
+            <kbd className="border border-[#E9E6DF] rounded px-1">↵</kbd> select
           </span>
           <span>
-            <kbd className="border border-[#D4CBC3] rounded px-1">⌘K</kbd> toggle
+            <kbd className="border border-[#E9E6DF] rounded px-1">⌘K</kbd> toggle
           </span>
         </div>
       </div>

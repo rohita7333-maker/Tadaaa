@@ -25,7 +25,7 @@ export default async function TemplatesPage() {
   const isAuthed = !!user;
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0]">
+    <div className="min-h-screen bg-[#FAF9F6]">
       {isAuthed ? <DashboardNavServer activeRoute="templates" /> : <Navbar />}
       <main>
         <TemplatesPageClient authedChrome={isAuthed} />

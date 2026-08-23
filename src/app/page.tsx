@@ -44,12 +44,12 @@ export default async function LandingPage() {
       {/* Final CTA */}
       <section className="py-28 px-6 relative overflow-hidden">
         {/* Dark warm background */}
-        <div className="absolute inset-0 bg-[#2D2926]" />
+        <div className="absolute inset-0 bg-[#1A1B18]" />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at 30% 50%, rgba(196,104,109,0.25) 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(201,169,110,0.15) 0%, transparent 60%)",
+              "radial-gradient(ellipse at 30% 50%, rgba(62, 107, 92,0.25) 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(138, 111, 53,0.15) 0%, transparent 60%)",
           }}
         />
 
@@ -60,8 +60,8 @@ export default async function LandingPage() {
         <div className="absolute bottom-16 right-12 text-3xl opacity-25 -rotate-12">🎁</div>
 
         <div className="relative z-10 max-w-2xl mx-auto text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#C4686D]/20 border border-[#C4686D]/30 flex items-center justify-center mx-auto mb-8">
-            <Heart className="w-8 h-8 fill-[#C4686D] text-[#C4686D]" />
+          <div className="w-16 h-16 rounded-2xl bg-[#3E6B5C]/20 border border-[#3E6B5C]/30 flex items-center justify-center mx-auto mb-8">
+            <Heart className="w-8 h-8 fill-[#3E6B5C] text-[#3E6B5C]" />
           </div>
           <h2 className="font-heading text-5xl md:text-6xl text-white mb-6 leading-tight">
             Ready to make
@@ -76,7 +76,7 @@ export default async function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/auth/signup"
-              className="inline-flex items-center justify-center h-14 px-10 rounded-2xl bg-gradient-to-r from-[#C4686D] to-[#9B3D42] hover:from-[#9B3D42] hover:to-[#C4686D] text-white font-semibold text-base transition-all duration-300 hover:scale-[1.02] pulse-glow shadow-xl shadow-[#C4686D]/30"
+              className="inline-flex items-center justify-center h-14 px-10 rounded-2xl bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] text-white font-semibold text-base transition-all duration-300 hover:scale-[1.02] pulse-glow shadow-xl shadow-[#3E6B5C]/30"
             >
               Create a surprise — free
               <ArrowRight className="ml-2 w-4 h-4" />
@@ -85,7 +85,7 @@ export default async function LandingPage() {
               href="/pricing"
               className="inline-flex items-center justify-center h-14 px-10 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 text-base transition-all duration-300 font-medium"
             >
-              <Sparkles className="w-4 h-4 mr-2 text-[#C9A96E]" />
+              <Sparkles className="w-4 h-4 mr-2 text-[#8A6F35]" />
               See pricing
             </Link>
           </div>

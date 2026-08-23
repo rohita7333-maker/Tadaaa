@@ -256,7 +256,7 @@ export default function QuestionScreen({
                   noDodging ? "cursor-none" : "cursor-pointer"
                 }`}
                 style={{
-                  background: "linear-gradient(135deg, #C4686D 0%, #9B3D42 100%)",
+                  background: "linear-gradient(135deg, #3E6B5C 0%, #2E5145 100%)",
                 }}
                 whileTap={noFrozen ? { scale: 0.92 } : {}}
               >

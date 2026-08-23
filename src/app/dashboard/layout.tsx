@@ -32,7 +32,7 @@ export default async function DashboardLayout({
     (user.user_metadata?.full_name as string | undefined)?.trim() || undefined;
 
   return (
-    <div className="min-h-screen bg-[#FFF8F0]">
+    <div className="min-h-screen bg-[#FAF9F6]">
       <Navbar
         userEmail={user.email}
         userInitial={initial}

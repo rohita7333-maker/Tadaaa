@@ -16,6 +16,8 @@ import EventsEditor, { type StoryEventDraft } from "@/components/create/EventsEd
 import QuestionBuilder, { type Question } from "@/components/create/QuestionBuilder";
 import PreviewPublish from "@/components/create/PreviewPublish";
 import TemplateSummaryChip from "@/components/create/TemplateSummaryChip";
+import MusicPicker from "@/components/create/MusicPicker";
+import { LivePreviewPhone, LivePreviewOverlay } from "@/components/create/LivePreview";
 import { AIDraftButton } from "@/components/create/AIDraftButton";
 import { getThemeById } from "@/lib/themes";
 import { getTemplate, type RevealStyle, type Template } from "@/lib/templates";
@@ -100,6 +102,8 @@ interface CreateDraft {
   templateId: string | null;
   /** Stripe Checkout Session id proving the premium theme was paid for. */
   stripeSessionId: string | null;
+  /** Reveal soundtrack track id. Optional so older stored drafts stay valid. */
+  musicTrack?: string;
 }
 
 const DRAFT_KEY = "tadaaaa.createDraft";
@@ -172,6 +176,9 @@ export default function CreatePage() {
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+  // Reveal soundtrack track id ("" = no music). Persisted server-side once the
+  // music_track migration lands; until then it drives preview only.
+  const [musicTrack, setMusicTrack] = useState("");
   const [countdownDate, setCountdownDate] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [hasExpiry, setHasExpiry] = useState(false);
@@ -204,6 +211,7 @@ export default function CreatePage() {
     setAcceptContributions(draft.acceptContributions);
     setQuestions(draft.questions ?? []);
     setEvents(draft.events ?? []);
+    setMusicTrack(draft.musicTrack ?? "");
     const draftTemplate = draft.templateId ? getTemplate(draft.templateId) : null;
     if (draftTemplate) setTemplateMode(draftTemplate);
     clearDraft();
@@ -500,7 +508,9 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
+    <div className="mx-auto max-w-2xl xl:max-w-5xl px-6 py-8">
+     <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-10 xl:items-start">
+      <div className="min-w-0">
       {/* Wizard header row. The logo/account bar lives in the layout — this
           keeps only the wizard's own context: an exit and the step count. */}
       <div className="mb-6 flex items-center justify-between">
@@ -617,6 +627,7 @@ export default function CreatePage() {
                   {revealType === "scroll_story" && (
                     <EventsEditor events={events} onEventsChange={setEvents} />
                   )}
+                  <MusicPicker selected={musicTrack} onSelect={setMusicTrack} />
                 </div>
               )}
 
@@ -688,6 +699,36 @@ export default function CreatePage() {
             </Button>
           </div>
         )}
+      </div>
+
+      {/* Step 4 is PreviewPublish — its own full preview — so the live phone
+          only accompanies the editing steps. */}
+      {step < 4 && (
+        <div className="hidden xl:block sticky top-24">
+          <LivePreviewPhone
+            title={title}
+            message={message}
+            occasionType={occasionType}
+            themeId={selectedTheme}
+            revealType={revealType}
+            photos={photos}
+            musicTrack={musicTrack}
+          />
+        </div>
+      )}
+     </div>
+
+     {step < 4 && (
+       <LivePreviewOverlay
+         title={title}
+         message={message}
+         occasionType={occasionType}
+         themeId={selectedTheme}
+         revealType={revealType}
+         photos={photos}
+         musicTrack={musicTrack}
+       />
+     )}
     </div>
   );
 }

@@ -10,6 +10,8 @@ import CountdownReveal from "@/components/surprise/CountdownReveal";
 import ScrollStoryReveal from "@/components/surprise/scrollstory/ScrollStoryReveal";
 import { inviteToStoryConfig } from "@/lib/scroll-story/from-invite";
 import ReportButton from "@/components/surprise/ReportButton";
+import MusicPill from "@/components/surprise/MusicPill";
+import { getTrackById } from "@/lib/music";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -141,6 +143,12 @@ export default async function SurprisePage({ params }: Props) {
   const occasionLabel = occasions.find((o) => o.id === invite.occasion_type)?.label;
   const senderName = (invite as { creatorName?: string | null }).creatorName ?? undefined;
 
+  // Reveal soundtrack — the row carries the track id; unknown/absent ids
+  // resolve to null and the pill simply doesn't render.
+  const musicTrack = getTrackById(
+    (invite as { music_track?: string | null }).music_track
+  );
+
   if (invite.reveal_type === "scroll_story") {
     const storyConfig = inviteToStoryConfig(
       {
@@ -157,6 +165,7 @@ export default async function SurprisePage({ params }: Props) {
     return (
       <div className="fixed inset-0 overflow-y-auto">
         <ReportButton inviteId={invite.id} />
+        {musicTrack && <MusicPill file={musicTrack.file} name={musicTrack.name} />}
         <ScrollStoryReveal config={storyConfig} inviteId={invite.id} />
       </div>
     );
@@ -165,6 +174,7 @@ export default async function SurprisePage({ params }: Props) {
   return (
     <div className="fixed inset-0 overflow-hidden">
       <ReportButton inviteId={invite.id} />
+      {musicTrack && <MusicPill file={musicTrack.file} name={musicTrack.name} />}
       {invite.reveal_type === "countdown" && invite.countdown_date ? (
         <CountdownReveal
           theme={theme}

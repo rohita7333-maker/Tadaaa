@@ -428,6 +428,7 @@ export default function CreatePage() {
       "events",
       JSON.stringify(revealType === "scroll_story" ? events : [])
     );
+    if (musicTrack) formData.append("musicTrack", musicTrack);
     if (giftId) formData.append("giftId", giftId);
     // Proof of the one-off premium-theme purchase — the server re-verifies it
     // with Stripe before allowing a free-tier user to publish a premium theme.

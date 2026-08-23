@@ -161,6 +161,27 @@ describe("createInviteShell — monthly cap query", () => {
     expect(capturedInsertPayload).not.toBeNull();
     expect((capturedInsertPayload as Record<string, unknown>).is_active).toBe(false);
   });
+
+  it("persists music_track when the id is from the curated registry", async () => {
+    const fd = makeFormData();
+    fd.set("musicTrack", "warm-keys");
+    await createInviteShell(fd);
+    expect((capturedInsertPayload as Record<string, unknown>).music_track).toBe("warm-keys");
+  });
+
+  it("drops music_track when the id is not in the registry", async () => {
+    const fd = makeFormData();
+    fd.set("musicTrack", "totally-forged-id");
+    await createInviteShell(fd);
+    expect(capturedInsertPayload).not.toBeNull();
+    expect(capturedInsertPayload).not.toHaveProperty("music_track");
+  });
+
+  it("omits music_track entirely when none was picked", async () => {
+    await createInviteShell(makeFormData());
+    expect(capturedInsertPayload).not.toBeNull();
+    expect(capturedInsertPayload).not.toHaveProperty("music_track");
+  });
 });
 
 // ── BLOCKER #1 + #2: finalizeInvite path validation + is_active flip ──────────

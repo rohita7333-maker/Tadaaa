@@ -12,6 +12,7 @@ import { getActiveTier, canCreateInvite, canUsePremiumTheme, getSignedUrlExpiry,
 import { isExpired } from "@/lib/utils";
 import { signPhotoList, signStorageUrl, extractBucketPath } from "@/lib/sign-storage";
 import { getThemeById } from "@/lib/themes";
+import { getTrackById } from "@/lib/music";
 import { trackServer } from "@/lib/analytics";
 import { scanImage } from "@/lib/moderation";
 import { logAudit } from "@/lib/audit";
@@ -184,6 +185,10 @@ export async function createInviteShell(formData: FormData) {
   const rawOccasion = (formData.get("occasionType") as string) || "custom";
   const occasionType = VALID_OCCASIONS.includes(rawOccasion as typeof VALID_OCCASIONS[number]) ? rawOccasion : "custom";
 
+  // Reveal soundtrack — persist only ids from the curated registry; anything
+  // else (stale draft, forged POST) silently drops to no music.
+  const musicTrack = getTrackById((formData.get("musicTrack") as string) || "")?.id ?? null;
+
   // Generate unique slug
   let slug = "";
   for (let i = 0; i < 3; i++) {
@@ -266,6 +271,7 @@ export async function createInviteShell(formData: FormData) {
       accept_contributions: acceptContributions,
       events,
       is_active: false,
+      ...(musicTrack ? { music_track: musicTrack } : {}),
       ...(paidThemeSessionId
         ? { stripe_session_id: paidThemeSessionId, is_paid: true }
         : {}),

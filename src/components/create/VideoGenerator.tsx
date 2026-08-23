@@ -97,7 +97,7 @@ export default function VideoGenerator({ inviteId, tier, initialStatus }: VideoG
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-[#E9E6DF]/30 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)]">
+    <div className="bg-white rounded-2xl p-5 border border-[#E9E6DF]/30 shadow-[0_4px_24px_rgba(26,27,24,0.06)]">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-9 h-9 rounded-xl bg-[#FFF0E8] flex items-center justify-center">
           <Film className="w-4.5 h-4.5 text-[#3E6B5C]" />

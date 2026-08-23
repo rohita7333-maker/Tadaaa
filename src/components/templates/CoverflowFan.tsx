@@ -126,7 +126,7 @@ export default function CoverflowFan() {
             <div
               key={template.id}
               aria-hidden={!slot.visible}
-              className="absolute left-1/2 top-1/2 overflow-hidden rounded-[18px] bg-cover bg-center shadow-[0_18px_50px_rgba(26, 27, 24,0.22)]"
+              className="absolute left-1/2 top-1/2 overflow-hidden rounded-[18px] bg-cover bg-center shadow-[0_18px_50px_rgba(26,27,24,0.22)]"
               style={{
                 width: "clamp(160px, 22vw, 218px)",
                 aspectRatio: "3 / 4.25",
@@ -157,7 +157,7 @@ export default function CoverflowFan() {
               <span
                 className="absolute inset-x-0 bottom-0 px-4 pb-3.5 pt-10 text-white"
                 style={{
-                  background: `linear-gradient(to top, ${theme?.colors.overlay ?? "rgba(26, 27, 24,0.5)"}, transparent)`,
+                  background: `linear-gradient(to top, ${theme?.colors.overlay ?? "rgba(26,27,24,0.5)"}, transparent)`,
                 }}
               >
                 <span className="block font-heading text-base leading-tight">

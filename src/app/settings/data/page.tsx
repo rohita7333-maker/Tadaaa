@@ -29,7 +29,7 @@ export default async function DataPage() {
           your GDPR right to data portability.
         </p>
 
-        <section className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] border border-[#E9E6DF]/30 mb-5">
+        <section className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(26,27,24,0.06)] border border-[#E9E6DF]/30 mb-5">
           <div className="flex items-center gap-2.5 mb-5">
             <div className="w-8 h-8 rounded-xl bg-[#FFF0E8] flex items-center justify-center">
               <FileJson className="w-4 h-4 text-[#3E6B5C]" />

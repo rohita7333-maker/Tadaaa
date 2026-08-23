@@ -22,7 +22,7 @@ export default function TemplateSummaryChip({ template, onChange }: Props) {
   const isPremium = template.tier === "premium";
 
   return (
-    <div className="relative rounded-2xl border border-[#8A6F35]/35 bg-gradient-to-br from-[#FAF9F6] to-[#FDF1E3] p-5 shadow-[0_2px_12px_rgba(26, 27, 24,0.06)]">
+    <div className="relative rounded-2xl border border-[#8A6F35]/35 bg-gradient-to-br from-[#FAF9F6] to-[#FDF1E3] p-5 shadow-[0_2px_12px_rgba(26,27,24,0.06)]">
       <div className="flex items-start gap-4">
         <span
           aria-hidden="true"

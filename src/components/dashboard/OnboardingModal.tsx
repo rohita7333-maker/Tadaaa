@@ -81,7 +81,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
           onClick={dismiss}
         >
           <motion.div
-            className="w-full max-w-md bg-white rounded-3xl shadow-[0_20px_60px_rgba(26, 27, 24,0.18)] border border-[#E9E6DF]/40 overflow-hidden"
+            className="w-full max-w-md bg-white rounded-3xl shadow-[0_20px_60px_rgba(26,27,24,0.18)] border border-[#E9E6DF]/40 overflow-hidden"
             initial={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
@@ -130,7 +130,7 @@ export default function OnboardingModal({ forceShow = false }: OnboardingModalPr
                   className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
                   style={{
                     background:
-                      "linear-gradient(135deg, rgba(62, 107, 92,0.12), rgba(138, 111, 53,0.12))",
+                      "linear-gradient(135deg, rgba(62,107,92,0.12), rgba(138,111,53,0.12))",
                   }}
                 >
                   <current.icon className="w-5 h-5 text-[#3E6B5C]" />

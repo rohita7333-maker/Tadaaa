@@ -18,7 +18,7 @@ export default function TemplateCard({ template }: Props) {
       href={`/create?template=${template.id}`}
       className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF9F6]"
     >
-      <article className="overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(26, 27, 24,0.06)] transition-[transform,box-shadow] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-[0_16px_40px_rgba(26, 27, 24,0.15)]">
+      <article className="overflow-hidden rounded-2xl bg-white shadow-[0_4px_16px_rgba(26,27,24,0.06)] transition-[transform,box-shadow] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-[0_16px_40px_rgba(26,27,24,0.15)]">
         <div
           className="relative flex items-center justify-center bg-cover bg-center"
           style={{

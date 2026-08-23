@@ -145,7 +145,7 @@ export default function TemplatesPageClient({
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#collection"
-            className={`rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] px-7 py-3 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(62, 107, 92,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_4px_20px_rgba(62, 107, 92,0.5)] ${FOCUS_RING} focus-visible:ring-offset-[#FAF9F6]`}
+            className={`rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] px-7 py-3 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(62,107,92,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_4px_20px_rgba(62,107,92,0.5)] ${FOCUS_RING} focus-visible:ring-offset-[#FAF9F6]`}
           >
             Choose a template
           </a>
@@ -239,7 +239,7 @@ export default function TemplatesPageClient({
               <motion.div
                 key={step.title}
                 {...enter(staggers.support + index * staggers.detail)}
-                className="rounded-2xl bg-white p-6 shadow-[0_4px_16px_rgba(26, 27, 24,0.05)]"
+                className="rounded-2xl bg-white p-6 shadow-[0_4px_16px_rgba(26,27,24,0.05)]"
               >
                 <span aria-hidden="true" className="block font-handwritten text-4xl text-[#8A6F35]">
                   {index + 1}
@@ -270,7 +270,7 @@ export default function TemplatesPageClient({
             </p>
             <Link
               href="/create"
-              className={`mt-8 inline-block rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] px-7 py-3 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(62, 107, 92,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_4px_20px_rgba(62, 107, 92,0.5)] ${FOCUS_RING} focus-visible:ring-offset-[#1A1B18]`}
+              className={`mt-8 inline-block rounded-full bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] px-7 py-3 text-sm font-semibold text-white shadow-[0_2px_12px_rgba(62,107,92,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_4px_20px_rgba(62,107,92,0.5)] ${FOCUS_RING} focus-visible:ring-offset-[#1A1B18]`}
             >
               Make someone&apos;s day
             </Link>

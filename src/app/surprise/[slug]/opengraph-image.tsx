@@ -92,7 +92,7 @@ export default async function InviteOGImage({
             right: 0,
             bottom: 0,
             background:
-              "radial-gradient(ellipse at 30% 40%, rgba(62, 107, 92,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(138, 111, 53,0.08) 0%, transparent 60%)",
+              "radial-gradient(ellipse at 30% 40%, rgba(62,107,92,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(138,111,53,0.08) 0%, transparent 60%)",
           }}
         />
 

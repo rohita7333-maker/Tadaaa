@@ -62,7 +62,7 @@ export default function AboutPage() {
             {steps.map((step, i) => (
               <div
                 key={i}
-                className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] border border-[#E9E6DF]/30"
+                className="bg-white rounded-3xl p-6 shadow-[0_4px_24px_rgba(26,27,24,0.06)] border border-[#E9E6DF]/30"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#FFF0E8] flex items-center justify-center mb-4">
                   <step.icon className="w-5 h-5 text-[#3E6B5C]" />
@@ -77,7 +77,7 @@ export default function AboutPage() {
 
       {/* Mission */}
       <section className="px-6 pb-20">
-        <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 sm:p-10 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] border border-[#E9E6DF]/30 text-center">
+        <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 sm:p-10 shadow-[0_4px_24px_rgba(26,27,24,0.06)] border border-[#E9E6DF]/30 text-center">
           <h2 className="font-heading text-2xl text-[#1A1B18] mb-4">Why we built this</h2>
           <p className="text-[#6F6E68] leading-relaxed mb-4">
             We believe the best gifts aren&apos;t things — they&apos;re moments. A birthday message

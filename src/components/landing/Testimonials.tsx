@@ -66,7 +66,7 @@ export default function Testimonials() {
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
-              className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] border border-[#E9E6DF]/40"
+              className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgba(26,27,24,0.06)] border border-[#E9E6DF]/40"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

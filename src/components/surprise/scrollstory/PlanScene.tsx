@@ -32,7 +32,7 @@ function Plaque({ event }: { event: StoryEvent }) {
       className="relative mx-auto w-full max-w-md rounded-[38px] px-8 py-9 text-center shadow-[0_18px_44px_rgba(45,41,38,0.12)]"
       style={{
         background: "linear-gradient(160deg, #FDF6E8 0%, #E8D5A8 100%)",
-        border: "1px solid rgba(201, 169, 110, 0.65)",
+        border: "1px solid rgba(201,169,110, 0.65)",
       }}
     >
       {/* Emoji flower clusters overlapping opposite corners */}
@@ -91,7 +91,7 @@ export default function PlanScene({ config }: PlanSceneProps) {
       className="relative px-6 py-28"
       style={{
         background:
-          "radial-gradient(80% 36% at 50% 0%, rgba(196, 104, 109, 0.12), transparent 70%), " +
+          "radial-gradient(80% 36% at 50% 0%, rgba(196,104,109, 0.12), transparent 70%), " +
           `linear-gradient(180deg, ${SEAM_MESSAGE_TO_PLAN} 0%, ${SEAM_PLAN_TO_POLAROID} 100%)`,
       }}
     >

@@ -68,7 +68,7 @@ export default function DeleteConfirmModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }}
             transition={makeReducedMotionTransition(shouldReduce, springs.weighty)}
-            className="relative w-full max-w-sm bg-white rounded-3xl border border-[#E9E6DF]/40 shadow-[0_24px_64px_rgba(26, 27, 24,0.24)] p-6 text-center"
+            className="relative w-full max-w-sm bg-white rounded-3xl border border-[#E9E6DF]/40 shadow-[0_24px_64px_rgba(26,27,24,0.24)] p-6 text-center"
           >
             <button
               onClick={() => !deleting && onClose()}

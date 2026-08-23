@@ -25,7 +25,7 @@ export default async function GiftSuccessPage({ searchParams }: GiftSuccessPageP
         <span className="font-heading text-xl text-[#1A1B18]">TaDaaaa</span>
       </Link>
 
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_24px_rgba(26, 27, 24,0.08)] border border-[#E9E6DF]/30 p-10 text-center">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_24px_rgba(26,27,24,0.08)] border border-[#E9E6DF]/30 p-10 text-center">
         {/* Icon */}
         <div className="flex items-center justify-center mb-6">
           <div className="relative">

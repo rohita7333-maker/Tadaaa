@@ -50,8 +50,8 @@ export default function ThemeSelector({
               className={cn(
                 "relative rounded-2xl overflow-hidden border-2 transition-colors text-left group",
                 isSelected
-                  ? "border-[#3E6B5C] shadow-[0_0_0_4px_rgba(62, 107, 92,0.15)]"
-                  : "border-transparent hover:border-[#E9E6DF] hover:shadow-[0_4px_16px_rgba(26, 27, 24,0.08)]"
+                  ? "border-[#3E6B5C] shadow-[0_0_0_4px_rgba(62,107,92,0.15)]"
+                  : "border-transparent hover:border-[#E9E6DF] hover:shadow-[0_4px_16px_rgba(26,27,24,0.08)]"
               )}
             >
               {/* Preview gradient */}

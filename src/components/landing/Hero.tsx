@@ -38,7 +38,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 25% 35%, rgba(62, 107, 92,0.1) 0%, transparent 55%), radial-gradient(ellipse at 75% 65%, rgba(138, 111, 53,0.08) 0%, transparent 55%), #FAF9F6",
+            "radial-gradient(ellipse at 25% 35%, rgba(62,107,92,0.1) 0%, transparent 55%), radial-gradient(ellipse at 75% 65%, rgba(138,111,53,0.08) 0%, transparent 55%), #FAF9F6",
         }}
       />
       <GridPattern variant="grid" cellSize={48} opacity={0.35} />
@@ -231,7 +231,7 @@ export default function Hero({ surpriseCount = 0 }: { surpriseCount?: number }) 
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
-                  className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#E9E6DF]/20 shadow-[0_2px_12px_rgba(26, 27, 24,0.04)]"
+                  className="bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-[#E9E6DF]/20 shadow-[0_2px_12px_rgba(26,27,24,0.04)]"
                   initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={makeReducedMotionTransition(reducedMotion, {

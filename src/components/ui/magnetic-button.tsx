@@ -62,7 +62,7 @@ export function MagneticButton({
         "btn-pri",
         "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-medium",
         "bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] text-white",
-        "shadow-[0_8px_24px_rgba(62, 107, 92,0.35)] hover:shadow-[0_12px_32px_rgba(62, 107, 92,0.5)]",
+        "shadow-[0_8px_24px_rgba(62,107,92,0.35)] hover:shadow-[0_12px_32px_rgba(62,107,92,0.5)]",
         "transition-shadow duration-300",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3E6B5C] focus-visible:ring-offset-2",
         "disabled:opacity-60 disabled:cursor-not-allowed",

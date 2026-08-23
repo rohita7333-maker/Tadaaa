@@ -49,7 +49,7 @@ export default async function LandingPage() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at 30% 50%, rgba(62, 107, 92,0.25) 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(138, 111, 53,0.15) 0%, transparent 60%)",
+              "radial-gradient(ellipse at 30% 50%, rgba(62,107,92,0.25) 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(138,111,53,0.15) 0%, transparent 60%)",
           }}
         />
 

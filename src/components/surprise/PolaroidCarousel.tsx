@@ -154,7 +154,7 @@ export default function PolaroidCarousel({
             {notes.map((n, i) => (
               <div
                 key={`n-${i}`}
-                className="bg-white rounded-2xl p-5 shadow-[0_10px_28px_rgba(26, 27, 24,0.16)]"
+                className="bg-white rounded-2xl p-5 shadow-[0_10px_28px_rgba(26,27,24,0.16)]"
               >
                 <p
                   className="text-[#1A1B18] leading-relaxed"
@@ -333,7 +333,7 @@ export default function PolaroidCarousel({
                 transition: shouldReduce
                   ? "opacity 0.3s ease"
                   : `transform 0.8s ${cssEasings.springBouncy}, opacity 0.5s ease`,
-                filter: "drop-shadow(0 18px 36px rgba(26, 27, 24,0.25))",
+                filter: "drop-shadow(0 18px 36px rgba(26,27,24,0.25))",
               }}
             >
               <div

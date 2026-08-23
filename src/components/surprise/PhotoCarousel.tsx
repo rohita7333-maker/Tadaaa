@@ -128,7 +128,7 @@ export default function PhotoCarousel({ photos, theme, message = "", onComplete 
             transition={getReducedMotionTransition(shouldReduce, { duration: 0.45, ease: "easeOut" as const })}
             className="cursor-grab active:cursor-grabbing select-none"
             style={{
-              filter: "drop-shadow(0 12px 32px rgba(26, 27, 24,0.22))",
+              filter: "drop-shadow(0 12px 32px rgba(26,27,24,0.22))",
             }}
           >
             {/* Polaroid frame */}

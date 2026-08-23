@@ -131,8 +131,8 @@ export function ContributeForm({ slug }: ContributeFormProps) {
 
   if (done) {
     return (
-      <div className="mt-8 bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center mx-auto mb-4 shadow-[0_4px_24px_rgba(62, 107, 92,0.3)]">
+      <div className="mt-8 bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_24px_rgba(26,27,24,0.06)] p-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center mx-auto mb-4 shadow-[0_4px_24px_rgba(62,107,92,0.3)]">
           <Heart className="w-8 h-8 fill-white text-white" />
         </div>
         <h2 className="font-heading text-2xl text-[#1A1B18] mb-2">
@@ -149,7 +149,7 @@ export function ContributeForm({ slug }: ContributeFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-8 bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] p-6 space-y-5"
+      className="mt-8 bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_24px_rgba(26,27,24,0.06)] p-6 space-y-5"
     >
       <div>
         <label className="text-[#1A1B18] font-medium text-sm mb-1.5 block">

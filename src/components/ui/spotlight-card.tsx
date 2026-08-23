@@ -25,7 +25,7 @@ interface SpotlightCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function SpotlightCard({
   children,
   className,
-  spotlightColor = "rgba(244, 213, 215, 0.55)",
+  spotlightColor = "rgba(244,213,215, 0.55)",
   radius = 320,
   bare = false,
   ...props

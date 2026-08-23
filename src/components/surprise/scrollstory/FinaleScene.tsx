@@ -119,8 +119,8 @@ export default function FinaleScene({ config }: FinaleSceneProps) {
                 key={unit.label}
                 className="rounded-[18px] px-2 py-4"
                 style={{
-                  backgroundColor: "rgba(255, 248, 240, 0.07)",
-                  border: "1px solid rgba(201, 169, 110, 0.4)",
+                  backgroundColor: "rgba(255,248,240, 0.07)",
+                  border: "1px solid rgba(201,169,110, 0.4)",
                 }}
               >
                 <p

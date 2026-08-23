@@ -40,7 +40,7 @@ export default function OccasionSelector({
               transition={makeReducedMotionTransition(shouldReduce, springs.soft)}
               className={`py-3 px-2 rounded-2xl border-2 text-center transition-colors ${
                 selected === occ.id
-                  ? "border-[#3E6B5C] bg-[#FFF0EE]"
+                  ? "border-[#3E6B5C] bg-[#E7EFEA]"
                   : "border-[#E9E6DF] bg-white hover:border-[#3E6B5C]/40"
               }`}
             >
@@ -72,7 +72,7 @@ export default function OccasionSelector({
                       aria-pressed={isSelected}
                       className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors ${
                         isSelected
-                          ? "border-[#3E6B5C] bg-[#FFF0EE] text-[#3E6B5C] font-medium"
+                          ? "border-[#3E6B5C] bg-[#E7EFEA] text-[#3E6B5C] font-medium"
                           : "border-[#E9E6DF] bg-white text-[#6F6E68] hover:border-[#3E6B5C] hover:text-[#3E6B5C]"
                       }`}
                     >

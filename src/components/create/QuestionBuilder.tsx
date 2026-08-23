@@ -45,7 +45,7 @@ export default function QuestionBuilder({ questions, onQuestionsChange }: Questi
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_16px_rgba(26, 27, 24,0.04)] p-6">
+    <div className="bg-white rounded-2xl border border-[#E9E6DF]/40 shadow-[0_4px_16px_rgba(26,27,24,0.04)] p-6">
       <div className="flex items-center gap-2 mb-1">
         <HelpCircle className="w-4 h-4 text-[#3E6B5C]" />
         <h3 className="font-heading text-base text-[#1A1B18]">Questions (Optional)</h3>

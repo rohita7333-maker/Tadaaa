@@ -84,7 +84,7 @@ export default function TestSurprisePage() {
       <h1 className="font-heading text-3xl text-[#1A1B18] mb-2">Surprise Page — Test</h1>
       <p className="text-[#6F6E68] mb-8 text-sm">Pick theme + mode, then preview the full experience</p>
 
-      <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(26, 27, 24,0.08)] p-8 w-full max-w-md space-y-6">
+      <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(26,27,24,0.08)] p-8 w-full max-w-md space-y-6">
         {/* Theme picker */}
         <div>
           <p className="text-[#1A1B18] font-medium text-sm mb-3">Theme</p>

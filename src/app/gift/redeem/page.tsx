@@ -99,7 +99,7 @@ function InvalidToken({ reason }: { reason: string }) {
         <span className="font-heading text-xl text-[#1A1B18]">TaDaaaa</span>
       </Link>
 
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_24px_rgba(26, 27, 24,0.08)] border border-[#E9E6DF]/30 p-10 text-center">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_4px_24px_rgba(26,27,24,0.08)] border border-[#E9E6DF]/30 p-10 text-center">
         <div className="flex items-center justify-center mb-6">
           <div className="w-20 h-20 rounded-full bg-[#FFF0E8] flex items-center justify-center">
             <AlertCircle className="w-9 h-9 text-[#3E6B5C]" />

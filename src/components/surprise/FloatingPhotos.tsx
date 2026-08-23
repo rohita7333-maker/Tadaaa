@@ -180,7 +180,7 @@ export default function FloatingPhotos({ photos, screenIndex }: FloatingPhotosPr
               style={{
                 width: `${frameW}px`,
                 padding: `10px 10px 48px 10px`,
-                boxShadow: "0 8px 28px rgba(26, 27, 24,0.30)",
+                boxShadow: "0 8px 28px rgba(26,27,24,0.30)",
               }}
             >
               <div style={{ width: `${imgW}px`, height: `${imgH}px`, overflow: "hidden" }}>

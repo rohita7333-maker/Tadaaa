@@ -97,13 +97,13 @@ export default function PricingTiers({ plans, isAuthed }: Props) {
               bare
               className={`rounded-3xl flex flex-col relative overflow-hidden ${
                 plan.highlight
-                  ? "bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] text-white shadow-[0_12px_48px_rgba(62, 107, 92,0.35)]"
-                  : "bg-white shadow-[0_4px_24px_rgba(26, 27, 24,0.06)] border border-[#E9E6DF]/30"
+                  ? "bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] text-white shadow-[0_12px_48px_rgba(62,107,92,0.35)]"
+                  : "bg-white shadow-[0_4px_24px_rgba(26,27,24,0.06)] border border-[#E9E6DF]/30"
               }`}
               spotlightColor={
                 plan.highlight
                   ? "rgba(255,255,255,0.18)"
-                  : "rgba(244, 213, 215, 0.55)"
+                  : "rgba(244,213,215, 0.55)"
               }
             >
               <div className="p-8 flex flex-col h-full">

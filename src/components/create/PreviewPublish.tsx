@@ -183,7 +183,7 @@ export default function PreviewPublish({
               <div className="absolute -left-[3px] top-[102px] w-[3px] h-6 bg-[#c0c0c0] rounded-l-sm" />
               {/* Device shell — titanium-ish gradient */}
               <div
-                className="rounded-[44px] p-2 shadow-[0_32px_80px_rgba(26, 27, 24,0.28)]"
+                className="rounded-[44px] p-2 shadow-[0_32px_80px_rgba(26,27,24,0.28)]"
                 style={{
                   background: "linear-gradient(to bottom, #e8e8e8, #d0d0d0, #b8b8b8)",
                 }}

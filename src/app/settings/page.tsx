@@ -87,7 +87,7 @@ export default async function SettingsPage() {
         {/* Account */}
         <SettingsSection
           index={1}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-white/60 mb-5"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26,27,24,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#DCE8E2] to-[#FAF9F6] flex items-center justify-center">
@@ -131,7 +131,7 @@ export default async function SettingsPage() {
         {/* Notifications */}
         <SettingsSection
           index={2}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-white/60 mb-5"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26,27,24,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#DCE8E2] to-[#FAF9F6] flex items-center justify-center">
@@ -156,7 +156,7 @@ export default async function SettingsPage() {
         {/* Security */}
         <SettingsSection
           index={3}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-white/60 mb-5"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26,27,24,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#DCE8E2] to-[#FAF9F6] flex items-center justify-center">
@@ -170,7 +170,7 @@ export default async function SettingsPage() {
         {/* Your Data */}
         <SettingsSection
           index={4}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-white/60 mb-5"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26,27,24,0.08)] border border-white/60 mb-5"
         >
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#DCE8E2] to-[#FAF9F6] flex items-center justify-center">
@@ -192,7 +192,7 @@ export default async function SettingsPage() {
         {/* Danger zone */}
         <SettingsSection
           index={5}
-          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] border border-red-100"
+          className="bg-white/85 backdrop-blur-sm rounded-3xl p-6 shadow-[0_8px_32px_rgba(26,27,24,0.08)] border border-red-100"
         >
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">

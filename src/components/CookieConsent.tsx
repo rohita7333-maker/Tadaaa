@@ -50,7 +50,7 @@ export function CookieConsent() {
           exit={shouldReduce ? { opacity: 0 } : { y: 24, opacity: 0 }}
           transition={makeReducedMotionTransition(shouldReduce, { type: "spring", stiffness: 280, damping: 26 }, { duration: durations.instant })}
         >
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-[#E9E6DF]/60 shadow-[0_20px_60px_rgba(26, 27, 24,0.18)] p-5">
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-[#E9E6DF]/60 shadow-[0_20px_60px_rgba(26,27,24,0.18)] p-5">
             <p
               id="cookie-consent-title"
               className="text-sm leading-relaxed text-[#1A1B18]"

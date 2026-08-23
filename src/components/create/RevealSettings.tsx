@@ -59,7 +59,7 @@ export default function RevealSettings({
             className={cn(
               "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
               revealType === "tap"
-                ? "border-[#3E6B5C] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(62, 107, 92,0.1)]"
+                ? "border-[#3E6B5C] bg-[#E7EFEA] shadow-[0_0_0_4px_rgba(62,107,92,0.1)]"
                 : "border-[#E9E6DF] bg-white hover:border-[#3E6B5C]/40"
             )}
           >
@@ -86,7 +86,7 @@ export default function RevealSettings({
             className={cn(
               "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
               revealType === "countdown"
-                ? "border-[#3E6B5C] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(62, 107, 92,0.1)]"
+                ? "border-[#3E6B5C] bg-[#E7EFEA] shadow-[0_0_0_4px_rgba(62,107,92,0.1)]"
                 : "border-[#E9E6DF] bg-white hover:border-[#3E6B5C]/40"
             )}
           >
@@ -113,7 +113,7 @@ export default function RevealSettings({
             className={cn(
               "relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors",
               revealType === "scroll_story"
-                ? "border-[#3E6B5C] bg-[#FFF0EE] shadow-[0_0_0_4px_rgba(62, 107, 92,0.1)]"
+                ? "border-[#3E6B5C] bg-[#E7EFEA] shadow-[0_0_0_4px_rgba(62,107,92,0.1)]"
                 : "border-[#E9E6DF] bg-white hover:border-[#3E6B5C]/40"
             )}
           >

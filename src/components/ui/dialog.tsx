@@ -41,7 +41,7 @@ function Dialog({ open, onClose, children, className }: DialogProps) {
           ref={overlayRef}
           onClick={handleOverlayClick}
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          style={{ backgroundColor: "rgba(26, 27, 24,0.5)" }}
+          style={{ backgroundColor: "rgba(26,27,24,0.5)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -49,7 +49,7 @@ function Dialog({ open, onClose, children, className }: DialogProps) {
         >
           <motion.div
             className={cn(
-              "relative w-full max-w-lg bg-white rounded-2xl shadow-[0_24px_80px_rgba(26, 27, 24,0.18)] overflow-hidden",
+              "relative w-full max-w-lg bg-white rounded-2xl shadow-[0_24px_80px_rgba(26,27,24,0.18)] overflow-hidden",
               className
             )}
             initial={{ scale: 0.95, opacity: 0, y: 16 }}

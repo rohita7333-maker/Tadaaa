@@ -20,7 +20,7 @@ export default function VerifyEmailPage() {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md text-center bg-white rounded-3xl p-10 border border-[#E9E6DF]/40 shadow-[0_4px_24px_rgba(26, 27, 24,0.06)]">
+        <div className="w-full max-w-md text-center bg-white rounded-3xl p-10 border border-[#E9E6DF]/40 shadow-[0_4px_24px_rgba(26,27,24,0.06)]">
           <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[#FFF0E8] to-[#F1EFE9] flex items-center justify-center">
             <Mail className="w-7 h-7 text-[#3E6B5C]" />
           </div>

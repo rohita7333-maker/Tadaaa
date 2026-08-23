@@ -153,7 +153,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       {/* Start-from-a-template CTA — mirrors the stat card styling */}
       <Link
         href="/templates"
-        className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-[#E9E6DF]/30 shadow-[0_2px_12px_rgba(26, 27, 24,0.04)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(26, 27, 24,0.10)] hover:border-[#3E6B5C]/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40 mb-8"
+        className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-[#E9E6DF]/30 shadow-[0_2px_12px_rgba(26,27,24,0.04)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(26,27,24,0.10)] hover:border-[#3E6B5C]/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40 mb-8"
       >
         <div
           className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -178,7 +178,7 @@ export default async function DashboardPage({ searchParams }: Props) {
               key={s.label}
               href={s.href}
               title={s.hint}
-              className="bg-white rounded-2xl p-4 border border-[#E9E6DF]/30 shadow-[0_2px_12px_rgba(26, 27, 24,0.04)] flex items-center gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(26, 27, 24,0.10)] hover:border-[#3E6B5C]/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40"
+              className="bg-white rounded-2xl p-4 border border-[#E9E6DF]/30 shadow-[0_2px_12px_rgba(26,27,24,0.04)] flex items-center gap-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(26,27,24,0.10)] hover:border-[#3E6B5C]/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40"
             >
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -241,7 +241,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       {/* Empty state — no invites at all */}
       {all.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#FFF0E8] to-[#F1EFE9] flex items-center justify-center mb-6 shadow-[0_8px_32px_rgba(62, 107, 92,0.15)]">
+          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#FFF0E8] to-[#F1EFE9] flex items-center justify-center mb-6 shadow-[0_8px_32px_rgba(62,107,92,0.15)]">
             <Sparkles className="w-10 h-10 text-[#3E6B5C]" />
           </div>
           <h2 className="font-heading text-2xl text-[#1A1B18] mb-3">No surprises yet</h2>
@@ -297,7 +297,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       {/* Mobile FAB */}
       <Link
         href="/create"
-        className="sm:hidden fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center text-white shadow-[0_4px_20px_rgba(62, 107, 92,0.4)] hover:scale-110 transition-transform duration-300 z-50"
+        className="sm:hidden fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3E6B5C] to-[#2E5145] flex items-center justify-center text-white shadow-[0_4px_20px_rgba(62,107,92,0.4)] hover:scale-110 transition-transform duration-300 z-50"
       >
         <Plus className="w-6 h-6" />
       </Link>

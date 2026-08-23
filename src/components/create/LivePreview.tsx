@@ -50,7 +50,7 @@ export function LivePreviewPhone({
     <div className="w-full max-w-[280px] mx-auto">
       <div
         className="relative aspect-[9/17.5] rounded-[32px] bg-white p-2.5"
-        style={{ boxShadow: "0 18px 44px rgba(26, 27, 24, 0.16), 0 0 0 1px #E9E6DF" }}
+        style={{ boxShadow: "0 18px 44px rgba(26,27,24, 0.16), 0 0 0 1px #E9E6DF" }}
       >
         <div
           className="h-full w-full rounded-[24px] overflow-hidden flex flex-col items-center justify-center text-center px-5 py-6 relative"

@@ -51,7 +51,7 @@ export default function CraftingIntro({ onComplete }: { onComplete: () => void }
             className="absolute inset-0"
             style={{
               background:
-                "radial-gradient(circle at 50% 45%, rgba(62, 107, 92,0.08) 0%, transparent 60%)",
+                "radial-gradient(circle at 50% 45%, rgba(62,107,92,0.08) 0%, transparent 60%)",
             }}
           />
 

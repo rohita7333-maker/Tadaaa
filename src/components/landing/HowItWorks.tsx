@@ -61,7 +61,7 @@ export default function HowItWorks() {
 
   return (
     <section id="how-it-works" className="py-28 px-6 bg-white relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(62, 107, 92,0.04)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(62,107,92,0.04)_0%,transparent_70%)]" />
 
       <div className="max-w-5xl mx-auto relative">
         {/* Section header — simple, not competing with hero */}
@@ -103,7 +103,7 @@ export default function HowItWorks() {
                 })}
               >
                 <SpotlightCard
-                  className="h-full bg-[#FAF9F6] hover:border-[#E9E6DF]/50 hover:shadow-[0_8px_32px_rgba(26, 27, 24,0.08)] transition-all duration-300 group"
+                  className="h-full bg-[#FAF9F6] hover:border-[#E9E6DF]/50 hover:shadow-[0_8px_32px_rgba(26,27,24,0.08)] transition-all duration-300 group"
                 >
                   <div className="p-7 h-full flex flex-col">
                     <div className="flex items-center gap-3 mb-5">

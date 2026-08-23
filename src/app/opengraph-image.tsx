@@ -29,7 +29,7 @@ export default function OGImage() {
             width: 300,
             height: 300,
             borderRadius: "50%",
-            background: "rgba(62, 107, 92,0.1)",
+            background: "rgba(62,107,92,0.1)",
           }}
         />
         <div
@@ -40,7 +40,7 @@ export default function OGImage() {
             width: 200,
             height: 200,
             borderRadius: "50%",
-            background: "rgba(138, 111, 53,0.1)",
+            background: "rgba(138,111,53,0.1)",
           }}
         />
 

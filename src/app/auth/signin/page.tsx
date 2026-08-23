@@ -23,7 +23,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at 20% 30%, rgba(62, 107, 92,0.3) 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, rgba(138, 111, 53,0.2) 0%, transparent 55%)",
+              "radial-gradient(ellipse at 20% 30%, rgba(62,107,92,0.3) 0%, transparent 55%), radial-gradient(ellipse at 80% 70%, rgba(138,111,53,0.2) 0%, transparent 55%)",
           }}
         />
         {polaroids.map((p, i) => (

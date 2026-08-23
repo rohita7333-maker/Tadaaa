@@ -23,7 +23,7 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/90 backdrop-blur-md border-b border-[#E9E6DF]/40 shadow-[0_2px_12px_rgba(26, 27, 24,0.06)]"
+          ? "bg-white/90 backdrop-blur-md border-b border-[#E9E6DF]/40 shadow-[0_2px_12px_rgba(26,27,24,0.06)]"
           : "bg-transparent"
       }`}
     >
@@ -74,7 +74,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/auth/signup"
-            className="text-sm font-semibold text-white bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_2px_12px_rgba(62, 107, 92,0.35)] hover:shadow-[0_4px_20px_rgba(62, 107, 92,0.5)]"
+            className="text-sm font-semibold text-white bg-gradient-to-r from-[#3E6B5C] to-[#2E5145] hover:from-[#2E5145] hover:to-[#3E6B5C] px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_2px_12px_rgba(62,107,92,0.35)] hover:shadow-[0_4px_20px_rgba(62,107,92,0.5)]"
           >
             Sign up free
           </Link>

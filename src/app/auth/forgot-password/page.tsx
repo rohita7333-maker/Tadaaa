@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
         <span className="font-heading text-xl text-[#1A1B18]">TaDaaaa</span>
       </Link>
 
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-[0_4px_24px_rgba(26, 27, 24,0.08)] border border-[#E9E6DF]/30 p-8">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-[0_4px_24px_rgba(26,27,24,0.08)] border border-[#E9E6DF]/30 p-8">
         {sent ? (
           /* Success state */
           <div className="text-center space-y-4">

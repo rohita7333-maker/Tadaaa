@@ -40,7 +40,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       offset={16}
       toastOptions={{
         classNames: {
-          toast: "font-sans text-sm rounded-2xl shadow-[0_8px_32px_rgba(26, 27, 24,0.12)] border border-[#E9E6DF]/60",
+          toast: "font-sans text-sm rounded-2xl shadow-[0_8px_32px_rgba(26,27,24,0.12)] border border-[#E9E6DF]/60",
           success: "bg-white text-[#1A1B18] border-[#E9E6DF]/60",
           error: "bg-white text-[#1A1B18] border-[#DCE8E2]/80",
           info: "bg-white text-[#1A1B18] border-[#E9E6DF]/60",

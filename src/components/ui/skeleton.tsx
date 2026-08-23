@@ -28,7 +28,7 @@ export function InviteCardSkeleton() {
   return (
     <div className="bg-white rounded-3xl border border-[#E9E6DF]/20 overflow-hidden"
       style={{
-        boxShadow: "0 2px 4px rgba(26, 27, 24,0.04), 0 8px 24px rgba(26, 27, 24,0.08)",
+        boxShadow: "0 2px 4px rgba(26,27,24,0.04), 0 8px 24px rgba(26,27,24,0.08)",
       }}
     >
       <Skeleton className="h-28 rounded-none" />

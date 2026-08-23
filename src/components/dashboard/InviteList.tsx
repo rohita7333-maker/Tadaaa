@@ -80,9 +80,9 @@ const cardExitReduced = {
 };
 
 const STATIC_SHADOW =
-  "0 2px 4px rgba(26, 27, 24,0.04), 0 8px 24px rgba(26, 27, 24,0.08), 0 24px 48px rgba(26, 27, 24,0.06)";
+  "0 2px 4px rgba(26,27,24,0.04), 0 8px 24px rgba(26,27,24,0.08), 0 24px 48px rgba(26,27,24,0.06)";
 const HOVER_SHADOW =
-  "0 4px 8px rgba(26, 27, 24,0.06), 0 16px 40px rgba(26, 27, 24,0.14), 0 40px 80px rgba(26, 27, 24,0.10)";
+  "0 4px 8px rgba(26,27,24,0.06), 0 16px 40px rgba(26,27,24,0.14), 0 40px 80px rgba(26,27,24,0.10)";
 
 export default function InviteList({ invites, creatorName, tier = "free" }: InviteListProps) {
   const shouldReduce = useReducedMotion();

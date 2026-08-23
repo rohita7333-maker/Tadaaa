@@ -27,7 +27,7 @@ export default function SignUpPage() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at 70% 20%, rgba(62, 107, 92,0.25) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(138, 111, 53,0.2) 0%, transparent 55%)",
+              "radial-gradient(ellipse at 70% 20%, rgba(62,107,92,0.25) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(138,111,53,0.2) 0%, transparent 55%)",
           }}
         />
         <GridPattern variant="dots" cellSize={32} opacity={0.3} strokeColor="#8A6F35" />

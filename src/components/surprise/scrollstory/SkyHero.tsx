@@ -179,7 +179,7 @@ export default function SkyHero({ config }: SkyHeroProps) {
             fontWeight: 500,
             fontSize: "clamp(46px, 10vw, 84px)",
             lineHeight: 1.04,
-            textShadow: "0 2px 28px rgba(35, 20, 15, 0.45)",
+            textShadow: "0 2px 28px rgba(35,20,15, 0.45)",
           }}
         >
           {config.recipient}
@@ -216,7 +216,7 @@ export default function SkyHero({ config }: SkyHeroProps) {
         <path
           d={`M ${ROPE_START.x} ${ROPE_START.y} Q ${ROPE_CTRL.x} ${ROPE_CTRL.y} ${ROPE_END.x} ${ROPE_END.y}`}
           fill="none"
-          stroke="rgba(45, 41, 38, 0.55)"
+          stroke="rgba(45,41,38, 0.55)"
           strokeWidth="3"
         />
         {BUNTING_FLAGS.map((flag, i) => (
@@ -224,7 +224,7 @@ export default function SkyHero({ config }: SkyHeroProps) {
             key={i}
             points={`${flag.x - 14},${flag.y} ${flag.x + 14},${flag.y} ${flag.x},${flag.y + 26}`}
             fill={flag.color}
-            stroke="rgba(45, 41, 38, 0.25)"
+            stroke="rgba(45,41,38, 0.25)"
             strokeWidth="1"
           />
         ))}

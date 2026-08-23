@@ -164,7 +164,7 @@ export default async function ActivityPage({ searchParams }: Props) {
       {/* Empty — nothing anywhere */}
       {events.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#FFF0E8] to-[#F1EFE9] flex items-center justify-center mb-5 shadow-[0_8px_32px_rgba(62, 107, 92,0.15)]">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#FFF0E8] to-[#F1EFE9] flex items-center justify-center mb-5 shadow-[0_8px_32px_rgba(62,107,92,0.15)]">
             <Sparkles className="w-8 h-8 text-[#3E6B5C]" />
           </div>
           <h2 className="font-heading text-xl text-[#1A1B18] mb-2">No activity yet</h2>
@@ -199,7 +199,7 @@ export default async function ActivityPage({ searchParams }: Props) {
         {groups.map((group) => (
           <section
             key={group.invite.id}
-            className="bg-white rounded-2xl border border-[#E9E6DF]/30 shadow-[0_2px_12px_rgba(26, 27, 24,0.04)] overflow-hidden"
+            className="bg-white rounded-2xl border border-[#E9E6DF]/30 shadow-[0_2px_12px_rgba(26,27,24,0.04)] overflow-hidden"
           >
             <header className="flex items-baseline justify-between gap-3 px-5 pt-4 pb-3 border-b border-[#E9E6DF]/30">
               <Link

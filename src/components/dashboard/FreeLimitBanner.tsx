@@ -31,9 +31,9 @@ export default function FreeLimitBanner({ used, limit }: FreeLimitBannerProps) {
           className="pointer-events-none absolute inset-0 rounded-2xl"
           animate={{
             boxShadow: [
-              "0 0 0 0 rgba(62, 107, 92,0.0)",
-              "0 0 0 3px rgba(62, 107, 92,0.18)",
-              "0 0 0 0 rgba(62, 107, 92,0.0)",
+              "0 0 0 0 rgba(62,107,92,0.0)",
+              "0 0 0 3px rgba(62,107,92,0.18)",
+              "0 0 0 0 rgba(62,107,92,0.0)",
             ],
           }}
           transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}

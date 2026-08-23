@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# graphify caches (regenerated)
+graphify-out/cache/
+src/graphify-out/

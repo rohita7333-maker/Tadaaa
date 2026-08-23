@@ -8,8 +8,8 @@
     "hash": "498f1a8b0161a92ff8f806bed8455624"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/next-env.d.ts": {
-    "mtime": 1785709975.4195712,
-    "hash": "2a74d3909800ca5467fa83b0ab4a4890"
+    "mtime": 1787107195.631581,
+    "hash": "d0f8375ae1199dc7acd3977fc33b78b8"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sentry.edge.config.ts": {
     "mtime": 1779338267.2834675,
@@ -32,7 +32,7 @@
     "hash": "dfa1f5f6a7037bf39dc510f30b180002"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/next.config.ts": {
-    "mtime": 1785087570.9846227,
+    "mtime": 1787107004.80565,
     "hash": "fee6317b6fb55d13ec9e0a73cea50bae"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/proxy.ts": {
@@ -40,15 +40,15 @@
     "hash": "65528261137701f9b49c091021dbf081"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/apple-icon.tsx": {
-    "mtime": 1779069387.2224014,
+    "mtime": 1787107004.8173425,
     "hash": "bf104094506583886345eec478d61ef1"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/icon.tsx": {
-    "mtime": 1779069380.6816785,
+    "mtime": 1787107004.8511903,
     "hash": "902e97f3a45dbc9764375603dda4c1f5"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/opengraph-image.tsx": {
-    "mtime": 1779069399.830975,
+    "mtime": 1787107004.8563347,
     "hash": "aa0e487b0fa2e02450ec2d5f699c387f"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/sitemap.ts": {
@@ -56,83 +56,83 @@
     "hash": "1a16dff154719febdd004d9c5cf495e2"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/icon1.tsx": {
-    "mtime": 1779326320.6536837,
+    "mtime": 1787107004.8519604,
     "hash": "296c3a7172af9cf335ec7543cec8dc57"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/layout.tsx": {
-    "mtime": 1785087571.0047338,
+    "mtime": 1787463919.690304,
     "hash": "009a1eb3cfc7a5b4445e5165439735eb"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/error.tsx": {
-    "mtime": 1779069429.8247743,
+    "mtime": 1787107004.8481822,
     "hash": "b0b6969b8bb04c84065a0c5282646c5a"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/icon2.tsx": {
-    "mtime": 1779326327.0209455,
+    "mtime": 1787107004.8527174,
     "hash": "817013617e9ef3a5c737191d103e2918"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/manifest.ts": {
-    "mtime": 1779326413.086837,
+    "mtime": 1787107004.8546276,
     "hash": "64b473c8f7a9b88f0336c809a2aac189"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/loading.tsx": {
-    "mtime": 1779069445.1557937,
+    "mtime": 1787107004.8538802,
     "hash": "305f981ab03a8c5846ebaa79274bbe4f"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/page.tsx": {
-    "mtime": 1785683416.3983874,
+    "mtime": 1787463919.6907008,
     "hash": "40e7d113b03f0969d3dbb6c89d6eba1a"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/not-found.tsx": {
-    "mtime": 1779069438.0297725,
+    "mtime": 1787107004.8555393,
     "hash": "d5c97a9c6700a5a1c1aa70083bf8c3a8"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/settings/AvatarUpload.tsx": {
-    "mtime": 1785087571.0056164,
+    "mtime": 1787463919.6921415,
     "hash": "9275c34e31b526471185259d5ee6b5e8"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/settings/ChangePasswordForm.tsx": {
-    "mtime": 1779326085.5552285,
+    "mtime": 1787463919.6946948,
     "hash": "d65d2a056d63c15d34a4a9180868b7cb"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/settings/DeleteAccountButton.tsx": {
-    "mtime": 1778443704.1043193,
+    "mtime": 1787463919.6950183,
     "hash": "cf4bd2d4c587c51eb5758e58cf5f29ed"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/settings/SettingsAnimated.tsx": {
-    "mtime": 1785087571.0062833,
+    "mtime": 1787463919.695942,
     "hash": "d97c3d0f0ca9441eb16bb6aaf65ff66c"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/settings/page.tsx": {
-    "mtime": 1785699958.5077348,
+    "mtime": 1787463919.6968184,
     "hash": "d6de89f78dbfb8f46604f5cc3bafb7fc"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/settings/data/page.tsx": {
-    "mtime": 1779340334.430145,
+    "mtime": 1787463919.696337,
     "hash": "61d1f385a8b58a48fdf22eafd33c6da9"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/privacy/page.tsx": {
-    "mtime": 1778443724.4633331,
+    "mtime": 1787107004.8591676,
     "hash": "16407601964a7d4640b75a6ac301dbe5"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/auth/signup/page.tsx": {
-    "mtime": 1779592211.8605142,
+    "mtime": 1787463919.668837,
     "hash": "f631f67f904594f3c48155cba2b4f7c0"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/auth/verify-email/page.tsx": {
-    "mtime": 1779326031.7190855,
+    "mtime": 1787463919.669591,
     "hash": "ff2c61af4b3c1ff69f198d3130dff49d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/auth/signin/page.tsx": {
-    "mtime": 1785707499.0910416,
+    "mtime": 1787463919.668492,
     "hash": "48f156692a043d488422075288861d0d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/auth/forgot-password/page.tsx": {
-    "mtime": 1778805898.818088,
+    "mtime": 1787463919.667648,
     "hash": "2c3a50b30eddfe70fa12ff7657287694"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/auth/reset-password/page.tsx": {
-    "mtime": 1778805915.6604445,
+    "mtime": 1787463919.667918,
     "hash": "0c26b57eca8ac9f22001c798783dd6ef"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/auth/callback/route.ts": {
@@ -140,15 +140,15 @@
     "hash": "d08253675bcd4891a00efa48139740cd"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/terms/page.tsx": {
-    "mtime": 1778443743.1144032,
+    "mtime": 1787107004.8657706,
     "hash": "f5099405af926e287a0fdd7b30a1211d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/about/page.tsx": {
-    "mtime": 1785087570.9949322,
+    "mtime": 1787107004.8092933,
     "hash": "08022dcfa00d76dba2f001341e1c8c6e"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/surprise/error.tsx": {
-    "mtime": 1779326291.6382492,
+    "mtime": 1787107004.863586,
     "hash": "5f0b0e6aa65284b43f228a7eb3767447"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/surprise/test/layout.tsx": {
@@ -156,47 +156,47 @@
     "hash": "fb1fb18783074cd9fdb6391952be7580"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/surprise/test/page.tsx": {
-    "mtime": 1785200964.7379887,
+    "mtime": 1787107004.8648365,
     "hash": "c271ac1c9478ddc6194696d768562579"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/surprise/[slug]/opengraph-image.tsx": {
-    "mtime": 1785279865.4417093,
+    "mtime": 1787107004.8625066,
     "hash": "18579b108671d88c0ddab08e23473cc6"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/surprise/[slug]/page.tsx": {
-    "mtime": 1785279765.8757703,
+    "mtime": 1787463919.6972117,
     "hash": "deeac3e90c1b3a417deb76175ffc8289"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/gift/success/page.tsx": {
-    "mtime": 1779572988.8158076,
+    "mtime": 1787107004.8499043,
     "hash": "bbd9f2e1671886bda1e072d0a79aa0cb"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/gift/redeem/page.tsx": {
-    "mtime": 1779573641.0014892,
+    "mtime": 1787107004.8489447,
     "hash": "e7000078456a306d48c22124f89368fd"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/dashboard/layout.tsx": {
-    "mtime": 1785699885.0639715,
+    "mtime": 1787463919.6729603,
     "hash": "de8e4b0c0f939f553e029cea9d6c43d1"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/dashboard/error.tsx": {
-    "mtime": 1779326271.4058452,
+    "mtime": 1787463919.6724865,
     "hash": "b0f9da244dc311ce4268a01f145eaafd"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/dashboard/loading.tsx": {
-    "mtime": 1779592257.682427,
+    "mtime": 1787463919.6868312,
     "hash": "65fa85a12c48d059d831ed9f1ecbf079"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/dashboard/page.tsx": {
-    "mtime": 1785705342.5935361,
+    "mtime": 1787463919.6883435,
     "hash": "5b11edd5667fd65e619dbf41c17e5731"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/dashboard/activity/page.tsx": {
-    "mtime": 1785705244.1329658,
+    "mtime": 1787463919.6720216,
     "hash": "69345c9ffaf1423811a6d7107fcee205"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/contribute/[slug]/page.tsx": {
-    "mtime": 1785087571.0015264,
+    "mtime": 1787463919.670214,
     "hash": "daee26fe13a17be1eb0f431f64fd32d9"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/video/status/route.ts": {
@@ -204,7 +204,7 @@
     "hash": "12e900d2d16e122527526bf45fe0a86d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/video/generate/route.ts": {
-    "mtime": 1779585212.8450954,
+    "mtime": 1787107004.8167124,
     "hash": "ca4e4c6f681ab758f82937e03b07f8d8"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/unsubscribe/route.test.ts": {
@@ -212,11 +212,11 @@
     "hash": "dc45a42b54fa622a5ef59b6ed9965ff9"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/unsubscribe/route.ts": {
-    "mtime": 1779653155.6241875,
+    "mtime": 1787107004.8154223,
     "hash": "0d4f5218cd46f5741b97ff8ecfcffff1"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/invite/answer/route.ts": {
-    "mtime": 1779653128.1252909,
+    "mtime": 1787464195.9007137,
     "hash": "323dde8bffcfff5395df9e3b167d9d5d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/invite/view/route.ts": {
@@ -224,7 +224,7 @@
     "hash": "19d58913b678d5f1a78162c1ac42070f"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/invite/rsvp/route.ts": {
-    "mtime": 1785087571.0008335,
+    "mtime": 1787464195.901327,
     "hash": "062f1d0258f6c66e1cdef6b7dfa291d3"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/invite/[slug]/art/route.test.ts": {
@@ -260,7 +260,7 @@
     "hash": "eb9dcf1eed20d4dd45f7d3648226d411"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/invite/[slug]/collage/route.tsx": {
-    "mtime": 1785087570.9989717,
+    "mtime": 1787107004.8115268,
     "hash": "17ceaa47c29983393726f9861042ef84"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/mobile/reveal/[slug]/route.ts": {
@@ -324,7 +324,7 @@
     "hash": "442632675ad1f05d07567a37595db9ab"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/cron/expire-invites/route.ts": {
-    "mtime": 1779652893.6303167,
+    "mtime": 1787463919.6668403,
     "hash": "bf23e16c096080b4646f233cac08463f"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/cron/purge-deleted/route.ts": {
@@ -344,31 +344,31 @@
     "hash": "0a5aa55834719aa31095598380b2908e"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/api/stripe/checkout/route.ts": {
-    "mtime": 1785701336.818432,
+    "mtime": 1787107004.8145971,
     "hash": "b976d4db6fef4293225012a919e22750"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/templates/page.tsx": {
-    "mtime": 1785699893.8156404,
+    "mtime": 1787463919.6975849,
     "hash": "bbfa3d8b0923b4d2aec3a9304e50b18b"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/create/layout.tsx": {
-    "mtime": 1785707524.7848241,
+    "mtime": 1787463919.6706042,
     "hash": "2a038ae721f38e1c2045729f414e8c8d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/create/error.tsx": {
-    "mtime": 1779326282.3705933,
+    "mtime": 1787107004.8233457,
     "hash": "ac7eee67f7edb31fedf5950c14494719"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/create/page.tsx": {
-    "mtime": 1785711553.5484982,
+    "mtime": 1787463919.6711783,
     "hash": "dc41c49707effa88e0270cf314962d9d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/app/pricing/page.tsx": {
-    "mtime": 1785699936.6955352,
+    "mtime": 1787463919.6913407,
     "hash": "62ab80e2a794bfb355539ad0415f7b97"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/CookieConsent.tsx": {
-    "mtime": 1785087571.0074294,
+    "mtime": 1787107004.8666863,
     "hash": "2c206193041e1c1381ab8d4050654643"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/tabs.tsx": {
@@ -384,7 +384,7 @@
     "hash": "aa71e8ceb68b33af5ed5799f42cd873e"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/spotlight-card.tsx": {
-    "mtime": 1779592173.4118032,
+    "mtime": 1787107004.9399402,
     "hash": "3ff2aa69dc22bb1c07792732a3f9f1dc"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/label.tsx": {
@@ -392,11 +392,11 @@
     "hash": "a70440da86bfc6a07f15197cca48cb08"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/sonner.tsx": {
-    "mtime": 1785087571.0347993,
+    "mtime": 1787107004.9395664,
     "hash": "7ed6d78bb689bdbda0e7f729a6c71e63"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/magnetic-button.tsx": {
-    "mtime": 1785087571.0341592,
+    "mtime": 1787107004.9382696,
     "hash": "2b5545ce1edbd6839f2dd52a1df95f97"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/grid-pattern.tsx": {
@@ -412,7 +412,7 @@
     "hash": "8b41492907a73176027427a3f0fd2302"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/dialog.tsx": {
-    "mtime": 1778014804.3628995,
+    "mtime": 1787107004.937863,
     "hash": "a903f977a7efa52e3d71938979a790b9"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/badge.tsx": {
@@ -448,47 +448,47 @@
     "hash": "0c3db20ef5c5b8dd8c3b478aa2a985ca"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/ui/skeleton.tsx": {
-    "mtime": 1779591902.1097767,
+    "mtime": 1787107004.9391534,
     "hash": "b70699bfe8466dcd210bc70eefab9988"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/Hero.tsx": {
-    "mtime": 1785705343.0400827,
+    "mtime": 1787463919.7189643,
     "hash": "1fa067a9fdea88da4157cc568c1a6e7e"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/Navbar.tsx": {
-    "mtime": 1785684524.1687737,
+    "mtime": 1787463919.7212272,
     "hash": "d719da9224bdff7086ab65c3df4eab95"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/HowItWorks.tsx": {
-    "mtime": 1785087571.022866,
+    "mtime": 1787463919.7201412,
     "hash": "25b7d318b1b471789185151d4b5d1e13"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/CraftingIntro.tsx": {
-    "mtime": 1779592130.1369963,
+    "mtime": 1787463919.7180848,
     "hash": "c6024e1ad76af8e0efd31ee091b52893"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/OccasionCards.tsx": {
-    "mtime": 1785087571.0243864,
+    "mtime": 1787463919.7216647,
     "hash": "5058ac68d9c0af24d3038f5e2113fcdc"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/Footer.tsx": {
-    "mtime": 1785200686.0109327,
+    "mtime": 1787463919.7185962,
     "hash": "0ee95a0ebd74d6d6b0515d7c0b599bc9"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/Testimonials.tsx": {
-    "mtime": 1785087571.024934,
+    "mtime": 1787463919.7232864,
     "hash": "1a993a75759709d5ac9d0f7c17cfccf4"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/LandingShell.tsx": {
-    "mtime": 1785087571.0232344,
+    "mtime": 1787463919.7205696,
     "hash": "ae1ebf8488dc0c11929ffa9473c9ad43"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/landing/TemplateShowcase.tsx": {
-    "mtime": 1785683404.4796057,
+    "mtime": 1787463919.7228389,
     "hash": "bb52ea71c37f4dd7b7dd8d68c3cb7604"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/auth/CreateSignInLink.tsx": {
-    "mtime": 1785708183.2794886,
+    "mtime": 1787463919.6985524,
     "hash": "a8ed3b5f949b16b88a7b8bdac29c6e81"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/auth/PerksList.tsx": {
@@ -496,55 +496,55 @@
     "hash": "a70a60e685f54bbe5854ddbfc9b1ab73"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/auth/AuthForm.tsx": {
-    "mtime": 1785707491.3556228,
+    "mtime": 1787463919.6980784,
     "hash": "01c55956ee228164005b3814b55b869c"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/fx/ConfettiCanvas.tsx": {
-    "mtime": 1785087571.018038,
+    "mtime": 1787463919.7171335,
     "hash": "bf1b3b8f1222197ec56eb283c364056e"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/fx/Ribbons.tsx": {
-    "mtime": 1785087571.020729,
+    "mtime": 1787107004.8905635,
     "hash": "77ed6c168dfc5a5aebf3432f106c1304"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/MessageReveal.tsx": {
-    "mtime": 1785087571.0262518,
+    "mtime": 1787463919.727477,
     "hash": "98954a5ed043862e8338d4390b5075bc"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/RSVPButton.tsx": {
-    "mtime": 1785204756.4202168,
+    "mtime": 1787463919.729464,
     "hash": "54cbecc94b332de8c2168a50fdf8e1c3"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/PhotoCarousel.tsx": {
-    "mtime": 1779571381.7679255,
+    "mtime": 1787463919.728278,
     "hash": "377e7fdeea55362395d61642d7aaa97a"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/PolaroidCarousel.tsx": {
-    "mtime": 1785087571.0274594,
+    "mtime": 1787463919.728639,
     "hash": "f7e97821ea42223c73e69130b9b4d624"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/ReportButton.tsx": {
-    "mtime": 1779571314.2770624,
+    "mtime": 1787107004.906762,
     "hash": "ac704fd2cff7db92ae824f33066752ce"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/TapToReveal.tsx": {
-    "mtime": 1785087571.03266,
+    "mtime": 1787463919.7299874,
     "hash": "30dae0847de793a045e8de5cf3e02db8"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/CountdownReveal.tsx": {
-    "mtime": 1779656549.9763622,
+    "mtime": 1787463919.726265,
     "hash": "b3cb0110e55599eda760dc63b89786f5"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/DesignerArtButton.tsx": {
-    "mtime": 1785087571.025347,
+    "mtime": 1787107004.9013512,
     "hash": "d0d66a4c7045bc4de476f6d21511ccc7"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/VideoPlayer.tsx": {
-    "mtime": 1779571613.3237078,
+    "mtime": 1787107004.9082015,
     "hash": "232efbcd142bdae2d2b1e0aba817c31c"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/QuestionScreen.tsx": {
-    "mtime": 1785087571.0302835,
+    "mtime": 1787107004.905693,
     "hash": "cd4ceeeb25b74bd2de7f8a5d7e181b45"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/CelebrationOverlay.tsx": {
@@ -552,39 +552,39 @@
     "hash": "c27229b913945fa94f7db7df7ea658e1"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/FloatingPhotos.tsx": {
-    "mtime": 1779660754.909062,
+    "mtime": 1787463919.7270188,
     "hash": "baed6980e2c1975c809be4886a01cf47"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/MessageScene.tsx": {
-    "mtime": 1785200868.022397,
+    "mtime": 1787463919.730785,
     "hash": "ecdef988a45ef127330db2f71d2dd0df"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/FinaleScene.tsx": {
-    "mtime": 1785200931.7442691,
+    "mtime": 1787463919.7304168,
     "hash": "1b1f1b74e128a61435bd6265560b1a97"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/SkyHero.tsx": {
-    "mtime": 1785200840.5043976,
+    "mtime": 1787463919.7332528,
     "hash": "3820c7ff32899547adb4f26789a1038f"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/RsvpScene.tsx": {
-    "mtime": 1785705274.544439,
+    "mtime": 1787463919.7319696,
     "hash": "ceb4d3d15b0166a2858b8b034729f614"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/PolaroidScene.tsx": {
-    "mtime": 1785200898.4398847,
+    "mtime": 1787463919.731628,
     "hash": "251bf8c5acb5fb4a955389a0e47c3d16"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/ScrollStoryReveal.tsx": {
-    "mtime": 1785705284.872983,
+    "mtime": 1787463919.7327156,
     "hash": "1ff63c3e12685c18fa227ccd13fde3cd"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/shared.ts": {
-    "mtime": 1785200702.5159757,
+    "mtime": 1787463919.7337604,
     "hash": "2dd348a79b09fdc5b133247fe8662e34"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/PlanScene.tsx": {
-    "mtime": 1785200885.386467,
+    "mtime": 1787463919.7311885,
     "hash": "24038bb88fd85540d227e52bc59a8a99"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/surprise/scrollstory/Reveal.tsx": {
@@ -592,11 +592,11 @@
     "hash": "c46fe8e2054cfb6a628bd9295eb4d29d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/Navbar.tsx": {
-    "mtime": 1785706524.2951794,
+    "mtime": 1787463919.71206,
     "hash": "7ffdf25b6b0a2dc689853694865e75b8"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/CommandPalette.tsx": {
-    "mtime": 1785087571.0142207,
+    "mtime": 1787463919.7077038,
     "hash": "92cf354bea3b6b98c867cce2fd65015c"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/DashboardNavServer.tsx": {
@@ -604,63 +604,63 @@
     "hash": "75bfbc69d9cd00895b76dc36eea6ffe6"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/InviteCard.tsx": {
-    "mtime": 1785706581.6064453,
+    "mtime": 1787463919.7099955,
     "hash": "b58ca25ef9a087a8065c6302d05aa2e1"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/nav-items.ts": {
-    "mtime": 1785699849.0817082,
+    "mtime": 1787463919.7160978,
     "hash": "232b9151bdcff5265252b2a769a30d35"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/DeleteConfirmModal.tsx": {
-    "mtime": 1785087571.015151,
+    "mtime": 1787463919.7089646,
     "hash": "9ccac5768a0b5e14039f4e37628a4dd2"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/InviteList.tsx": {
-    "mtime": 1785087571.0165615,
+    "mtime": 1787463919.711582,
     "hash": "65d89f33ae08d5397d58bf28d81f0a2c"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/ShareButtons.tsx": {
-    "mtime": 1779586343.9012039,
+    "mtime": 1787463919.7139347,
     "hash": "8400cd035991eee4637bb6a54ff34177"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/OccasionFilter.tsx": {
-    "mtime": 1778806010.8606956,
+    "mtime": 1787463919.7127004,
     "hash": "857e18746d63fd9e45a330c627559a4d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/OnboardingModal.tsx": {
-    "mtime": 1785087571.0170145,
+    "mtime": 1787463919.7130666,
     "hash": "1e2621643129d63b94b8c9c17b0fa8e5"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/nav-items.test.ts": {
-    "mtime": 1785699836.5825124,
+    "mtime": 1787463919.7156465,
     "hash": "28600f969a6f3509ded788eaef1976b9"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/FreeLimitBanner.tsx": {
-    "mtime": 1785087571.0155547,
+    "mtime": 1787463919.709381,
     "hash": "e0f732a31dbcd648b7acdc7c17181834"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/dashboard/ResponsesModal.tsx": {
-    "mtime": 1785087571.0174792,
+    "mtime": 1787463919.713407,
     "hash": "7ed714ef942bbba7e99ae8e16058bc98"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/contribute/ContributeForm.tsx": {
-    "mtime": 1779469142.256585,
+    "mtime": 1787463919.6992376,
     "hash": "357d8dfbbdb0b29a7328ba751f29be84"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/CoverflowFan.tsx": {
-    "mtime": 1785705373.7514172,
+    "mtime": 1787463919.7341714,
     "hash": "6f7448647e0a8d65b2e9ed3f17a692aa"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/chip-style.ts": {
-    "mtime": 1785705262.5982618,
+    "mtime": 1787463919.737844,
     "hash": "5ce4971ca9e46b971e9ddf3bb1fd2d07"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/PriceChips.tsx": {
-    "mtime": 1785705277.206463,
+    "mtime": 1787463919.735191,
     "hash": "ca2ea4ab3db6c229519b0348bc0f7450"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/StyleTagChips.tsx": {
-    "mtime": 1785705282.3142443,
+    "mtime": 1787463919.7359989,
     "hash": "09455aa61d275473008e0fdbbb07b2bb"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/TemplateGrid.tsx": {
@@ -668,11 +668,11 @@
     "hash": "3daa62da2f3d23663191ed7c6593bba3"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/TemplatesPageClient.tsx": {
-    "mtime": 1785705312.6054242,
+    "mtime": 1787463919.7373478,
     "hash": "dc1d4bd19b8c9de302d8072305532ca7"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/FilterChips.tsx": {
-    "mtime": 1785705271.412952,
+    "mtime": 1787463919.7344427,
     "hash": "ef28353e7086bdf06e6ab3a299b4f9dc"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/coverflow-math.test.ts": {
@@ -684,7 +684,7 @@
     "hash": "4181795455a34e0a05caf48bf8dcb3ea"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/TemplateCard.tsx": {
-    "mtime": 1785706890.4868264,
+    "mtime": 1787463919.736385,
     "hash": "55a37b0f9fc9dfeb6c4a810ff6897a1b"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/templates/cover-style.ts": {
@@ -692,55 +692,55 @@
     "hash": "c3960b3a997427477d5bc6508350cf86"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/AIDraftButton.tsx": {
-    "mtime": 1785087571.0082052,
+    "mtime": 1787463919.7000542,
     "hash": "b747304a8858f1fa1e482d7c71e8fb94"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/QuestionBuilder.tsx": {
-    "mtime": 1785087571.0111065,
+    "mtime": 1787463919.7047775,
     "hash": "fa478e77fb4e6508d2a977e93b046c6e"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/PreviewPublish.tsx": {
-    "mtime": 1785706564.8148623,
+    "mtime": 1787463919.7042432,
     "hash": "0628d2b40df6bf756dd1ddf66ae64412"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/EmojiPicker.tsx": {
-    "mtime": 1785087571.008511,
+    "mtime": 1787463919.700771,
     "hash": "724d59d32269b86c151fcdb11291c6a5"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/RevealSettings.tsx": {
-    "mtime": 1785281143.6120856,
+    "mtime": 1787463919.7053268,
     "hash": "8798bf5abc7c49b331eae8a707869e98"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/ThemeSelector.tsx": {
-    "mtime": 1785700433.7738385,
+    "mtime": 1787463919.7066715,
     "hash": "61ee2b1d57df68019fda1fa8f61b0288"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/VideoGenerator.tsx": {
-    "mtime": 1785087571.0135324,
+    "mtime": 1787463919.7071724,
     "hash": "68a6cadecc02d1102a2b0737df800f87"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/PhotoUploader.tsx": {
-    "mtime": 1785087571.0097444,
+    "mtime": 1787463919.7037864,
     "hash": "daddf98013d46ab2cab6854d8b88a9d7"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/MessageEditor.tsx": {
-    "mtime": 1785087571.0089293,
+    "mtime": 1787463919.7023754,
     "hash": "60a2e50c08e15da20a0ec969c4c97ec6"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/StepIndicator.tsx": {
-    "mtime": 1785087571.0126936,
+    "mtime": 1787463919.7059658,
     "hash": "efb7fdb6d0161e1c30c7414a82823439"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/EventsEditor.tsx": {
-    "mtime": 1785279794.1014473,
+    "mtime": 1787463919.70156,
     "hash": "ddd19cac5dee77dbb831df2fda3cac2d"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/TemplateSummaryChip.tsx": {
-    "mtime": 1785706526.9337833,
+    "mtime": 1787463919.7062747,
     "hash": "dc1a3a479449328e4a4a82d15e25d33a"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/create/OccasionSelector.tsx": {
-    "mtime": 1785087571.009275,
+    "mtime": 1787463919.7032158,
     "hash": "94b6ba398d19f6ee25fb58a635a64faa"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/pricing/PricingCTA.tsx": {
@@ -748,15 +748,15 @@
     "hash": "27e87fce76b94e179c10a98291e1318e"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/pricing/GiftCTA.tsx": {
-    "mtime": 1785708516.836319,
+    "mtime": 1787463919.7239926,
     "hash": "258193fd2c775caa8809f341f0089b45"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/components/pricing/PricingTiers.tsx": {
-    "mtime": 1785708543.6127727,
+    "mtime": 1787463919.7250123,
     "hash": "01984839c73db3d894fbbefb823c31b7"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/actions/account.ts": {
-    "mtime": 1785087570.9903307,
+    "mtime": 1787107004.8070047,
     "hash": "c6af8e76ee428ac69f5a32cfcf7ad318"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/actions/questions.ts": {
@@ -764,7 +764,7 @@
     "hash": "99f3a3f297fddcc795f1c384648c3228"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/actions/invite.ts": {
-    "mtime": 1785712063.9506695,
+    "mtime": 1787107004.808154,
     "hash": "58d1b50092e2d4e351282911f1ed2c70"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/actions/delete-invite.test.ts": {
@@ -804,7 +804,7 @@
     "hash": "9b2c2eec28d27d2e34da2e0161073690"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/utils.test.ts": {
-    "mtime": 1779326230.1587696,
+    "mtime": 1787107004.9510803,
     "hash": "f5a52883add10eac97559e6de8d4ab12"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/motion.test.ts": {
@@ -824,7 +824,7 @@
     "hash": "97e7da9d5ee7c8d283c7c9025ba2a142"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/collage-templates.ts": {
-    "mtime": 1785087571.0442476,
+    "mtime": 1787107004.9421556,
     "hash": "bc0175d642b1f0105abf220343fdedf0"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/share-copy.ts": {
@@ -856,7 +856,7 @@
     "hash": "92d87c42884f651f1cd658641a4a6a15"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/pricing.ts": {
-    "mtime": 1785200613.7297578,
+    "mtime": 1787463919.7386134,
     "hash": "654a363fbbfd9e6648d0503a579b3da6"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/publish-gate.test.ts": {
@@ -864,11 +864,11 @@
     "hash": "5aeee57d43974c5c57918afec5527a90"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/auth-redirect.ts": {
-    "mtime": 1785707426.9129267,
+    "mtime": 1787107004.9408503,
     "hash": "af3d49c57ddc560fcdceeb37252fd665"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/invite-view.test.ts": {
-    "mtime": 1785705436.900309,
+    "mtime": 1787107004.9460514,
     "hash": "9c2e6aaf67db8c36f0ac5fd40ee9f993"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/templates.test.ts": {
@@ -884,15 +884,15 @@
     "hash": "9d86610a038267cb27c415cb8176cf53"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/schemas.ts": {
-    "mtime": 1785707872.0733,
+    "mtime": 1787107004.9491765,
     "hash": "8c07c9cf325763456301ebcd16f3ab47"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/utils.ts": {
-    "mtime": 1778130086.8686523,
+    "mtime": 1787107004.951531,
     "hash": "bb7bea8703328c33d05ff4e0b7275112"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/collage-templates.test.ts": {
-    "mtime": 1785087571.0431957,
+    "mtime": 1787107004.9415488,
     "hash": "df19ff2a7bd8cba8dc2df47a196b59c6"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/motion.ts": {
@@ -932,7 +932,7 @@
     "hash": "583a5a1ed8aa8e49d8a5efc50b179115"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/dashboard-data.ts": {
-    "mtime": 1785087571.0457053,
+    "mtime": 1787107004.9429297,
     "hash": "54cc8963bfe9a2c2de6cacdced4fb5bf"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/cron-auth.ts": {
@@ -948,7 +948,7 @@
     "hash": "56a488a4b0e215c30a405a0856b0a979"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/designer-art.ts": {
-    "mtime": 1785087571.0484734,
+    "mtime": 1787107004.9435542,
     "hash": "eb60158ae52a4b61c772567a6283cde2"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/sign-storage.test.ts": {
@@ -964,7 +964,7 @@
     "hash": "590105ec016ead0550bdb5fd2e3e98ab"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/rsvp-client.ts": {
-    "mtime": 1785204744.7255096,
+    "mtime": 1787107004.9485843,
     "hash": "cdec2a764b9518aee543576f6e33b375"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/moderation.ts": {
@@ -1008,7 +1008,7 @@
     "hash": "4edb6ca0ae82dda45228ecdb8318b459"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/invite-view.ts": {
-    "mtime": 1785087571.0491571,
+    "mtime": 1787107004.9465616,
     "hash": "c341555f368ce168e3df29b41d77855c"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/theme-unlock.test.ts": {
@@ -1016,7 +1016,7 @@
     "hash": "1ab753cec8872235f59d802850a3a2ca"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/themes.ts": {
-    "mtime": 1785087571.0526369,
+    "mtime": 1787107004.9504957,
     "hash": "83988b7f757d16d8cf29e15e94009d25"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/video/composition.tsx": {
@@ -1024,11 +1024,11 @@
     "hash": "967e4f20d4e19df0e67b1c5b7dbfa299"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/video/entry.tsx": {
-    "mtime": 1779084269.4271767,
+    "mtime": 1787107004.9521067,
     "hash": "46ac146d9627b15d136badaa89b5d636"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/supabase/middleware.ts": {
-    "mtime": 1785711929.1043477,
+    "mtime": 1787107004.9498067,
     "hash": "2f3dea155df110581fd06b10b63065db"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/supabase/client.ts": {
@@ -1076,11 +1076,11 @@
     "hash": "b71998d4d051ead3b71fa0a5b2e26f19"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/email/templates.ts": {
-    "mtime": 1779586429.846339,
+    "mtime": 1787107004.9453852,
     "hash": "b5a3fe161813b1adaea6784d79655bcc"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/src/lib/email/send.ts": {
-    "mtime": 1779083570.0249918,
+    "mtime": 1787107004.944013,
     "hash": "88402dc28fc9751e4d5523367ee8d57f"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/scroll_story_events.sql": {
@@ -1091,6 +1091,10 @@
     "mtime": 1779573074.728683,
     "hash": "586309c120c567b2de761ecd49357a34"
   },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/mobile_handoff_phase0.sql": {
+    "mtime": 1786924177.257227,
+    "hash": "424e5e1687d2f46daf9945d899412c03"
+  },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/push_tokens.sql": {
     "mtime": 1785711323.829121,
     "hash": "1a7d66f7a00dd2054a88716aba84fa90"
@@ -1098,6 +1102,10 @@
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/premium_enforcement.sql": {
     "mtime": 1785711457.474732,
     "hash": "1b7c16171adae0dac0f4c22d8f9ed4fe"
+  },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/invite_status.sql": {
+    "mtime": 1786327468.8985825,
+    "hash": "d94b1682d07d21123c8bbbe4e38a907e"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/invite_reveal_type_scroll_story.sql": {
     "mtime": 1785205163.8292031,
@@ -1155,6 +1163,14 @@
     "mtime": 1779323767.1134045,
     "hash": "bc781ef6b6136f95238aae1e7c1afd17"
   },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/PENDING_invite_events.sql": {
+    "mtime": 1787008003.537473,
+    "hash": "08a63b24d85597a9d4d56d7c55d531a6"
+  },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/invite_read_lockdown.sql": {
+    "mtime": 1786737760.1841702,
+    "hash": "290a94d53dd14f32d03ee0525dd6a09a"
+  },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/free_tier_expiry.sql": {
     "mtime": 1785087570.9891303,
     "hash": "0b8ba5b740de558229be35e9f2a069a0"
@@ -1166,6 +1182,10 @@
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/invite_session_unique.sql": {
     "mtime": 1785707829.2389522,
     "hash": "a89401cd866f6b33b3ebf3d45f492d7e"
+  },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/P4_migrations.sql": {
+    "mtime": 1786743481.3325503,
+    "hash": "d48e3ca7103f50b9322d04be45ddd689"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/sql/stripe_events.sql": {
     "mtime": 1779323752.352319,
@@ -1190,10 +1210,6 @@
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/README.md": {
     "mtime": 1777788462.2106655,
     "hash": "f15aaa42d5d299d091b1171097ea56ad"
-  },
-  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/mockup.html": {
-    "mtime": 1785087571.2091634,
-    "hash": "9592389c2bcedc4b762c219eb399ffae"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/AGENTS.md": {
     "mtime": 1777788483.461905,
@@ -1232,8 +1248,8 @@
     "hash": "d0af7ef1486a70a1026ae02ecbe31e7a"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/memory/diary.md": {
-    "mtime": 1785087570.9812667,
-    "hash": "046206fe5fceeabb0f7058dacaaab4bd"
+    "mtime": 1785712319.827785,
+    "hash": "6dcbed8960ca9cfe919b7a96303d254c"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/docs/MOTION_MASTERPLAN.md": {
     "mtime": 1785087570.6998847,
@@ -1251,6 +1267,18 @@
     "mtime": 1785699679.6103315,
     "hash": "b7fab8e9a01ed696f5544292094249c8"
   },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/docs/superpowers/plans/PROGRESS.md": {
+    "mtime": 1787095064.2779238,
+    "hash": "457ba3fa91b27ab4cf1ed541064ec3b9"
+  },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/docs/superpowers/plans/2026-08-22-launch-bar-six.md": {
+    "mtime": 1787431039.0935173,
+    "hash": "e19160177db4dda2bca4571a387fb4f9"
+  },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/docs/superpowers/plans/2026-08-09-editorial-retheme.md": {
+    "mtime": 1786324026.8920233,
+    "hash": "9871df2aa3a2690b2e33175c5096a47d"
+  },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/docs/superpowers/plans/2026-05-20-tadaaaa-sophistication.md": {
     "mtime": 1779337886.2423902,
     "hash": "ced640559ecd30983ec96d09d2cc6883"
@@ -1259,9 +1287,21 @@
     "mtime": 1785200053.7625957,
     "hash": "333c5579e341aacf2d18e86d76c294d4"
   },
-  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/nav-blueprint.html": {
-    "mtime": 1785699339.7696493,
-    "hash": "fab43aa0c08a6af398223073daec07c6"
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/docs/superpowers/plans/2026-08-17-web-desktop-parity.md": {
+    "mtime": 1787010141.8453383,
+    "hash": "e8d2b6ce3a532dc252fce7757f9dfe23"
+  },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/docs/superpowers/snapshots/P0-web-status.txt": {
+    "mtime": 1786319607.2071233,
+    "hash": "1d7a2104ef7b009a0ca4f14b3b37bf1f"
+  },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/docs/superpowers/specs/2026-08-14-invite-read-lockdown-design.md": {
+    "mtime": 1786737484.9203131,
+    "hash": "75d34ddbd60da0b5d14a57e00b2f5181"
+  },
+  "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/full-app-mockup.html": {
+    "mtime": 1786205246.2926135,
+    "hash": "b4805b7e74a6466fb89354816a59a629"
   },
   "/Users/rohit/Downloads/ClaudeCodeProject/tadaaaa/surprise-invite/public/robots.txt": {
     "mtime": 1778442176.5826135,

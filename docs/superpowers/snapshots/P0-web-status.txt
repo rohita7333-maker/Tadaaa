@@ -1,0 +1,15 @@
+ M src/app/auth/signin/page.tsx
+ M src/app/auth/signup/page.tsx
+ M src/app/globals.css
+ M src/app/layout.tsx
+ M src/components/contribute/ContributeForm.tsx
+ M src/components/create/PhotoUploader.tsx
+ M src/components/landing/CraftingIntro.tsx
+ M src/components/surprise/FloatingPhotos.tsx
+ M src/components/surprise/PhotoCarousel.tsx
+ M src/components/surprise/PolaroidCarousel.tsx
+ M src/components/surprise/scrollstory/shared.ts
+?? docs/superpowers/plans/2026-08-09-editorial-retheme.md
+?? docs/superpowers/snapshots/
+?? src/lib/design-tokens.test.ts
+?? src/lib/design-tokens.ts

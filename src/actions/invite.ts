@@ -660,12 +660,13 @@ async function _getInviteBySlugImpl(slug: string) {
   ) || [];
   questions.sort((a, b) => a.sort_order - b.sort_order);
 
-  // Generate video URL if ready. Video lives in the moment-photos bucket;
+  // Generate video URL if ready. Videos live in the same bucket as photos —
+  // the old "moment-photos" literal pointed at a bucket that never existed.
   // 24h TTL is generous for a single page session.
   let videoUrl: string | null = null;
   const videoStoragePath = (invite as { video_storage_path?: string }).video_storage_path;
   if ((invite as { video_status?: string }).video_status === "ready" && videoStoragePath) {
-    videoUrl = await signStorageUrl("moment-photos", videoStoragePath, 60 * 60 * 24, {
+    videoUrl = await signStorageUrl(STORAGE_BUCKET, videoStoragePath, 60 * 60 * 24, {
       inviteId: invite.id,
       inviteSlug: slug,
     });

@@ -160,14 +160,14 @@ async function renderVideo(params: {
     const storagePath = `${params.userId}/${params.inviteId}/video.mp4`;
 
     await supabase.storage
-      .from("moment-photos")
+      .from(STORAGE_BUCKET)
       .upload(storagePath, fileBuffer, {
         contentType: "video/mp4",
         upsert: true,
       });
 
     const { data: urlData } = supabase.storage
-      .from("moment-photos")
+      .from(STORAGE_BUCKET)
       .getPublicUrl(storagePath);
 
     await supabase

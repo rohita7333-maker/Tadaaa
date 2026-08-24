@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { STORAGE_BUCKET } from "@/lib/constants";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
   if (invite.video_status === "ready" && invite.video_storage_path) {
     const adminClient = createAdminClient();
     const { data } = await adminClient.storage
-      .from("moment-photos")
+      .from(STORAGE_BUCKET)
       .createSignedUrl(invite.video_storage_path, 60 * 60 * 24);
     videoUrl = data?.signedUrl || null;
   }

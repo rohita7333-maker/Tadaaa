@@ -23,13 +23,19 @@ export async function logInviteViewBySlug(
     return { ok: false, status: 429 };
   }
 
-  // Anon client — invites table has public SELECT policy for active invites.
   const supabase = await createClient();
+  const admin = createAdminClient();
 
-  // invites has no `status` column (split-brain schema retired) — gate on
-  // is_active + expires_at only. Selecting a missing column errors the query
-  // and silently 404s, which froze the view counter.
-  const { data: invite } = await supabase
+  // The lookup MUST use the admin client. `invites_select_restrict` is a
+  // RESTRICTIVE policy on {anon, authenticated} (creator_id = auth.uid()) from
+  // the enumeration lockdown, so an anonymous recipient's SELECT returns
+  // nothing — reading through the anon client 404'd every real view.
+  //
+  // Bypassing RLS is safe here: this function returns only ok/404 plus a count,
+  // never invite data, and the same active/deleted/expired gates are applied
+  // below by hand. `invites` has no `status` column (split-brain schema
+  // retired) — gate on is_active + expires_at only.
+  const { data: invite } = await admin
     .from("invites")
     .select("id, is_active, creator_id, title, expires_at")
     .eq("slug", slug)
@@ -58,10 +64,9 @@ export async function logInviteViewBySlug(
     invite_id: invite.id,
   });
 
-  // Notification side-effects use the admin client (no RLS policies on invite_views/profiles
-  // for anon writes, and auth.admin.getUserById requires service-role regardless).
-  const admin = createAdminClient();
-
+  // Notification side-effects reuse the same admin client (no RLS policies on
+  // invite_views/profiles for anon writes, and auth.admin.getUserById requires
+  // service-role regardless).
   await admin.from("invite_views").insert({
     invite_id: invite.id,
     user_agent: ua.slice(0, 255),

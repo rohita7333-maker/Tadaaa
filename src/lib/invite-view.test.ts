@@ -29,17 +29,26 @@ const mockViewInsert = vi.fn(async (row: { invite_id: string; user_agent: string
 const mockProfileMaybeSingle = vi.fn(async () => ({ data: { notify_on_view: false } }));
 const mockGetUserById = vi.fn(async () => ({ data: { user: null } }));
 
-function inviteQuery() {
+/**
+ * Models production RLS: `invites_select_restrict` is RESTRICTIVE on
+ * {anon, authenticated} (creator_id = auth.uid()), so an anonymous recipient's
+ * SELECT on `invites` returns NOTHING. The lookup must therefore run through
+ * the admin client. An earlier version of this mock served the row from the
+ * anon client, which hid a live bug: every recipient view 404'd.
+ */
+function inviteLookup(rowSource: () => Record<string, unknown> | null) {
   return {
     select: vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
         is: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: mockInviteRow, error: null }),
+          single: vi.fn().mockResolvedValue({ data: rowSource(), error: null }),
         }),
       }),
     }),
   };
 }
+
+const mockAnonInviteSelect = vi.fn();
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
@@ -48,12 +57,20 @@ vi.mock("@/lib/supabase/server", () => ({
         data: { user: mockViewerId ? { id: mockViewerId } : null },
       })),
     },
-    from: vi.fn(() => inviteQuery()),
+    from: vi.fn((table: string) => {
+      if (table === "invites") {
+        mockAnonInviteSelect();
+        // RLS blocks anon reads of invites — always empty.
+        return inviteLookup(() => null);
+      }
+      return inviteLookup(() => null);
+    }),
     rpc: mockRpc,
   }),
   createAdminClient: () => ({
     from: vi.fn((table: string) => {
       if (table === "invite_views") return { insert: mockViewInsert };
+      if (table === "invites") return inviteLookup(() => mockInviteRow);
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({ maybeSingle: mockProfileMaybeSingle }),
@@ -138,6 +155,28 @@ describe("logInviteViewBySlug — creator preview skip (audit point 14)", () => 
 
     expect(result).toEqual({ ok: true });
     expect(mockRpc).not.toHaveBeenCalled();
+  });
+});
+
+describe("logInviteViewBySlug — reads the invite past RLS (regression)", () => {
+  /**
+   * The enumeration lockdown added a RESTRICTIVE SELECT policy on `invites`.
+   * From that moment the anon lookup here returned null and EVERY recipient
+   * view 404'd instead of being counted.
+   */
+  it("counts an anonymous recipient's view even though anon cannot SELECT invites", async () => {
+    mockViewerId = null;
+
+    const result = await logInviteViewBySlug("maya", "ua", "1.2.3.4");
+
+    expect(result.ok).toBe(true);
+    expect(result.count).toBe(1);
+    expect(mockViewInsert).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not attempt the invite lookup through the anon client", async () => {
+    await logInviteViewBySlug("maya", "ua", "1.2.3.4");
+    expect(mockAnonInviteSelect).not.toHaveBeenCalled();
   });
 });
 

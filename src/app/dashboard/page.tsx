@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Plus, Sparkles, Eye, Gift, TrendingUp, MessageCircle, Heart, LayoutTemplate, ArrowRight, Activity } from "lucide-react";
+import { Plus, Sparkles, Eye, Gift, TrendingUp, MessageCircle, Heart, LayoutTemplate, ArrowRight, Activity, BarChart3 } from "lucide-react";
 import InviteList from "@/components/dashboard/InviteList";
 import OccasionFilter from "@/components/dashboard/OccasionFilter";
 import OnboardingModal from "@/components/dashboard/OnboardingModal";
@@ -197,16 +197,26 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       )}
 
-      {/* Activity drilldown — the "who" behind the numbers above */}
+      {/* Drilldowns — the "who" and the "how it performed" behind the numbers */}
       {all.length > 0 && (
-        <Link
-          href="/dashboard/activity"
-          className="inline-flex items-center gap-1.5 text-sm text-[#6F6E68] hover:text-[#3E6B5C] transition-colors mb-8 -mt-4 focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40 rounded-lg"
-        >
-          <Activity className="w-3.5 h-3.5" />
-          See all activity
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+        <div className="flex flex-wrap items-center gap-5 mb-8 -mt-4">
+          <Link
+            href="/dashboard/activity"
+            className="inline-flex items-center gap-1.5 text-sm text-[#6F6E68] hover:text-[#3E6B5C] transition-colors focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40 rounded-lg"
+          >
+            <Activity className="w-3.5 h-3.5" />
+            See all activity
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <Link
+            href="/dashboard/analytics"
+            className="inline-flex items-center gap-1.5 text-sm text-[#6F6E68] hover:text-[#3E6B5C] transition-colors focus:outline-none focus:ring-2 focus:ring-[#3E6B5C]/40 rounded-lg"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            Analytics
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       )}
 
       {/* Occasion filter + sort */}

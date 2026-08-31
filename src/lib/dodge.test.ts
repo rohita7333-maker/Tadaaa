@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  shouldDodgeOnActivation,
   UNLIMITED_DODGES,
   DEFAULT_DODGE_LIMIT,
   MAX_DODGE_LIMIT,
@@ -83,5 +84,25 @@ describe("dodgeHint", () => {
 
   it("shows nothing at all when dodging is switched off", () => {
     expect(dodgeHint(0, 0, "No")).toBeNull();
+  });
+});
+
+describe("shouldDodgeOnActivation", () => {
+  it("dodges a pointer press while it still has dodges left", () => {
+    expect(shouldDodgeOnActivation(3, 0, "pointer")).toBe(true);
+  });
+
+  it("stops dodging a pointer press once frozen", () => {
+    expect(shouldDodgeOnActivation(3, 3, "pointer")).toBe(false);
+  });
+
+  it("never dodges a keyboard press — the joke must not trap keyboard users", () => {
+    expect(shouldDodgeOnActivation(3, 0, "keyboard")).toBe(false);
+    expect(shouldDodgeOnActivation(UNLIMITED_DODGES, 99, "keyboard")).toBe(false);
+  });
+
+  it("leaves No reachable by keyboard even when it dodges forever by pointer", () => {
+    expect(shouldDodgeOnActivation(UNLIMITED_DODGES, 4, "pointer")).toBe(true);
+    expect(shouldDodgeOnActivation(UNLIMITED_DODGES, 4, "keyboard")).toBe(false);
   });
 });

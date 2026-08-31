@@ -40,3 +40,20 @@ export function dodgeHint(limit: number, count: number, noLabel: string): string
   if (limit === UNLIMITED_DODGES) return "It keeps running away 😂";
   return `It keeps running away 😂 (${limit - count} left)`;
 }
+
+/**
+ * Whether an activation of the No button should run away instead of answering.
+ *
+ * Pointer presses play the game. Keyboard presses never do: chasing a button is
+ * inherently a mouse gag, and with an unlimited limit a keyboard or
+ * screen-reader user would otherwise have literally no way to answer No — a
+ * trap, not a joke.
+ */
+export function shouldDodgeOnActivation(
+  limit: number,
+  count: number,
+  source: "pointer" | "keyboard"
+): boolean {
+  if (source === "keyboard") return false;
+  return !isDodgeFrozen(limit, count);
+}

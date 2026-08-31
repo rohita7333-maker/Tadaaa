@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { normalizeDodgeLimit, isDodgeFrozen, dodgeHint } from "@/lib/dodge";
+import { normalizeDodgeLimit, isDodgeFrozen, dodgeHint, shouldDodgeOnActivation } from "@/lib/dodge";
 import { motion, AnimatePresence } from "framer-motion";
 import { type Theme } from "@/lib/themes";
 import FloatingPhotos from "./FloatingPhotos";
@@ -238,7 +238,16 @@ export default function QuestionScreen({
               {/* NO button — dodge-capable */}
               <motion.button
                 ref={noBtnRef}
-                onClick={() => noFrozen && submitAnswer(false)}
+                // detail === 0 means the click came from Enter/Space, not a
+                // pointer. Keyboard users always get to answer No.
+                onClick={(e) => {
+                  const source = e.detail === 0 ? "keyboard" : "pointer";
+                  if (shouldDodgeOnActivation(dodgeLimit, dodgeCount, source)) {
+                    dodge();
+                    return;
+                  }
+                  submitAnswer(false);
+                }}
                 onMouseEnter={() => { if (!noFrozen) dodge(); }}
                 onTouchStart={(e) => {
                   if (!noFrozen) { e.preventDefault(); dodge(); }

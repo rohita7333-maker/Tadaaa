@@ -153,18 +153,18 @@ export default function CirclePolaroidCarousel({
 
   return (
     <div
-      className="w-full min-h-screen flex flex-col items-center justify-between px-6 py-5"
+      className="w-full min-h-screen flex flex-col items-center justify-between px-3 py-3"
       style={{ background: theme.colors.background }}
     >
-      <div className="w-full max-w-sm text-center pt-4">
-        <p className="text-xs font-medium opacity-70 uppercase tracking-wider" style={{ color: textColor }}>
+      <div className="w-full text-center pt-1 shrink-0">
+        <p className="text-[10px] font-medium opacity-60 uppercase tracking-[0.16em]" style={{ color: textColor }}>
           A memory for you
         </p>
-        <h1 className="font-heading text-2xl mt-2" style={{ color: textColor }}>{title}</h1>
+        <h1 className="font-heading text-xl mt-0.5" style={{ color: textColor }}>{title}</h1>
       </div>
 
       {/* Stage — the polaroid, with the photo blooming open inside its frame. */}
-      <div className="flex-1 w-full max-w-sm flex items-center justify-center py-4 min-h-0">
+      <div className="flex-1 w-full flex items-center justify-center py-3 min-h-0">
         <AnimatePresence mode="wait">
           <motion.figure
             key={activeIndex}
@@ -172,7 +172,13 @@ export default function CirclePolaroidCarousel({
             animate={{ opacity: 1, scale: 1, rotate: tilt }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: shouldReduce ? 0 : 0.28 }}
-            className="bg-white rounded-[4px] p-3 pb-0 shadow-[0_18px_44px_rgba(26,27,24,0.28)] w-full"
+            className="bg-white rounded-[4px] p-2.5 pb-0 shadow-[0_22px_60px_rgba(26,27,24,0.34)]"
+            style={{
+              // Fill the screen: the square photo grows until either the width
+              // or the leftover height runs out, whichever binds first.
+              width: "min(94vw, calc(100dvh - 16rem))",
+              maxWidth: "min(94vw, 900px)",
+            }}
           >
             <div className="relative w-full aspect-square overflow-hidden bg-[#0d0f0d]">
               <motion.img
@@ -199,7 +205,7 @@ export default function CirclePolaroidCarousel({
       </div>
 
       {/* Dots — each memory waiting as a circle, the way it arrived. */}
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm shrink-0">
         <div className="flex items-center justify-center gap-3 mb-3">
           <button
             type="button"

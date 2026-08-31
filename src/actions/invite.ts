@@ -307,11 +307,28 @@ export async function createInviteShell(formData: FormData) {
         const nonEmpty = questions.filter((q) => q.text.trim().length > 0);
         if (nonEmpty.length > 0) {
           // Dodge is an invite-level setting; the first question owns it.
+          //
+          // Written as two statements on purpose. Postgres fails an UPDATE
+          // naming an unknown column *atomically*, so bundling dodge_limit in
+          // before its migration lands would silently discard enable_dodge_no
+          // too. The legacy flag goes first and always sticks; the new column
+          // is best-effort until sql/dodge_limit.sql is applied.
           const dodgeLimit = normalizeDodgeLimit(nonEmpty[0].dodgeLimit);
           await supabase
             .from("invites")
-            .update({ dodge_limit: dodgeLimit, enable_dodge_no: dodgeLimit !== 0 })
+            .update({ enable_dodge_no: dodgeLimit !== 0 })
             .eq("id", invite.id);
+
+          const { error: dodgeLimitError } = await supabase
+            .from("invites")
+            .update({ dodge_limit: dodgeLimit })
+            .eq("id", invite.id);
+          if (dodgeLimitError) {
+            console.warn(
+              "[createInviteShell] dodge_limit not persisted (migration pending?):",
+              dodgeLimitError.message
+            );
+          }
 
           const records = nonEmpty.map((q, i) => ({
             invite_id: invite.id,

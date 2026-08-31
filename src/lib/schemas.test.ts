@@ -143,7 +143,7 @@ describe("inviteQuestionsSchema", () => {
       requireAnswer: true,
       yesLabel: "y",
       noLabel: "n",
-      enableDodge: false,
+      dodgeLimit: 0,
     }));
     expect(inviteQuestionsSchema.safeParse(arr).success).toBe(true);
   });
@@ -154,7 +154,7 @@ describe("inviteQuestionsSchema", () => {
       requireAnswer: true,
       yesLabel: "y",
       noLabel: "n",
-      enableDodge: false,
+      dodgeLimit: 0,
     }));
     expect(inviteQuestionsSchema.safeParse(arr).success).toBe(false);
   });

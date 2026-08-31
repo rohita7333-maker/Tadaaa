@@ -20,7 +20,7 @@ interface CountdownRevealProps {
   countdownDate: string;
   questions?: { id: string; question_text: string; yes_label: string; no_label: string; require_answer: boolean }[];
   inviteId?: string;
-  enableDodge?: boolean;
+  dodgeLimit?: number;
   videoUrl?: string | null;
   /** Message-only contributions (Task B2) — rendered after polaroid stack. */
   contributorNotes?: { contributor_name: string; message: string }[];
@@ -53,7 +53,7 @@ export default function CountdownReveal({
   countdownDate,
   questions = [],
   inviteId = "",
-  enableDodge = true,
+  dodgeLimit,
   videoUrl,
   contributorNotes = [],
 }: CountdownRevealProps) {
@@ -112,7 +112,7 @@ export default function CountdownReveal({
       <QuestionScreen
         questions={questions}
         theme={theme}
-        enableDodge={enableDodge}
+        dodgeLimit={dodgeLimit}
         onComplete={() => setStage("celebrate")}
         inviteId={inviteId}
         photos={photos}

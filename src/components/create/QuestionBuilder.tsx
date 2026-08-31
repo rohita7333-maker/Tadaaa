@@ -5,13 +5,25 @@ import { Trash2, Plus, HelpCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { springs, makeReducedMotionTransition } from "@/lib/motion";
+import { DEFAULT_DODGE_LIMIT, UNLIMITED_DODGES } from "@/lib/dodge";
+
+/** Creator picks how stubborn the No button is: never, a set number, or forever. */
+const DODGE_CHOICES: { value: number; label: string }[] = [
+  { value: 0, label: "Off" },
+  { value: 1, label: "1" },
+  { value: 3, label: "3" },
+  { value: 5, label: "5" },
+  { value: 10, label: "10" },
+  { value: UNLIMITED_DODGES, label: "∞" },
+];
 
 export interface Question {
   text: string;
   yesLabel: string;
   noLabel: string;
   requireAnswer: boolean;
-  enableDodge: boolean;
+  /** Times No runs away: 0 never, -1 forever. */
+  dodgeLimit: number;
 }
 
 interface QuestionBuilderProps {
@@ -24,7 +36,7 @@ const EMPTY_QUESTION: Question = {
   yesLabel: "Yes",
   noLabel: "No",
   requireAnswer: false,
-  enableDodge: true,
+  dodgeLimit: DEFAULT_DODGE_LIMIT,
 };
 
 export default function QuestionBuilder({ questions, onQuestionsChange }: QuestionBuilderProps) {
@@ -116,16 +128,36 @@ export default function QuestionBuilder({ questions, onQuestionsChange }: Questi
                 </div>
               </div>
 
-              {/* Dodge toggle */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-[#1A1B18] font-medium">Dodging No button 😄</p>
-                  <p className="text-[10px] text-[#6F6E68]">No button runs away on desktop hover</p>
+              {/* How many times No runs away */}
+              <div>
+                <p className="text-xs text-[#1A1B18] font-medium">Dodging No button 😄</p>
+                <p className="text-[10px] text-[#6F6E68] mb-2">
+                  {q.dodgeLimit === 0
+                    ? "It stays put — they can answer No normally."
+                    : q.dodgeLimit === UNLIMITED_DODGES
+                      ? "It can never be caught, so the only answer they can give is Yes."
+                      : `It runs away ${q.dodgeLimit} time${q.dodgeLimit === 1 ? "" : "s"}, then lets itself be caught.`}
+                </p>
+                <div className="flex flex-wrap gap-1.5" role="group" aria-label="Times the No button runs away">
+                  {DODGE_CHOICES.map((choice) => {
+                    const active = q.dodgeLimit === choice.value;
+                    return (
+                      <button
+                        key={choice.value}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => updateQuestion(i, { dodgeLimit: choice.value })}
+                        className={`h-8 min-w-9 px-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                          active
+                            ? "bg-[#3E6B5C] text-white"
+                            : "bg-white border border-[#E9E6DF] text-[#6F6E68] hover:border-[#3E6B5C]"
+                        }`}
+                      >
+                        {choice.label}
+                      </button>
+                    );
+                  })}
                 </div>
-                <Switch
-                  checked={q.enableDodge}
-                  onCheckedChange={(checked) => updateQuestion(i, { enableDodge: checked })}
-                />
               </div>
 
               {/* Require answer toggle */}

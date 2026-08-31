@@ -19,7 +19,7 @@ interface TapToRevealProps {
   message: string;
   questions?: { id: string; question_text: string; yes_label: string; no_label: string; require_answer: boolean }[];
   inviteId?: string;
-  enableDodge?: boolean;
+  dodgeLimit?: number;
   videoUrl?: string | null;
   /**
    * Message-only contributions from collaborative invites (Task B2).
@@ -79,7 +79,7 @@ function FloatingParticles({
   );
 }
 
-export default function TapToReveal({ theme, photos, title, message, questions = [], inviteId = "", enableDodge = true, videoUrl, contributorNotes = [] }: TapToRevealProps) {
+export default function TapToReveal({ theme, photos, title, message, questions = [], inviteId = "", dodgeLimit, videoUrl, contributorNotes = [] }: TapToRevealProps) {
   const [stage, setStage] = useState<Stage>("landing");
   const shouldReduce = useReducedMotion();
 
@@ -264,7 +264,7 @@ export default function TapToReveal({ theme, photos, title, message, questions =
             <QuestionScreen
               questions={questions}
               theme={theme}
-              enableDodge={enableDodge}
+              dodgeLimit={dodgeLimit}
               onComplete={() => setStage("celebrate")}
               inviteId={inviteId}
               photos={photos}

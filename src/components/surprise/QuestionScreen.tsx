@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { normalizeDodgeLimit, isDodgeFrozen, dodgeHint } from "@/lib/dodge";
 import { motion, AnimatePresence } from "framer-motion";
 import { type Theme } from "@/lib/themes";
 import FloatingPhotos from "./FloatingPhotos";
@@ -56,18 +57,17 @@ interface Question {
 interface QuestionScreenProps {
   questions: Question[];
   theme: Theme;
-  enableDodge?: boolean;
+  /** How many times No runs away. 0 = never, -1 = forever. */
+  dodgeLimit?: number;
   onComplete: () => void;
   inviteId: string;
   photos?: { url: string; caption?: string; rotation_deg?: number }[];
 }
 
-const MAX_DODGES = 5;
-
 export default function QuestionScreen({
   questions,
   theme,
-  enableDodge = true,
+  dodgeLimit: rawDodgeLimit,
   onComplete,
   inviteId,
   photos = [],
@@ -81,10 +81,11 @@ export default function QuestionScreen({
   const noBtnRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const dodgeLimit = normalizeDodgeLimit(rawDodgeLimit);
   const current = questions[currentIndex];
 
   const dodge = useCallback(() => {
-    if (!enableDodge || dodgeCount >= MAX_DODGES) return;
+    if (isDodgeFrozen(dodgeLimit, dodgeCount)) return;
 
     const container = containerRef.current;
     const btn = noBtnRef.current;
@@ -108,7 +109,7 @@ export default function QuestionScreen({
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate(20);
     }
-  }, [dodgeCount, enableDodge, noPos]);
+  }, [dodgeCount, dodgeLimit, noPos]);
 
   if (!current) {
     onComplete();
@@ -117,8 +118,9 @@ export default function QuestionScreen({
 
   const yesLabel = current.yes_label || "Yes";
   const noLabel = current.no_label || "No";
-  const noFrozen = !enableDodge || dodgeCount >= MAX_DODGES;
-  const noDodging = enableDodge && dodgeCount > 0 && dodgeCount < MAX_DODGES;
+  const noFrozen = isDodgeFrozen(dodgeLimit, dodgeCount);
+  const noDodging = !noFrozen && dodgeCount > 0;
+  const hint = dodgeHint(dodgeLimit, dodgeCount, noLabel);
 
   async function submitAnswer(answer: boolean) {
     if (submitting) return;
@@ -256,7 +258,7 @@ export default function QuestionScreen({
                   noDodging ? "cursor-none" : "cursor-pointer"
                 }`}
                 style={{
-                  background: "linear-gradient(135deg, #3E6B5C 0%, #2E5145 100%)",
+                  background: "linear-gradient(135deg, #B3261E 0%, #8A1D17 100%)",
                 }}
                 whileTap={noFrozen ? { scale: 0.92 } : {}}
               >
@@ -279,26 +281,17 @@ export default function QuestionScreen({
               </motion.button>
             </div>
 
-            {/* Dodge hints */}
-            {enableDodge && dodgeCount === 0 && (
+            {/* Dodge hint — one line, driven by the shared dodge rules. */}
+            {hint && (
               <motion.p
-                className="mt-8 text-xs opacity-40"
+                key={hint}
+                className="mt-8 text-xs opacity-50"
                 style={{ color: theme.colors.text }}
-                animate={{ opacity: [0.3, 0.6, 0.3] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                animate={dodgeCount === 0 ? { opacity: [0.3, 0.6, 0.3] } : { opacity: 0.5 }}
+                transition={dodgeCount === 0 ? { duration: 2, repeat: Infinity } : { duration: 0.2 }}
               >
-                Try clicking {noLabel}... 😏
+                {hint}
               </motion.p>
-            )}
-            {noDodging && (
-              <p className="mt-8 text-xs opacity-50" style={{ color: theme.colors.text }}>
-                It keeps running away 😂 ({MAX_DODGES - dodgeCount} left)
-              </p>
-            )}
-            {noFrozen && dodgeCount >= MAX_DODGES && (
-              <p className="mt-8 text-xs opacity-50" style={{ color: theme.colors.text }}>
-                Fine, it&apos;ll stay still now 😄
-              </p>
             )}
 
             {/* Skip */}

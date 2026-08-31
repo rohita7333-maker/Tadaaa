@@ -530,7 +530,7 @@ export default function CreatePage() {
         yesLabel: q.yesLabel,
         noLabel: q.noLabel,
         requireAnswer: false,
-        enableDodge: false,
+        dodgeLimit: 0,
       }))
     );
     // Move to step 2 so user can see the drafted content and add photos

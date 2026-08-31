@@ -13,6 +13,7 @@ import { isExpired } from "@/lib/utils";
 import { signPhotoList, signStorageUrl, extractBucketPath } from "@/lib/sign-storage";
 import { getThemeById } from "@/lib/themes";
 import { getTrackById } from "@/lib/music";
+import { normalizeDodgeLimit } from "@/lib/dodge";
 import { trackServer } from "@/lib/analytics";
 import { scanImage } from "@/lib/moderation";
 import { logAudit } from "@/lib/audit";
@@ -305,11 +306,11 @@ export async function createInviteShell(formData: FormData) {
         const questions = parsed.data;
         const nonEmpty = questions.filter((q) => q.text.trim().length > 0);
         if (nonEmpty.length > 0) {
-          // Determine enable_dodge_no from first question (invite-level)
-          const enableDodge = nonEmpty[0].enableDodge ?? true;
+          // Dodge is an invite-level setting; the first question owns it.
+          const dodgeLimit = normalizeDodgeLimit(nonEmpty[0].dodgeLimit);
           await supabase
             .from("invites")
-            .update({ enable_dodge_no: enableDodge })
+            .update({ dodge_limit: dodgeLimit, enable_dodge_no: dodgeLimit !== 0 })
             .eq("id", invite.id);
 
           const records = nonEmpty.map((q, i) => ({

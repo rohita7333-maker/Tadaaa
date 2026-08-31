@@ -83,7 +83,8 @@ export const inviteQuestionsSchema = z
       requireAnswer: z.boolean(),
       yesLabel: z.string().max(40),
       noLabel: z.string().max(40),
-      enableDodge: z.boolean(),
+      // -1 = dodges forever, 0 = never dodges, otherwise a count.
+      dodgeLimit: z.number().int().min(-1).max(50),
     })
   )
   .max(10, "At most 10 questions per invite");

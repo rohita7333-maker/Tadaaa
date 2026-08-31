@@ -12,6 +12,7 @@ import { inviteToStoryConfig } from "@/lib/scroll-story/from-invite";
 import ReportButton from "@/components/surprise/ReportButton";
 import MusicPill from "@/components/surprise/MusicPill";
 import { getTrackById } from "@/lib/music";
+import { DEFAULT_DODGE_LIMIT } from "@/lib/dodge";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { MagneticButton } from "@/components/ui/magnetic-button";
@@ -125,7 +126,15 @@ export default async function SurprisePage({ params }: Props) {
       message: c.message as string,
     }));
   const questions = (invite.questions as { id: string; question_text: string; yes_label: string; no_label: string; require_answer: boolean }[]) || [];
-  const enableDodge = (invite as { enable_dodge_no?: boolean }).enable_dodge_no ?? true;
+  // dodge_limit is the source of truth; enable_dodge_no is the pre-migration
+  // fallback so invites created before the setting existed behave unchanged.
+  const rawDodge = (invite as { dodge_limit?: number | null }).dodge_limit;
+  const dodgeLimit =
+    typeof rawDodge === "number"
+      ? rawDodge
+      : ((invite as { enable_dodge_no?: boolean }).enable_dodge_no ?? true)
+        ? DEFAULT_DODGE_LIMIT
+        : 0;
   const videoUrl = (invite as { videoUrl?: string | null }).videoUrl ?? null;
 
   // Log view directly via the shared lib — no env-URL hop, no silent
@@ -184,7 +193,7 @@ export default async function SurprisePage({ params }: Props) {
           countdownDate={invite.countdown_date}
           questions={questions}
           inviteId={invite.id}
-          enableDodge={enableDodge}
+          dodgeLimit={dodgeLimit}
           videoUrl={videoUrl}
           contributorNotes={contributorNotes}
         />
@@ -196,7 +205,7 @@ export default async function SurprisePage({ params }: Props) {
           message={invite.message}
           questions={questions}
           inviteId={invite.id}
-          enableDodge={enableDodge}
+          dodgeLimit={dodgeLimit}
           videoUrl={videoUrl}
           contributorNotes={contributorNotes}
         />

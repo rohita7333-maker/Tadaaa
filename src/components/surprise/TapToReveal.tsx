@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
-import PolaroidCarousel from "./PolaroidCarousel";
+import CirclePolaroidCarousel from "./CirclePolaroidCarousel";
 import MessageReveal from "./MessageReveal";
 import RSVPButton from "./RSVPButton";
 import QuestionScreen from "./QuestionScreen";
@@ -219,7 +219,8 @@ export default function TapToReveal({ theme, photos, title, message, questions =
           >
             <VideoPlayer
               videoUrl={videoUrl}
-              onComplete={() => setStage(questions.length > 0 ? "questions" : "message")}
+              // The video is the opening act — photos come next, not instead.
+              onComplete={() => setStage("photos")}
             />
           </motion.div>
         )}
@@ -238,7 +239,7 @@ export default function TapToReveal({ theme, photos, title, message, questions =
             transition={shouldReduce ? rmInstant : springs.weighty}
             onAnimationComplete={handleSettleVibrate}
           >
-            <PolaroidCarousel
+            <CirclePolaroidCarousel
               photos={photos}
               theme={theme}
               title={title}

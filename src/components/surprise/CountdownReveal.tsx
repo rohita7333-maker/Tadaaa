@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useReducedMotion } from "framer-motion";
 import { type Theme } from "@/lib/themes";
 import { getReducedMotionTransition } from "@/lib/a11y";
-import PolaroidCarousel from "./PolaroidCarousel";
+import CirclePolaroidCarousel from "./CirclePolaroidCarousel";
 import MessageReveal from "./MessageReveal";
 import RSVPButton from "./RSVPButton";
 import QuestionScreen from "./QuestionScreen";
@@ -92,13 +92,14 @@ export default function CountdownReveal({
     return (
       <VideoPlayer
         videoUrl={videoUrl}
-        onComplete={() => setStage(questions.length > 0 ? "questions" : "message")}
+        // The video is the opening act — photos come next, not instead.
+        onComplete={() => setStage("photos")}
       />
     );
   }
   if (stage === "photos") {
     return (
-      <PolaroidCarousel
+      <CirclePolaroidCarousel
         photos={photos}
         theme={theme}
         title={title}

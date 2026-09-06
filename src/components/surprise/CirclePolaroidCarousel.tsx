@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type Theme } from "@/lib/themes";
+import { readableTextOn } from "@/lib/contrast";
 
 interface Photo {
   url: string;
@@ -61,6 +62,9 @@ export default function CirclePolaroidCarousel({
   const textColor = theme.colors.text;
   const accent = theme.colors.accent;
   const allViewed = useMemo(() => seen.size >= total, [seen, total]);
+  // Theme accents are byte-locked with mobile and range from deep pine to pale
+  // gold, so the label picks whichever of ink/white actually passes on this one.
+  const onAccent = readableTextOn(accent);
 
   // Nothing to show at all — don't strand the guest on an empty stage.
   useEffect(() => {
@@ -212,29 +216,38 @@ export default function CirclePolaroidCarousel({
             onClick={handlePrev}
             disabled={total < 2}
             aria-label="Previous photo"
-            className="w-9 h-9 rounded-full flex items-center justify-center disabled:opacity-30 transition-opacity"
+            // 44px minimum touch target; the visible disc stays smaller.
+            className="w-11 h-11 rounded-full flex items-center justify-center disabled:opacity-30 transition-opacity"
             style={{ background: `${accent}22`, color: textColor }}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center gap-2.5" role="tablist" aria-label="Photos">
+          {/* A plain labelled group, not a tablist: there is no tabpanel here,
+              and claiming the ARIA tabs pattern without one misleads screen
+              readers. aria-current marks the photo on screen. */}
+          <div className="flex items-center" role="group" aria-label="Choose a photo">
             {photos.map((p, i) => (
               <button
                 key={`${p.url}-${i}`}
                 type="button"
-                role="tab"
-                aria-selected={i === activeIndex}
+                aria-current={i === activeIndex}
                 aria-label={p.caption ? `Photo ${i + 1}: ${p.caption}` : `Photo ${i + 1}`}
                 onClick={() => goTo(i)}
-                className="w-5 h-5 rounded-full bg-cover bg-center transition-transform"
-                style={{
-                  backgroundImage: `url(${p.url})`,
-                  outline: i === activeIndex ? `2px solid ${textColor}` : `1.5px solid ${textColor}55`,
-                  outlineOffset: "2px",
-                  transform: i === activeIndex ? "scale(1.25)" : "scale(1)",
-                }}
-              />
+                // 44px tap target with a small visual dot inside it.
+                className="w-11 h-11 flex items-center justify-center shrink-0"
+              >
+                <span
+                  aria-hidden="true"
+                  className="w-5 h-5 rounded-full bg-cover bg-center transition-transform block"
+                  style={{
+                    backgroundImage: `url(${p.url})`,
+                    outline: i === activeIndex ? `2px solid ${textColor}` : `1.5px solid ${textColor}55`,
+                    outlineOffset: "2px",
+                    transform: i === activeIndex ? "scale(1.25)" : "scale(1)",
+                  }}
+                />
+              </button>
             ))}
           </div>
 
@@ -243,7 +256,7 @@ export default function CirclePolaroidCarousel({
             onClick={handleNext}
             disabled={total < 2}
             aria-label="Next photo"
-            className="w-9 h-9 rounded-full flex items-center justify-center disabled:opacity-30 transition-opacity"
+            className="w-11 h-11 rounded-full flex items-center justify-center disabled:opacity-30 transition-opacity"
             style={{ background: `${accent}22`, color: textColor }}
           >
             <ChevronRight className="w-4 h-4" />
@@ -258,8 +271,8 @@ export default function CirclePolaroidCarousel({
           type="button"
           onClick={handleContinue}
           disabled={!allViewed}
-          className="w-full h-12 rounded-full font-semibold text-white disabled:opacity-40 transition-opacity"
-          style={{ background: accent }}
+          className="w-full h-12 rounded-full font-semibold disabled:opacity-40 transition-opacity"
+          style={{ background: accent, color: onAccent }}
         >
           {allViewed ? "Continue" : `Look at all ${total} first`}
         </button>

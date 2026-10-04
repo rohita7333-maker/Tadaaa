@@ -1,0 +1,50 @@
+name: Supabase keep-alive
+
+# Supabase Free tier auto-pauses a project after ~7 days with no activity.
+# A paused project drops its DNS (NXDOMAIN) → login + every DB call dies.
+# This job runs a tiny authenticated REST read once a day, which executes a
+# real Postgres query and resets the idle clock so the project never pauses.
+#
+# Requires repo secrets:
+#   SUPABASE_URL        e.g. https://xxxx.supabase.co
+#   SUPABASE_ANON_KEY   the public anon key (safe — already shipped to browser)
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # daily 06:17 UTC (off the hour; GitHub delays top-of-hour)
+  workflow_dispatch: {} # allow manual run from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST (real DB read)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /tmp/body -w "%{http_code}" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_URL}/rest/v1/profiles?select=id&limit=1")
+          echo "HTTP $code"
+          # 200 = read ok, 401/403 = RLS blocked but query still hit Postgres.
+          # Any of these means the project is awake. Only fail on network/5xx.
+          case "$code" in
+            2*|401|403) echo "Project awake."; exit 0 ;;
+            *) echo "Unexpected status $code"; cat /tmp/body; exit 1 ;;
+          esac
+
+# ---------------------------------------------------------------------------
+# ARCHIVED COPY — not an active workflow.
+#
+# Stored here as .txt because GitHub refuses a push that creates or updates
+# anything under .github/workflows/ from a token without `workflow` scope.
+# To activate it on a new machine:
+#
+#   mkdir -p .github/workflows
+#   cp docs/ci/supabase-keepalive.yml.txt .github/workflows/supabase-keepalive.yml
+#   # strip this trailing comment block, then commit and push with a token
+#   # that has `workflow` scope (gh auth refresh -s workflow)
+# ---------------------------------------------------------------------------

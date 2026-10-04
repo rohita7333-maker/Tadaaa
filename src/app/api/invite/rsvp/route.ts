@@ -26,8 +26,28 @@ export async function POST(request: NextRequest) {
   const cleanName =
     typeof name === "string" && name.trim() ? name.trim().slice(0, 80) : null;
 
-  // record_rsvp has SECURITY DEFINER + GRANT to anon — validates invite and upserts atomically.
   const supabase = await createClient();
+
+  // Creator previews must not pollute stats — views already skip the creator
+  // (invite-view.ts); RSVPs get the same guard. RLS lets a signed-in creator
+  // read their own invite row; everyone else's probe returns nothing and
+  // recording proceeds.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const { data: ownInvite } = await supabase
+      .from("invites")
+      .select("id")
+      .eq("id", inviteId)
+      .eq("creator_id", user.id)
+      .maybeSingle();
+    if (ownInvite) {
+      return NextResponse.json({ ok: true, skipped: "creator_preview" });
+    }
+  }
+
+  // record_rsvp has SECURITY DEFINER + GRANT to anon — validates invite and upserts atomically.
   const { data, error } = await supabase.rpc("record_rsvp", {
     p_invite_id: inviteId,
     p_visitor_hash: visitorHash,

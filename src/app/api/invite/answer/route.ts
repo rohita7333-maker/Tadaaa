@@ -24,9 +24,26 @@ export async function POST(request: NextRequest) {
 
   const rawUa = request.headers.get("user-agent") ?? "";
 
+  const supabase = await createClient();
+
+  // Creator previews must not pollute stats — same guard as RSVPs and views.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const { data: ownInvite } = await supabase
+      .from("invites")
+      .select("id")
+      .eq("id", inviteId)
+      .eq("creator_id", user.id)
+      .maybeSingle();
+    if (ownInvite) {
+      return NextResponse.json({ ok: true, skipped: "creator_preview" });
+    }
+  }
+
   // record_answer has SECURITY DEFINER + GRANT to anon — validates invite, verifies
   // question ownership, inserts answer, and returns creator_id+title for the notification.
-  const supabase = await createClient();
   const { data, error } = await supabase.rpc("record_answer", {
     p_question_id: questionId,
     p_invite_id: inviteId,

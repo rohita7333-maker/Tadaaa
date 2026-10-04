@@ -6,6 +6,10 @@ npm 10.9.7.
 
 **Time:** ~10 minutes, most of it `npm install`.
 
+> Want the complete version — mobile app, architecture diagram, command cheat
+> sheet, full troubleshooting? See **[RUNBOOK.md](RUNBOOK.md)**. This file is the
+> web-only quick start.
+
 ---
 
 ## 0. What you are setting up
@@ -190,18 +194,24 @@ chunks. Stop dev first.
 
 ## Running the mobile app too (optional)
 
-The Expo app is a **separate git repo** inside the same folder, and it is pushed
-to the same GitHub remote under the branch name `mobile-app`.
+The Expo app is a **separate git repo** on the same GitHub remote, under the branch
+`mobile-app`. It is **not** a folder inside this branch — you clone the repo a second
+time, as a sibling:
 
 ```bash
-cd tadaaaa/mobile
+cd ..                               # the PARENT folder, not the web checkout
+git clone -b mobile-app https://github.com/rohita7333-maker/Tadaaa.git mobile
+cd mobile
 npm install --legacy-peer-deps      # plain `npm install` fails on a known peer conflict
-npx expo start --lan --port 8081
+cp .env.example .env                # then set EXPO_PUBLIC_API_BASE_URL to your LAN IP
+npx expo start --lan
 ```
 
-`mobile/.env` hardcodes a LAN IP for `EXPO_PUBLIC_API_BASE_URL`. On a new machine
-that IP is wrong — find the new one with `ipconfig getifaddr en0` and update it,
-or the phone cannot reach the web app's API.
+`EXPO_PUBLIC_API_BASE_URL` must be `http://<your-laptop-LAN-IP>:3000` — not
+`localhost`, which on a phone means the phone. Find it with `ipconfig getifaddr en0`.
+
+**Full mobile instructions, including simulators and troubleshooting, are in
+[RUNBOOK.md](RUNBOOK.md) Part B.**
 
 ---
 

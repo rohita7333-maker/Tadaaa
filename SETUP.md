@@ -16,7 +16,7 @@ npm 10.9.7.
 | Database | **Hosted Supabase** — shared with this machine, nothing to install or migrate |
 | Package manager | **npm** (`package-lock.json` is the lockfile — do not use yarn/pnpm) |
 | Node | **≥ 20.9.0** required by Next 16. `.nvmrc` pins **22** |
-| Branch to run | **`feat/wizard-trio`** — this is the current app, *not* `main` |
+| Branch to run | **`snapshot/complete-2026-10-04`** — the complete current app, *not* `main` |
 
 > The database is a hosted Supabase project. The new laptop talks to the **same**
 > database as this one. You do **not** run anything from `sql/` — all 29 migrations
@@ -51,17 +51,19 @@ cd tadaaaa
 This is the step people get wrong. `main` is **not** the current app.
 
 ```bash
-git checkout feat/wizard-trio
-git log --oneline -1    # expect: db3f958 fix(a11y): readable Continue label…
+git checkout snapshot/complete-2026-10-04
 ```
 
 Branch map, so you know what you are looking at:
 
 | Branch | What it is |
 |---|---|
-| **`feat/wizard-trio`** | **Run this.** Current app: pine theme, live preview, music, video recorder, analytics |
+| **`snapshot/complete-2026-10-04`** | **Run this.** Everything mergeable in one branch: pine theme, live preview, music, video recorder, analytics, creator-preview fix |
+| `feat/wizard-trio` | Same app, minus the creator-preview fix |
+| `backup/sophistication-2026-10-04` | Archive of the old warm/Bricolage re-skin + mobile BFF. Not runnable alongside pine |
 | `retheme/pine` | The pine re-skin alone, without the wizard features |
 | `feat/templates` | Older base — still the *warm* rose/gold theme |
+| `preview/editorial` | Abandoned alternative design. Reference only |
 | `main` | Stale |
 
 ## 4. Install dependencies
@@ -142,11 +144,11 @@ Run all three. They are the project's real gates.
 
 ```bash
 npx tsc --noEmit     # expect: no output, exit 0
-npm test             # expect: 44 files, 525 tests passed
+npm test             # expect: 46 files, 533 tests passed
 npm run build        # expect: ✓ Compiled successfully
 ```
 
-If `npm test` reports fewer than 525, something did not install cleanly — delete
+If `npm test` reports fewer than 533, something did not install cleanly — delete
 `node_modules` and `package-lock.json`, then `npm install` again.
 
 ### Click-through smoke test
